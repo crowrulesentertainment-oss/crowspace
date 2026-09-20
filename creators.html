@@ -3,7 +3,8 @@
 <title>Creators You Follow — CrowSpace</title>
 <style>
 :root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1100px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill{color:#8ff6ff}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.hero{background:linear-gradient(135deg,#101d2c,#30194b,#0d0f18)}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.primary{background:linear-gradient(90deg,#126d7a,#56358c)!important;border:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.creator{background:#10131f;border:1px solid #292e42;border-radius:16px;padding:15px}.head{display:flex;gap:12px;align-items:center}.avatar{width:58px;height:58px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.muted{color:#9da5bd}.handle{color:#8ff6ff}.section{margin-top:14px;padding-top:12px;border-top:1px solid #25293a}.item{padding:9px 0;border-bottom:1px solid #25293a}.item:last-child{border-bottom:0}.item a{color:#fff;text-decoration:none}.tag{font-size:10px;letter-spacing:.1em;color:#8ff6ff;font-weight:800}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.empty{text-align:center;padding:35px;color:#9da5bd}.toast{margin-top:10px;color:#8ff6ff}@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
-</style></head><body><main>
+</style><link rel="stylesheet" href="./css/crowrules-cinematic.css">
+</head><body data-crowrules-division="crowspace"><main>
 <div class="top"><div class="brand">🌌 CrowSpace <span class="pill">Creator Following Hub</span></div><a class="btn" href="./">← CrowSpace</a></div>
 <section class="card hero"><h1>Creators You Follow</h1><p class="muted">One place for the people building stories, projects and podcasts across the CrowRules Universe.</p><div id="summary" class="pill">Loading…</div><div id="toast" class="toast"></div></section>
 <section class="card"><div id="content"><div class="empty">Loading creators…</div></div></section>
@@ -36,4 +37,5 @@ async function init(){
 async function unfollow(id){const r=await db.from("crowspace_follows").delete().eq("follower_id",me.id).eq("following_id",id);if(r.error){toast.textContent=r.error.message;return}location.reload()}
 db.auth.onAuthStateChange(()=>init());init();
 </script><script src="./js/crowspace-holiday-themes.js"></script>
+<script src="./js/crowrules-cinematic.js"></script>
 </body></html>
