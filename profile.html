@@ -22,8 +22,9 @@ main{max-width:1160px;margin:auto;padding:16px}.card{background:var(--panel);bor
 .creatorHub{background:linear-gradient(135deg,#0b101b,#211033)}.creatorGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.creatorItem{background:#101522;border:1px solid var(--line);border-radius:12px;padding:13px}.creatorBadge,.p5badge{display:inline-block;font-size:10px;color:#8ff6ff;border:1px solid #3a4660;border-radius:999px;padding:4px 8px}.creatorItem h4{margin:7px 0}.creatorItem p{color:#b9c1d5;line-height:1.4;margin:6px 0}.p5dash{background:linear-gradient(135deg,#0b101b,#171027)}.p5grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.p5stat{background:#101522;border:1px solid var(--line);border-radius:12px;padding:13px;text-align:center}.p5stat b{display:block;font-size:22px}.profileError{background:#180f18;border:1px solid #63384f;border-radius:12px;padding:12px;margin-top:10px;color:#ffb7d2}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}.miniGrid{grid-template-columns:repeat(2,1fr)}.creatorGrid{grid-template-columns:1fr}.p5grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:500px){main{padding:9px}.cover{height:210px}.avatar{width:110px;height:110px;margin-top:-55px}.identity h1{font-size:25px}.sectionGrid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="./css/crowrules-cinematic.css">
 </head>
-<body>
+<body data-crowrules-division="crowspace">
 <main><div id="page"><div class="card"><div class="empty">Loading profile…</div></div></div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -188,5 +189,6 @@ function toast(m){const t=document.createElement("div");t.className="toast";t.te
 window.profileReady=init();
 </script>
 <script src="./js/crowspace-holiday-themes.js"></script>
+<script src="./js/crowrules-cinematic.js"></script>
 </body>
 </html>
