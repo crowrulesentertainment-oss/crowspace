@@ -80,8 +80,8 @@ async function initHome(){
 async function initProfile(){
   const app=$('#app');if(!app)return;
   if(!cs.user){app.innerHTML='<div class="eyebrow">AUTH REQUIRED</div><h2>Universal ID required</h2><p class="muted">Sign in to edit your CrowSpace identity.</p><a class="btn primary" href="membership.html">OPEN UNIVERSAL MEMBERSHIP</a>';return}
-  $('#displayName').value=cs.profile?.display_name||'';$('#avatar').value=cs.profile?.avatar_url||'';$('#bio').value=cs.profile?.bio||'';
-  $('#saveProfile').onclick=async()=>{const payload={user_id:cs.user.id,display_name:$('#displayName').value.trim(),bio:$('#bio').value.trim(),avatar_url:$('#avatar').value.trim(),updated_at:new Date().toISOString()};const r=await cs.client.from('crowspace_profiles').upsert(payload,{onConflict:'user_id'});msg('#profileMsg',r.error?r.error.message:'PROFILE LINKED · IDENTITY UPDATED',!r.error);if(!r.error)await ensureIdentity()};
+  $('#displayName').value=cs.profile?.display_name||'';$('#username').value=cs.profile?.username||'';$('#avatar').value=cs.profile?.avatar_url||'';$('#banner').value=cs.profile?.banner_url||'';$('#location').value=cs.profile?.location||'';$('#website').value=cs.profile?.website_url||'';$('#bio').value=cs.profile?.bio||'';$('#theme').value=cs.profile?.theme||'crow-dark';
+  $('#saveProfile').onclick=async()=>{const payload={user_id:cs.user.id,display_name:$('#displayName').value.trim(),bio:$('#bio').value.trim(),avatar_url:$('#avatar').value.trim(),banner_url:$('#banner').value.trim(),location:$('#location').value.trim(),website_url:$('#website').value.trim(),theme:$('#theme').value,updated_at:new Date().toISOString()};const r=await cs.client.from('crowspace_profiles').upsert(payload,{onConflict:'user_id'});msg('#profileMsg',r.error?r.error.message:'PROFILE LINKED · IDENTITY UPDATED',!r.error);if(!r.error)await ensureIdentity()};
 }
 async function initPicturesVideos(type){
   const grid=$('#mediaGrid');if(!grid)return;
