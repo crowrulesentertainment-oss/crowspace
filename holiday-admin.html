@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace Holiday Theme Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{margin:0;background:#05050b;color:#f5f7ff;font:15px Arial,sans-serif}main{max-width:1100px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}.muted{color:#98a2bd}.grid{display:grid;grid-template-columns:380px 1fr;gap:18px;margin-top:20px}.card{background:#0d101a;border:1px solid #272d42;border-radius:18px;padding:20px;box-shadow:0 15px 40px #0005}label{display:block;margin:12px 0 6px;color:#aeb8d2;font-size:12px}input,textarea,button{font:inherit}input,textarea{width:100%;box-sizing:border-box;background:#080a12;color:#fff;border:1px solid #343c56;border-radius:10px;padding:10px}button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#20e6ff;color:#031018;font-weight:700}.secondary{background:#20263a;color:#fff}.danger{background:#7d2636;color:#fff}.row{display:flex;gap:8px;flex-wrap:wrap}.theme{border:1px solid #282f45;border-radius:14px;padding:15px;margin-bottom:10px}.theme.active{border-color:#20e6ff}.swatch{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px}.status{margin:10px 0;min-height:20px}.preview{min-height:120px;border-radius:15px;padding:20px;background:radial-gradient(circle at 70% 20%,var(--a,#20e6ff) 0,transparent 28%),#080b14;border:1px solid #30374d}.badge{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#20e6ff}@media(max-width:800px){.grid{grid-template-columns:1fr}main{padding:16px}}
+</style></head><body><main>
+<div class="top"><div><div class="badge">CrowSpace Administration</div><h1>Animated Holiday Theme Center</h1><p class="muted">Create, schedule, preview and manage the visual themes used across CrowSpace.</p></div><a href="./command-center.html" style="color:#8fefff">← Command Center</a></div>
+<div id="gate" class="card">Checking administrator access…</div>
+<section id="app" class="grid" style="display:none">
+<div class="card"><h2 id="formTitle">Create Theme</h2><form id="form">
+<input type="hidden" id="id">
+<label>Name</label><input id="name" required maxlength="120" placeholder="Halloween 2027">
+<label>Slug</label><input id="slug" required maxlength="120" placeholder="halloween-2027">
+<label>Starts</label><input id="starts" type="date" required>
+<label>Ends</label><input id="ends" type="date" required>
+<label>Background URL</label><input id="background" type="url" placeholder="https://…">
+<label>Accent Color</label><input id="accent" value="#20e6ff" placeholder="#20e6ff">
+<label>Secondary Color</label><input id="secondary" value="#8b5cf6" placeholder="#8b5cf6">
+<label>CSS Class</label><input id="cssClass" placeholder="holiday-halloween">
+<label><input id="active" type="checkbox" checked style="width:auto"> Active</label>
+<div class="row"><button>Save Theme</button><button type="button" class="secondary" id="reset">New Theme</button></div>
+<div id="status" class="status muted"></div></form></div>
+<div class="card"><div class="top"><h2>Theme Schedule</h2><button class="secondary" id="refresh">Refresh</button></div><div id="list"></div></div>
+<div class="card" style="grid-column:1/-1"><h2>Live Preview</h2><div id="preview" class="preview"><h2 id="pvName">Select a theme</h2><p id="pvDates" class="muted">The selected theme will appear here.</p><div id="pvParticle" style="font-size:42px">✨ ❄ 🍂</div></div></div>
+</section></main>
+<script>
+const URL="https://cevylpnoexugwgygvtgu.supabase.co",KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";const db=supabase.createClient(URL,KEY);
+const $=id=>document.getElementById(id);let themes=[];
+async function init(){const s=await db.auth.getSession();if(!s.data.session){gate.textContent="Please sign in to CrowRules first.";return}const r=await db.rpc("cr_platform_is_admin");if(r.error||r.data!==true){gate.textContent="Administrator access is required for this page.";return}gate.style.display="none";app.style.display="grid";await load()}
+async function load(){const r=await db.from("crowspace_holiday_themes").select("*").order("starts_on");if(r.error){status.textContent=r.error.message;return}themes=r.data||[];render()}
+function render(){list.innerHTML=themes.map(t=>'<div class="theme '+(t.is_active?"active":"")+'"><div class="top"><div><b>'+esc(t.name)+'</b><div class="muted">'+esc(t.slug)+' · '+esc(t.starts_on)+' → '+esc(t.ends_on)+'</div></div><div class="row"><button onclick="editTheme(\''+t.id+'\')">Edit</button><button class="danger" onclick="deleteTheme(\''+t.id+'\')">Delete</button></div></div><p class="muted">'+(t.is_active?"Active":"Inactive")+' · '+esc(t.css_class||"no class")+'</p></div>').join("")||'<p class="muted">No themes yet.</p>'}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+window.editTheme=id=>{const t=themes.find(x=>x.id===id);if(!t)return;formTitle.textContent="Edit Theme";$("id").value=t.id;name.value=t.name;slug.value=t.slug;starts.value=t.starts_on;ends.value=t.ends_on;background.value=t.background_url||"";accent.value=t.accent_color||"#20e6ff";secondary.value=t.secondary_color||"#8b5cf6";cssClass.value=t.css_class||"";active.checked=!!t.is_active;previewTheme(t)}
+window.deleteTheme=async id=>{if(!confirm("Delete this theme?"))return;status.textContent="Deleting…";const r=await db.rpc("crowspace_holiday_admin_delete",{p_id:id});status.textContent=r.error?r.error.message:"Theme deleted.";if(!r.error)await load()}
+form.onsubmit=async e=>{e.preventDefault();if(starts.value>ends.value){status.textContent="End date must be on or after start date.";return}status.textContent="Saving…";const r=await db.rpc("crowspace_holiday_admin_save",{p_id:$("id").value||null,p_name:name.value.trim(),p_slug:slug.value.trim().toLowerCase(),p_starts_on:starts.value,p_ends_on:ends.value,p_background_url:background.value.trim()||null,p_accent_color:accent.value.trim()||null,p_secondary_color:secondary.value.trim()||null,p_css_class:cssClass.value.trim()||null,p_is_active:active.checked});status.textContent=r.error?r.error.message:"Theme saved.";if(!r.error){resetForm();await load()}}
+reset.onclick=resetForm;refresh.onclick=load;
+function resetForm(){form.reset();$("id").value="";formTitle.textContent="Create Theme";accent.value="#20e6ff";secondary.value="#8b5cf6";active.checked=true;preview.textContent="";pvName.textContent="Select a theme";pvDates.textContent="The selected theme will appear here."}
+function previewTheme(t){preview.style.setProperty("--a",t.accent_color||"#20e6ff");pvName.textContent=t.name;pvDates.textContent=t.starts_on+" → "+t.ends_on}
+[name,accent,secondary,starts,ends].forEach(x=>x.addEventListener("input",()=>previewTheme({name:name.value||"Preview",accent_color:accent.value,starts_on:starts.value,ends_on:ends.value})));
+init();
+</script></body></html>
