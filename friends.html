@@ -3,7 +3,8 @@
 <title>CrowSpace Friends 2.0</title>
 <style>
 :root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1050px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.brand{font-size:26px;font-weight:900}.pill{color:#8ff6ff}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.search{flex:1;min-width:220px}input,select{width:100%;padding:11px;background:#080a12;color:#fff;border:1px solid #292e42;border-radius:10px}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.btn.active,.primary{background:linear-gradient(90deg,#126d7a,#56358c);border:0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0}.stat{background:#080a12;border:1px solid #25293a;border-radius:12px;padding:13px}.stat b{display:block;font-size:22px}.muted{color:#9da5bd}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.friend{background:#0a0c14;border:1px solid #25293a;border-radius:15px;padding:14px;position:relative}.person{display:flex;gap:11px;align-items:center}.avatar{width:58px;height:58px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold;font-size:17px;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.onlineDot{position:absolute;left:58px;top:57px;width:11px;height:11px;border-radius:50%;background:#4cff91;border:2px solid #0a0c14}.name{font-size:17px;font-weight:800}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}.small{font-size:11px}.badge{display:inline-block;background:#18243a;border-radius:20px;padding:4px 7px;margin-top:6px}.empty{text-align:center;padding:35px;color:#9da5bd}.top8mark{position:absolute;right:10px;top:10px;color:#ffd86b;font-size:12px}.status{margin-top:5px}.count{color:#8ff6ff}@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){main{padding:10px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:repeat(2,1fr)}}
-</style></head><body><main>
+</style><link rel="stylesheet" href="./css/crowrules-cinematic.css">
+</head><body data-crowrules-division="crowspace"><main>
 <div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Friends 2.0</span></div><a class="btn" href="./">← CrowSpace</a></div>
 <div id="auth" class="card">Loading…</div>
 <div id="app" style="display:none">
@@ -53,4 +54,5 @@ search.oninput=render;document.querySelectorAll("[data-filter]").forEach(b=>b.on
 db.channel("crowspace-friends-live").on("postgres_changes",{event:"*",schema:"public",table:"crowspace_friends"},()=>load()).subscribe();
 init();
 </script><script src="./js/crowspace-holiday-themes.js"></script>
+<script src="./js/crowrules-cinematic.js"></script>
 </body></html>
