@@ -143,7 +143,7 @@ async function saveProfile(){
  if(!name||!username)return toast("Display name and username are required.");
  const roles=[...new Set($("#profRoles").value.split(",").map(x=>x.trim()).filter(Boolean))].slice(0,12);
  const skills=[...new Set($("#profSkills").value.split(",").map(x=>x.trim()).filter(Boolean))].slice(0,30);
- const r1=await db.from("crowspace_profiles").update({display_name:name,username,bio:$("#profBio").value.trim(),avatar_url:$("#profAvatar").value.trim()||null,banner_url:$("#profBanner").value.trim()||null}).eq("user_id",uid);
+ const r1=await db.from("crowspace_profiles").upsert({user_id:uid,display_name:name,username,bio:$("#profBio").value.trim(),avatar_url:$("#profAvatar").value.trim()||null,banner_url:$("#profBanner").value.trim()||null},{onConflict:"user_id"});
  if(r1.error)return toast(r1.error.message);
  const r2=await db.from("crowspace_profile_preferences").upsert({user_id:uid,story:$("#profStory").value.trim(),looking_for:$("#profLooking").value.trim(),can_help_with:$("#profHelp").value.trim(),availability:$("#profAvail").value,open_to_collaborate:$("#profAvail").value!=="Not available",favorite_division:$("#profDiv").value||null},{onConflict:"user_id"});
  if(r2.error)return toast(r2.error.message);
