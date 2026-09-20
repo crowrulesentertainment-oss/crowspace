@@ -61,4 +61,5 @@ async function e4Hub(e){
  const del=document.getElementById("e4delete");if(del)del.onclick=async()=>{if(!confirm("Delete this event?"))return;const r=await db.from("crowspace_events").delete().eq("id",e.id).eq("owner_id",me.id);if(r.error)alert(r.error.message);else{back.click();await load()}};
 }
 })();
-</script></body></html>
+</script><script src="./js/crowspace-holiday-themes.js"></script>
+</body></html>
