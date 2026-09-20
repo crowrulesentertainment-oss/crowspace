@@ -97,6 +97,8 @@ async function initProfile(){
     return;
   }
   const owner=!!cs.user&&cs.user.id===target.user_id;
+  const targetMemberR=await cs.client.from('crowspace_members').select('id,user_id').eq('user_id',target.user_id).maybeSingle();
+  const targetMember=targetMemberR.data||null;
   if(target.profile_visibility==='private'&&!owner){
     app.innerHTML='<section class="card"><div class="eyebrow">PRIVATE PROFILE</div><h1 class="title">ACCESS RESTRICTED</h1><p class="muted">This member has limited public profile visibility.</p></section>';
     return;
@@ -121,8 +123,8 @@ async function initProfile(){
   const groups=groupsR.data||[];
   const gp=groups.length?(await cs.client.from('crowspace_groups').select('id,name,slug').in('id',groups.map(x=>x.group_id))).data||[]:[];
   const groupMap=new Map(gp.map(x=>[x.id,x]));
-  const postRows=(postsR.data||[]).filter(x=>x.author_id===cs.member?.id||x.author_id===target.user_id);
-  const posts=postRows.length?postRows:(target.user_id===cs.user?.id?(postsR.data||[]):[]);
+  const postRows=(postsR.data||[]).filter(x=>x.author_id===targetMember?.id||x.author_id===target.user_id);
+  const posts=postRows;
   const ratings=ratingsR.data||[];
   const avg=ratings.length?(ratings.reduce((s,x)=>s+Number(x.rating||0),0)/ratings.length).toFixed(1):'—';
   const status=statusR.data||{};
