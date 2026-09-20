@@ -9,9 +9,27 @@ function msg(id,text,ok=false){const el=$(id);if(el){el.textContent=text;el.clas
 function authRequired(){if(cs.user)return true;msg('#pageMsg','Sign in through Universal CrowRules Membership to use this feature.');return false}
 async function ensureIdentity(){
   if(!cs.user)return;
+  // Automatically provision the user's MySpace-style CrowSpace identity on first login.
   try{await CrowRulesMembership.ensureCrow()}catch(e){}
-  const p=await cs.client.from('crowspace_profiles').select('*').eq('user_id',cs.user.id).maybeSingle();
+  const meta=cs.user.user_metadata||{};
+  const emailName=(cs.user.email||'member').split('@')[0];
+  const base=String(meta.username||meta.user_name||emailName).toLowerCase().replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'').slice(0,30)||'crowmember';
+  const display=String(meta.full_name||meta.name||meta.display_name||emailName||'CrowSpace Member').trim().slice(0,80);
+  let p=await cs.client.from('crowspace_profiles').select('*').eq('user_id',cs.user.id).maybeSingle();
+  if(!p.data){
+    const username=base+'_'+cs.user.id.replace(/-/g,'').slice(0,6);
+    const seed={user_id:cs.user.id,username,display_name:display,bio:'Welcome to my CrowSpace. Building my place in the CrowRules universe.',avatar_url:meta.avatar_url||meta.picture||null,theme:'crow-dark',accent_color:'#e10600',profile_visibility:'public',guestbook_visibility:'public'};
+    const created=await cs.client.from('crowspace_profiles').insert(seed).select('*').single();
+    p={data:created.data,error:created.error};
+  }
+  if(p.error)console.warn('CrowSpace profile provisioning:',p.error.message);
   cs.profile=p.data||null;
+  if(cs.profile){
+    const memberSeed={user_id:cs.user.id,display_name:cs.profile.display_name,username:cs.profile.username,bio:cs.profile.bio,avatar_url:cs.profile.avatar_url,location:cs.profile.location,website_url:cs.profile.website_url,is_public:cs.profile.profile_visibility!=='private'};
+    const existing=await cs.client.from('crowspace_members').select('id').eq('user_id',cs.user.id).maybeSingle();
+    if(!existing.data)await cs.client.from('crowspace_members').insert(memberSeed);
+    else await cs.client.from('crowspace_members').update(memberSeed).eq('user_id',cs.user.id);
+  }
   const m=await cs.client.from('crowspace_members').select('*').eq('user_id',cs.user.id).maybeSingle();
   cs.member=m.data||null;
 }
