@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowSpace Media 3.0</title>
+<title>CrowSpace Media 4.0</title>
 <style>
 :root{--a:#20e6ff;--p:#8d5cff;--bg:#05050b;--card:#0d101a;--line:#292e42;--muted:#9da5bd}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#17132d 0,transparent 35%),var(--bg);color:#f5f7ff;font:14px Arial,sans-serif}
@@ -20,7 +20,7 @@ main{max-width:1250px;margin:auto;padding:18px}.top{display:flex;justify-content
 </style>
 </head>
 <body><main>
-<div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Media 3.0</span></div><a class="btn" href="./">← CrowSpace</a></div>
+<div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Media 4.0</span></div><a class="btn" href="./">← CrowSpace</a></div>
 <section class="card hero"><h1>📸 CrowSpace Media</h1><p class="muted">A community media hub for photos, videos, links and albums.</p>
 <div class="stats"><div class="stat"><b id="total">0</b><span class="muted">Media</span></div><div class="stat"><b id="photos">0</b><span class="muted">Images</span></div><div class="stat"><b id="videos">0</b><span class="muted">Videos</span></div><div class="stat"><b id="likes">0</b><span class="muted">Likes</span></div><div class="stat"><b id="views">0</b><span class="muted">Views</span></div></div></section>
 
@@ -29,10 +29,10 @@ main{max-width:1250px;margin:auto;padding:18px}.top{display:flex;justify-content
 <section class="card"><div class="toolbar"><div class="search"><input id="q" placeholder="Search titles, descriptions, creators, albums…"><button class="btn primary" id="go">Search</button></div>
 <button class="btn filter active" data-filter="foryou">For You</button><button class="btn filter" data-filter="following">Following</button><button class="btn filter" data-filter="latest">Latest</button><button class="btn filter" data-filter="featured">Featured</button><button class="btn filter" data-filter="trending">Trending</button><button class="btn filter" data-filter="image">Images</button><button class="btn filter" data-filter="video">Videos</button><button class="btn filter" data-filter="mine">My Media</button><a class="btn" href="./albums.html">📁 Albums</a></div></section>
 
-<section class="card"><h2>Albums</h2><div id="albums" class="albumRow"><span class="muted">Loading albums…</span></div></section>
+<section class="card"><h2>Creators</h2><div id="creators" class="albumRow"><span class="muted">Loading creators…</span></div></section>\n<section class="card"><h2>Albums</h2><div id="albums" class="albumRow"><span class="muted">Loading albums…</span></div></section>
 <section class="card"><div class="sortline"><div id="context" class="muted"></div><button class="btn" id="clearContext" style="display:none">Clear</button></div><div id="list" class="mediaGrid"><div class="empty">Loading media…</div></div></section>
 
-<div id="viewer" class="viewer"><div class="viewerbox"><div class="viewerbar"><button class="btn" onclick="closeViewer()">✕ Close</button><div class="vieweractions"><button class="btn" onclick="prevMedia()">← Previous</button><button class="btn" onclick="nextMedia()">Next →</button></div></div><div id="viewerContent" style="margin-top:10px"></div><h2 id="viewerTitle"></h2><div id="viewerCreator" class="creator"></div><p id="viewerDesc" class="muted"></p><div id="viewerMeta" class="meta"></div><div class="vieweractions" style="margin-top:10px"><button id="likeBtn" class="btn" onclick="toggleViewerLike()">♡ Like</button><a id="profileBtn" class="btn" href="#">Profile</a></div><div id="viewerComments" class="comments"></div><div class="vieweractions"><input id="commentText" placeholder="Write a comment"><button class="btn primary" onclick="postViewerComment()">Post</button></div></div></div>
+<div id="viewer" class="viewer"><div class="viewerbox"><div class="viewerbar"><button class="btn" onclick="closeViewer()">✕ Close</button><div class="vieweractions"><button class="btn" onclick="prevMedia()">← Previous</button><button class="btn" onclick="nextMedia()">Next →</button></div></div><div id="viewerContent" style="margin-top:10px"></div><h2 id="viewerTitle"></h2><div id="viewerCreator" class="creator"></div><p id="viewerDesc" class="muted"></p><div id="viewerMeta" class="meta"></div><div class="vieweractions" style="margin-top:10px"><button id="likeBtn" class="btn" onclick="toggleViewerLike()">♡ Like</button><button id="shareBtn" class="btn">🔗 Share</button><a id="profileBtn" class="btn" href="#">Profile</a></div><div id="viewerComments" class="comments"></div><div class="vieweractions"><input id="commentText" placeholder="Write a comment"><button class="btn primary" onclick="postViewerComment()">Post</button></div></div></div>
 <div id="toast" class="toast"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -47,8 +47,13 @@ const toastEl=document.getElementById("toast");
 async function init(){
  me=(await db.auth.getSession()).data.session?.user||null;
  const p=new URLSearchParams(location.search); contextAlbum=p.get("album");contextCreator=p.get("creator");
- await loadAlbums(); await loadMedia(); subscribeRealtime();
+ await loadAlbums(); await loadMedia(); loadCreators(); subscribeRealtime();
 }
+async function loadCreators(){
+ const map={};items.forEach(x=>{if(x.user_id)map[x.user_id]=x.profile||{}});const rows=Object.entries(map).map(([id,p])=>({id,p})).sort((a,b)=>String(a.p.display_name||a.p.username).localeCompare(String(b.p.display_name||b.p.username)));
+ creators.innerHTML=rows.length?rows.map(x=>'<div class="album" onclick="selectCreator(\\''+x.id+'\\')">'+(x.p.avatar_url?'<img src="'+esc(x.p.avatar_url)+'">':'<div style="height:75px;display:grid;place-items:center">👤</div>')+'<b>'+esc(x.p.display_name||x.p.username||"Member")+'</b><span class="muted">@'+esc(x.p.username||"member")+'</span></div>').join(""):'<span class="muted">No creators yet.</span>';
+}
+function selectCreator(id){contextCreator=id;contextAlbum=null;history.replaceState({},'',"?creator="+encodeURIComponent(id));filter="foryou";syncFilters();render()}
 async function loadAlbums(){
  const r=await db.from("crowspace_albums").select("id,user_id,title,description,cover_url,visibility").order("created_at",{ascending:false}).limit(60);
  const rows=(r.data||[]).filter(a=>a.visibility==="public"||a.user_id===me?.id);
@@ -105,7 +110,7 @@ async function openViewer(i){if(!viewItems[i])return;viewerIndex=i;currentViewer
 function closeViewer(){viewer.classList.remove("show");document.body.style.overflow=""}
 async function prevMedia(){if(viewItems.length){viewerIndex=(viewerIndex-1+viewItems.length)%viewItems.length;currentViewerId=viewItems[viewerIndex].id;await renderViewer()}}
 async function nextMedia(){if(viewItems.length){viewerIndex=(viewerIndex+1)%viewItems.length;currentViewerId=viewItems[viewerIndex].id;await renderViewer()}}
-async function renderViewer(){
+document.getElementById("shareBtn").onclick=async()=>{const x=viewItems[viewerIndex];if(!x)return;const url=location.origin+location.pathname+"?"+(x.album_id?"album="+encodeURIComponent(x.album_id):"creator="+encodeURIComponent(x.user_id));try{await navigator.clipboard.writeText(url);toast("Media link copied")}catch(_){toast(url)}};\nasync function renderViewer(){
  const x=viewItems[viewerIndex];viewerTitle.textContent=x.title||"Untitled";viewerDesc.textContent=x.description||"";
  const av=x.profile.avatar_url?'<img class="avatar" src="'+esc(x.profile.avatar_url)+'">':'<span class="avatar">'+ini(x.profile.display_name||x.profile.username)+'</span>';
  viewerCreator.innerHTML=av+'<a class="muted" href="./profile.html?u='+encodeURIComponent(x.profile.username||"")+'">'+esc(x.profile.display_name||x.profile.username||"Member")+'</a>';
