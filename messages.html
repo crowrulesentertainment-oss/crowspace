@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowSpace Messages 2.0</title>
+<title>CrowSpace Messages 4.0</title>
 <style>
 :root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1100px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill{color:#8ff6ff}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.layout{display:grid;grid-template-columns:310px 1fr;gap:15px}.search input,input,textarea{width:100%;box-sizing:border-box;padding:11px;background:#080a12;color:#fff;border:1px solid #292e42;border-radius:10px}.search{display:flex;gap:8px}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.primary{background:linear-gradient(90deg,#126d7a,#56358c)!important;border:0!important}.list{max-height:65vh;overflow:auto}.conversation{display:flex;gap:10px;padding:11px;border-bottom:1px solid #25293a;cursor:pointer;border-radius:10px}.conversation.active{background:#111b2b;outline:1px solid #263b55}.avatar{width:44px;height:44px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.convmain{min-width:0;flex:1}.truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.online{color:#80ffb0;font-size:11px}.unread{background:#18243a;border-radius:20px;padding:2px 6px;font-size:10px}.chat{display:flex;flex-direction:column;min-height:65vh}.chatHead{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid #292e42}.chatHead h2{margin:0}.messages{flex:1;overflow:auto;padding:14px 2px}.bubbleRow{display:flex;margin:7px 0}.bubbleRow.mine{justify-content:flex-end}.bubble{max-width:75%;padding:10px 13px;border-radius:15px;background:#151a2a;border:1px solid #2a3348}.mine .bubble{background:#173d49}.time{font-size:10px;color:#9da5bd;margin-top:4px}.composer{display:flex;gap:8px;align-items:end;border-top:1px solid #292e42;padding-top:12px}.composer textarea{min-height:48px;max-height:140px;resize:vertical}.typing{height:18px;color:#9da5bd;font-size:12px}.empty{text-align:center;padding:30px;color:#9da5bd}.toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #405078;padding:14px 18px;border-radius:12px;z-index:99}@media(max-width:800px){.layout{grid-template-columns:1fr}.list{max-height:35vh}.chat{min-height:55vh}}@media(max-width:500px){main{padding:10px}.top{align-items:flex-start;flex-direction:column}.bubble{max-width:88%}}
 </style></head><body><main>
@@ -29,4 +29,29 @@ function startRealtime(){live=db.channel("crowspace-messages-"+me.id).on("postgr
 let presence;
 let typingTimer=null;function presenceFor(id){if(presence){db.removeChannel(presence);presence=null}presence=db.channel("crowspace-dm-presence-"+[me.id,id].sort().join("-"),{config:{presence:{key:me.id}}}).on("broadcast",{event:"typing"},p=>{if(p.payload?.userId===activeId){typing.textContent=p.payload.typing?"✍️ "+(profiles[activeId]?.display_name||"Member")+" is typing…":""}}).on("presence",{event:"sync"},()=>{const state=presence.presenceState();const online=Object.values(state).flat().some(x=>x.userId===id);const el=document.getElementById("presenceStatus");if(el)el.textContent=online?"🟢 Online":"Offline"}).subscribe(async s=>{if(s==="SUBSCRIBED")await presence.track({userId:me.id,onlineAt:new Date().toISOString()})})}
 init();
+</script><style>
+.m4bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.m4chip{padding:7px 10px;border:1px solid #303850;border-radius:999px;background:#101522;color:#9da5bd;cursor:pointer}.m4chip.active{color:#8ff6ff;border-color:#20e6ff}.convmeta{display:flex;justify-content:space-between;gap:8px}.m4empty{padding:18px;text-align:center;color:#9da5bd}
+</style>
+<script>
+(function(){
+const oldRender=renderConversations;
+renderConversations=function(){
+ const term=search.value.trim().toLowerCase();
+ const mode=window.m4mode||"all";
+ const rows=conversations.filter(c=>{
+  const p=profiles[c.otherId]||{};
+  const match=!term||[p.display_name,p.username,c.last.content].some(v=>String(v||"").toLowerCase().includes(term));
+  const unread=!!c.unread;
+  return match&&(mode==="all"||(mode==="unread"&&unread));
+ });
+ if(!rows.length){conversationList.innerHTML='<div class="m4empty">'+(mode==="unread"?"No unread conversations.":"No conversations yet.")+'</div>';return}
+ conversationList.innerHTML=rows.map(c=>{const p=profiles[c.otherId]||{};return '<div class="conversation '+(activeId===c.otherId?"active":"")+'" onclick="selectConversation(\''+c.otherId+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':ini(p.display_name))+'</div><div class="convmain"><div class="convmeta"><b>'+esc(p.display_name||"CrowSpace Member")+'</b><span class="muted">'+relative(c.last.created_at)+'</span></div><div class="muted">@'+esc(p.username||"member")+'</div><div class="truncate muted">'+esc(c.last.content)+'</div></div>'+(c.unread?'<span class="unread">'+c.unread+'</span>':"")+'</div>'}).join("");
+};
+function relative(t){const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);if(s<60)return"now";if(s<3600)return Math.floor(s/60)+"m";if(s<86400)return Math.floor(s/3600)+"h";if(s<604800)return Math.floor(s/86400)+"d";return new Date(t).toLocaleDateString()}
+const layout=document.querySelector(".layout"), sidebar=layout?.querySelector("section.card");
+if(sidebar){
+ const h=sidebar.querySelector("h2");if(h)h.insertAdjacentHTML("afterend",'<div class="m4bar"><button class="m4chip active" data-m4="all">All</button><button class="m4chip" data-m4="unread">Unread</button><a class="btn" href="./search.html">Find Members</a></div>');
+ sidebar.querySelectorAll("[data-m4]").forEach(b=>b.onclick=()=>{window.m4mode=b.dataset.m4;sidebar.querySelectorAll("[data-m4]").forEach(x=>x.classList.toggle("active",x===b));renderConversations()});
+}
+})();
 </script></body></html>
