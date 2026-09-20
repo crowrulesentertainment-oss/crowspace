@@ -30,18 +30,49 @@
 <div id="count" class="count"></div>
 <div id="results" class="directory"><div class="empty">Loading members…</div></div>
 </section>
+<section class="card" id="universeCreatorsCard">
+<h2>🌌 CrowRules Universe Creators</h2>
+<p class="muted">Discover creators building stories, projects and podcasts across CrowRules.</p>
+<div id="universeCreators" class="directory"><div class="empty">Loading creators…</div></div>
+</section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
-let me=null, members=[], activeFilter="all", onlineIds=new Set(), presenceChannel;
+let me=null, members=[], activeFilter="all", onlineIds=new Set(), presenceChannel,universeCreators=[];
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ini=s=>(s||"Member").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();
 const qEl=document.getElementById("q"), results=document.getElementById("results"), count=document.getElementById("count"), toast=document.getElementById("toast");
 
+async function loadUniverseCreators(){
+ const box=document.getElementById("universeCreators"); if(!box)return;
+ const [d1,d2,p]=await Promise.all([
+  db.from("dream_submissions").select("creator_id").eq("status","published").limit(100),
+  db.from("dream_projects").select("creator_id").in("status",["active","in_development","development","production"]).limit(100),
+  db.from("podcasts").select("creator_id").eq("status","published").limit(100)
+ ]);
+ const ids=[...new Set([...((d1.data||[]).map(x=>x.creator_id)),...((d2.data||[]).map(x=>x.creator_id)),...((p.data||[]).map(x=>x.creator_id))].filter(Boolean))];
+ if(!ids.length){box.innerHTML='<div class="empty">No public Universe creators yet.</div>';return}
+ const q=await db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,location,verification_status").in("user_id",ids);
+ if(q.error){box.innerHTML='<div class="empty">Creator discovery is temporarily unavailable.</div>';return}
+ universeCreators=q.data||[];
+ box.innerHTML=universeCreators.map(x=>{
+   const following=members.find(m=>m.user_id===x.user_id)?.isFollowing;
+   const follow=me&&x.user_id!==me.id?'<button class="btn" onclick="toggleCreatorFollow(\''+x.user_id+'\')">'+(following?"Following":"Follow Creator")+'</button>':"";
+   return '<article class="member"><div class="avatar">'+(x.avatar_url?'<img src="'+esc(x.avatar_url)+'" alt="">':ini(x.display_name))+'</div><div class="member-main"><div class="name"><a href="./profile.html?u='+encodeURIComponent(x.username||"")+'">'+esc(x.display_name||"Member")+'</a> '+(x.verification_status==="verified"?"✓":"")+'</div><div class="handle">@'+esc(x.username||"member")+'</div><div class="bio">'+esc(x.bio||"Building in the CrowRules Universe.")+'</div><div class="actions"><a class="btn" href="./profile.html?u='+encodeURIComponent(x.username||"")+'">View Profile</a>'+follow+'</div></div></article>'
+ }).join("")||'<div class="empty">No creator profiles found.</div>';
+}
+async function toggleCreatorFollow(id){
+ if(!me)return;
+ const exists=await db.from("crowspace_follows").select("follower_id").eq("follower_id",me.id).eq("following_id",id).maybeSingle();
+ const r=exists.data?await db.from("crowspace_follows").delete().eq("follower_id",me.id).eq("following_id",id):await db.from("crowspace_follows").insert({follower_id:me.id,following_id:id});
+ if(r.error){toast.textContent=r.error.message;return}
+ await loadMembers(); await loadUniverseCreators(); render();
+}
 async function init(){
  const s=(await db.auth.getSession()).data.session; me=s?.user||null;
  await loadMembers();
+ await loadUniverseCreators();
  if(me) startPresence();
  const initial=new URLSearchParams(location.search).get("q"); if(initial){qEl.value=initial}
  render();
