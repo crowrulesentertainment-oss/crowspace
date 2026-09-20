@@ -80,7 +80,7 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     const y=t.slice(0,4);
     const fallback=FALLBACKS.find(x=>{
       const s=x.starts_on.slice(5),e=x.ends_on.slice(5);
-      return s<=md&&md<=e;
+      return s<=e?s<=md&&md<=e:md>=s||md<=e;
     });
     return fallback?{...fallback,starts_on:y+"-"+fallback.starts_on.slice(5),ends_on:y+"-"+fallback.ends_on.slice(5)}:null;
   }
