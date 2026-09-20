@@ -1,1 +1,124 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Find Members — CrowSpace</title><style>:root{--a:#20e6ff}body{margin:0;background:#05050b;color:#fff;font:14px Arial}main{max-width:900px;margin:auto;padding:20px}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:20px;margin-bottom:15px}.search{display:flex;gap:8px}.search input{flex:1;padding:13px;background:#080a12;color:#fff;border:1px solid #292e42;border-radius:10px}.btn{padding:11px 14px;background:#182033;color:#fff;border:1px solid #343c56;border-radius:10px;cursor:pointer;text-decoration:none}.person{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #25293a}.avatar{width:52px;height:52px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold}.avatar img{width:100%;height:100%;object-fit:cover}.muted{color:#9da5bd}.person a{color:#fff;text-decoration:none}</style></head><body><main><div class="card"><h1>Find CrowSpace Members</h1><div class="search"><input id="q" placeholder="Search by name or @username"><button class="btn" id="go">Search</button></div><p class="muted">Discover people across the CrowRules universe.</p></div><div class="card"><div id="results">Enter a name or username to search.</div><p><a class="btn" href="./">← CrowSpace</a></p></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));const ini=s=>(s||"M").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();async function run(){const qv=q.value.trim();if(!qv){results.textContent="Enter a search term.";return}results.textContent="Searching…";const term="%"+qv.replace(/[%_]/g,"")+"%";const r=await db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,location").or("username.ilike."+term+",display_name.ilike."+term).order("display_name").limit(50);if(r.error){results.textContent=r.error.message;return}results.innerHTML=(r.data||[]).map(p=>'<div class="person"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':ini(p.display_name))+'</div><div><a href="./profile.html?u='+encodeURIComponent(p.username||"")+'"><b>'+esc(p.display_name||"Member")+'</b></a><div class="muted">@'+esc(p.username||"member")+(p.location?" · "+esc(p.location):"")+'</div><div>'+esc(p.bio||"")+'</div></div></div>').join("")||"No members found."}go.onclick=run;q.addEventListener("keydown",e=>{if(e.key==="Enter")run()});const initial=new URLSearchParams(location.search).get("q");if(initial){q.value=initial;run()}</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Member Directory — CrowSpace</title>
+<style>
+:root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1180px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill{color:#8ff6ff}.muted{color:#9da5bd}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.hero{background:linear-gradient(135deg,#101d2c,#30194b,#0d0f18)}.toolbar{display:grid;grid-template-columns:1fr auto;gap:10px}.search{display:flex;gap:8px}.search input{flex:1;padding:13px;background:#080a12;color:#fff;border:1px solid #292e42;border-radius:10px}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.btn:disabled{opacity:.5;cursor:default}.primary{background:linear-gradient(90deg,#126d7a,#56358c)!important;border:0!important}.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.filter.active{outline:2px solid var(--a)}.directory{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.member{background:#10131f;border:1px solid #292e42;border-radius:16px;padding:15px;display:flex;gap:13px}.avatar{width:64px;height:64px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold;font-size:18px;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.member-main{min-width:0;flex:1}.name{font-size:17px;font-weight:800}.name a{color:#fff;text-decoration:none}.handle{color:#8ff6ff}.bio{margin:7px 0;color:#d9deec;line-height:1.4}.meta{color:#9da5bd;font-size:12px;line-height:1.5}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.status{font-size:11px;color:#80ffb0}.empty{text-align:center;padding:35px;color:#9da5bd}.count{margin-top:10px;color:#9da5bd}.toast{min-height:18px;margin-top:10px}@media(max-width:760px){.toolbar{grid-template-columns:1fr}.directory{grid-template-columns:1fr}}@media(max-width:500px){main{padding:10px}.top{align-items:flex-start;flex-direction:column}.member{padding:12px}.avatar{width:54px;height:54px}}
+</style>
+</head>
+<body><main>
+<div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Member Directory</span></div><a class="btn" href="./">← CrowSpace</a></div>
+<section class="card hero">
+<h1>Find CrowSpace Members</h1>
+<p class="muted">Discover people across the CrowRules universe. Search names, usernames, bios, interests, and locations.</p>
+<div class="toolbar">
+<div class="search"><input id="q" placeholder="Search name, @username, interests, bio, location…"><button class="btn primary" id="go">Search</button></div>
+<button class="btn" id="clear">Clear</button>
+</div>
+<div class="filters">
+<button class="btn filter active" data-filter="all">All</button>
+<button class="btn filter" data-filter="online">🟢 Online</button>
+<button class="btn filter" data-filter="friends">Friends</button>
+<button class="btn filter" data-filter="following">Following</button>
+<button class="btn filter" data-filter="followers">Followers</button>
+</div>
+<div id="toast" class="toast muted"></div>
+</section>
+<section class="card">
+<div id="count" class="count"></div>
+<div id="results" class="directory"><div class="empty">Loading members…</div></div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+let me=null, members=[], activeFilter="all", onlineIds=new Set(), presenceChannel;
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ini=s=>(s||"Member").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();
+const qEl=document.getElementById("q"), results=document.getElementById("results"), count=document.getElementById("count"), toast=document.getElementById("toast");
+
+async function init(){
+ const s=(await db.auth.getSession()).data.session; me=s?.user||null;
+ await loadMembers();
+ if(me) startPresence();
+ const initial=new URLSearchParams(location.search).get("q"); if(initial){qEl.value=initial}
+ render();
+}
+async function loadMembers(){
+ results.innerHTML='<div class="empty">Loading members…</div>';
+ const r=await db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,location,interests,verification_status,verified_display_label,public_figure_category").order("display_name").limit(500);
+ if(r.error){results.innerHTML='<div class="empty">'+esc(r.error.message)+'</div>';return}
+ members=r.data||[];
+ if(me){
+   const [follows,friends]=await Promise.all([
+     db.from("crowspace_follows").select("follower_id,following_id").or("follower_id.eq."+me.id+",following_id.eq."+me.id),
+     db.from("crowspace_friends").select("requester_id,recipient_id,status").or("requester_id.eq."+me.id+",recipient_id.eq."+me.id)
+   ]);
+   const following=new Set((follows.data||[]).filter(x=>x.follower_id===me.id).map(x=>x.following_id));
+   const followers=new Set((follows.data||[]).filter(x=>x.following_id===me.id).map(x=>x.follower_id));
+   const friendRows=friends.data||[];
+   const friendIds=new Set(friendRows.filter(x=>x.status==="accepted").map(x=>x.requester_id===me.id?x.recipient_id:x.requester_id));
+   const pendingSent=new Set(friendRows.filter(x=>x.status==="pending"&&x.requester_id===me.id).map(x=>x.recipient_id));
+   const pendingReceived=new Set(friendRows.filter(x=>x.status==="pending"&&x.recipient_id!==me.id).map(x=>x.requester_id));
+   members=members.map(p=>({...p,isFollowing:following.has(p.user_id),isFollower:followers.has(p.user_id),isFriend:friendIds.has(p.user_id),pendingSent:pendingSent.has(p.user_id),pendingReceived:pendingReceived.has(p.user_id)}));
+ }else members=members.map(p=>({...p,isFollowing:false,isFollower:false,isFriend:false,pendingSent:false,pendingReceived:false}));
+}
+function visible(){
+ const term=qEl.value.trim().toLowerCase();
+ return members.filter(p=>{
+   if(p.user_id===me?.id)return false;
+   if(activeFilter==="online"&&!onlineIds.has(p.user_id))return false;
+   if(activeFilter==="friends"&&!p.isFriend)return false;
+   if(activeFilter==="following"&&!p.isFollowing)return false;
+   if(activeFilter==="followers"&&!p.isFollower)return false;
+   if(!term)return true;
+   return [p.username,p.display_name,p.bio,p.interests,p.location,p.public_figure_category].some(v=>String(v||"").toLowerCase().includes(term));
+ });
+}
+function render(){
+ const list=visible(); count.textContent=list.length+" member"+(list.length===1?"":"s")+" shown";
+ if(!list.length){results.innerHTML='<div class="empty">No members match your search or filter.</div>';return}
+ results.innerHTML=list.map((p,i)=>card(p,i)).join("");
+}
+function card(p,i){
+ const verified=p.verification_status==="verified";
+ let friend="";
+ if(!me) friend='<a class="btn" href="../login.html">Sign In to Connect</a>';
+ else if(p.isFriend) friend='<button class="btn" disabled>✓ Friends</button>';
+ else if(p.pendingSent) friend='<button class="btn" disabled>Request Sent</button>';
+ else if(p.pendingReceived) friend='<button class="btn" onclick="acceptFriend(\''+p.user_id+'\')">Accept Friend</button>';
+ else friend='<button class="btn primary" onclick="addFriend(\''+p.user_id+'\')">Add Friend</button>';
+ const follow=me?(p.isFollowing?'<button class="btn" onclick="toggleFollow(\''+p.user_id+'\')">Following</button>':'<button class="btn" onclick="toggleFollow(\''+p.user_id+'\')">Follow</button>'):"";
+ const msg=me?'<a class="btn" href="./messages.html?u='+encodeURIComponent(p.username||"")+'">Message</a>':"";
+ return '<article class="member"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':ini(p.display_name))+'</div><div class="member-main"><div class="name"><a href="./profile.html?u='+encodeURIComponent(p.username||"")+'">'+esc(p.display_name||"Member")+'</a> '+(verified?'<span title="Verified">✓</span>':"")+'</div><div class="handle">@'+esc(p.username||"member")+(onlineIds.has(p.user_id)?' · <span class="status">● Online</span>':"")+'</div><div class="meta">'+(p.location?esc(p.location):"")+(p.location&&p.interests?" · ":"")+(p.interests?"Interests: "+esc(p.interests):"")+'</div><div class="bio">'+esc(p.bio||"")+'</div><div class="actions"><a class="btn" href="./profile.html?u='+encodeURIComponent(p.username||"")+'">View Profile</a>'+friend+follow+msg+'</div></div></article>';
+}
+async function addFriend(id){if(!me)return;const r=await db.from("crowspace_friends").insert({requester_id:me.id,recipient_id:id,status:"pending"});if(r.error){toast.textContent=r.error.message;return}toast.textContent="Friend request sent.";await loadMembers();render()}
+async function acceptFriend(id){if(!me)return;const r=await db.from("crowspace_friends").update({status:"accepted",updated_at:new Date().toISOString()}).eq("requester_id",id).eq("recipient_id",me.id).eq("status","pending");if(r.error){toast.textContent=r.error.message;return}toast.textContent="Friend request accepted.";await loadMembers();render()}
+async function toggleFollow(id){
+ if(!me)return;
+ const p=members.find(x=>x.user_id===id);
+ const r=p?.isFollowing?await db.from("crowspace_follows").delete().eq("follower_id",me.id).eq("following_id",id):await db.from("crowspace_follows").insert({follower_id:me.id,following_id:id});
+ if(r.error){toast.textContent=r.error.message;return}
+ toast.textContent=p?.isFollowing?"Unfollowed.":"Now following.";
+ await loadMembers();render();
+}
+function startPresence(){
+ presenceChannel=db.channel("crowspace-presence",{config:{presence:{key:me.id}}})
+ .on("presence",{event:"sync"},syncPresence).on("presence",{event:"join"},syncPresence).on("presence",{event:"leave"},syncPresence);
+ presenceChannel.subscribe(async status=>{if(status==="SUBSCRIBED")await presenceChannel.track({userId:me.id,onlineAt:new Date().toISOString()})});
+}
+function syncPresence(){
+ const state=presenceChannel.presenceState();
+ onlineIds=new Set(Object.values(state).flat().map(x=>x.userId).filter(Boolean));
+ render();
+}
+document.getElementById("go").onclick=()=>{render();const v=qEl.value.trim();history.replaceState(null,"",v?"?q="+encodeURIComponent(v):location.pathname)};
+qEl.addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("go").click()});
+document.getElementById("clear").onclick=()=>{qEl.value="";activeFilter="all";document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x.dataset.filter==="all"));history.replaceState(null,"",location.pathname);render()};
+document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));render()});
+db.auth.onAuthStateChange(async()=>{await loadMembers();render()});
+init();
+</script>
+</body></html>
