@@ -45,6 +45,24 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
   function injectCss(){if(document.getElementById("cr-holiday-css"))return;const s=document.createElement("style");s.id="cr-holiday-css";s.textContent=CSS;document.head.appendChild(s)}
   function stored(){try{return localStorage.getItem("crowspace_holiday_mode")||"automatic"}catch(e){return"automatic"}}
   function save(v){try{localStorage.setItem("crowspace_holiday_mode",v)}catch(e){}}
+  async function getMode(db){
+    let mode=stored();
+    try{
+      const s=await db.auth.getSession();
+      if(s.data.session){
+        const r=await db.from("crowspace_holiday_preferences").select("mode").eq("user_id",s.data.session.user.id).maybeSingle();
+        if(!r.error&&r.data?.mode){mode=r.data.mode;save(mode)}
+      }
+    }catch(e){}
+    return mode;
+  }
+  async function persistMode(db,v){
+    save(v);
+    try{
+      const s=await db.auth.getSession();
+      if(s.data.session) await db.from("crowspace_holiday_preferences").upsert({user_id:s.data.session.user.id,mode:v,updated_at:new Date().toISOString()});
+    }catch(e){}
+  }
   async function themes(){
     if(!window.supabase)return FALLBACKS;
     try{
@@ -56,7 +74,15 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
   }
   function activeTheme(list){
     const t=today();
-    return list.find(x=>x.starts_on<=t&&x.ends_on>=t)||null;
+    const exact=list.find(x=>x.starts_on<=t&&x.ends_on>=t);
+    if(exact)return exact;
+    const md=t.slice(5);
+    const y=t.slice(0,4);
+    const fallback=FALLBACKS.find(x=>{
+      const s=x.starts_on.slice(5),e=x.ends_on.slice(5);
+      return s<=md&&md<=e;
+    });
+    return fallback?{...fallback,starts_on:y+"-"+fallback.starts_on.slice(5),ends_on:y+"-"+fallback.ends_on.slice(5)}:null;
   }
   function particle(theme){
     const layer=document.getElementById("cr-holiday-layer");if(!layer)return;
@@ -102,16 +128,19 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     const wrap=document.createElement("div");wrap.className="cr-holiday-settings";
     const label=document.createElement("span");label.className="cr-holiday-label";label.textContent=current?"Theme: "+current.name:"Theme: Seasonal";
     const select=document.createElement("select");select.innerHTML='<option value="automatic">Automatic</option><option value="on">On</option><option value="off">Off</option>';select.value=stored();
-    select.onchange=()=>{save(select.value);location.reload()};
+    select.onchange=async()=>{if(window.CrowSpaceHoliday?.setMode)await window.CrowSpaceHoliday.setMode(select.value);else save(select.value);location.reload()};
     wrap.append(label,select);
     return wrap;
   }
   async function init(){
     injectCss();
     const list=await themes();
-    const mode=stored();const current=activeTheme(list);
+    let db=null;
+    try{if(window.supabase)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){}
+    const mode=db?await getMode(db):stored();
+    const current=activeTheme(list);
     if(current&&mode!=="off")apply(current);
-    window.CrowSpaceHoliday={themes:list,current,mode,settings:(host)=>{if(host)host.appendChild(settings(list,current))},refresh:()=>location.reload()};
+    window.CrowSpaceHoliday={themes:list,current,mode,settings:(host)=>{if(host)host.appendChild(settings(list,current))},setMode:async(v)=>{if(db)await persistMode(db,v);else save(v);location.reload()},refresh:()=>location.reload()};
     document.dispatchEvent(new CustomEvent("crowspace:holiday-ready",{detail:{theme:current,mode,list}}));
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
