@@ -49,4 +49,5 @@ async function applyPlayback(p){
 }
 playPause.onclick=async()=>{if(!isHost)return;const v=player.querySelector("video");if(!v)return;v.paused?await v.play():v.pause();broadcastPlayback(v.paused?"pause":"play")};
 syncNow.onclick=()=>{if(partyChannel)partyChannel.send({type:"broadcast",event:"request-sync",payload:{userId:me?.id}})};
-</script></body></html>
+</script><script src="./js/crowspace-holiday-themes.js"></script>
+</body></html>
