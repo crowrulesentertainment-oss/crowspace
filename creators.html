@@ -35,4 +35,5 @@ async function init(){
 }
 async function unfollow(id){const r=await db.from("crowspace_follows").delete().eq("follower_id",me.id).eq("following_id",id);if(r.error){toast.textContent=r.error.message;return}location.reload()}
 db.auth.onAuthStateChange(()=>init());init();
-</script></body></html>
+</script><script src="./js/crowspace-holiday-themes.js"></script>
+</body></html>
