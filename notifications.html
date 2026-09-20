@@ -3,7 +3,8 @@
 <title>CrowSpace Notifications 4.0</title>
 <style>
 :root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:900px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill{color:#8ff6ff}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.toolbar{display:flex;flex-wrap:wrap;gap:8px}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.primary{background:linear-gradient(90deg,#126d7a,#56358c)!important;border:0!important}.filter.active{outline:2px solid var(--a)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#111522;padding:13px;border-radius:12px;text-align:center}.stat b{display:block;font-size:22px}.muted{color:#9da5bd}.n{display:flex;gap:12px;padding:15px;border-bottom:1px solid #25293a;align-items:flex-start}.n.unread{background:#111b2b}.icon{width:42px;height:42px;border-radius:12px;background:#182033;display:grid;place-items:center;font-size:20px;flex:none}.content{min-width:0;flex:1}.message{margin:5px 0;line-height:1.4}.actor{color:#8ff6ff}.time{font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.badge{display:inline-block;background:#e33;border-radius:20px;padding:3px 7px;font-size:11px}.empty{text-align:center;padding:35px}.toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #405078;padding:14px 18px;border-radius:12px;z-index:99;box-shadow:0 10px 30px #0008}@media(max-width:600px){main{padding:10px}.top{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr}.n{padding:12px}}
-</style></head><body><main>
+</style><link rel="stylesheet" href="./css/crowrules-cinematic.css">
+</head><body data-crowrules-division="crowspace"><main>
 <div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Notifications 3.0</span></div><a class="btn" href="./">← CrowSpace</a></div>
 <section class="card"><h1>🔔 Notifications</h1><p class="muted">Stay up to date with activity across your CrowSpace.</p>
 <div class="stats"><div class="stat"><b id="total">0</b><span class="muted">Total</span></div><div class="stat"><b id="unread">0</b><span class="muted">Unread</span></div><div class="stat"><b id="today">0</b><span class="muted">Today</span></div></div>
@@ -60,4 +61,5 @@ load().then(startLive);
  window.markRead=async function(id){await oldMark(id)};
 })();
 </script><script src="./js/crowspace-holiday-themes.js"></script>
+<script src="./js/crowrules-cinematic.js"></script>
 </body></html>
