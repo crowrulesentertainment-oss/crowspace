@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowSpace Groups 2.0</title>
+<title>CrowSpace Groups 4.0</title>
 <style>
 :root{--a:#20e6ff;--p:#8d5cff;--bg:#05050b;--card:#0d101a;--line:#292e42;--muted:#9da5bd}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#17132d,transparent 38%),var(--bg);color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1200px;margin:auto;padding:18px}
@@ -12,8 +12,12 @@
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.stat{background:#111522;padding:10px;border-radius:10px;text-align:center}.stat b{font-size:20px;display:block}
 .layout{display:grid;grid-template-columns:280px 1fr;gap:15px}.side{position:sticky;top:12px;height:max-content}.member{padding:9px;border-bottom:1px solid #25293a}.avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#20253a;display:grid;place-items:center;font-weight:800;font-size:11px}.post{border-top:1px solid #25293a;padding:14px 0}.posthead{display:flex;gap:9px;align-items:center}.postbody{white-space:pre-wrap;line-height:1.5;margin:10px 0}.composer textarea{min-height:90px;resize:vertical}.empty{text-align:center;padding:35px}
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.side{position:static}}@media(max-width:600px){main{padding:10px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}}
+</style><style>
+.g4panel{background:linear-gradient(135deg,#0e1420,#171027);border:1px solid #303951;border-radius:15px;padding:15px;margin-bottom:15px}
+.g4grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.g4stat{background:#0a0d15;border:1px solid #252d42;border-radius:12px;padding:12px}.g4stat b{display:block;font-size:20px}.g4member{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #25293a}.g4member:last-child{border-bottom:0}.g4avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#20253a;display:grid;place-items:center;font-weight:800}.g4tag{font-size:10px;border:1px solid #3a4660;border-radius:20px;padding:3px 7px;color:#8ff6ff}.g4search{margin:8px 0}.g4delete{float:right}.g4empty{color:#9da5bd;padding:12px 0}
+@media(max-width:600px){.g4grid{grid-template-columns:1fr 1fr}}
 </style></head><body><main>
-<div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Groups 2.0</span></div><a class="btn" href="./">← CrowSpace</a></div>
+<div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Groups 4.0</span></div><a class="btn" href="./">← CrowSpace</a></div>
 <section class="card hero"><h1>👥 CrowSpace Groups</h1><p class="muted">Find communities, join conversations, and build inside the CrowRules universe.</p><div class="stats"><div class="stat"><b id="groupCount">0</b><span class="muted">Groups</span></div><div class="stat"><b id="memberCount">0</b><span class="muted">Members</span></div><div class="stat"><b id="postCount">0</b><span class="muted">Group Posts</span></div></div></section>
 
 <section class="card"><div class="toolbar"><div class="search"><input id="q" placeholder="Search groups…"><button class="btn primary" id="go">Search</button></div><button class="btn filter active" data-filter="all">All</button><button class="btn filter" data-filter="joined">Joined</button><button class="btn filter" data-filter="mine">My Groups</button><button class="btn filter" data-filter="public">Public</button></div></section>
@@ -71,5 +75,24 @@ async function g3Announcements(g){let box=document.getElementById("g3announce");
 async function g3Manage(g){let box=document.getElementById("g3manage");if(g.owner_id!==me?.id){if(box)box.remove();return}if(!box){box=document.createElement("div");box.id="g3manage";box.className="g3box";document.getElementById("communityLayout").querySelector("aside").append(box)}box.innerHTML="<h3>🛡️ Management</h3>"+members.map(m=>{const p=profiles[m.user_id]||{};return "<div class=\"g3row\" style=\"justify-content:space-between;margin:7px 0\"><span>"+esc(p.display_name||p.username||"Member")+"</span><select data-u=\""+m.user_id+"\" class=\"g3role\"><option value=\"member\" "+(m.role==="member"?"selected":"")+">Member</option><option value=\"moderator\" "+(m.role==="moderator"?"selected":"")+">Moderator</option><option value=\"admin\" "+(m.role==="admin"?"selected":"")+">Admin</option></select></div>"}).join("")||"<div class=\"muted\">No members yet.</div>";box.querySelectorAll(".g3role").forEach(s=>s.onchange=async()=>{const r=await db.from("crowspace_group_members").update({role:s.value}).eq("group_id",g.id).eq("user_id",s.dataset.u);if(r.error)alert(r.error.message)})}
 function g3PostTools(){document.querySelectorAll("#feed .post").forEach(el=>{if(el.querySelector(".g3delete"))return;const a=el.querySelector(".posthead a");if(a&&me&&a.href.includes(encodeURIComponent(me.id)))return;const buttons=el.querySelector(".meta");if(!buttons)return;const idMatch=el.innerHTML.match(/data-id="([^"]+)"/);})}
 window.g3DeletePost=async function(id){if(!confirm("Delete this post?"))return;const r=await db.from("crowspace_posts").delete().eq("id",id).eq("author_id",me.id);if(r.error)alert(r.error.message);else oldLoadGroupData(groups.find(g=>g.id===selected))};
+})();
+</script><script>
+(function(){
+function g4AddPanel(){
+ const layout=document.getElementById("communityLayout"),section=layout?.querySelector("section");if(!section||document.getElementById("g4panel"))return;
+ const box=document.createElement("div");box.id="g4panel";box.className="g4panel";section.insertBefore(box,section.firstChild);g4RenderPanel();
+}
+async function g4RenderPanel(){
+ const box=document.getElementById("g4panel");if(!box||!selected)return;
+ const g=groups.find(x=>x.id===selected);if(!g)return;
+ const mine=members.some(m=>m.user_id===me?.id&&m.status==="active"),owner=g.owner_id===me?.id,mods=members.filter(m=>["moderator","admin"].includes(m.role)).length;
+ box.innerHTML='<h3>🏠 Community Dashboard</h3><div class="g4grid"><div class="g4stat"><b>'+members.length+'</b><span class="muted">Members</span></div><div class="g4stat"><b>'+posts.length+'</b><span class="muted">Posts</span></div><div class="g4stat"><b>'+mods+'</b><span class="muted">Moderators/Admins</span></div></div><div class="g4search"><input id="g4memberSearch" placeholder="Search group members…"></div><div id="g4memberResults"></div><div class="actions" style="margin-top:10px"><span class="g4tag">'+esc(g.visibility)+'</span><span class="g4tag">'+(owner?"Owner":mine?"Member":"Visitor")+'</span>'+(owner?'<span class="g4tag">Community Manager</span>':"")+'</div>';
+ const renderMembers=()=>{const term=(document.getElementById("g4memberSearch").value||"").toLowerCase();const rows=members.filter(m=>{const p=profiles[m.user_id]||{};return !term||[p.display_name,p.username,p.bio].some(v=>String(v||"").toLowerCase().includes(term))});document.getElementById("g4memberResults").innerHTML=rows.slice(0,25).map(m=>{const p=profiles[m.user_id]||{};return '<div class="g4member"><a href="./profile.html?u='+encodeURIComponent(p.username||"")+'"><div class="g4avatar">'+(p.avatar_url?'<img class="g4avatar" src="'+esc(p.avatar_url)+'">':ini(p.display_name||p.username))+'</div></a><div style="flex:1"><a href="./profile.html?u='+encodeURIComponent(p.username||"")+'"><b>'+esc(p.display_name||p.username||"Member")+'</b></a><div class="muted">@'+esc(p.username||"member")+'</div></div><span class="g4tag">'+esc(m.role)+'</span></div>'}).join("")||'<div class="g4empty">No matching members.</div>'};
+ document.getElementById("g4memberSearch").oninput=renderMembers;renderMembers();
+}
+const oldRenderFeed=window.renderFeed;
+window.g4WrapFeed=function(){const feed=document.getElementById("feed");if(!feed)return;feed.querySelectorAll(".post").forEach((el,i)=>{if(el.querySelector(".g4delete"))return;const post=posts[i];if(post&&me&&post.author_id===me.id){const b=document.createElement("button");b.className="btn g4delete g4danger";b.textContent="Delete";b.onclick=async()=>{if(!confirm("Delete this post?"))return;const r=await db.from("crowspace_posts").delete().eq("id",post.id).eq("author_id",me.id);if(r.error)alert(r.error.message);else await loadGroupData(groups.find(g=>g.id===selected))};el.querySelector(".meta")?.appendChild(b)}})};
+const oldLoad=window.loadGroupData;
+window.loadGroupData=async function(g){await oldLoad(g);g4AddPanel();g4WrapFeed()};
 })();
 </script></body></html>
