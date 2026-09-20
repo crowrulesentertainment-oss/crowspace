@@ -173,3 +173,50 @@ async function searchAll(q){const [p,g,pr]=await Promise.all([db.from("crowspace
 function setupRealtime(){if(window.__channel)return;window.__channel=db.channel("crowspace-live").on("postgres_changes",{event:"*",schema:"public",table:"crowspace_posts"},()=>loadContext()).on("postgres_changes",{event:"*",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+state.user.id},()=>loadContext()).subscribe()}
 window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h)go(h)});
 setupNav();loadContext();
+/* CROWRULES SOCIAL UNIVERSE — CrowSpace 2.0 */
+async function loadSocialMode(mode="for-you"){
+  const feed=$("#feed"), highlights=$("#socialHighlights"); if(!feed)return;
+  highlights.innerHTML='<article><span>🌌</span><b>Dreamscapes</b><small>Bring an idea to life.</small><button data-go="build">Build</button></article><article><span>🎙️</span><b>Podcasting</b><small>Find shows and creators.</small><button data-go="discover">Explore</button></article><article><span>🕯️</span><b>Memorials</b><small>Remember. Honor. Celebrate.</small><button data-go="discover">Explore</button></article><article><span>📺</span><b>CrowRules TV</b><small>Watch, talk and connect.</small><button data-go="events">Watch</button></article>';
+  highlights.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
+  if(mode==="reels"){
+    const r=await db.from("crowspace_reels").select("id,user_id,title,description,video_url,thumbnail_url,views_count,created_at").eq("visibility","public").order("created_at",{ascending:false}).limit(12);
+    feed.innerHTML=(r.data||[]).map(x=>'<article class="social-card reel-card"><div class="media">'+(x.video_url?'<video controls playsinline src="'+esc(x.video_url)+'"></video>':'<div class="media-placeholder">🎞️ REEL</div>')+'</div><h3>'+esc(x.title||"Crow Reel")+'</h3><p>'+esc(x.description||"")+'</p><div class="social-meta">▶ '+Number(x.views_count||0).toLocaleString()+' views · '+timeAgo(x.created_at)+'</div></article>').join("")||'<div class="empty panel">No public Reels yet.</div>';
+    return;
+  }
+  if(mode==="photos"){
+    const r=await db.from("crowspace_media").select("id,user_id,title,description,media_url,thumbnail_url,media_type,created_at").eq("visibility","public").eq("media_type","photo").order("created_at",{ascending:false}).limit(12);
+    feed.innerHTML=(r.data||[]).map(x=>'<article class="social-card photo-card">'+(x.media_url?'<img loading="lazy" src="'+esc(x.media_url)+'" alt="'+esc(x.title||"CrowSpace photo")+'">':'<div class="media-placeholder">📸 PHOTO</div>')+'<h3>'+esc(x.title||"CrowSpace Photo")+'</h3><p>'+esc(x.description||"")+'</p></article>').join("")||'<div class="empty panel">No public photos yet.</div>';
+    return;
+  }
+  if(mode==="crows"){
+    const r=await db.from("crowspace_statuses").select("user_id,status_text,mood,music_text,location_text,updated_at").order("updated_at",{ascending:false}).limit(20);
+    feed.innerHTML=(r.data||[]).map(x=>'<article class="crow-status"><div class="avatar">🐦</div><div><b>@Crow</b><p>'+esc(x.status_text||"")+'</p><small>'+esc(x.mood||"")+(x.music_text?" · 🎵 "+esc(x.music_text):"")+(x.location_text?" · 📍 "+esc(x.location_text):"")+' · '+timeAgo(x.updated_at)+'</small></div></article>').join("")||'<div class="empty panel">No Crows posted yet.</div>';
+    return;
+  }
+  let q=db.from("crowspace_posts").select("id,author_id,body,media_url,media_type,created_at,like_count,comment_count,group_id").eq("status","published").order("created_at",{ascending:false}).limit(30);
+  if(mode==="following"){
+    const ids=(state.follows||[]).filter(x=>x.follower_id===state.user?.id).map(x=>x.following_id);
+    if(ids.length)q=q.in("author_id",ids); else {feed.innerHTML='<div class="empty panel">Follow creators to build your Following feed.</div>';return;}
+  }
+  const r=await q; const rows=r.data||[];
+  feed.innerHTML=rows.map(p=>'<article class="post social-post" data-post="'+p.id+'"><div class="post-head"><div class="avatar">🐦</div><div><b>Crow Member</b><span class="verified">✓ CrowSpace</span><small>'+timeAgo(p.created_at)+'</small></div></div><p>'+esc(p.body||"")+'</p>'+(p.media_url?'<div class="media"><video controls playsinline src="'+esc(p.media_url)+'"></video></div>':"")+'<div class="post-actions"><button data-like="'+p.id+'">❤️ '+Number(p.like_count||0)+'</button><button data-comment="'+p.id+'">💬 '+Number(p.comment_count||0)+'</button><button data-share="'+p.id+'">↗ Share</button></div></article>').join("")||'<div class="empty panel">Your CrowSpace feed is ready for the next story.</div>';
+  feed.querySelectorAll("[data-like]").forEach(b=>b.onclick=async()=>{const r=await db.rpc("crowspace_toggle_like",{target_post_id:b.dataset.like});toast(r.error?r.error.message:"Like updated.");if(!r.error)loadSocialMode(mode)});
+  feed.querySelectorAll("[data-comment]").forEach(b=>b.onclick=()=>showCommentComposer(b.dataset.comment));
+  feed.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>navigator.clipboard?.writeText(location.href+"#post-"+b.dataset.share).then(()=>toast("Post link copied.")));
+}
+async function showCommentComposer(postId){
+  $("#modal").classList.remove("hidden");$("#modalCard").innerHTML='<h3>💬 Join the conversation</h3><textarea id="commentBody" rows="4" placeholder="Write a thoughtful reply…"></textarea><div class="toolbar"><button class="primary" id="sendComment">Reply</button><button id="cancelComment">Cancel</button></div>';
+  $("#cancelComment").onclick=()=>$("#modal").classList.add("hidden");
+  $("#sendComment").onclick=async()=>{const content=$("#commentBody").value.trim();if(!content)return toast("Write a reply first.");const r=await db.from("crowspace_comments").insert({post_id:postId,author_id:state.user.id,content});toast(r.error?r.error.message:"Reply posted.");if(!r.error)$("#modal").classList.add("hidden");};
+}
+function bindSocialTabs(){
+  $$("#feedTabs [data-feed-mode]").forEach(b=>b.onclick=()=>{$$("#feedTabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");loadSocialMode(b.dataset.feedMode)});
+  const df=$("#discoverFilter"); if(df&&!df.dataset.bound){df.dataset.bound="1";df.oninput=()=>{const q=df.value.toLowerCase();$$("#discoverGrid article").forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?"":"none")};}
+}
+async function enhanceCrowSpace(){
+  bindSocialTabs();
+  await loadSocialMode("for-you");
+  const tabButtons=$$(".discover-tabs button");
+  tabButtons.forEach(b=>b.onclick=()=>{tabButtons.forEach(x=>x.classList.remove("active"));b.classList.add("active");const label=b.textContent.trim();const map={Creators:"profile",Groups:"groups",Projects:"build",Divisions:"discover",Videos:"discover",Photos:"discover"};if(map[label]&&label!=="discover")go(map[label]);else toast(label+" discovery is active.");});
+}
+setTimeout(enhanceCrowSpace,900);
