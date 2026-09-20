@@ -61,8 +61,8 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
   function particle(theme){
     const layer=document.getElementById("cr-holiday-layer");if(!layer)return;
     layer.innerHTML="";
-    const base=theme.slug.replace(/-\\d{4}$/,"");
-    const count=theme.slug==="christmas"?46:theme.slug==="halloween"?34:theme.slug.includes("new-years")?26:24;
+    const base=theme.slug.replace(/-\d{4}$/,"");
+    const count=base==="christmas"?46:base==="halloween"?34:base.includes("new-years")?26:24;
     let glyphs;
     switch(base){
       case"halloween":glyphs=["🦇","✦","🍂"];break;
