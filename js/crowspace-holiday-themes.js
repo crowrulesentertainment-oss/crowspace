@@ -67,7 +67,7 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     if(!window.supabase)return FALLBACKS;
     try{
       const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-      const r=await db.from("crowspace_holiday_themes").select("name,slug,starts_on,ends_on,background_url,accent_color,secondary_color,css_class,is_active").eq("is_active",true).order("starts_on",{ascending:false});
+      const r=await db.from("crowrules_holiday_calendar").select("name,slug,starts_on,ends_on,background_url,accent_color,secondary_color,css_class,particle_set,is_active,priority").eq("is_active",true).order("priority",{ascending:true}).order("starts_on",{ascending:false});
       if(!r.error&&r.data&&r.data.length)return r.data;
     }catch(e){}
     return FALLBACKS;
@@ -88,9 +88,9 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     const layer=document.getElementById("cr-holiday-layer");if(!layer)return;
     layer.innerHTML="";
     const base=theme.slug.replace(/-\d{4}$/,"");
-    const count=base==="christmas"?46:base==="halloween"?34:base.includes("new-years")?26:24;
+    const set=theme.particle_set||base; const count=set==="christmas"?46:set==="halloween"?34:set==="new-years"?26:24;
     let glyphs;
-    switch(base){
+    switch(set){
       case"halloween":glyphs=["🦇","✦","🍂"];break;
       case"thanksgiving":glyphs=["🍂","🍁","🌰"];break;
       case"christmas":glyphs=["❄","✦","❅","🎄"];break;
