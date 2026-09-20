@@ -9,7 +9,7 @@ const divisions=[
  {key:"memorials",name:"Memorials",icon:"🕯️",desc:"Remember. Honor. Celebrate.",path:"https://crowrulesentertainment-oss.github.io/memorials/"},
  {key:"tv",name:"CrowRules TV",icon:"📺",desc:"Shows, channels, live and on-demand.",path:"https://crowrulesentertainment-oss.github.io/crowrulestv/"}
 ];
-let state={user:null,profile:null,member:null,plan:null,access:{},posts:[],events:[],groups:[],projects:[],ideas:[],opportunities:[],challenges:[],achievements:[],notifications:[],friends:[],follows:[],enemies:[],leaderboard:[]};
+let state={user:null,profile:null,member:null,plan:null,access:{},posts:[],events:[],groups:[],projects:[],ideas:[],opportunities:[],challenges:[],achievements:[],notifications:[],friends:[],follows:[],enemies:[],leaderboard:[],roles:[],skills:[],preferences:null,privacy:null,earned:[]};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials=s=>String(s||"CS").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();
@@ -56,9 +56,9 @@ async function loadContext(){
   db.from("crowspace_achievements").select("id,code,name,description,icon").order("created_at",{ascending:true}).limit(100),
   db.from("crowspace_user_achievements").select("achievement_id,earned_at").eq("user_id",uid)
  ]);
- state.member=results[0].data;state.profile=results[1].data;state.plan=results[2].data?.membership_plans||null;state.posts=results[3].data||[];state.events=results[4].data||[];state.groups=results[5].data||[];state.projects=results[6].data||[];state.notifications=results[7].data||[];state.friends=results[8].data||[];state.follows=results[9].data||[];state.enemies=results[10].data||[];state.leaderboard=results[11].data||[];state.achievements=results[12].data||[];state.earned=results[13].data||[];
+ state.member=results[0].data;state.profile=results[1].data;state.plan=results[2].data?.membership_plans||null;state.posts=results[3].data||[];state.events=results[4].data||[];state.groups=results[5].data||[];state.projects=results[6].data||[];state.notifications=results[7].data||[];state.friends=results[8].data||[];state.follows=results[9].data||[];state.enemies=results[10].data||[];state.leaderboard=results[11].data||[];state.achievements=results[12].data||[];state.earned=results[13].data||[];state.roles=(results[14].data||[]).map(x=>x.role);state.skills=(results[15].data||[]).map(x=>x.skill);state.preferences=results[16].data||null;state.privacy=results[17].data||null;
  const ctx=await db.rpc("crowspace_get_access");state.access={};if(ctx.data?.crowspace===true)state.access.crowspace=true;if(ctx.data?.divisions)ctx.data.divisions.forEach(x=>state.access[x.site_key]=true);state.access.crowspace=!!ctx.data?.crowspace||!!state.plan;
- render();loadIdeas();loadOpportunities();loadChallenges();setupRealtime();
+ render();loadIdeas();loadOpportunities();loadChallenges();renderProfile();setupRealtime();
 }
 function renderSignedOut(){document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;padding:30px"><div class="gate"><span>🐦</span><small class="eyebrow">CROWRULES ENTERTAINMENT</small><h2>CrowSpace requires your Universal CrowRules account</h2><p>Sign in through the same account used across CrowRules Entertainment.</p><a href="./login.html"><button class="primary">Sign in</button></a></div></main>'}
 function render(){
@@ -67,7 +67,7 @@ function render(){
  const unread=state.notifications.filter(x=>!x.is_read).length;$("#notifyCount").textContent=unread;$("#messageCount").textContent=state.notifications.filter(x=>x.type==="message"&&!x.is_read).length;
  $("#stats").innerHTML=[["CROWPOINTS",points.toLocaleString()],["LEVEL",level],["FRIENDS",state.friends.filter(x=>x.status==="accepted").length],["PROJECTS",state.projects.filter(x=>x.owner_id===state.user.id).length],["DIVISIONS",Object.keys(state.access).filter(k=>k!=="crowspace").length]].map(x=>'<div><small>'+x[0]+"</small><b>"+x[1]+"</b></div>").join("");
  renderDivisionNav();$("#divisions").innerHTML=divisions.map(d=>{const ok=divisionAccess(d.key);return '<article class="division-card '+(ok?"":"locked")+'"><span>'+d.icon+'</span><div><h3>'+d.name+'</h3><p>'+d.desc+'</p><strong>'+(ok?"● MEMBER ACCESS":"🔒 DIVISION ACCESS REQUIRED")+"</strong></div></article>"}).join("");
- renderFeed(name);renderEvents();renderGroups();renderRooms();renderLeaderboard();renderAchievements();renderPassport(name,username,points,level);renderSpectrum();renderDiscover();renderFriends();renderRivals();renderDashboard();
+ renderFeed(name);renderEvents();renderGroups();renderRooms();renderLeaderboard();renderAchievements();renderPassport(name,username,points,level);renderSpectrum();renderProfile();renderDiscover();renderFriends();renderRivals();renderDashboard();
 }
 function renderFeed(name){const demo=state.posts.length?state.posts:[{id:"demo",author_id:state.user.id,body:"Welcome to CrowSpace — one social universe connecting members, creators, communities and CrowRules projects.",created_at:new Date().toISOString(),like_count:0,comment_count:0}];$("#feed").innerHTML=demo.map(p=>'<article class="post" data-post="'+p.id+'"><div class="post-head"><div class="avatar">'+initials(name)+'</div><div><b>'+esc(p.author_name||name)+'</b><span class="verified">✓ CrowSpace</span><small>'+timeAgo(p.created_at)+'</small></div></div><p>'+esc(p.body||"")+"</p>"+(p.media_url?'<div class="media"><video controls playsinline src="'+esc(p.media_url)+'"></video></div>':"")+'<div class="post-actions"><button data-like="'+p.id+'">❤️ Like <span>'+Number(p.like_count||0)+"</span></button><button data-comment='"+p.id+"'>💬 "+Number(p.comment_count||0)+"</button><button data-bookmark='"+p.id+"'>🔖 Save</button><button data-share='"+p.id+"'>↗ Share</button></div></article>').join("");
  $$("[data-like]").forEach(b=>b.onclick=async()=>{if(b.dataset.like==="demo"){toast("Demo post.");return}const r=await db.rpc("crowspace_toggle_like",{target_post_id:b.dataset.like});toast(r.error?r.error.message:"Like updated.");if(!r.error)loadContext()});
@@ -84,6 +84,77 @@ function renderSpectrum(){$("#spectrumData").innerHTML=[["🎬","Independent Pro
 function renderDiscover(){$("#discoverGrid").innerHTML=[["👤","People & Creators","Friends, collaborators and verified public figures."],["🎥","Videos & Reels","Long-form video, clips, reels and live content."],["🚀","Projects","Ideas looking for teams and audiences."],["💼","Opportunities","Casting, writing, editing, production and volunteer roles."],["🔥","Challenges","Creator challenges powered by CrowPoints."],["📅","CrowCalendar","Events, watch parties and productions."],["🏆","Awards","Spectrum Awards and digital trophies."],["🗺️","CrowMap","Future public events and CrowRules community locations."]].map(x=>'<article><span>'+x[0]+"</span><h3>"+x[1]+"</h3><p>"+x[2]+"</p></article>").join("")}
 function renderFriends(){const accepted=state.friends.filter(x=>x.status==="accepted");$("#friendsList").innerHTML=accepted.length?accepted.map(x=>'<div class="mini-row">👤 '+esc(x.requester_id===state.user.id?x.recipient_id:x.requester_id)+'</div>').join(""):'<div class="empty">No accepted friends yet. Use Discover to find your crew.</div>'}
 function renderRivals(){$("#rivalsList").innerHTML=state.enemies.length?state.enemies.map(x=>'<div class="mini-row">⚔️ '+esc(x.user_id===state.user.id?x.enemy_id:x.user_id)+"</div>").join(""):'<div class="empty">No rivals added.</div>'}
+function renderProfile(){
+ const p=state.profile||{},m=state.member||{},pref=state.preferences||{};
+ const name=p.display_name||m.display_name||state.user?.email?.split("@")[0]||"Crow Member", username=p.username||m.username||"member";
+ const points=Number(m.points||0),level=Math.max(1,Math.floor(points/1000)+1);
+ const verified=p.verification_status==="verified", roles=state.roles||[], skills=state.skills||[];
+ const ownedProjects=state.projects.filter(x=>x.owner_id===state.user.id), ownedIdeas=state.ideas.filter(x=>x.owner_id===state.user.id);
+ const badges=(state.earned||[]).map(e=>(state.achievements||[]).find(a=>a.id===e.achievement_id)).filter(Boolean);
+ const divisionsActive=divisions.filter(d=>divisionAccess(d.key));
+ $("#profilePage").innerHTML=`
+ <div class="profile-hero" style="${p.banner_url?'background-image:linear-gradient(rgba(7,7,12,.35),rgba(7,7,12,.92)),url('${esc(p.banner_url)}')':''}">
+   <div class="profile-avatar-wrap"><div class="profile-avatar">${p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':initials(name)}</div></div>
+   <div class="profile-head"><div class="eyebrow">CROW IDENTITY</div><h2>${esc(name)} ${verified?'<span class="verified">✓ '+esc(p.verified_display_label||"Verified")+'</span>':""}</h2><div class="handle">@${esc(username)} · Member since ${new Date(p.created_at||m.created_at||Date.now()).toLocaleDateString()}</div><p>${esc(p.bio||"Tell the CrowRules universe who you are.")}</p></div>
+   <button class="primary" id="editProfileButton">✏️ Edit Profile</button>
+ </div>
+ <div class="identity-grid">
+   <article class="identity-card"><div class="card-kicker">🪪 CROW PASSPORT</div><b>Level ${level}</b><span>${points.toLocaleString()} CrowPoints</span><small>${esc(state.plan?.name||m.membership_type||"Universal CrowRules")}</small></article>
+   <article class="identity-card"><div class="card-kicker">🎬 CREATOR MODE</div><b>${pref.open_to_collaborate===false?"Taking a break":"Open to Collaborate"}</b><span>${esc(pref.availability||"Open to opportunities")}</span><small>${roles.length} roles · ${skills.length} skills</small></article>
+   <article class="identity-card"><div class="card-kicker">🌌 MY UNIVERSE</div><b>${divisionsActive.length} Active Divisions</b><span>${divisionsActive.map(d=>d.icon+" "+d.name).join(" · ")||"CrowSpace"}</span><small>Division access is membership-controlled.</small></article>
+ </div>
+ <div class="profile-columns">
+   <div>
+    <article class="panel"><div class="profile-section-head"><h3>My Story</h3></div><p class="profile-copy">${esc(pref.story||"Add a short story about your creative journey.")}</p></article>
+    <article class="panel"><div class="profile-section-head"><h3>Creator Identity</h3></div><div class="chips">${roles.length?roles.map(x=>'<span>'+esc(x)+'</span>').join(""):'<span>Choose your creator roles</span>'}</div><h4>Skills</h4><div class="chips">${skills.length?skills.map(x=>'<span>'+esc(x)+'</span>').join(""):'<span>Add the skills you can bring to a project</span>'}</div></article>
+    <article class="panel"><div class="profile-section-head"><h3>Build With Me</h3><span>${pref.open_to_collaborate===false?"Not currently open":"Open"}</span></div><div class="looking-grid"><div><small>LOOKING FOR</small><p>${esc(pref.looking_for||"Collaborators, creators and new projects.")}</p></div><div><small>I CAN HELP WITH</small><p>${esc(pref.can_help_with||"Add what you can contribute.")}</p></div></div></article>
+    <article class="panel"><div class="profile-section-head"><h3>My Projects</h3><span>${ownedProjects.length}</span></div>${ownedProjects.length?ownedProjects.map(x=>'<div class="profile-project"><b>'+esc(x.title)+'</b><small>'+esc(x.status||"building")+' · '+esc(x.category||"Creation")+'</small><p>'+esc(x.description||"")+'</p></div>').join(""):'<div class="empty">No projects yet. Start with Build With Me.</div>'}</article>
+    <article class="panel"><div class="profile-section-head"><h3>My CrowIdeas</h3><span>${ownedIdeas.length}</span></div>${ownedIdeas.length?ownedIdeas.map(x=>'<div class="profile-project"><b>💡 '+esc(x.title)+'</b><small>'+esc(x.status||"submitted")+'</small><p>'+esc(x.description||"")+'</p></div>').join(""):'<div class="empty">No submitted ideas yet.</div>'}</article>
+   </div>
+   <aside>
+    <article class="panel"><div class="profile-section-head"><h3>🏆 Achievements</h3><span>${badges.length}</span></div>${badges.length?badges.map(a=>'<div class="mini-row">'+esc(a.icon||"🎖️")+' '+esc(a.name)+'</div>').join(""):'<div class="empty">Your first badge is waiting.</div>'}</article>
+    <article class="panel"><div class="profile-section-head"><h3>🌈 Spectrum</h3></div><div class="mini-row">Awards history will appear here as nominations and wins are recorded.</div></article>
+    <article class="panel"><div class="profile-section-head"><h3>👥 The Crew</h3><span>${state.friends.filter(x=>x.status==="accepted").length}</span></div><div class="mini-row">Friends, collaborators and project teammates.</div></article>
+    <article class="panel"><div class="profile-section-head"><h3>🔒 Privacy</h3></div><div class="mini-row">Profile: ${esc(p.profile_visibility||"public")} · Posts: ${p.show_posts?"visible":"hidden"} · Media: ${p.show_media?"visible":"hidden"}</div></article>
+   </aside>
+ </div>`;
+ $("#editProfileButton").onclick=showProfileEditor;
+}
+function showProfileEditor(){
+ const p=state.profile||{},pref=state.preferences||{}, privacy=state.privacy||{};
+ $("#modal").classList.remove("hidden");
+ $("#modalCard").innerHTML=`<h3>✏️ Edit Crow Identity</h3>
+ <div class="form-row"><input id="profName" placeholder="Display name" value="${esc(p.display_name||state.member?.display_name||"")}"><input id="profUser" placeholder="Username" value="${esc(p.username||state.member?.username||"")}"></div>
+ <textarea id="profBio" rows="3" placeholder="Short bio">${esc(p.bio||"")}</textarea>
+ <textarea id="profStory" rows="4" placeholder="My story">${esc(pref.story||"")}</textarea>
+ <div class="form-row"><input id="profRoles" placeholder="Creator roles, comma separated" value="${esc((state.roles||[]).join(", "))}"><input id="profSkills" placeholder="Skills, comma separated" value="${esc((state.skills||[]).join(", "))}"></div>
+ <textarea id="profLooking" rows="2" placeholder="What are you looking for?">${esc(pref.looking_for||"")}</textarea>
+ <textarea id="profHelp" rows="2" placeholder="What can you help with?">${esc(pref.can_help_with||"")}</textarea>
+ <div class="form-row"><select id="profAvail"><option ${pref.availability==="Open to opportunities"?"selected":""}>Open to opportunities</option><option ${pref.availability==="Limited availability"?"selected":""}>Limited availability</option><option ${pref.availability==="Not available"?"selected":""}>Not available</option></select><select id="profDiv"><option value="">Favorite division</option>${divisions.map(d=>'<option value="'+d.key+'" '+(pref.favorite_division===d.key?"selected":"")+'>'+d.name+'</option>').join("")}</select></div>
+ <div class="form-row"><input id="profAvatar" placeholder="Avatar image URL (optional)" value="${esc(p.avatar_url||"")}"><input id="profBanner" placeholder="Banner image URL (optional)" value="${esc(p.banner_url||"")}"></div>
+ <div class="toolbar"><button class="primary" id="saveProfile">Save Profile</button><button id="cancelProfile">Cancel</button></div>`;
+ $("#cancelProfile").onclick=()=>$("#modal").classList.add("hidden");
+ $("#saveProfile").onclick=saveProfile;
+}
+async function saveProfile(){
+ if(!state.user)return;
+ const uid=state.user.id;
+ const name=$("#profName").value.trim(),username=$("#profUser").value.trim();
+ if(!name||!username)return toast("Display name and username are required.");
+ const roles=[...new Set($("#profRoles").value.split(",").map(x=>x.trim()).filter(Boolean))].slice(0,12);
+ const skills=[...new Set($("#profSkills").value.split(",").map(x=>x.trim()).filter(Boolean))].slice(0,30);
+ const r1=await db.from("crowspace_profiles").update({display_name:name,username,bio:$("#profBio").value.trim(),avatar_url:$("#profAvatar").value.trim()||null,banner_url:$("#profBanner").value.trim()||null}).eq("user_id",uid);
+ if(r1.error)return toast(r1.error.message);
+ const r2=await db.from("crowspace_profile_preferences").upsert({user_id:uid,story:$("#profStory").value.trim(),looking_for:$("#profLooking").value.trim(),can_help_with:$("#profHelp").value.trim(),availability:$("#profAvail").value,open_to_collaborate:$("#profAvail").value!=="Not available",favorite_division:$("#profDiv").value||null},{onConflict:"user_id"});
+ if(r2.error)return toast(r2.error.message);
+ const del1=await db.from("crowspace_profile_roles").delete().eq("user_id",uid);if(del1.error)return toast(del1.error.message);
+ if(roles.length){const rr=await db.from("crowspace_profile_roles").insert(roles.map(role=>({user_id:uid,role})));if(rr.error)return toast(rr.error.message);}
+ const del2=await db.from("crowspace_profile_skills").delete().eq("user_id",uid);if(del2.error)return toast(del2.error.message);
+ if(skills.length){const sr=await db.from("crowspace_profile_skills").insert(skills.map(skill=>({user_id:uid,skill})));if(sr.error)return toast(sr.error.message);}
+ toast("Crow Identity updated.");
+ $("#modal").classList.add("hidden");
+ await loadContext();
+}
 function renderDashboard(){$("#dashboardData").innerHTML=[["🚀","My Projects",state.projects.filter(x=>x.owner_id===state.user.id).length,"Open Build With Me"],["💼","Open Opportunities",state.opportunities?.length||0,"Find collaborators"],["💡","My Ideas",state.ideas?.filter(x=>x.owner_id===state.user.id).length||0,"Track ideas"],["🎖️","Achievements",(state.earned||[]).length,"View badges"],["👥","Friends",state.friends.filter(x=>x.status==="accepted").length,"Grow your crew"],["🔔","Notifications",state.notifications.filter(x=>!x.is_read).length,"Review updates"]].map(x=>'<article><span>'+x[0]+"</span><h3>"+x[1]+"</h3><b>"+x[2]+"</b><small>"+x[3]+"</small></article>").join("")}
 async function loadIdeas(){const r=await db.from("crowspace_ideas").select("id,owner_id,title,description,category,status,support_count,created_at").order("created_at",{ascending:false}).limit(30);if(!r.error)state.ideas=r.data||[];renderIdeas()}
 function renderIdeas(){const list=state.ideas.length?state.ideas:[{title:"Build a CrowSpace creator collaboration hub",description:"Find the right people for media projects.",category:"Creation",status:"submitted",support_count:0}];$("#ideasList").innerHTML=list.map(i=>'<article class="idea-card"><div class="card-kicker">💡 '+esc(i.category||"Idea")+"</div><h3>"+esc(i.title)+"</h3><p>"+esc(i.description||"")+'</p><div class="card-meta"><span>'+esc(i.status)+'</span><b>❤️ '+Number(i.support_count||0)+"</b></div></article>").join("")}
