@@ -52,4 +52,5 @@ function startPresence(){presence=db.channel("crowspace-friends-presence",{confi
 search.oninput=render;document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));render()});
 db.channel("crowspace-friends-live").on("postgres_changes",{event:"*",schema:"public",table:"crowspace_friends"},()=>load()).subscribe();
 init();
-</script></body></html>
+</script><script src="./js/crowspace-holiday-themes.js"></script>
+</body></html>
