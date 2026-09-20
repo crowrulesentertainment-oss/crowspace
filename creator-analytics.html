@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Creator Analytics — CrowSpace</title>
+<style>
+:root{--a:#20e6ff;--p:#0d0f18;--p2:#151827;--m:#9da5bd}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif;background-image:radial-gradient(circle at 10% 0,#19213d,transparent 35%)}main{max-width:1150px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill,.accent{color:#8ff6ff}.card{background:var(--p);border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.hero{background:linear-gradient(135deg,#0b1824,#29143e,#0d0f18)}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #363c55;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.primary{background:var(--a)!important;color:#031014!important;border:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:var(--p2);border:1px solid #292e42;border-radius:14px;padding:14px;text-align:center}.stat b{display:block;font-size:27px;margin:4px}.muted{color:var(--m)}.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}.item{padding:11px 0;border-bottom:1px solid #25293a}.item:last-child{border:0}.tag{font-size:10px;letter-spacing:.1em;color:#8ff6ff;font-weight:800}.chart{height:170px;display:flex;align-items:end;gap:5px;border-bottom:1px solid #30364c;padding:10px 5px 0}.bar{flex:1;min-width:6px;background:linear-gradient(to top,#20e6ff,#9b55ff);border-radius:5px 5px 0 0;position:relative}.bar span{position:absolute;bottom:-21px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--m);white-space:nowrap}.progress{height:8px;background:#252a3a;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:linear-gradient(90deg,#20e6ff,#9b55ff)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.empty{text-align:center;padding:28px;color:var(--m)}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}@media(max-width:500px){main{padding:9px}.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<div class="top"><div class="brand">🌌 CrowSpace <span class="pill">Creator Analytics</span></div><a class="btn" href="./creator-dashboard.html">← Dashboard</a></div>
+<section class="card hero"><h1 id="welcome">Creator Growth & Analytics</h1><p class="muted">A private view of your audience, content and CrowRules Universe activity.</p><div id="status" class="accent">Loading analytics…</div></section>
+<section class="grid" id="stats"></section>
+<section class="card"><h2>📈 Follower Growth — Last 30 Days</h2><div id="chart" class="chart"></div><p class="muted" id="growthNote"></p></section>
+<section class="two">
+<section class="card"><h2>🌌 Dreamscapes Performance</h2><div id="dreams"></div></section>
+<section class="card"><h2>🎙️ Podcast Performance</h2><div id="pods"></div></section>
+</section>
+<section class="card"><h2>📣 CrowSpace Engagement</h2><div id="engagement"></div></section>
+<div class="actions"><a class="btn primary" href="./creator-dashboard.html">Creator Dashboard</a><a class="btn" href="./profile.html">My Profile</a><a class="btn" href="./creators.html">Creators I Follow</a></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));const ago=t=>{const d=(Date.now()-new Date(t).getTime())/1000;if(d<60)return"just now";if(d<3600)return Math.floor(d/60)+"m ago";if(d<86400)return Math.floor(d/3600)+"h ago";return Math.floor(d/86400)+"d ago"};
+async function init(){
+ const me=(await db.auth.getSession()).data.session?.user;if(!me){location.href="../login.html";return}
+ const p=await db.from("crowspace_profiles").select("username,display_name").eq("user_id",me.id).maybeSingle();if(!p.data){status.textContent="Create your CrowSpace profile first.";return}
+ welcome.textContent=(p.data.display_name||"Creator")+" — Growth & Analytics";
+ const since=new Date(Date.now()-30*864e5).toISOString();
+ const [allF,newF,posts,media,projects,ideas,podcasts,acts,comments,likes]=await Promise.all([
+  db.from("crowspace_follows").select("follower_id,created_at").eq("following_id",me.id).order("created_at",{ascending:true}),
+  db.from("crowspace_follows").select("follower_id,created_at").eq("following_id",me.id).gte("created_at",since).order("created_at",{ascending:true}),
+  db.from("crowspace_posts").select("id,like_count,comment_count,created_at").eq("author_id",me.id).eq("status","published").order("created_at",{ascending:false}).limit(100),
+  db.from("crowspace_media").select("id,created_at").eq("user_id",me.id).eq("visibility","public"),
+  db.from("dream_projects").select("id,title,status,progress_percent,updated_at").eq("creator_id",me.id).in("status",["active","in_development","development","production"]).order("updated_at",{ascending:false}).limit(20),
+  db.from("dream_submissions").select("id,dream_title,view_count,vote_count,comment_count,progress_percent,submitted_at").eq("creator_id",me.id).eq("status","published").order("submitted_at",{ascending:false}).limit(20),
+  db.from("podcasts").select("id,title,listener_count,total_plays,is_live,updated_at").eq("creator_id",me.id).order("updated_at",{ascending:false}).limit(20),
+  db.from("crowspace_activity").select("id,type,created_at").eq("actor_id",me.id).gte("created_at",since).order("created_at",{ascending:false}).limit(100),
+  db.from("crowspace_comments").select("id,post_id,created_at").gte("created_at",since).limit(500),
+  db.from("crowspace_post_likes").select("id,post_id,created_at").gte("created_at",since).limit(500)
+ ]);
+ const totalPlays=(podcasts.data||[]).reduce((n,x)=>n+Number(x.total_plays||0),0),listeners=(podcasts.data||[]).reduce((n,x)=>n+Number(x.listener_count||0),0);
+ const postLikes=(posts.data||[]).reduce((n,x)=>n+Number(x.like_count||0),0),postComments=(posts.data||[]).reduce((n,x)=>n+Number(x.comment_count||0),0);
+ stats.innerHTML=[["👥",allF.data?.length||0,"Followers"],["📈","+"+(newF.data?.length||0),"New / 30d"],["📣",posts.data?.length||0,"Posts"],["❤️",postLikes,"Post Likes"],["💬",postComments,"Post Comments"],["🎬",projects.data?.length||0,"Projects"],["🎙️",podcasts.data?.length||0,"Podcasts"],["▶️",totalPlays,"Podcast Plays"]].map(x=>'<div class="stat"><span>'+x[0]+'</span><b>'+x[1]+'</b><span class="muted">'+x[2]+'</span></div>').join("");
+ const days=[];for(let i=29;i>=0;i--){const d=new Date(Date.now()-i*864e5);d.setHours(0,0,0,0);days.push({d,n:0})}newF.data?.forEach(x=>{const d=new Date(x.created_at);d.setHours(0,0,0,0);const q=days.find(z=>z.d.getTime()===d.getTime());if(q)q.n++});
+ const max=Math.max(1,...days.map(x=>x.n));chart.innerHTML=days.map(x=>'<div class="bar" title="'+x.n+' new follower'+(x.n===1?"":"s")+'" style="height:'+Math.max(5,x.n/max*145)+'px"><span>'+x.d.toLocaleDateString(undefined,{month:"numeric",day:"numeric"})+'</span></div>').join("");growthNote.textContent=(newF.data?.length||0)===0?"No new followers recorded in the last 30 days.":"+"+(newF.data?.length||0)+" follower"+(newF.data?.length===1?"":"s")+" recorded in the last 30 days.";
+ dreams.innerHTML=(projects.data||[]).map(x=>'<div class="item"><span class="tag">PROJECT</span><b>'+esc(x.title)+'</b><div class="muted">'+esc(String(x.status||"").replaceAll("_"," "))+' · '+Number(x.progress_percent||0)+'% · '+ago(x.updated_at)+'</div><div class="progress"><i style="width:'+Math.max(0,Math.min(100,Number(x.progress_percent)||0))+'%"></i></div></div>').join("")||'<div class="empty">No active projects.</div>';
+ dreams.innerHTML+=(ideas.data||[]).map(x=>'<div class="item"><span class="tag">IDEA</span><b>'+esc(x.dream_title)+'</b><div class="muted">Views '+Number(x.view_count||0)+' · Votes '+Number(x.vote_count||0)+' · Comments '+Number(x.comment_count||0)+'</div></div>').join("");
+ pods.innerHTML=(podcasts.data||[]).map(x=>'<div class="item"><span class="tag">PODCAST</span><b>'+esc(x.title)+'</b><div class="muted">'+(x.is_live?"🔴 Live · ":"")+Number(x.listener_count||0)+' listeners · '+Number(x.total_plays||0)+' plays</div></div>').join("")||'<div class="empty">No podcasts yet.</div>';
+ const recentLikes=likes.data?.length||0,recentComments=comments.data?.length||0;
+ engagement.innerHTML='<div class="item">⚡ <b>'+recentLikes+'</b> likes recorded across CrowSpace posts in the last 30 days.</div><div class="item">💬 <b>'+recentComments+'</b> comments recorded across CrowSpace posts in the last 30 days.</div><div class="item">🪶 <b>'+(acts.data?.length||0)+'</b> creator activities recorded in the last 30 days.</div><div class="muted">Engagement totals reflect activity visible to the current authenticated account under its Row Level Security policies.</div>';
+ status.textContent="Analytics synchronized · "+new Date().toLocaleString();
+}
+init();
+</script></body></html>
