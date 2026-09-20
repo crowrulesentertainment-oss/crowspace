@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowSpace Media 4.0</title>
+<title>CrowSpace Media 5.0</title>
 <style>
 :root{--a:#20e6ff;--p:#8d5cff;--bg:#05050b;--card:#0d101a;--line:#292e42;--muted:#9da5bd}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#17132d 0,transparent 35%),var(--bg);color:#f5f7ff;font:14px Arial,sans-serif}
@@ -156,4 +156,26 @@ function subscribeRealtime(){
 }
 init();
 </script>
-</body></html>
+<script>
+(function(){
+const s=document.createElement("style");s.textContent=".m5box{background:linear-gradient(135deg,#0b101b,#171027);border:1px solid #303951;border-radius:15px;padding:15px;margin-bottom:15px}.m5grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.m5item{background:#0b0e17;border:1px solid #292e42;border-radius:12px;padding:12px}.m5tag{display:inline-block;font-size:10px;color:#8ff6ff;border:1px solid #3a4660;border-radius:20px;padding:3px 7px;margin:2px}.m5save{background:#171a29}.m5playlist{max-height:250px;overflow:auto}.m5row{display:flex;gap:8px;align-items:center;padding:8px;border-bottom:1px solid #25293a}.m5row:last-child{border-bottom:0}@media(max-width:700px){.m5grid{grid-template-columns:1fr 1fr}}@media(max-width:500px){.m5grid{grid-template-columns:1fr}}";document.head.appendChild(s);
+let saved=new Set(),playlist=[];
+async function m5Load(){
+ if(!me)return;
+ const r=await db.from("crowspace_bookmarks").select("*").eq("user_id",me.id).limit(200);
+ if(!r.error){saved=new Set((r.data||[]).map(x=>x.reference_id||x.media_id).filter(Boolean))}
+}
+async function m5Hub(){
+ let box=document.getElementById("m5hub");if(!box){box=document.createElement("section");box.id="m5hub";box.className="m5box";document.querySelector("main").insertBefore(box,document.querySelector(".card:nth-of-type(2)"))}
+ const creatorsMap={};items.forEach(x=>{if(x.user_id)creatorsMap[x.user_id]=x.profile||{}});const creatorsList=Object.entries(creatorsMap);
+ box.innerHTML='<h2>🎛️ Media Studio</h2><div class="m5grid"><div class="m5item"><b>Creators</b><div class="m5tag">'+creatorsList.length+' active creators</div><p class="muted">Explore media by creator.</p></div><div class="m5item"><b>Collections</b><div class="m5tag">'+new Set(items.map(x=>x.album_id).filter(Boolean)).size+' albums</div><p class="muted">Albums remain your main collections.</p></div><div class="m5item"><b>Saved Media</b><div class="m5tag">'+saved.size+' saved</div><p class="muted">'+(me?"Your saved media is ready to revisit.":"Sign in to save media.")+'</p></div></div><div class="m5playlist" style="margin-top:12px"><h3>▶️ My Media Queue</h3><div id="m5queue"></div></div>';
+ const ql=document.getElementById("m5queue");ql.innerHTML=playlist.length?playlist.map((x,i)=>'<div class="m5row"><span style="flex:1"><b>'+esc(x.title||"Untitled")+'</b><span class="muted"> · '+esc(x.profile?.display_name||x.profile?.username||"Member")+'</span></span><button class="btn" onclick="openViewer('+viewItems.findIndex(v=>v.id===x.id)+')">Open</button><button class="btn" onclick="m5Remove('+i+')">Remove</button></div>').join(""):'<span class="muted">Add media to your queue from the viewer.</span>';
+}
+window.m5Add=async function(){const x=viewItems[viewerIndex];if(!x)return;playlist.push(x);await m5Hub();toast("Added to media queue")};
+window.m5Remove=async function(i){playlist.splice(i,1);await m5Hub()};
+const oldViewer=window.renderViewer;
+window.renderViewer=async function(){await oldViewer();const x=viewItems[viewerIndex];if(!x)return;let a=document.getElementById("m5viewerActions");if(!a){a=document.createElement("div");a.id="m5viewerActions";a.className="vieweractions";document.getElementById("viewerMeta").after(a)}a.innerHTML='<button class="btn" id="m5queueBtn">＋ Queue</button>';document.getElementById("m5queueBtn").onclick=window.m5Add};
+const oldInit=window.init;
+window.init=async function(){await oldInit();await m5Load();await m5Hub()};
+})();
+</script></body></html>
