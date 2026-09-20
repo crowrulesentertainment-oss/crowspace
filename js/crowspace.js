@@ -1,5 +1,5 @@
-const SUPABASE_URL='https://cevylpnoexugwgygvtgu.supabase.co';
-const SUPABASE_KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-';
+const SUPABASE_URL=window.CrowSpaceConfig?.url||'https://cevylpnoexugwgygvtgu.supabase.co';
+const SUPABASE_KEY=window.CrowSpaceConfig?.key||'sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-';
 
 window.cs={client:null,user:null,profile:null,member:null,membership:null,channel:null,ready:null};
 const $=s=>document.querySelector(s);
@@ -34,7 +34,8 @@ async function ensureIdentity(){
   cs.member=m.data||null;
 }
 async function csInit(){
-  cs.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  if(window.CrowSpaceSupabase?.connect) await window.CrowSpaceSupabase.connect();
+  cs.client=window.CrowSpaceSupabaseClient||(window.CrowSpaceSupabase&&await window.CrowSpaceSupabase.connect())||window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   await cs.client.auth.getUser().then(r=>{cs.user=r.data.user||null});
   if(cs.user)await ensureIdentity();
   try{cs.membership=await CrowRulesMembership.status()}catch(e){cs.membership=null}
