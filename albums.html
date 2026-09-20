@@ -9,4 +9,5 @@ async function moveMedia(id,newIndex){const r=await db.from("crowspace_media").s
 async function removeMedia(id){if(!confirm("Remove this media from the album?"))return;const r=await db.from("crowspace_media").update({album_id:null,album_position:0}).eq("id",id).eq("user_id",me.id);if(r.error)alert(r.error.message);else loadMedia()}
 async function deleteAlbum(id){if(!confirm("Delete this album? Its media will remain in CrowSpace but become unassigned."))return;const r=await db.from("crowspace_albums").delete().eq("id",id).eq("user_id",me.id);if(r.error)alert(r.error.message);else load()}
 $("create").onclick=async()=>{if(!me)return;const t=$("title").value.trim();if(!t)return;$("create").disabled=true;const r=await db.from("crowspace_albums").insert({user_id:me.id,title:t,description:$("desc").value.trim(),cover_url:$("cover").value.trim()||null,visibility:$("privacy").value});$("create").disabled=false;if(r.error){$("status").textContent=r.error.message;return}$("title").value="";$("desc").value="";$("cover").value="";$("privacy").value="public";$("status").textContent="Album created.";load()};load();
-</script></body></html>
+</script><script src="./js/crowspace-holiday-themes.js"></script>
+</body></html>
