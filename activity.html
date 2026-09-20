@@ -13,4 +13,5 @@ const rows=r.data||[];const ids=[...new Set(rows.map(x=>x.actor_id).filter(Boole
 list.innerHTML=rows.map(x=>{const p=profiles[x.actor_id]||{};const who=x.actor_id===me.id?"You":(p.display_name||"A CrowSpace member");const link=x.actor_id===me.id?"./profile.html":"./profile.html?u="+encodeURIComponent(p.username||"");return '<div class="activity"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':ini(who))+'</div><div><div><a href="'+link+'"><b>'+esc(who)+'</b></a> <span class="icon">'+(icon[x.type]||"⚡")+'</span></div><p style="margin:7px 0">'+esc(x.message)+'</p><small class="muted">'+new Date(x.created_at).toLocaleString()+'</small></div></div>'}).join("")||'<p class="muted">No activity yet. Start posting, following members, making friends, or sharing media.</p>'}
 function live(){db.channel("crowspace-activity-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_activity",filter:"user_id=eq."+me.id},()=>{load();const t=document.createElement("div");t.className="toast";t.textContent="⚡ New activity";document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}).subscribe()}
 load().then(live);
-</script></body></html>
+</script><script src="./js/crowspace-holiday-themes.js"></script>
+</body></html>
