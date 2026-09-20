@@ -1,1 +1,40 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace · Universal CrowRules Login</title><link rel="stylesheet" href="styles.css"></head><body><main style="min-height:100vh;display:grid;place-items:center;padding:25px"><div class="gate" style="width:min(520px,100%)"><div style="font-size:50px">🐦</div><small class="eyebrow">ONE ACCOUNT · ONE UNIVERSE</small><h2>Enter CrowSpace</h2><p>Use your Universal CrowRules account. The same identity can travel across CrowRules Entertainment sites.</p><form id="auth"><input id="email" type="email" required placeholder="Email" style="display:block;width:100%;padding:12px;margin:8px 0;background:#101017;border:1px solid #292934;border-radius:9px;color:#fff"><input id="password" type="password" required placeholder="Password" style="display:block;width:100%;padding:12px;margin:8px 0;background:#101017;border:1px solid #292934;border-radius:9px;color:#fff"><button class="primary" style="width:100%;margin-top:8px">Sign in</button></form><button id="signup" style="width:100%;margin-top:8px">Create Universal CrowRules account</button><button id="google" style="width:100%;margin-top:8px">Continue with Google</button><p id="msg"></p></div></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");const msg=document.querySelector("#msg");const email=document.querySelector("#email"),password=document.querySelector("#password");document.querySelector("#auth").onsubmit=async e=>{e.preventDefault();msg.textContent="Signing in…";const r=await db.auth.signInWithPassword({email:email.value,password:password.value});if(r.error){msg.textContent=r.error.message;return}location.href="./#home"};document.querySelector("#signup").onclick=async()=>{msg.textContent="Creating your Universal CrowRules account…";const r=await db.auth.signUp({email:email.value,password:password.value});msg.textContent=r.error?r.error.message:"Account created. Check your email if confirmation is enabled.";};document.querySelector("#google").onclick=async()=>{const r=await db.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname.replace("login.html","")+"#home"}});if(r.error)msg.textContent=r.error.message};</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050508">
+<meta name="description" content="CrowSpace universal CrowRules login — one account, one universe.">
+<title>CrowSpace · Universal CrowRules Login</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+<main class="auth-shell">
+ <section class="auth-card">
+  <div class="auth-brand"><div class="auth-logo">🐦</div><div><b>CROW<span>SPACE</span></b><small>Universal CrowRules</small></div></div>
+  <div class="auth-copy"><small class="eyebrow">ONE ACCOUNT · ONE UNIVERSE</small><h1>Welcome back.</h1><p>Sign in once and carry your CrowRules identity across CrowSpace and participating CrowRules sites.</p></div>
+  <form id="auth" class="auth-form">
+   <label>Email<input id="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+   <label>Password<input id="password" type="password" autocomplete="current-password" required placeholder="Your password"></label>
+   <div class="auth-row"><label class="remember"><input id="remember" type="checkbox"> Remember me</label><button type="button" id="forgot" class="link-button">Forgot password?</button></div>
+   <button class="primary auth-submit" type="submit">Sign in to CrowSpace</button>
+  </form>
+  <div class="auth-divider"><span>OR</span></div>
+  <button id="google" class="oauth">🌐 Continue with Google</button>
+  <button id="signup" class="secondary-auth">Create a Universal CrowRules account</button>
+  <div class="auth-feature-grid"><div><b>🪪</b><span>Crow Passport</span></div><div><b>🚀</b><span>Build With Me</span></div><div><b>🌌</b><span>One Universe</span></div></div>
+  <p id="msg" class="auth-message" role="status"></p>
+  <a class="back-link" href="./">← Back to CrowSpace</a>
+ </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+const msg=document.querySelector("#msg"),email=document.querySelector("#email"),password=document.querySelector("#password");
+const setMsg=x=>msg.textContent=x;
+document.querySelector("#auth").onsubmit=async e=>{e.preventDefault();setMsg("Signing in…");const r=await db.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(r.error){setMsg(r.error.message);return}location.href="./#home"};
+document.querySelector("#signup").onclick=async()=>{if(!email.value.trim()||password.value.length<6){setMsg("Enter an email and a password of at least 6 characters.");return}setMsg("Creating your Universal CrowRules account…");const r=await db.auth.signUp({email:email.value.trim(),password:password.value});setMsg(r.error?r.error.message:"Account created. Check your email if confirmation is enabled.")};
+document.querySelector("#forgot").onclick=async()=>{if(!email.value.trim()){setMsg("Enter your email first, then choose Forgot password.");return}setMsg("Sending password reset instructions…");const r=await db.auth.resetPasswordForEmail(email.value.trim(),{redirectTo:location.origin+location.pathname});setMsg(r.error?r.error.message:"If an account exists for that email, password reset instructions have been sent.")};
+document.querySelector("#google").onclick=async()=>{setMsg("Opening Google sign-in…");const r=await db.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname.replace("login.html","")+"#home"}});if(r.error)setMsg(r.error.message)};
+</script>
+</body></html>
