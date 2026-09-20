@@ -78,7 +78,7 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     if(exact)return exact;
     const md=t.slice(5);
     const y=t.slice(0,4);
-    const fallback=FALLBACKS.find(x=>{
+    const fallback=FALLBACKS.slice().sort((a,b)=>(["spring","summer","fall"].includes(a.slug)?0:1)-(["spring","summer","fall"].includes(b.slug)?0:1)).find(x=>{
       const s=x.starts_on.slice(5),e=x.ends_on.slice(5);
       return s<=e?s<=md&&md<=e:md>=s||md<=e;
     });
