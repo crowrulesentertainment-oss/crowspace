@@ -262,3 +262,24 @@ loadContext=async function(){
 };
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshUniversalMembership()});
 window.addEventListener("focus",()=>refreshUniversalMembership());
+
+/* CROWSPACE V3 UNIVERSAL UNIVERSE */
+async function refreshUniversalUniverseV3(){
+ if(!state.user)return;
+ const {data,error}=await db.rpc("crowspace_get_access");
+ if(error){console.warn("Universal membership refresh:",error);return;}
+ state.access={};
+ (data?.divisions||[]).filter(x=>x.status==="active").forEach(x=>state.access[x.site_key]=true);
+ state.access.crowspace=!!data?.crowspace;
+ const el=$("#universeStatus");
+ if(el){
+   const plan=data?.plan_name||data?.plan_key||"Crow";
+   const level=Number(data?.level||1);
+   const divisions=Object.keys(state.access).filter(x=>x!=="crowspace");
+   el.innerHTML='<strong>ONE ACCOUNT · ONE UNIVERSE</strong><span>'+esc(plan)+' · Level '+level+'</span><small>'+ (divisions.length?divisions.length+" connected division access point"+(divisions.length===1?"":"s"):"CrowSpace connected · division access is managed separately") +'</small>';
+ }
+ renderDivisionNav();
+}
+const __v3Load=loadContext;
+loadContext=async function(){await __v3Load();await refreshUniversalUniverseV3();};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshUniversalUniverseV3()});
