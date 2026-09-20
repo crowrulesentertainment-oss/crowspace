@@ -32,7 +32,7 @@ async function loadContext(){
  state.access.crowspace=!!state.plan||!!state.member;
  render();
 }
-function renderSignedOut(){document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;padding:30px"><div class="gate"><span>🐦</span><small class="eyebrow">CROWRULES ENTERTAINMENT</small><h2>CrowSpace requires your Universal CrowRules account</h2><p>Sign in through the same account used across CrowRules Entertainment.</p><a href="../login.html"><button class="primary">Sign in</button></a></div></main>'}
+function renderSignedOut(){document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;padding:30px"><div class="gate"><span>🐦</span><small class="eyebrow">CROWRULES ENTERTAINMENT</small><h2>CrowSpace requires your Universal CrowRules account</h2><p>Sign in through the same account used across CrowRules Entertainment.</p><a href="./login.html"><button class="primary">Sign in</button></a></div></main>'}
 function render(){const name=state.profile?.display_name||state.member?.display_name||state.user.email?.split("@")[0]||"Crow Member";const username=state.profile?.username||state.member?.username||"member";const points=state.member?.points||0;const level=Math.max(1,Math.floor(points/1000)+1);
  $("#accountCard").innerHTML='<div class="avatar">'+initials(name)+'</div><div><b>'+esc(name)+'</b><small>@'+esc(username)+' · Level '+level+'</small></div>';$("#topAvatar").textContent=initials(name);
  $("#stats").innerHTML=[["CROWPOINTS",points.toLocaleString()],["LEVEL",level],["FRIENDS","—"],["PROJECTS","—"],["DIVISIONS",Object.keys(state.access).filter(k=>k!=="crowspace").length]].map(x=>'<div><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join("");
