@@ -7,8 +7,9 @@
 <style>
 :root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1180px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill{color:#8ff6ff}.muted{color:#9da5bd}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.hero{background:linear-gradient(135deg,#101d2c,#30194b,#0d0f18)}.toolbar{display:grid;grid-template-columns:1fr auto;gap:10px}.search{display:flex;gap:8px}.search input{flex:1;padding:13px;background:#080a12;color:#fff;border:1px solid #292e42;border-radius:10px}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.btn:disabled{opacity:.5;cursor:default}.primary{background:linear-gradient(90deg,#126d7a,#56358c)!important;border:0!important}.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.filter.active{outline:2px solid var(--a)}.directory{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.member{background:#10131f;border:1px solid #292e42;border-radius:16px;padding:15px;display:flex;gap:13px}.avatar{width:64px;height:64px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold;font-size:18px;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.member-main{min-width:0;flex:1}.name{font-size:17px;font-weight:800}.name a{color:#fff;text-decoration:none}.handle{color:#8ff6ff}.bio{margin:7px 0;color:#d9deec;line-height:1.4}.meta{color:#9da5bd;font-size:12px;line-height:1.5}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.status{font-size:11px;color:#80ffb0}.empty{text-align:center;padding:35px;color:#9da5bd}.count{margin-top:10px;color:#9da5bd}.toast{min-height:18px;margin-top:10px}@media(max-width:760px){.toolbar{grid-template-columns:1fr}.directory{grid-template-columns:1fr}}@media(max-width:500px){main{padding:10px}.top{align-items:flex-start;flex-direction:column}.member{padding:12px}.avatar{width:54px;height:54px}}
 </style>
+<link rel="stylesheet" href="./css/crowrules-cinematic.css">
 </head>
-<body><main>
+<body data-crowrules-division="crowspace"><main>
 <div class="top"><div class="brand">🖤 CrowSpace <span class="pill">Member Directory</span></div><a class="btn" href="./">← CrowSpace</a></div>
 <section class="card hero">
 <h1>Find CrowSpace Members</h1>
@@ -153,4 +154,5 @@ db.auth.onAuthStateChange(async()=>{await loadMembers();render()});
 init();
 </script>
 <script src="./js/crowspace-holiday-themes.js"></script>
+<script src="./js/crowrules-cinematic.js"></script>
 </body></html>
