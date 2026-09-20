@@ -1,0 +1,22 @@
+/* CROWSPACE PROFILE BUILDER — drag/drop layout editor */
+.profile-builder{margin-top:16px;padding:16px;border:1px solid rgba(39,231,255,.2);border-radius:14px;background:linear-gradient(180deg,rgba(7,12,25,.94),rgba(3,7,16,.82));box-shadow:0 0 30px rgba(39,231,255,.06)}
+.profile-builder-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.profile-builder-title{font:900 14px Orbitron;letter-spacing:1.5px;color:var(--cyan)}
+.profile-builder-sub{margin-top:5px;color:#7890a4;font-size:12px;line-height:1.55}
+.profile-builder-actions{display:flex;gap:8px;flex-wrap:wrap}
+.profile-builder-list{display:grid;gap:8px;margin-top:14px}
+.profile-builder-row{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid rgba(102,137,163,.16);border-radius:10px;background:rgba(2,7,15,.72);cursor:grab;transition:.18s}
+.profile-builder-row:hover{border-color:rgba(39,231,255,.32);transform:translateY(-1px)}
+.profile-builder-row.dragging{opacity:.45;border-color:var(--violet);box-shadow:0 0 22px rgba(154,92,255,.14)}
+.profile-builder-row.drop-target{border-color:var(--cyan);box-shadow:inset 0 0 20px rgba(39,231,255,.06)}
+.profile-builder-handle{font-size:18px;color:#6e879a;text-align:center;user-select:none}
+.profile-builder-name{font:800 10px Orbitron;letter-spacing:1px;color:#d7e8f2}
+.profile-builder-desc{font-size:10px;color:#61798d;margin-top:3px}
+.profile-builder-toggle{display:flex;align-items:center;gap:7px;font:700 9px Orbitron;color:#8ca4b6;white-space:nowrap}
+.profile-builder-toggle input{accent-color:var(--cyan)}
+.profile-builder-status{margin-top:10px;min-height:18px;font:700 10px Orbitron;letter-spacing:.6px;color:#71899c}
+.profile-builder-preview{margin-top:12px;padding:10px;border:1px dashed rgba(39,231,255,.16);border-radius:9px;color:#7890a4;font-size:11px}
+.profile-builder-preview b{color:var(--cyan)}
+.profile-section.builder-hidden{display:none!important}
+.profile-section.builder-main{order:initial}
+@media(max-width:600px){.profile-builder-row{grid-template-columns:28px 1fr}.profile-builder-toggle{grid-column:2}.profile-builder-actions{width:100%}.profile-builder-actions .btn{flex:1}}
