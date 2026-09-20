@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace Profile</title>
+<style>body{margin:0;background:#05050b;color:#f5f7ff;font:15px Arial,sans-serif}main{max-width:900px;margin:40px auto;padding:20px}.card{background:#0d0f18;border:1px solid #272b3e;border-radius:18px;padding:22px}.cover{height:180px;border-radius:14px;background:linear-gradient(135deg,#13283a,#542b7a,#181020)}.avatar{width:110px;height:110px;margin:-55px 0 0 25px;border:5px solid #0d0f18;border-radius:50%;background:#252a40;display:grid;place-items:center;font-size:35px;font-weight:bold}.muted{color:#9da5bd}.btn{display:inline-block;margin-top:15px;padding:11px 16px;border-radius:10px;background:#191c2b;color:#fff;text-decoration:none;border:1px solid #363c55}</style></head>
+<body><main><div class="card"><div class="cover"></div><div class="avatar" id="avatar">C</div><h1 id="name">CrowSpace Member</h1><p class="muted" id="handle">@member</p><p id="bio">Welcome to CrowSpace.</p><a class="btn" href="./">← Back to CrowSpace</a></div></main>
+<script>
+const params=new URLSearchParams(location.search);const u=params.get("u");
+const key="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";const url="https://cevylpnoexugwgygvtgu.supabase.co";
+async function load(){if(!u)return;const r=await fetch(url+"/rest/v1/crowspace_members?username=eq."+encodeURIComponent(u)+"&select=display_name,username,bio,avatar_url&limit=1",{headers:{apikey:key,Authorization:"Bearer "+key}});const d=await r.json();const p=d[0];if(!p)return;name.textContent=p.display_name||"CrowSpace Member";handle.textContent="@"+(p.username||u);bio.textContent=p.bio||"Welcome to my CrowSpace.";if(p.avatar_url)avatar.innerHTML='<img src="'+p.avatar_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}load();
+</script></body></html>
