@@ -227,3 +227,38 @@ async function enhanceCrowSpace(){
   tabButtons.forEach(b=>b.onclick=()=>{tabButtons.forEach(x=>x.classList.remove("active"));b.classList.add("active");const label=b.textContent.trim();const map={Creators:"profile",Groups:"groups",Projects:"build",Divisions:"discover",Videos:"discover",Photos:"discover"};if(map[label]&&label!=="discover")go(map[label]);else toast(label+" discovery is active.");});
 }
 setTimeout(enhanceCrowSpace,900);
+
+
+/* UNIVERSAL MEMBERSHIP 3.0 — live cross-universe access refresh */
+async function refreshUniversalMembership(){
+  if(!state.user)return;
+  const [membership,access]=await Promise.all([
+    db.rpc("get_my_membership"),
+    db.rpc("crowspace_get_access")
+  ]);
+  if(!membership.error && Array.isArray(membership.data) && membership.data.length){
+    state.plan=membership.data[0];
+  }
+  state.access={};
+  if(!access.error && access.data?.crowspace===true) state.access.crowspace=true;
+  if(!access.error && Array.isArray(access.data?.divisions)){
+    access.data.divisions.forEach(x=>{if(x.status==="active")state.access[x.site_key]=true});
+  }
+  if(state.plan)state.access.crowspace=true;
+  const summary=$("#membershipSummary");
+  if(summary){
+    summary.innerHTML=state.plan
+      ? '<b>🪪 Universal CrowRules Membership</b><span>'+esc(state.plan.plan_name||state.plan.name||state.plan.plan_key||"CROW")+' · Level '+Number(state.plan.level||1)+'</span><small>One Account · One Universe · Live access</small>'
+      : '<b>🪪 Universal CrowRules Membership</b><span>Connected</span><small>Choose a membership plan to unlock member access.</small>';
+  }
+  if(state.member) renderDivisionNav();
+  return state.plan;
+}
+const __originalLoadContext=loadContext;
+loadContext=async function(){
+  await __originalLoadContext();
+  await refreshUniversalMembership();
+  renderDivisionNav();
+};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshUniversalMembership()});
+window.addEventListener("focus",()=>refreshUniversalMembership());
