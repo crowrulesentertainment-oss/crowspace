@@ -41,6 +41,7 @@ async function csInit(){
   try{cs.membership=await CrowRulesMembership.status()}catch(e){cs.membership=null}
   await csTheme();
   renderNav();
+  window.dispatchEvent(new CustomEvent('crowspace:ready'));
   cs.client.auth.onAuthStateChange(async(_event,session)=>{cs.user=session?.user||null;if(cs.user)await ensureIdentity();try{cs.membership=await CrowRulesMembership.status()}catch(e){}renderNav();});
   return cs.client;
 }
