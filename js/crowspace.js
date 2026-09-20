@@ -78,10 +78,92 @@ async function initHome(){
   $$('[data-like]').forEach(b=>b.onclick=async()=>{if(!authRequired())return;const r=await cs.client.from('crowspace_likes').insert({post_id:b.dataset.like,user_id:cs.user.id});if(r.error?.code==='23505')await cs.client.from('crowspace_likes').delete().eq('post_id',b.dataset.like).eq('user_id',cs.user.id);initHome()});
 }
 async function initProfile(){
-  const app=$('#app');if(!app)return;
-  if(!cs.user){app.innerHTML='<div class="eyebrow">AUTH REQUIRED</div><h2>Universal ID required</h2><p class="muted">Sign in to edit your CrowSpace identity.</p><a class="btn primary" href="membership.html">OPEN UNIVERSAL MEMBERSHIP</a>';return}
-  $('#displayName').value=cs.profile?.display_name||'';$('#username').value=cs.profile?.username||'';$('#avatar').value=cs.profile?.avatar_url||'';$('#banner').value=cs.profile?.banner_url||'';$('#location').value=cs.profile?.location||'';$('#website').value=cs.profile?.website_url||'';$('#bio').value=cs.profile?.bio||'';$('#theme').value=cs.profile?.theme||'crow-dark';
-  $('#saveProfile').onclick=async()=>{const payload={user_id:cs.user.id,display_name:$('#displayName').value.trim(),bio:$('#bio').value.trim(),avatar_url:$('#avatar').value.trim(),banner_url:$('#banner').value.trim(),location:$('#location').value.trim(),website_url:$('#website').value.trim(),theme:$('#theme').value,updated_at:new Date().toISOString()};const r=await cs.client.from('crowspace_profiles').upsert(payload,{onConflict:'user_id'});msg('#profileMsg',r.error?r.error.message:'PROFILE LINKED · IDENTITY UPDATED',!r.error);if(!r.error)await ensureIdentity()};
+  const app=$('#app'); if(!app)return;
+  const params=new URLSearchParams(location.search);
+  const requested=(params.get('u')||params.get('username')||'').trim();
+  const requestedId=(params.get('id')||'').trim();
+  let target=null;
+  if(requested){
+    const r=await cs.client.from('crowspace_profiles').select('*').ilike('username',requested).maybeSingle();
+    target=r.data||null;
+  }else if(requestedId){
+    const r=await cs.client.from('crowspace_profiles').select('*').eq('user_id',requestedId).maybeSingle();
+    target=r.data||null;
+  }else if(cs.profile){
+    target=cs.profile;
+  }
+  if(!target){
+    app.innerHTML='<section class="card"><div class="eyebrow">PROFILE NOT FOUND</div><h1 class="title">NO SIGNAL</h1><p class="muted">That CrowSpace identity does not exist or is not public.</p><a class="btn primary" href="members.html">FIND MEMBERS</a></section>';
+    return;
+  }
+  const owner=!!cs.user&&cs.user.id===target.user_id;
+  if(target.profile_visibility==='private'&&!owner){
+    app.innerHTML='<section class="card"><div class="eyebrow">PRIVATE PROFILE</div><h1 class="title">ACCESS RESTRICTED</h1><p class="muted">This member has limited public profile visibility.</p></section>';
+    return;
+  }
+  const escA=esc(target.avatar_url||'');
+  const banner=target.banner_url||target.background_url||'';
+  document.body.style.setProperty('--profile-accent',target.accent_color||'#e10600');
+  const [friendsR,postsR,mediaR,groupsR,ratingsR,statusR,badgesR,guestR]=await Promise.all([
+    cs.client.from('crowspace_friends').select('requester_id,recipient_id').eq('status','accepted').or('requester_id.eq.'+target.user_id+',recipient_id.eq.'+target.user_id),
+    cs.client.from('crowspace_posts').select('id,body,media_url,media_type,created_at,like_count,comment_count,author_id').eq('status','published').eq('visibility','public').order('created_at',{ascending:false}).limit(12),
+    cs.client.from('crowspace_media').select('*').eq('user_id',target.user_id).eq('visibility','public').order('created_at',{ascending:false}).limit(12),
+    cs.client.from('crowspace_group_members').select('group_id,role,status').eq('user_id',target.user_id).eq('status','active').limit(12),
+    cs.client.from('crowspace_member_ratings').select('rating,review,created_at').eq('member_id',target.user_id).order('created_at',{ascending:false}).limit(12),
+    cs.client.from('crowspace_statuses').select('*').eq('user_id',target.user_id).maybeSingle(),
+    cs.client.from('crowspace_user_achievements').select('earned_at,achievement:crowspace_achievements(id,code,name,description,icon)').eq('user_id',target.user_id).order('earned_at',{ascending:false}).limit(12),
+    cs.client.from('crowspace_guestbook').select('id,author_id,message,created_at,status').eq('profile_id',target.user_id).order('created_at',{ascending:false}).limit(20)
+  ]);
+  const friendRows=friendsR.data||[];
+  const friendIds=[...new Set(friendRows.flatMap(x=>[x.requester_id,x.recipient_id]).filter(x=>x!==target.user_id))].slice(0,12);
+  const fp=friendIds.length?(await cs.client.from('crowspace_profiles').select('user_id,username,display_name,avatar_url').in('user_id',friendIds)).data||[]:[];
+  const friendMap=new Map(fp.map(x=>[x.user_id,x]));
+  const groups=groupsR.data||[];
+  const gp=groups.length?(await cs.client.from('crowspace_groups').select('id,name,slug').in('id',groups.map(x=>x.group_id))).data||[]:[];
+  const groupMap=new Map(gp.map(x=>[x.id,x]));
+  const postRows=(postsR.data||[]).filter(x=>x.author_id===cs.member?.id||x.author_id===target.user_id);
+  const posts=postRows.length?postRows:(target.user_id===cs.user?.id?(postsR.data||[]):[]);
+  const ratings=ratingsR.data||[];
+  const avg=ratings.length?(ratings.reduce((s,x)=>s+Number(x.rating||0),0)/ratings.length).toFixed(1):'—';
+  const status=statusR.data||{};
+  const badges=badgesR.data||[];
+  const guestbook=guestR.data||[];
+  const media=mediaR.data||[];
+  const pictures=media.filter(x=>x.media_type==='picture');
+  const videos=media.filter(x=>x.media_type==='video');
+  const profileUrl='profile.html?u='+encodeURIComponent(target.username||'');
+  const website=target.website_url?'<a class="btn" target="_blank" rel="noopener" href="'+esc(target.website_url)+'">VISIT WEBSITE</a>':'';
+  const avatar=escA?'<img class="profile-avatar-lg" src="'+escA+'" alt="">':'<div class="profile-avatar-lg avatar-placeholder">CROW</div>';
+  const bg=banner?'style="--profile-banner:url(\''+esc(banner).replace(/'/g,"%27")+'\')"':'';
+  app.innerHTML='<section class="profile-page theme-'+esc(target.theme||'crow-dark')+'" '+bg+'>'+
+    '<div class="profile-cover"><div class="profile-cover-overlay"></div><div class="profile-identity">'+avatar+
+    '<div><div class="eyebrow">CROWSPACE IDENTITY</div><h1 class="profile-name">'+esc(target.display_name||target.username||'CrowSpace Member')+'</h1><div class="profile-handle">@'+esc(target.username||'member')+'</div>'+
+    '<div class="row profile-meta">'+(target.location?'<span class="chip">⌖ '+esc(target.location)+'</span>':'')+'<span class="chip">● UNIVERSAL ID</span><span class="chip">'+esc(target.theme||'crow-dark').toUpperCase()+'</span></div></div></div></div>'+
+    '<div class="profile-actions row">'+(owner?'<a class="btn primary" href="#edit-profile">EDIT MY PROFILE</a>':'<button class="btn primary" data-profile-friend="'+esc(target.user_id)+'">ADD FRIEND</button><button class="btn" data-profile-message="'+esc(target.user_id)+'">MESSAGE</button><button class="btn" data-profile-favorite="'+esc(target.user_id)+'">♥ FAVORITE</button><a class="btn" href="rate-member.html?member='+encodeURIComponent(target.user_id)+'">RATE MEMBER</a><button class="btn danger" data-profile-block="'+esc(target.user_id)+'">BLOCK</button>')+website+'</div>'+
+    '<div class="profile-stats"><div><b>'+friendRows.length+'</b><span>FRIENDS</span></div><div><b>'+posts.length+'</b><span>POSTS</span></div><div><b>'+pictures.length+'</b><span>PICTURES</span></div><div><b>'+videos.length+'</b><span>VIDEOS</span></div><div><b>'+avg+'</b><span>RATING</span></div></div>'+
+    '<div class="profile-layout"><div class="profile-main">'+
+      '<section class="card profile-section"><div class="section-kicker">ABOUT ME</div><h2>'+esc(target.display_name||'My CrowSpace')+'</h2><p class="profile-bio">'+esc(target.bio||'No bio signal yet.')+'</p><div class="about-grid">'+(status.mood?'<div><b>MOOD</b><span>'+esc(status.mood)+'</span></div>':'')+(status.location_text?'<div><b>NOW AT</b><span>'+esc(status.location_text)+'</span></div>':'')+(status.music_text?'<div><b>NOW PLAYING</b><span>♫ '+esc(status.music_text)+'</span></div>':'')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">LATEST POSTS</div><div class="list">'+(posts.map(x=>'<article class="item"><div class="statusbar"><span class="dot"></span>'+new Date(x.created_at).toLocaleString()+'</div><p>'+esc(x.body||'')+'</p>'+(x.media_url?(x.media_type==='video'?'<video controls src="'+esc(x.media_url)+'"></video>':'<img src="'+esc(x.media_url)+'">'):'')+'<div class="muted">♥ '+(x.like_count||0)+' · '+(x.comment_count||0)+' comments</div></article>').join('')||'<div class="muted">No public posts yet.</div>')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">PICTURES</div><div class="media-grid profile-media">'+(pictures.map(x=>'<a href="'+esc(x.media_url)+'" target="_blank" rel="noopener"><img src="'+esc(x.thumbnail_url||x.media_url)+'" alt="'+esc(x.title||'Picture')+'"></a>').join('')||'<div class="muted">No public pictures yet.</div>')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">VIDEOS</div><div class="media-grid profile-media">'+(videos.map(x=>'<article><video controls poster="'+esc(x.thumbnail_url||'')+'" src="'+esc(x.media_url)+'"></video><div class="muted">'+esc(x.title||'CrowSpace Video')+'</div></article>').join('')||'<div class="muted">No public videos yet.</div>')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">GUESTBOOK</div><div id="guestbook" class="list">'+(guestbook.map(x=>'<article class="item"><div class="statusbar">'+new Date(x.created_at).toLocaleString()+'</div><p>'+esc(x.message)+'</p><div class="muted">Guestbook entry</div></article>').join('')||'<div class="muted">Be the first to sign the guestbook.</div>')+'</div>'+
+      (target.guestbook_visibility!=='private'&&cs.user&&!owner?'<div class="guestbook-form"><textarea id="guestbookMessage" class="textarea" placeholder="Leave a message on this profile..."></textarea><button id="signGuestbook" class="btn primary">SIGN GUESTBOOK</button><span id="guestbookMsg" class="muted"></span></div>':'')+'</section>'+
+    '</div><aside class="profile-side">'+
+      '<section class="card profile-section"><div class="section-kicker">TOP FRIENDS</div><div class="top-friends">'+(fp.map(x=>'<a href="profile.html?u='+encodeURIComponent(x.username||'')+'">'+(x.avatar_url?'<img src="'+esc(x.avatar_url)+'" alt="">':'<div class="avatar-placeholder small">◉</div>')+'<span>'+esc(x.display_name||x.username||'Member')+'</span></a>').join('')||'<div class="muted">No public friends yet.</div>')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">GROUPS</div><div class="list">'+(gp.map(x=>'<a class="item" href="groups.html"><b>'+esc(x.name)+'</b><div class="muted">CrowSpace group</div></a>').join('')||'<div class="muted">No groups yet.</div>')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">BADGES</div><div class="badge-grid">'+(badges.map(x=>'<div class="badge"><strong>'+esc(x.achievement?.icon||'◆')+'</strong><b>'+esc(x.achievement?.name||'Achievement')+'</b><span>'+esc(x.achievement?.description||'')+'</span></div>').join('')||'<div class="muted">No badges earned yet.</div>')+'</div></section>'+
+      '<section class="card profile-section"><div class="section-kicker">FAVORITES / SIGNAL</div><div class="terminal"><b>NETWORK STATUS:</b> ACTIVE<br><b>THEME:</b> '+esc(target.theme||'crow-dark')+'<br><b>MEDIA:</b> '+media.length+' public items<br><b>RATING:</b> '+avg+'</div></section>'+
+      (owner?'<section id="edit-profile" class="card profile-section"><div class="section-kicker">CUSTOMIZE PROFILE</div><div class="form"><label>Display name<input id="displayName" class="input" value="'+esc(target.display_name||'')+'"></label><label>Username<input id="username" class="input" disabled value="'+esc(target.username||'')+'"></label><label>Avatar URL<input id="avatar" class="input" value="'+esc(target.avatar_url||'')+'"></label><label>Banner URL<input id="banner" class="input" value="'+esc(target.banner_url||'')+'"></label><label>Background URL<input id="background" class="input" value="'+esc(target.background_url||'')+'"></label><label>Location<input id="location" class="input" value="'+esc(target.location||'')+'"></label><label>Website<input id="website" class="input" value="'+esc(target.website_url||'')+'"></label><label>Bio<textarea id="bio" class="textarea">'+esc(target.bio||'')+'</textarea></label><label>Theme<select id="theme" class="select"><option value="crow-dark">Crow Dark</option><option value="cyberpunk">Cyberpunk</option><option value="halloween">Halloween</option><option value="christmas">Christmas</option></select></label><label>Accent color<input id="accent" class="input" value="'+esc(target.accent_color||'#e10600')+'"></label><label>Profile visibility<select id="visibility" class="select"><option value="public">Public</option><option value="private">Private</option></select></label><label>Guestbook visibility<select id="guestVisibility" class="select"><option value="public">Public</option><option value="private">Private</option></select></label><button id="saveProfile" class="btn primary">SAVE PROFILE DESIGN</button><div id="profileMsg" class="muted"></div></div></section>':'')+
+    '</aside></div></section>';
+  if(owner){
+    $('#theme').value=target.theme||'crow-dark';$('#visibility').value=target.profile_visibility||'public';$('#guestVisibility').value=target.guestbook_visibility||'public';
+    $('#saveProfile').onclick=async()=>{const payload={user_id:cs.user.id,display_name:$('#displayName').value.trim(),bio:$('#bio').value.trim(),avatar_url:$('#avatar').value.trim(),banner_url:$('#banner').value.trim(),background_url:$('#background').value.trim(),location:$('#location').value.trim(),website_url:$('#website').value.trim(),theme:$('#theme').value,accent_color:$('#accent').value.trim()||'#e10600',profile_visibility:$('#visibility').value,guestbook_visibility:$('#guestVisibility').value,updated_at:new Date().toISOString()};const r=await cs.client.from('crowspace_profiles').upsert(payload,{onConflict:'user_id'});msg('#profileMsg',r.error?.message||'PROFILE DESIGN SAVED',!r.error);if(!r.error){await ensureIdentity();location.href=profileUrl}};
+  }
+  $('[data-profile-friend]')?.addEventListener('click',async()=>{if(!authRequired())return;const r=await cs.client.from('crowspace_friends').upsert({requester_id:cs.user.id,recipient_id:target.user_id,status:'pending'},{onConflict:'requester_id,recipient_id'});msg('#pageMsg',r.error?.message||'FRIEND REQUEST SENT',!r.error)});
+  $('[data-profile-message]')?.addEventListener('click',()=>location.href='messages.html?to='+encodeURIComponent(target.user_id));
+  $('[data-profile-favorite]')?.addEventListener('click',async()=>{if(!authRequired())return;const r=await cs.client.from('crowspace_favorites').upsert({user_id:cs.user.id,target_type:'member',target_id:target.user_id});msg('#pageMsg',r.error?.message||'PROFILE FAVORITED',!r.error)});
+  $('[data-profile-block]')?.addEventListener('click',async()=>{if(!authRequired())return;const r=await cs.client.from('crowspace_enemies').upsert({user_id:cs.user.id,enemy_id:target.user_id});msg('#pageMsg',r.error?.message||'MEMBER BLOCKED',!r.error)});
+  $('#signGuestbook')?.addEventListener('click',async()=>{if(!authRequired())return;const message=$('#guestbookMessage').value.trim();if(!message)return;const r=await cs.client.from('crowspace_guestbook').insert({profile_id:target.user_id,author_id:cs.user.id,message,status:'approved'});msg('#guestbookMsg',r.error?.message||'GUESTBOOK ENTRY ADDED',!r.error);if(!r.error)location.reload()});
 }
 async function initPicturesVideos(type){
   const grid=$('#mediaGrid');if(!grid)return;
