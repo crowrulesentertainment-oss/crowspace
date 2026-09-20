@@ -57,7 +57,14 @@ async function loadContext(){
   db.from("crowspace_user_achievements").select("achievement_id,earned_at").eq("user_id",uid)
  ]);
  state.member=results[0].data;state.profile=results[1].data;state.plan=results[2].data?.membership_plans||null;state.posts=results[3].data||[];state.events=results[4].data||[];state.groups=results[5].data||[];state.projects=results[6].data||[];state.notifications=results[7].data||[];state.friends=results[8].data||[];state.follows=results[9].data||[];state.enemies=results[10].data||[];state.leaderboard=results[11].data||[];state.achievements=results[12].data||[];state.earned=results[13].data||[];state.roles=(results[14].data||[]).map(x=>x.role);state.skills=(results[15].data||[]).map(x=>x.skill);state.preferences=results[16].data||null;state.privacy=results[17].data||null;
- const ctx=await db.rpc("crowspace_get_access");state.access={};if(ctx.data?.crowspace===true)state.access.crowspace=true;if(ctx.data?.divisions)ctx.data.divisions.forEach(x=>state.access[x.site_key]=true);state.access.crowspace=!!ctx.data?.crowspace||!!state.plan;
+ const ctx=await db.rpc("crowspace_get_access");
+state.access={};
+if(!ctx.error && ctx.data?.crowspace===true)state.access.crowspace=true;
+if(!ctx.error && Array.isArray(ctx.data?.divisions))ctx.data.divisions.forEach(x=>{if(x.status==="active")state.access[x.site_key]=true});
+if(state.plan)state.access.crowspace=true;
+if($("#membershipSummary"))$("#membershipSummary").innerHTML=state.plan
+ ? '<b>🪪 Universal CrowRules Membership</b><span>'+esc(state.plan.name||state.plan.plan_key||"Crow")+' · Level '+Number(state.plan.level||1)+'</span><small>One Account · One Universe</small>'
+ : '<b>🪪 Universal CrowRules Membership</b><span>Account connected</span><small>Choose a membership plan to unlock member access.</small>';
  render();loadIdeas();loadOpportunities();loadChallenges();renderProfile();setupRealtime();
 }
 function renderSignedOut(){document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;padding:30px"><div class="gate"><span>🐦</span><small class="eyebrow">CROWRULES ENTERTAINMENT</small><h2>CrowSpace requires your Universal CrowRules account</h2><p>Sign in through the same account used across CrowRules Entertainment.</p><a href="./login.html"><button class="primary">Sign in</button></a></div></main>'}
