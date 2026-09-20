@@ -22,3 +22,9 @@
 @media(max-width:560px){.social-highlights{grid-template-columns:1fr}.feed-tabs,.discover-tabs{padding-bottom:6px}.create-identity{grid-template-columns:auto 1fr}}
 
 .membership-summary{margin:14px 0;padding:14px 16px;border:1px solid rgba(0,229,255,.22);border-radius:16px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(168,85,247,.08));display:flex;align-items:center;gap:12px;flex-wrap:wrap}.membership-summary b{font-size:.95rem}.membership-summary span{color:var(--text)}.membership-summary small{color:var(--muted)}
+
+/* CrowSpace V3 Universal Universe */
+.universe-status{display:flex;flex-direction:column;gap:.25rem;margin:1rem 0;padding:1rem 1.15rem;border:1px solid rgba(120,220,255,.22);border-radius:18px;background:linear-gradient(135deg,rgba(10,18,30,.92),rgba(35,18,48,.82));box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.universe-status strong{letter-spacing:.08em;font-size:.78rem}
+.universe-status span{font-size:1.05rem;font-weight:700}
+.universe-status small{opacity:.72}
