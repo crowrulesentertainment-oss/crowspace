@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Creators You Follow — CrowSpace</title>
+<style>
+:root{--a:#20e6ff}*{box-sizing:border-box}body{margin:0;background:#05050b;color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1100px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.brand{font-size:25px;font-weight:900}.pill{color:#8ff6ff}.card{background:#0d0f18;border:1px solid #292e42;border-radius:18px;padding:18px;margin-bottom:15px}.hero{background:linear-gradient(135deg,#101d2c,#30194b,#0d0f18)}.btn,a.btn{display:inline-block;padding:10px 13px;border:1px solid #343c56;border-radius:10px;background:#171a29;color:#fff;text-decoration:none;cursor:pointer}.primary{background:linear-gradient(90deg,#126d7a,#56358c)!important;border:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.creator{background:#10131f;border:1px solid #292e42;border-radius:16px;padding:15px}.head{display:flex;gap:12px;align-items:center}.avatar{width:58px;height:58px;border-radius:50%;background:#252a40;display:grid;place-items:center;overflow:hidden;font-weight:bold;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.muted{color:#9da5bd}.handle{color:#8ff6ff}.section{margin-top:14px;padding-top:12px;border-top:1px solid #25293a}.item{padding:9px 0;border-bottom:1px solid #25293a}.item:last-child{border-bottom:0}.item a{color:#fff;text-decoration:none}.tag{font-size:10px;letter-spacing:.1em;color:#8ff6ff;font-weight:800}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.empty{text-align:center;padding:35px;color:#9da5bd}.toast{margin-top:10px;color:#8ff6ff}@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style></head><body><main>
+<div class="top"><div class="brand">🌌 CrowSpace <span class="pill">Creator Following Hub</span></div><a class="btn" href="./">← CrowSpace</a></div>
+<section class="card hero"><h1>Creators You Follow</h1><p class="muted">One place for the people building stories, projects and podcasts across the CrowRules Universe.</p><div id="summary" class="pill">Loading…</div><div id="toast" class="toast"></div></section>
+<section class="card"><div id="content"><div class="empty">Loading creators…</div></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const db=supabase.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
+let me,creatorMap={};const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));const ini=s=>(s||"Member").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();
+async function init(){
+ me=(await db.auth.getSession()).data.session?.user;if(!me){location.href="../login.html";return}
+ const f=await db.from("crowspace_follows").select("following_id,created_at").eq("follower_id",me.id).order("created_at",{ascending:false});
+ if(f.error){content.innerHTML='<div class="empty">'+esc(f.error.message)+'</div>';return}
+ const ids=(f.data||[]).map(x=>x.following_id).filter(Boolean);summary.textContent=ids.length+" creator"+(ids.length===1?"":"s")+" followed";
+ if(!ids.length){content.innerHTML='<div class="empty">You are not following any creators yet.<br><br><a class="btn primary" href="./search.html">Discover Creators</a></div>';return}
+ const [p,d,s,pod]=await Promise.all([
+  db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,verification_status").in("user_id",ids),
+  db.from("dream_projects").select("id,creator_id,title,slug,status,updated_at").in("creator_id",ids).in("status",["active","in_development","development","production"]).order("updated_at",{ascending:false}).limit(100),
+  db.from("dream_submissions").select("id,creator_id,dream_title,status,submitted_at").in("creator_id",ids).eq("status","published").order("submitted_at",{ascending:false}).limit(100),
+  db.from("podcasts").select("id,creator_id,title,slug,description,artwork_url,updated_at").in("creator_id",ids).eq("status","published").order("updated_at",{ascending:false}).limit(100)
+ ]);
+ if(p.error){content.innerHTML='<div class="empty">Creator profiles are unavailable.</div>';return}
+ (p.data||[]).forEach(x=>creatorMap[x.user_id]=x);
+ const by={};ids.forEach(id=>by[id]={projects:[],dreams:[],podcasts:[]});
+ (d.data||[]).forEach(x=>by[x.creator_id]?.projects.push(x));(s.data||[]).forEach(x=>by[x.creator_id]?.dreams.push(x));(pod.data||[]).forEach(x=>by[x.creator_id]?.podcasts.push(x));
+ content.innerHTML=ids.map(id=>{const x=creatorMap[id],v=by[id]||{projects:[],dreams:[],podcasts:[]};if(!x)return "";
+ const projects=v.projects.slice(0,3).map(z=>'<div class="item"><span class="tag">PROJECT</span><br><a href="https://crowrulesentertainment-oss.github.io/dreamscapes/projects.html?slug='+encodeURIComponent(z.slug||"")+'"><b>'+esc(z.title)+'</b></a><div class="muted">'+esc(String(z.status||"").replaceAll("_"," "))+'</div></div>').join("")||'<div class="muted">No active projects.</div>';
+ const dreams=v.dreams.slice(0,3).map(z=>'<div class="item"><span class="tag">IDEA</span><br><a href="https://crowrulesentertainment-oss.github.io/dreamscapes/">'+esc(z.dream_title)+'</a></div>').join("")||'<div class="muted">No published ideas.</div>';
+ const podcasts=v.podcasts.slice(0,3).map(z=>'<div class="item"><span class="tag">PODCAST</span><br><a href="https://crowrulesentertainment-oss.github.io/podcasting/">'+esc(z.title)+'</a></div>').join("")||'<div class="muted">No published podcasts.</div>';
+ return '<article class="creator"><div class="head"><div class="avatar">'+(x.avatar_url?'<img src="'+esc(x.avatar_url)+'" alt="">':ini(x.display_name))+'</div><div><div><b>'+esc(x.display_name||"Member")+'</b> '+(x.verification_status==="verified"?"✓":"")+'</div><div class="handle">@'+esc(x.username||"member")+'</div><div class="muted">'+esc(x.bio||"Creator in the CrowRules Universe.")+'</div></div></div><div class="actions"><a class="btn primary" href="./profile.html?u='+encodeURIComponent(x.username||"")+'">View Profile</a><button class="btn" onclick="unfollow(''+id+'')">Unfollow</button></div><div class="section"><b>🎬 Latest Projects</b>'+projects+'</div><div class="section"><b>💡 Published Ideas</b>'+dreams+'</div><div class="section"><b>🎙️ Podcasts</b>'+podcasts+'</div></article>'}).join("")||'<div class="empty">No creator profiles found.</div>';
+}
+async function unfollow(id){const r=await db.from("crowspace_follows").delete().eq("follower_id",me.id).eq("following_id",id);if(r.error){toast.textContent=r.error.message;return}location.reload()}
+db.auth.onAuthStateChange(()=>init());init();
+</script></body></html>
