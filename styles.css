@@ -20,3 +20,5 @@
 .create-identity span{font-size:2rem;grid-row:span 2}.create-identity b{font-size:1rem}.create-identity small{color:var(--muted);line-height:1.45}
 @media(max-width:900px){.social-highlights{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.social-highlights{grid-template-columns:1fr}.feed-tabs,.discover-tabs{padding-bottom:6px}.create-identity{grid-template-columns:auto 1fr}}
+
+.membership-summary{margin:14px 0;padding:14px 16px;border:1px solid rgba(0,229,255,.22);border-radius:16px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(168,85,247,.08));display:flex;align-items:center;gap:12px;flex-wrap:wrap}.membership-summary b{font-size:.95rem}.membership-summary span{color:var(--text)}.membership-summary small{color:var(--muted)}
