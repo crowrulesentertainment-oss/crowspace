@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05050b">
+<title>CrowSpace — CrowRules Entertainment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#05050b;--panel:#0c0d16;--panel2:#111321;--line:#24283a;--text:#f5f7ff;--muted:#9da5bd;--cyan:#20e6ff;--purple:#9a5cff;--pink:#ff4fc3}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#17203c 0,#080912 32%,#05050b 70%);color:var(--text);font-family:Montserrat,Arial,sans-serif}a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit}.top{position:sticky;top:0;z-index:20;background:#060711eF;border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}nav{max-width:1250px;margin:auto;display:flex;align-items:center;gap:22px;padding:14px 20px}.logo{font:800 20px Orbitron;letter-spacing:1px;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;color:transparent}.links{display:flex;gap:16px;flex:1}.links a{font-size:13px;color:var(--muted)}.links a:hover{color:#fff}.account{font-size:13px;color:#fff}.wrap{max-width:1250px;margin:auto;padding:28px 20px 60px}.hero{padding:38px 30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#11172b,#0a0b13 65%);box-shadow:0 25px 80px #0008}.eyebrow{color:var(--cyan);font:700 12px Orbitron;letter-spacing:2px}.hero h1{font:800 42px Orbitron;margin:12px 0}.hero p{max-width:700px;color:var(--muted);line-height:1.7}.grid{display:grid;grid-template-columns:280px minmax(0,1fr) 280px;gap:18px;margin-top:18px}.card{background:linear-gradient(180deg,#11131f,#0b0c14);border:1px solid var(--line);border-radius:18px;padding:18px}.cover{height:100px;border-radius:12px;background:linear-gradient(135deg,#13283a,#49236d,#191020);position:relative}.avatar{width:78px;height:78px;border-radius:50%;border:3px solid #0b0c14;background:#20253a;display:grid;place-items:center;font:700 28px Orbitron;position:absolute;bottom:-35px;left:18px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.profile-info{padding-top:45px}.name{font-weight:800;font-size:18px}.handle{color:var(--muted);font-size:12px;margin-top:3px}.bio{font-size:13px;line-height:1.55;color:#c8ccda;margin:14px 0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{background:#151827;border-radius:10px;padding:10px 5px;text-align:center}.stat b{display:block;font-size:15px}.stat span{font-size:9px;color:var(--muted);text-transform:uppercase}.membership{margin-top:14px;padding:11px;border-radius:10px;background:#102b31;border:1px solid #1b6871;color:#8ff6ff;font-size:11px}.composer textarea{width:100%;min-height:100px;resize:vertical;background:#080a12;color:#fff;border:1px solid var(--line);border-radius:12px;padding:13px;outline:none}.row{display:flex;gap:10px;align-items:center}.row select{background:#0a0c14;color:#ddd;border:1px solid var(--line);border-radius:9px;padding:9px}.btn{border:1px solid #3a4058;background:#171a29;color:#fff;border-radius:10px;padding:10px 15px;cursor:pointer}.btn.primary{background:linear-gradient(90deg,#126d7a,#56358c);border:0}.btn:disabled{opacity:.45;cursor:not-allowed}.post{margin-top:14px}.posthead{display:flex;gap:10px;align-items:center}.mini{width:42px;height:42px;border-radius:50%;background:#20253a;display:grid;place-items:center;font-weight:800;overflow:hidden}.mini img{width:100%;height:100%;object-fit:cover}.postbody{margin:14px 0;line-height:1.7;color:#e4e6ef;white-space:pre-wrap}.actions{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:10px}.side-title{font:700 12px Orbitron;letter-spacing:1px;margin-bottom:13px;color:#cdd4ee}.member{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #1b1e2c}.member:last-child{border:0}.member .mini{width:36px;height:36px;font-size:11px}.muted{color:var(--muted);font-size:12px}.login{max-width:520px;margin:70px auto}.login h1{font:800 28px Orbitron}.hidden{display:none!important}.notice{padding:12px;border-radius:10px;background:#241c12;border:1px solid #63451d;color:#ffd99a;font-size:12px;margin-top:10px}@media(max-width:950px){.grid{grid-template-columns:1fr}.left,.right{display:none}.hero h1{font-size:30px}.links{overflow:auto}.links a{white-space:nowrap}}
+</style>
+</head>
+<body>
+<header class="top"><nav><a class="logo" href="./">CROWSPACE</a><div class="links"><a href="./">HOME</a><a href="#discover">DISCOVER</a><a href="#friends">FRIENDS</a><a href="#groups">GROUPS</a><a href="#events">EVENTS</a><a href="../membership.html">MEMBERSHIP</a><a href="../">CROWRULES</a></div><span class="account" id="account">Guest</span></nav></header>
+<main class="wrap">
+<section id="loginView" class="login card">
+<div class="eyebrow">CROWRULES UNIVERSAL MEMBERSHIP</div>
+<h1>Welcome to CrowSpace</h1><p class="muted">One Account · One Universe</p>
+<input id="email" type="email" placeholder="Email" style="width:100%;margin:8px 0;padding:12px;border-radius:10px;border:1px solid var(--line);background:#080a12;color:#fff">
+<input id="password" type="password" placeholder="Password" style="width:100%;margin:8px 0;padding:12px;border-radius:10px;border:1px solid var(--line);background:#080a12;color:#fff">
+<div class="row" style="margin-top:8px"><button class="btn primary" id="signIn">Sign In</button><button class="btn" id="signUp">Create Account</button></div>
+<div id="loginMsg" class="notice hidden"></div>
+</section>
+<section id="appView" class="hidden">
+<div class="hero"><div class="eyebrow">THE SOCIAL HOME OF CROWRULES ENTERTAINMENT</div><h1>Welcome to CrowSpace</h1><p>Build your profile, connect with members, share ideas, discover creators and help build the CrowRules universe together.</p></div>
+<div class="grid">
+<aside class="left">
+<div class="card"><div class="cover"><div class="avatar" id="avatar">C</div></div><div class="profile-info"><div class="name" id="displayName">CrowRules Member</div><div class="handle" id="handle">@member</div><div class="bio" id="bio">Welcome to my CrowSpace.</div><div class="stats"><div class="stat"><b id="points">0</b><span>Points</span></div><div class="stat"><b id="friendsCount">0</b><span>Friends</span></div><div class="stat"><b id="postsCount">0</b><span>Posts</span></div></div><div class="membership">✓ UNIVERSAL MEMBERSHIP ACTIVE</div><button class="btn" style="width:100%;margin-top:10px" onclick="location.href='../membership.html'">Manage Membership</button><button class="btn" style="width:100%;margin-top:8px" id="signOut">Sign Out</button></div></div>
+</aside>
+<section>
+<div class="card composer"><div class="side-title">YOUR BULLETIN</div><textarea id="postText" placeholder="What's happening in your CrowSpace?"></textarea><div class="row" style="justify-content:space-between;margin-top:10px"><select id="visibility"><option value="public">Public</option><option value="members">Members</option></select><button class="btn primary" id="postBtn">POST TO CROWSPACE</button></div><div id="postMsg" class="notice hidden"></div></div>
+<div id="feed"></div>
+</section>
+<aside class="right">
+<div class="card" id="discover"><div class="side-title">DISCOVER MEMBERS</div><div id="members"><span class="muted">Loading members...</span></div></div>
+<div class="card" style="margin-top:18px" id="groups"><div class="side-title">CROWSPACE</div><p class="muted">Top 8 friends · Guestbooks · Photos · Music · Groups · Events · Messages · Notifications</p></div>
+</aside>
+</div>
+</section>
+</main>
+<script>
+const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
+const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let user=null,member=null,active=false;
+const $=id=>document.getElementById(id);
+function initials(n){return (n||"C").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}
+function showLoginMsg(s){$("loginMsg").textContent=s;$("loginMsg").classList.remove("hidden")}
+function showPostMsg(s){$("postMsg").textContent=s;$("postMsg").classList.remove("hidden");setTimeout(()=>$("postMsg").classList.add("hidden"),3500)}
+async function membership(){
+ const {data,error}=await db.from("crowspace_memberships").select("*").eq("user_id",user.id).eq("status","active").limit(1);
+ active=!error&&data&&data.length>0; return active;
+}
+async function loadProfile(){
+ let r=await db.from("crowspace_members").select("*").eq("user_id",user.id).maybeSingle();
+ if(!r.data){$("displayName").textContent="CrowRules Member";$("handle").textContent="@member";return}
+ member=r.data;$("displayName").textContent=r.data.display_name||"CrowRules Member";$("handle").textContent="@"+(r.data.username||"member");$("bio").textContent=r.data.bio||"Welcome to my CrowSpace.";$("points").textContent=r.data.points||0;
+ if(r.data.avatar_url){$("avatar").innerHTML='<img src="'+r.data.avatar_url.replace(/"/g,"&quot;")+'">'}else $("avatar").textContent=initials(r.data.display_name);
+}
+async function loadMembers(){
+ const r=await db.from("crowspace_members").select("id,user_id,display_name,username,avatar_url,bio").eq("is_public",true).limit(8);
+ if(r.error){$("members").innerHTML='<span class="muted">Member discovery is being prepared.</span>';return}
+ $("members").innerHTML=(r.data||[]).filter(x=>x.user_id!==user.id).map(x=>'<div class="member"><div class="mini">'+(x.avatar_url?'<img src="'+x.avatar_url+'">':initials(x.display_name))+'</div><div><b style="font-size:12px">'+(x.display_name||"Member")+'</b><div class="muted">@'+(x.username||"member")+'</div></div></div>').join("")||'<span class="muted">Be the first to connect.</span>';
+}
+async function loadFeed(){
+ const r=await db.from("crowspace_posts").select("id,author_id,body,media_url,media_type,visibility,like_count,comment_count,created_at").eq("status","published").order("created_at",{ascending:false}).limit(20);
+ if(r.error){$("feed").innerHTML='<div class="card post"><b>Feed</b><p class="muted">Your CrowSpace feed will appear here.</p></div>';return}
+ const ids=[...new Set((r.data||[]).map(x=>x.author_id))];
+ let authors={};
+ if(ids.length){const a=await db.from("crowspace_members").select("user_id,display_name,username,avatar_url").in("user_id",ids);(a.data||[]).forEach(x=>authors[x.user_id]=x)}
+ $("feed").innerHTML=(r.data||[]).map(p=>{const a=authors[p.author_id]||{};return '<article class="card post"><div class="posthead"><div class="mini">'+(a.avatar_url?'<img src="'+a.avatar_url+'">':initials(a.display_name))+'</div><div><b>'+(a.display_name||"CrowRules Member")+'</b><div class="muted">@'+(a.username||"member")+' · '+new Date(p.created_at).toLocaleString()+'</div></div></div><div class="postbody">'+escapeHtml(p.body||"")+'</div><div class="actions"><button class="btn" onclick="likePost(\''+p.id+'\')">♥ '+(p.like_count||0)+'</button><button class="btn">💬 '+(p.comment_count||0)+'</button><button class="btn" onclick="navigator.clipboard?.writeText(location.href)">↗ Share</button></div></article>'}).join("")||'<div class="card post"><b>No posts yet.</b><p class="muted">Start the conversation with your first CrowSpace bulletin.</p></div>';
+}
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+async function likePost(id){if(!active)return alert("An active Universal CrowRules Membership is required.");await db.from("crowspace_likes").upsert({post_id:id,user_id:user.id},{onConflict:"post_id,user_id"});loadFeed()}
+$("postBtn").onclick=async()=>{if(!active){showPostMsg("An active Universal CrowRules Membership is required to post.");return}const body=$("postText").value.trim();if(!body)return;const r=await db.from("crowspace_posts").insert({author_id:user.id,body,visibility:$("visibility").value,status:"published"});if(r.error){showPostMsg(r.error.message);return}$("postText").value="";loadFeed()}
+$("signIn").onclick=async()=>{const r=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(r.error)showLoginMsg(r.error.message)}
+$("signUp").onclick=async()=>{const r=await db.auth.signUp({email:$("email").value,password:$("password").value});if(r.error)showLoginMsg(r.error.message);else showLoginMsg("Account created. Check your email if confirmation is enabled, then sign in.")}
+$("signOut").onclick=()=>db.auth.signOut();
+async function start(){
+ const s=await db.auth.getSession(); user=s.data.session?.user||null;
+ if(!user){$("loginView").classList.remove("hidden");$("appView").classList.add("hidden");$("account").textContent="Guest";return}
+ $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("account").textContent=user.email||"Member";
+ active=await membership();if(!active){$("postBtn").disabled=true;$("postBtn").textContent="MEMBERSHIP REQUIRED";$("appView").insertAdjacentHTML("afterbegin",'<div class="notice">Your CrowSpace account is connected to CrowRules Universal Membership, but no active membership was found. <a href="../membership.html"><u>Manage Membership</u></a>.</div>')}
+ await loadProfile();await loadMembers();await loadFeed();
+}
+db.auth.onAuthStateChange(()=>setTimeout(start,0));start();
+</script>
+</body>
+</html>
