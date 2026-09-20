@@ -49,7 +49,7 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     if(!window.supabase)return FALLBACKS;
     try{
       const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-      const r=await db.from("crowspace_holiday_themes").select("name,slug,starts_on,ends_on,background_url,accent_color,secondary_color,css_class,is_active").eq("is_active",true).order("starts_on");
+      const r=await db.from("crowspace_holiday_themes").select("name,slug,starts_on,ends_on,background_url,accent_color,secondary_color,css_class,is_active").eq("is_active",true).order("starts_on",{ascending:false});
       if(!r.error&&r.data&&r.data.length)return r.data;
     }catch(e){}
     return FALLBACKS;
@@ -61,9 +61,10 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
   function particle(theme){
     const layer=document.getElementById("cr-holiday-layer");if(!layer)return;
     layer.innerHTML="";
+    const base=theme.slug.replace(/-\\d{4}$/,"");
     const count=theme.slug==="christmas"?46:theme.slug==="halloween"?34:theme.slug.includes("new-years")?26:24;
     let glyphs;
-    switch(theme.slug){
+    switch(base){
       case"halloween":glyphs=["🦇","✦","🍂"];break;
       case"thanksgiving":glyphs=["🍂","🍁","🌰"];break;
       case"christmas":glyphs=["❄","✦","❅","🎄"];break;
@@ -93,6 +94,7 @@ body.cr-holiday-active .card,body.cr-holiday-active .panel,body.cr-holiday-activ
     if(theme.secondary_color)document.body.style.setProperty("--cr-holiday-secondary",theme.secondary_color);
     if(theme.background_url)document.body.style.setProperty("--cr-holiday-background","url('"+theme.background_url.replace(/'/g,"%27")+"')");
     const layer=document.createElement("div");layer.id="cr-holiday-layer";document.body.appendChild(layer);
+    if(theme.background_url)document.body.style.backgroundImage="linear-gradient(rgba(5,5,11,.82),rgba(5,5,11,.92)),url(\'"+theme.background_url.replace(/\'/g,"%27")+"\')";
     particle(theme);banner(theme);
     document.documentElement.dataset.crowspaceHoliday=theme.slug;
   }
