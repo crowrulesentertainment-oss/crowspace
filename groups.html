@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CrowSpace Groups 4.0</title>
+<title>CrowSpace Groups 5.0</title>
 <style>
 :root{--a:#20e6ff;--p:#8d5cff;--bg:#05050b;--card:#0d101a;--line:#292e42;--muted:#9da5bd}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#17132d,transparent 38%),var(--bg);color:#f5f7ff;font:14px Arial,sans-serif}main{max-width:1200px;margin:auto;padding:18px}
@@ -94,5 +94,37 @@ const oldRenderFeed=window.renderFeed;
 window.g4WrapFeed=function(){const feed=document.getElementById("feed");if(!feed)return;feed.querySelectorAll(".post").forEach((el,i)=>{if(el.querySelector(".g4delete"))return;const post=posts[i];if(post&&me&&post.author_id===me.id){const b=document.createElement("button");b.className="btn g4delete g4danger";b.textContent="Delete";b.onclick=async()=>{if(!confirm("Delete this post?"))return;const r=await db.from("crowspace_posts").delete().eq("id",post.id).eq("author_id",me.id);if(r.error)alert(r.error.message);else await loadGroupData(groups.find(g=>g.id===selected))};el.querySelector(".meta")?.appendChild(b)}})};
 const oldLoad=window.loadGroupData;
 window.loadGroupData=async function(g){await oldLoad(g);g4AddPanel();g4WrapFeed()};
+})();
+</script><script>
+(function(){
+const st=document.createElement("style");st.textContent=".g5box{background:linear-gradient(135deg,#0b101b,#171027);border:1px solid #303951;border-radius:15px;padding:15px;margin-bottom:15px}.g5grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.g5item{border:1px solid #292e42;border-radius:12px;padding:12px;background:#0b0e17}.g5thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:#151a28}.g5tag{display:inline-block;font-size:10px;color:#8ff6ff;border:1px solid #3a4660;border-radius:20px;padding:3px 7px;margin:3px 3px 0 0}.g5tools{display:flex;gap:7px;flex-wrap:wrap}.g5danger{background:#35151d!important}@media(max-width:700px){.g5grid{grid-template-columns:1fr 1fr}}@media(max-width:500px){.g5grid{grid-template-columns:1fr}}";document.head.appendChild(st);
+const old=window.loadGroupData;
+window.loadGroupData=async function(g){await old(g);await g5Community(g)};
+async function g5Community(g){
+ const section=document.getElementById("communityLayout")?.querySelector("section");if(!section)return;
+ let box=document.getElementById("g5community");if(!box){box=document.createElement("div");box.id="g5community";box.className="g5box";section.appendChild(box)}
+ const [mr,er,med,ar]=await Promise.all([
+  db.from("crowspace_group_members").select("user_id,role,status,created_at").eq("group_id",g.id).eq("status","active").order("created_at",{ascending:false}).limit(100),
+  db.from("crowspace_events").select("id,title,description,start_at,end_at,event_type,visibility").eq("group_id",g.id).order("start_at",{ascending:true}).limit(6),
+  db.from("crowspace_media").select("id,title,description,media_url,thumbnail_url,media_type,created_at,user_id").eq("visibility","public").order("created_at",{ascending:false}).limit(100),
+  db.from("crowspace_activity").select("actor_id,activity_type,created_at,reference_id").eq("reference_id",g.id).order("created_at",{ascending:false}).limit(8)
+ ]);
+ const groupMembers=mr.data||[], events=er.data||[], media=(med.data||[]).filter(x=>x.user_id&&groupMembers.some(m=>m.user_id===x.user_id)).slice(0,6), activity=ar.data||[];
+ const owner=g.owner_id===me?.id, mine=groupMembers.some(x=>x.user_id===me?.id);
+ box.innerHTML='<h3>🌐 Community Hub</h3><div class="g5tools"><span class="g5tag">'+esc(owner?"OWNER":mine?"MEMBER":"VISITOR")+'</span><span class="g5tag">'+esc(g.visibility||"public")+'</span><span class="g5tag">'+groupMembers.length+' members</span><span class="g5tag">'+posts.length+' posts</span></div>'+
+ '<div class="g5grid" style="margin-top:12px">'+
+ '<div class="g5item"><b>📸 Group Media</b><div id="g5media" class="g5grid" style="margin-top:8px"></div></div>'+
+ '<div class="g5item"><b>📅 Group Events</b><div id="g5events" style="margin-top:8px"></div></div>'+
+ '<div class="g5item"><b>⚡ Group Activity</b><div id="g5activity" style="margin-top:8px"></div></div></div>';
+ const mediaEl=document.getElementById("g5media");mediaEl.innerHTML=media.length?media.map(x=>'<a class="g5item" style="text-decoration:none;color:#fff" href="./media.html?creator='+encodeURIComponent(x.user_id)+'"><img class="g5thumb" src="'+esc(x.thumbnail_url||x.media_url)+'"><b>'+esc(x.title||"Untitled media")+'</b></a>').join(""):'<span class="muted">No recent member media.</span>';
+ const evEl=document.getElementById("g5events");evEl.innerHTML=events.length?events.map(x=>'<div style="padding:7px 0;border-bottom:1px solid #25293a"><b>'+esc(x.title)+'</b><div class="muted">'+(x.start_at?new Date(x.start_at).toLocaleString():"Date TBA")+'</div><a class="btn" style="margin-top:5px" href="./events.html?event='+encodeURIComponent(x.id)+'">View Event</a></div>').join(""):'<span class="muted">No group events yet.</span>';
+ const actEl=document.getElementById("g5activity");actEl.innerHTML=activity.length?activity.map(x=>'<div style="padding:7px 0;border-bottom:1px solid #25293a"><b>'+esc((profiles[x.actor_id]?.display_name||profiles[x.actor_id]?.username||"Member"))+'</b> <span class="muted">'+esc(String(x.activity_type||"activity").replace(/_/g," "))+'</span><div class="muted">'+new Date(x.created_at).toLocaleString()+'</div></div>').join(""):'<span class="muted">No recent activity.</span>';
+ if(owner){let tools=document.getElementById("g5mod");if(!tools){tools=document.createElement("div");tools.id="g5mod";tools.className="g5box";section.appendChild(tools)}
+ tools.innerHTML='<h3>🛡️ Moderation Center</h3><p class="muted">Manage the community through member roles and post ownership controls.</p><div class="g5tools"><button class="btn" id="g5scrollMembers">Manage Members</button><button class="btn" id="g5scrollFeed">Manage Posts</button><button class="btn" id="g5refresh">Refresh Community</button></div>';
+ document.getElementById("g5scrollMembers").onclick=()=>document.getElementById("g3manage")?.scrollIntoView({behavior:"smooth"});
+ document.getElementById("g5scrollFeed").onclick=()=>document.getElementById("feed")?.scrollIntoView({behavior:"smooth"});
+ document.getElementById("g5refresh").onclick=()=>window.loadGroupData(g);
+ }
+}
 })();
 </script></body></html>
