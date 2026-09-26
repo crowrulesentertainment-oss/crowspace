@@ -5,7 +5,7 @@ window.CROWSPACE_DATA={
   music:"https://www.youtube.com/",musicTitle:"Your Current Soundtrack",
   cover:"",avatar:"",interests:["Film","Music","Tacoma","Creators"],
   sections:[{title:"About My World",text:"This is your personal corner of CrowSpace — a place for your story, projects, people and ideas."}],
-  friends:128,groups:12
+  friends:128,groups:12,followers:342,following:219,profileViews:47
  },
  groups:[
   {id:"g0",name:"Tacoma Creatives",members:842,desc:"Film, design, music, photography and creative projects.",rules:"Be constructive. Credit creators. Build each other up.",joined:true,banner:""},
@@ -34,11 +34,12 @@ window.CROWSPACE_DATA={
   {id:"e2",name:"Community Game Night",date:"Sunday · 6:00 PM",place:"CrowRoom"}
  ],
  friends:[
-  {id:"f0",name:"Maya Chen",status:"Creator",avatar:""},
-  {id:"f1",name:"Alex Rivera",status:"Filmmaker",avatar:""}
+  {id:"p-maya",name:"Maya Chen",handle:"@mayachen",status:"Creator",avatar:""},
+  {id:"p-alex",name:"Alex Rivera",handle:"@alexrivera",status:"Filmmaker",avatar:""}
  ],
- friendRequests:[{id:"fr0",from:"Jordan Lee",status:"pending"}],
- conversations:[
+ friendRequests:[{id:"fr0",from:"Jordan Lee",profileId:"p-jordan",status:"pending"}],
+ profiles:[{id:"p-maya",name:"Maya Chen",handle:"@mayachen",status:"Creator",avatar:"",bio:"Film, photography and community projects.",followers:842,following:301,interests:["Film","Photography","PNW"]},{id:"p-alex",name:"Alex Rivera",handle:"@alexrivera",status:"Filmmaker",avatar:"",bio:"Independent filmmaker building stories in the PNW.",followers:516,following:188,interests:["Film","Writing","Music"]},{id:"p-jordan",name:"Jordan Lee",handle:"@jordanlee",status:"Designer",avatar:"",bio:"Designing worlds and digital communities.",followers:274,following:192,interests:["Design","Games","Art"]}],followingIds:["p-maya"],profileVisits:[],crowWall:[{id:"w0",profileId:"me",author:"Maya Chen",text:"Your new CrowSpace is looking great!",time:"Today"},{id:"w1",profileId:"me",author:"Alex Rivera",text:"Let’s collaborate on that film idea.",time:"Yesterday"}],
+conversations:[
   {id:"c0",with:"Maya Chen",online:true,messages:[{from:"Maya Chen",text:"Are you still looking for collaborators?",time:"Today · 1:42 PM"},{from:"me",text:"Yes — let's talk about the project.",time:"Today · 1:48 PM"}]},
   {id:"c1",with:"Alex Rivera",online:false,messages:[{from:"Alex Rivera",text:"I posted the short-film idea in Tacoma Creatives.",time:"Yesterday"}]}
  ],
