@@ -1,1 +1,55 @@
-window.CROWSPACE_DATA={user:{name:"Your Space",handle:"@you",mood:"Creating something new.",bio:"Build your world. Find your people. Make your space.",friends:128,groups:12},groups:[{name:"Tacoma Creatives",members:842,desc:"Film, design, music, photography and creative projects."},{name:"PNW Gamers",members:1290,desc:"Games, streams, tournaments and community."},{name:"Independent Musicians",members:516,desc:"A home for independent artists and music makers."},{name:"CrowRules Fans",members:311,desc:"Talk about CrowRules Entertainment projects."}],spaces:[{name:"Tacoma",desc:"The people, places and ideas shaping Tacoma."},{name:"Creators",desc:"A community hub for people building original work."},{name:"Entertainment",desc:"Film, television, music, podcasts and live events."}],posts:[{author:"Maya Chen",text:"What are you building this weekend? Drop a project, idea or goal below.",signals:["💡 24","🔥 18","🤝 11"]},{author:"Alex Rivera",text:"Looking for collaborators for a short-film project in the PNW.",signals:["🎬 16","👀 9"]},{author:"CrowSpace",text:"Welcome to the new social universe. Your profile is your space.",signals:["⭐ 31","🖤 7"]}],rooms:[{name:"The Creator Room",members:84,topic:"Projects, collaboration and feedback"},{name:"Tacoma After Dark",members:56,topic:"Local conversation"},{name:"Game Night",members:133,topic:"Tonight's games and hangouts"}]};
+window.CROWSPACE_DATA={
+ user:{
+  id:"me",name:"Your Space",handle:"@you",mood:"Creating something new.",
+  bio:"Build your world. Find your people. Make your space.",location:"Tacoma, Washington",
+  music:"https://www.youtube.com/",musicTitle:"Your Current Soundtrack",
+  cover:"",avatar:"",interests:["Film","Music","Tacoma","Creators"],
+  sections:[{title:"About My World",text:"This is your personal corner of CrowSpace — a place for your story, projects, people and ideas."}],
+  friends:128,groups:12
+ },
+ groups:[
+  {id:"g0",name:"Tacoma Creatives",members:842,desc:"Film, design, music, photography and creative projects.",rules:"Be constructive. Credit creators. Build each other up.",joined:true,banner:""},
+  {id:"g1",name:"PNW Gamers",members:1290,desc:"Games, streams, tournaments and community.",rules:"Have fun. No harassment. Keep spoilers marked.",joined:false,banner:""},
+  {id:"g2",name:"Independent Musicians",members:516,desc:"A home for independent artists and music makers.",rules:"Share your work, feedback and opportunities.",joined:false,banner:""},
+  {id:"g3",name:"CrowRules Fans",members:311,desc:"Talk about CrowRules Entertainment projects.",rules:"Respect the community and creators.",joined:false,banner:""}
+ ],
+ spaces:[
+  {id:"s0",name:"Tacoma",desc:"The people, places and ideas shaping Tacoma.",groups:18,rooms:7},
+  {id:"s1",name:"Creators",desc:"A community hub for people building original work.",groups:26,rooms:12},
+  {id:"s2",name:"Entertainment",desc:"Film, television, music, podcasts and live events.",groups:34,rooms:19}
+ ],
+ posts:[
+  {id:"seed0",author:"Maya Chen",text:"What are you building this weekend? Drop a project, idea or goal below.",signals:["💡 24","🔥 18","🤝 11"],comments:[],reactions:{}},
+  {id:"seed1",author:"Alex Rivera",text:"Looking for collaborators for a short-film project in the PNW.",signals:["🎬 16","👀 9"],comments:[],reactions:{}},
+  {id:"seed2",author:"CrowSpace",text:"Welcome to the new social universe. Your profile is your space.",signals:["⭐ 31","🖤 7"],comments:[],reactions:{}}
+ ],
+ rooms:[
+  {id:"r0",name:"The Creator Room",members:84,topic:"Projects, collaboration and feedback"},
+  {id:"r1",name:"Tacoma After Dark",members:56,topic:"Local conversation"},
+  {id:"r2",name:"Game Night",members:133,topic:"Tonight's games and hangouts"}
+ ],
+ events:[
+  {id:"e0",name:"CrowSpace Launch Hangout",date:"Friday · 7:00 PM",place:"CrowRoom"},
+  {id:"e1",name:"Tacoma Creator Meetup",date:"Saturday · 3:00 PM",place:"Tacoma"},
+  {id:"e2",name:"Community Game Night",date:"Sunday · 6:00 PM",place:"CrowRoom"}
+ ],
+ friends:[
+  {id:"f0",name:"Maya Chen",status:"Creator",avatar:""},
+  {id:"f1",name:"Alex Rivera",status:"Filmmaker",avatar:""}
+ ],
+ friendRequests:[{id:"fr0",from:"Jordan Lee",status:"pending"}],
+ conversations:[
+  {id:"c0",with:"Maya Chen",online:true,messages:[{from:"Maya Chen",text:"Are you still looking for collaborators?",time:"Today · 1:42 PM"},{from:"me",text:"Yes — let's talk about the project.",time:"Today · 1:48 PM"}]},
+  {id:"c1",with:"Alex Rivera",online:false,messages:[{from:"Alex Rivera",text:"I posted the short-film idea in Tacoma Creatives.",time:"Yesterday"}]}
+ ],
+ notifications:[
+  {id:"n0",text:"Maya Chen reacted to your CrowBoard post.",time:"Today"},
+  {id:"n1",text:"Jordan Lee sent you a friend request.",time:"Today"},
+  {id:"n2",text:"Tacoma Creatives has a new discussion.",time:"Yesterday"}
+ ],
+ media:[
+  {id:"m0",type:"image",title:"My CrowSpace",url:"https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80"},
+  {id:"m1",type:"image",title:"Tacoma Nights",url:"https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&q=80"},
+  {id:"m2",type:"video",title:"My Video",url:"https://www.youtube.com/"}
+ ]
+};
