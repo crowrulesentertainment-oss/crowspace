@@ -104,8 +104,8 @@ async function media(){
 }
 async function notifications(){
  if(!user){app.innerHTML=shell("Notifications","Persistent activity inbox.",gate());return}
- const rows=(await sb.from("crowspace_notifications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100)).data||[];
- app.innerHTML=shell("Notifications","Your persistent activity inbox.",card(button("Mark All Read","readall"))+(rows.map(n=>'<div class="notification '+(!n.is_read?"unread":"")+'"><span class="notify-dot"></span><div><b>'+esc(n.message||n.type)+'</b><p class="muted">'+when(n.created_at)+'</p></div></div>').join("")||'<p class="muted">You are all caught up.</p>'));
+ const rows=(await sb.from("crowspace_notifications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100)).data||[];\n const unread=rows.filter(n=>!n.is_read).length;
+ app.innerHTML=shell("Notifications",unread+" unread notification"+(unread===1?"":"s"),card(button("Mark All Read","readall"))+(rows.map(n=>'<div class="notification '+(!n.is_read?"unread":"")+'"><span class="notify-dot"></span><div><b>'+esc(n.message||n.type)+'</b><p class="muted">'+when(n.created_at)+'</p></div></div>').join("")||'<p class="muted">You are all caught up.</p>'));
 }
 async function friends(){
  if(!user){app.innerHTML=shell("Friends","Your social graph.",gate());return}
