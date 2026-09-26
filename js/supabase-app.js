@@ -1,7 +1,7 @@
 (()=> {
 const URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
-let sb=null, user=null;const app=document.getElementById("app");
+let sb=null, user=null, liveChannels=[];const app=document.getElementById("app");
 const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const q=k=>new URLSearchParams(location.search).get(k);
 const page=()=>location.pathname.split("/").pop()||"index.html";
@@ -155,9 +155,24 @@ async function act(a){
  if(a.startsWith("rsvp:")){if(!user){location.href="auth.html";return}const id=a.slice(5),x=(await sb.from("crowspace_event_members").select("*").eq("event_id",id).eq("user_id",user.id).maybeSingle()).data;if(x)await sb.from("crowspace_event_members").delete().eq("event_id",id).eq("user_id",user.id);else await sb.from("crowspace_event_members").insert({event_id:id,user_id:user.id,status:"going"});events();return}
  if(a==="readall"){await sb.from("crowspace_notifications").update({is_read:true}).eq("user_id",user.id);notifications()}
 }
+async function startRealtime(){
+ if(!sb)return;
+ for(const ch of liveChannels){try{await sb.removeChannel(ch)}catch(e){}}
+ liveChannels=[];
+ const refresh=()=>{clearTimeout(window.__crowspaceRT);window.__crowspaceRT=setTimeout(()=>render(),180)};
+ const feed=sb.channel("crowspace:feed",{config:{private:true}});
+ feed.on("broadcast",{event:"INSERT"},refresh).on("broadcast",{event:"UPDATE"},refresh).on("broadcast",{event:"DELETE"},refresh).subscribe();
+ liveChannels.push(feed);
+ if(user){
+  const personal=sb.channel("crowspace:user:"+user.id,{config:{private:true}});
+  personal.on("broadcast",{event:"INSERT"},refresh).on("broadcast",{event:"UPDATE"},refresh).on("broadcast",{event:"DELETE"},refresh).subscribe();
+  liveChannels.push(personal);
+ }
+}
 async function render(){
  const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"friends.html":friends,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
  if(map[p])await map[p]();
+ await startRealtime();
 }
 document.addEventListener("submit",submit);
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cr-action]");if(b)act(b.dataset.crAction)});
