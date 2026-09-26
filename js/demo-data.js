@@ -7,7 +7,54 @@ window.CROWSPACE_DATA={
   sections:[{title:"About My World",text:"This is your personal corner of CrowSpace — a place for your story, projects, people and ideas."}],
   friends:128,groups:12,followers:342,following:219,profileViews:47
  },
- groups:[
+ communityMembers:[
+  {groupId:"g0",userId:"me",role:"owner",joined:"Today"},
+  {groupId:"g0",userId:"p-maya",role:"moderator",joined:"Yesterday"},
+  {groupId:"g0",userId:"p-alex",role:"member",joined:"Yesterday"},
+  {groupId:"g0",userId:"p-jordan",role:"member",joined:"Today"},
+  {groupId:"g1",userId:"p-alex",role:"moderator",joined:"Today"},
+  {groupId:"g1",userId:"p-jordan",role:"member",joined:"Yesterday"},
+  {groupId:"g2",userId:"p-maya",role:"owner",joined:"Today"},
+  {groupId:"g2",userId:"p-alex",role:"member",joined:"Today"},
+  {groupId:"g3",userId:"me",role:"owner",joined:"Today"},
+  {groupId:"g3",userId:"p-maya",role:"member",joined:"Yesterday"}
+ ],
+spaceMembers:[
+  {spaceId:"s0",userId:"me",role:"member"},
+  {spaceId:"s0",userId:"p-maya",role:"moderator"},
+  {spaceId:"s0",userId:"p-jordan",role:"member"},
+  {spaceId:"s1",userId:"me",role:"member"},
+  {spaceId:"s1",userId:"p-alex",role:"moderator"},
+  {spaceId:"s1",userId:"p-maya",role:"member"},
+  {spaceId:"s2",userId:"me",role:"owner"},
+  {spaceId:"s2",userId:"p-alex",role:"member"},
+  {spaceId:"s2",userId:"p-jordan",role:"member"}
+ ],
+roomMembers:[
+  {roomId:"r0",userId:"me",role:"member"},
+  {roomId:"r0",userId:"p-maya",role:"moderator"},
+  {roomId:"r0",userId:"p-alex",role:"member"},
+  {roomId:"r1",userId:"me",role:"member"},
+  {roomId:"r1",userId:"p-jordan",role:"moderator"},
+  {roomId:"r1",userId:"p-maya",role:"member"},
+  {roomId:"r2",userId:"p-alex",role:"moderator"},
+  {roomId:"r2",userId:"p-jordan",role:"member"}
+ ],
+groupActivity:[
+  {id:"ga0",groupId:"g0",userId:"p-maya",text:"Started a new discussion about weekend creator projects.",time:"Today"},
+  {id:"ga1",groupId:"g0",userId:"p-alex",text:"Shared a short-film collaboration idea.",time:"Yesterday"},
+  {id:"ga2",groupId:"g1",userId:"p-jordan",text:"Joined the next community game night.",time:"Yesterday"}
+ ],
+communityNotifications:[
+  {id:"cn0",groupId:"g0",text:"Maya Chen started a new discussion.",time:"Today"},
+  {id:"cn1",groupId:"g1",text:"PNW Gamers has a new community activity.",time:"Yesterday"}
+ ],
+peopleSuggestions:[
+  {userId:"p-jordan",reason:"You share 1 group and 1 interest."},
+  {userId:"p-alex",reason:"You share 2 groups and several interests."},
+  {userId:"p-maya",reason:"You share 2 groups and creative interests."}
+ ],
+groups:[
   {id:"g0",name:"Tacoma Creatives",members:842,desc:"Film, design, music, photography and creative projects.",rules:"Be constructive. Credit creators. Build each other up.",joined:true,banner:""},
   {id:"g1",name:"PNW Gamers",members:1290,desc:"Games, streams, tournaments and community.",rules:"Have fun. No harassment. Keep spoilers marked.",joined:false,banner:""},
   {id:"g2",name:"Independent Musicians",members:516,desc:"A home for independent artists and music makers.",rules:"Share your work, feedback and opportunities.",joined:false,banner:""},
