@@ -87,8 +87,8 @@ groups:[
  friendRequests:[{id:"fr0",from:"Jordan Lee",profileId:"p-jordan",status:"pending"}],
  profiles:[{id:"p-maya",name:"Maya Chen",handle:"@mayachen",status:"Creator",avatar:"",bio:"Film, photography and community projects.",followers:842,following:301,interests:["Film","Photography","PNW"]},{id:"p-alex",name:"Alex Rivera",handle:"@alexrivera",status:"Filmmaker",avatar:"",bio:"Independent filmmaker building stories in the PNW.",followers:516,following:188,interests:["Film","Writing","Music"]},{id:"p-jordan",name:"Jordan Lee",handle:"@jordanlee",status:"Designer",avatar:"",bio:"Designing worlds and digital communities.",followers:274,following:192,interests:["Design","Games","Art"]}],followingIds:["p-maya"],profileVisits:[],crowWall:[{id:"w0",profileId:"me",author:"Maya Chen",text:"Your new CrowSpace is looking great!",time:"Today"},{id:"w1",profileId:"me",author:"Alex Rivera",text:"Let’s collaborate on that film idea.",time:"Yesterday"}],
 conversations:[
-  {id:"c0",with:"Maya Chen",online:true,messages:[{from:"Maya Chen",text:"Are you still looking for collaborators?",time:"Today · 1:42 PM"},{from:"me",text:"Yes — let's talk about the project.",time:"Today · 1:48 PM"}]},
-  {id:"c1",with:"Alex Rivera",online:false,messages:[{from:"Alex Rivera",text:"I posted the short-film idea in Tacoma Creatives.",time:"Yesterday"}]}
+  {id:"c0",name:"Maya Chen",participants:["me","p-maya"],messages:[{from:"p-maya",text:"Are you still looking for collaborators?",createdAt:"2026-09-26T13:42:00-07:00"},{from:"me",text:"Yes — let's talk about the project.",createdAt:"2026-09-26T13:48:00-07:00"}]},
+  {id:"c1",name:"Alex Rivera",participants:["me","p-alex"],messages:[{from:"p-alex",text:"I posted the short-film idea in Tacoma Creatives.",createdAt:"2026-09-25T16:00:00-07:00"}]}
  ],
  notifications:[
   {id:"n0",text:"Maya Chen reacted to your CrowBoard post.",time:"Today"},
