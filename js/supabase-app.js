@@ -104,8 +104,34 @@ async function media(){
 }
 async function notifications(){
  if(!user){app.innerHTML=shell("Notifications","Persistent activity inbox.",gate());return}
- const rows=(await sb.from("crowspace_notifications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100)).data||[];\n const unread=rows.filter(n=>!n.is_read).length;
- app.innerHTML=shell("Notifications",unread+" unread notification"+(unread===1?"":"s"),card(button("Mark All Read","readall"))+(rows.map(n=>'<div class="notification '+(!n.is_read?"unread":"")+'"><span class="notify-dot"></span><div><b>'+esc(n.message||n.type)+'</b><p class="muted">'+when(n.created_at)+'</p></div></div>').join("")||'<p class="muted">You are all caught up.</p>'));
+ const {data:rows,error}=await sb.from("crowspace_notifications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(200);
+ if(error){app.innerHTML=shell("Notifications","Live activity inbox.",card("<p>"+esc(error.message)+"</p>"));return}
+ const list=rows||[],actorIds=[...new Set(list.map(n=>n.actor_id).filter(Boolean))],actors=await getProfiles(actorIds);
+ const unread=list.filter(n=>!n.is_read).length;
+ const label={friend_request:"FRIEND REQUEST",follow:"FOLLOW",comment:"COMMENT",reaction:"REACTION",event_rsvp:"EVENT RSVP"};
+ const icon={friend_request:"👥",follow:"➕",comment:"💬",reaction:"⚡",event_rsvp:"📅"};
+ const groups={};
+ for(const n of list){const k=n.type||"activity";(groups[k]??=[]).push(n)}
+ const target=n=>{
+   if(n.type==="friend_request"||n.type==="follow")return n.actor_id?"profile.html?id="+n.actor_id:"friends.html";
+   if(n.type==="event_rsvp")return n.reference_id?"event.html?id="+n.reference_id:"events.html";
+   if(n.type==="comment"||n.type==="reaction")return n.reference_id?"index.html#post-"+n.reference_id:"index.html";
+   return "notifications.html";
+ };
+ const action=n=>{
+   const a=[];
+   if(!n.is_read)a.push(button("Mark Read","read:"+n.id));
+   if(n.type==="friend_request"&&n.actor_id)a.push(button("View Request","friendview:"+n.actor_id));
+   if(n.type==="comment"||n.type==="reaction")a.push('<a class="btn" href="'+target(n)+'">Open</a>');
+   else if(n.type==="event_rsvp")a.push('<a class="btn" href="'+target(n)+'">Open Event</a>');
+   else if(n.type==="follow")a.push('<a class="btn" href="'+target(n)+'">View Profile</a>');
+   return a.join(" ");
+ };
+ const actorName=n=>{const a=actors.find(x=>x.user_id===n.actor_id);return a?.display_name||a?.username||"Member"};
+ const notificationCard=n=>'<article class="notification '+(!n.is_read?"unread":"")+'"><div class="notify-icon">'+(icon[n.type]||"🔔")+'</div><div class="notification-body"><div><span class="kicker">'+esc(label[n.type]||"ACTIVITY")+'</span><b>'+esc(n.message||n.type||"Activity")+'</b></div><p class="muted">'+(n.actor_id?'<a href="profile.html?id='+n.actor_id+'">'+esc(actorName(n))+'</a> · ':"")+esc(when(n.created_at))+'</p><div class="notification-actions">'+action(n)+'</div></div></article>';
+ const order=Object.keys(groups);
+ const grouped=order.map(k=>'<section class="notification-group"><div class="feed-meta"><span class="feed-type">'+esc(label[k]||"ACTIVITY")+'</span><span class="muted">'+groups[k].length+' item'+(groups[k].length===1?"":"s")+'</span></div>'+groups[k].map(notificationCard).join("")+'</section>').join("");
+ app.innerHTML=shell("Notification Center",unread?unread+" unread notification"+(unread===1?"":"s"):"You're all caught up.",card('<div class="inbox-toolbar">'+button("Mark All Read","readall")+(unread?'<span class="muted">Live updates enabled</span>':'<span class="muted">Everything is up to date</span>')+'</div>')+(grouped||card('<p class="muted">No activity yet.</p>')));
 }
 async function friends(){
  if(!user){app.innerHTML=shell("Friends","Your social graph.",gate());return}
