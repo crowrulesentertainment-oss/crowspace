@@ -9,7 +9,7 @@ const card=x=>`<article class="card">${x}</article>`;
 const button=(label,action)=>`<button class="btn" data-cr-action="${esc(action)}">${esc(label)}</button>`;
 const avatar=(name,url)=>url?`<img class="avatar-img" src="${esc(url)}" alt="">`:`<div class="avatar">${esc(String(name||"?").slice(0,2).toUpperCase())}</div>`;
 const when=x=>x?new Date(x).toLocaleString([],{dateStyle:"medium",timeStyle:"short"}):"";
-const shell=(title,sub,body)=>`<div class="wrap"><section class="hero"><span class="eyebrow">CROWSPACE 3.3 · SUPABASE</span><h1>${esc(title)}</h1><p>${esc(sub||"")}</p></section>${body}</div>`;
+const shell=(title,sub,body)=>`<div class="wrap"><section class="hero"><span class="eyebrow">CROWSPACE 4.0 · SUPABASE</span><h1>${esc(title)}</h1><p>${esc(sub||"")}</p></section>${body}</div>`;
 const gate=()=>card('<span class="kicker">ACCOUNT REQUIRED</span><h2>Sign in to continue</h2><p class="muted">This feature is persistent and requires a CrowSpace account.</p><a class="btn" href="auth.html">Sign In / Create Account</a>');
 async function boot(){
  if(!window.supabase?.createClient){await new Promise(ok=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=ok;s.onerror=ok;document.head.appendChild(s)})}
@@ -101,6 +101,21 @@ async function media(){
  let html=user?card('<span class="kicker">ADD MEDIA</span><form id="crMedia"><input class="search" name="title" placeholder="Title"><input class="search" name="url" placeholder="Media URL" required><select class="search" name="type"><option value="image">Photo</option><option value="video">Video</option><option value="audio">Audio</option></select><button class="btn">Add Media</button></form>'):gate();
  html+='<div class="media-grid">'+rows.map(m=>card(m.media_type==="image"?'<img class="media-thumb" src="'+esc(m.media_url)+'" alt="'+esc(m.title||"")+'"><h3>'+esc(m.title||"Untitled")+'</h3>':'<h3>'+esc(m.title||"Media")+'</h3><a class="btn" href="'+esc(m.media_url)+'" target="_blank" rel="noopener">Open '+esc(m.media_type)+'</a>')).join("")+'</div>';
  app.innerHTML=shell("Media Gallery","Persistent member media.",html);
+}
+async function activity(){
+ if(!user){app.innerHTML=shell("Activity","Your unified CrowSpace social timeline.",gate());return}
+ const types={friend:"FRIENDS",follow:"FOLLOWS",post:"POSTS",comment:"COMMENTS",reaction:"REACTIONS",event:"EVENTS",group:"GROUPS",room:"ROOMS"};
+ const icons={friend:"👥",follow:"➕",post:"✦",comment:"💬",reaction:"⚡",event:"📅",group:"◈",room:"◉"};
+ const filter=(q("type")||"all").toLowerCase();
+ const {data:rows,error}=await sb.from("crowspace_activity").select("*").order("created_at",{ascending:false}).limit(120);
+ if(error){app.innerHTML=shell("Activity","Unified social timeline.",card("<p>"+esc(error.message)+"</p>"));return}
+ const list=(rows||[]).filter(x=>filter==="all"||x.type===filter),ids=[...new Set(list.map(x=>x.actor_id).filter(Boolean))],people=await getProfiles(ids);
+ const name=id=>{const p=people.find(x=>x.user_id===id);return p?.display_name||p?.username||"Member"};
+ const target=x=>x.type==="post"||x.type==="comment"||x.type==="reaction"?"index.html#post-"+(x.reference_id||"") : x.type==="event"?"event.html?id="+(x.reference_id||"") : x.type==="group"?"group.html":x.type==="room"?"room.html":x.actor_id?"profile.html?id="+x.actor_id:"friends.html";
+ const chips=["all","friend","follow","post","comment","reaction","event","group","room"].map(t=>'<a class="filter-chip '+(filter===t?"active":"")+'" href="activity.html'+(t==="all"?"":"?type="+t)+'">'+(t==="all"?"ALL ACTIVITY":types[t])+"</a>").join("");
+ const groups={};list.forEach(x=>{const key=x.type+"|"+(x.reference_id||x.id);(groups[key]??=[]).push(x)});
+ const cards=Object.values(groups).map(items=>{const x=items[0],count=items.length,actorIds=[...new Set(items.map(i=>i.actor_id).filter(Boolean))],names=actorIds.slice(0,3).map(name),more=Math.max(0,actorIds.length-3),who=names.join(", ")+(more?" + "+more+" more":"");const grouped=count>1&&(x.type==="reaction"||x.type==="comment"||x.type==="event");const msg=grouped?(x.type==="event"?count+" people responded to this event":who+" "+(x.type==="reaction"?"reacted to":"commented on")+" this post"):(x.message||types[x.type]||"Activity");return card('<div class="activity-row"><div class="activity-icon">'+(icons[x.type]||"•")+'</div><div class="activity-main"><div class="feed-meta"><span class="feed-type">'+esc(types[x.type]||"ACTIVITY")+'</span><span class="muted">'+esc(when(x.created_at))+'</span></div><b>'+esc(msg)+'</b><p class="muted">'+(grouped?count+" events · ":"")+(x.actor_id?'<a href="profile.html?id='+x.actor_id+'">'+esc(name(x.actor_id))+"</a>":"")+'</p><a class="btn" href="'+esc(target(x))+'">Open</a></div></div>')}).join("")||card('<p class="muted">No activity matches this filter yet.</p>');
+ app.innerHTML=shell("Activity","One timeline for the CrowSpace universe.",card('<div class="community-head"><div><span class="kicker">UNIFIED ACTIVITY</span><h2>What’s happening</h2><p class="muted">Live social activity from people and communities connected to you.</p></div></div><div class="filter-row activity-filters">'+chips+'</div>')+cards);
 }
 async function notifications(){
  if(!user){app.innerHTML=shell("Notifications","Persistent activity inbox.",gate());return}
@@ -239,7 +254,7 @@ async function startRealtime(){
  }
 }
 async function render(){
- const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"friends.html":friends,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
+ const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"activity.html":activity,"friends.html":friends,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
  if(map[p])await map[p]();
  await startRealtime();
 }
