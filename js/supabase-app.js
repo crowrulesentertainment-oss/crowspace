@@ -1,7 +1,7 @@
 (()=> {
 const URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
-let sb=null, user=null;
+let sb=null, user=null;const app=document.getElementById("app");
 const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const q=k=>new URLSearchParams(location.search).get(k);
 const page=()=>location.pathname.split("/").pop()||"index.html";
