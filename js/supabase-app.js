@@ -222,39 +222,47 @@ async function friends(){
  const html=rows.map(r=>{const id=r.requester_id===user.id?r.recipient_id:r.requester_id,p=people.find(x=>x.user_id===id);return '<div class="person-row">'+avatar(p?.display_name,p?.avatar_url)+'<div><a href="profile.html?id='+id+'"><b>'+esc(p?.display_name||"Member")+'</b></a><p class="muted">'+esc(r.status)+'</p></div>'+(r.status==="pending"&&r.recipient_id===user.id?button("Accept","accept:"+r.id):"")+'</div>'}).join("");
  app.innerHTML=shell("Friends & Connections","Persistent social graph.",card('<span class="kicker">CONNECTIONS</span>'+ (html||'<p class="muted">No connections yet.</p>')));
 }
-async async function discover(){
+async async async function discover(){
  if(!user){app.innerHTML=shell("Discover","Find people and communities across CrowSpace.",gate());return}
  const me=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).maybeSingle()).data||{};
- const [pr,fr,fo,groups,rooms,activity]=await Promise.all([
-   sb.from("crowspace_profiles").select("*").eq("profile_visibility","public").limit(200),
-   sb.from("crowspace_friends").select("requester_id,recipient_id,status").eq("status","accepted").or("requester_id.eq."+user.id+",recipient_id.eq."+user.id),
-   sb.from("crowspace_follows").select("follower_id,following_id").or("follower_id.eq."+user.id+",following_id.eq."+user.id),
-   sb.from("crowspace_groups").select("*").eq("visibility","public").eq("status","active").limit(100),
-   sb.from("crowspace_rooms").select("*").eq("visibility","public").limit(100),
-   sb.from("crowspace_activity").select("type,reference_id,actor_id,created_at").gte("created_at",new Date(Date.now()-7*86400000).toISOString()).order("created_at",{ascending:false}).limit(500)
+ const [pr,fr,fo,gm,groups,rooms,acts]=await Promise.all([
+  sb.from("crowspace_profiles").select("*").eq("profile_visibility","public").limit(200),
+  sb.from("crowspace_friends").select("requester_id,recipient_id,status").eq("status","accepted").or("requester_id.eq."+user.id+",recipient_id.eq."+user.id),
+  sb.from("crowspace_follows").select("follower_id,following_id").or("follower_id.eq."+user.id+",following_id.eq."+user.id),
+  sb.from("crowspace_group_members").select("group_id").eq("user_id",user.id).eq("status","active"),
+  sb.from("crowspace_groups").select("*").eq("visibility","public").eq("status","active").limit(100),
+  sb.from("crowspace_rooms").select("*").eq("visibility","public").limit(100),
+  sb.from("crowspace_activity").select("type,reference_id,actor_id,created_at").gte("created_at",new Date(Date.now()-7*86400000).toISOString()).order("created_at",{ascending:false}).limit(500)
  ]);
- const profiles=pr.data||[],friends=fr.data||[],follows=fo.data||[],acts=activity.data||[];
- const friendIds=new Set(friends.map(x=>x.requester_id===user.id?x.recipient_id:x.requester_id)),following=new Set(follows.filter(x=>x.follower_id===user.id).map(x=>x.following_id));
+ const profiles=pr.data||[],friends=fr.data||[],follows=fo.data||[],myGroups=new Set((gm.data||[]).map(x=>x.group_id)),acts=acts.data||[];
+ const friendIds=new Set(friends.map(x=>x.requester_id===user.id?x.recipient_id:x.requester_id));
+ const following=new Set(follows.filter(x=>x.follower_id===user.id).map(x=>x.following_id));
+ const mutuals=new Map();
+ friends.forEach(x=>{const id=x.requester_id===user.id?x.recipient_id:x.requester_id;});
+ const followedBy=new Set(follows.filter(x=>x.following_id===user.id).map(x=>x.follower_id));
  const interestText=String(me.interests||"").toLowerCase().split(/[,;|]/).map(x=>x.trim()).filter(Boolean),loc=String(me.location||"").trim().toLowerCase();
- const score=p=>{
-   if(p.user_id===user.id)return -999;
-   let s=0;if(friendIds.has(p.user_id))s+=6;if(following.has(p.user_id))s-=20;
-   if(loc&&String(p.location||"").trim().toLowerCase()===loc)s+=5;
-   const pi=String(p.interests||"").toLowerCase();interestText.forEach(i=>{if(i&&pi.includes(i))s+=2});
-   if(friends.some(f=>f.requester_id===p.user_id||f.recipient_id===p.user_id))s+=1;
-   const recent=acts.filter(x=>x.actor_id===p.user_id).length;s+=Math.min(recent,4);
-   return s;
+ const connectionScore=p=>{
+  if(p.user_id===user.id||following.has(p.user_id))return -999;
+  let s=0,reasons=[];
+  if(friendIds.has(p.user_id)){s+=6;reasons.push("Already connected");}
+  if(followedBy.has(p.user_id)){s+=4;reasons.push("Follows you");}
+  if(loc&&String(p.location||"").trim().toLowerCase()===loc){s+=4;reasons.push("Same location");}
+  const pi=String(p.interests||"").toLowerCase(),shared=interestText.filter(i=>i&&pi.includes(i)).length;
+  if(shared){s+=shared*2;reasons.push(shared+" shared interest"+(shared===1?"":"s"))}
+  const recent=acts.filter(x=>x.actor_id===p.user_id).length;if(recent){s+=Math.min(recent,4);reasons.push("Active recently")}
+  return {score:s,reasons};
  };
- const people=profiles.filter(p=>!following.has(p.user_id)&&p.user_id!==user.id).sort((x,y)=>score(y)-score(x)).slice(0,8);
- const activityCount=(type,id)=>acts.filter(x=>x.type===type&&String(x.reference_id)===String(id)).length;
- const gs=(groups.data||[]).map(g=>({...g,_trend:activityCount("group",g.id)})).sort((a,b)=>b._trend-a._trend).slice(0,6);
- const rs=(rooms.data||[]).map(r=>({...r,_trend:activityCount("room",r.id)})).sort((a,b)=>b._trend-a._trend).slice(0,6);
- const peopleHtml=people.map(p=>card(avatar(p.display_name||p.username,p.avatar_url)+'<span class="kicker">PEOPLE YOU MAY KNOW</span><h2>'+esc(p.display_name||p.username)+'</h2><p class="muted">'+esc(p.location||"")+'</p><p>'+esc(p.bio||"")+'</p><button class="btn" data-act="follow:'+p.user_id+'">Follow</button> <a class="btn" href="profile.html?id='+p.user_id+'">Profile</a>')).join("")||card('<p class="muted">No new people to suggest yet.</p>');
- const groupHtml=gs.map(g=>card('<span class="kicker">SUGGESTED GROUP</span><h2>'+esc(g.name)+'</h2><p>'+esc(g.description||"")+'</p><p class="muted">'+g._trend+' recent activity events</p><a class="btn" href="group.html?id='+esc(g.slug)+'">Explore Group</a>')).join("")||card('<p class="muted">No public groups available.</p>');
- const roomHtml=rs.map(r=>card('<span class="kicker">SUGGESTED CROWROOM</span><h2>'+esc(r.name)+'</h2><p>'+esc(r.topic||"")+'</p><p class="muted">'+r._trend+' recent activity events</p><a class="btn" href="room.html?id='+esc(r.slug)+'">Enter Room</a>')).join("")||card('<p class="muted">No public CrowRooms available.</p>');
- const trend=acts.filter(x=>["post","reaction","comment","event","group","room"].includes(x.type)).reduce((m,x)=>{const k=x.type+"|"+(x.reference_id||"");m[k]=(m[k]||0)+1;return m},{}),top=Object.entries(trend).sort((a,b)=>b[1]-a[1]).slice(0,5);
- const trending=top.map(([k,n])=>{const [type,id]=k.split("|");return '<span class="filter-chip active">'+esc(type.toUpperCase())+' · '+n+' events</span>'}).join(" ")||'<span class="muted">Trending signals will appear as the community grows.</span>';
- app.innerHTML=shell("Discover","Find the people, communities and conversations you haven't discovered yet.",card('<div class="community-head"><div><span class="kicker">CROWSPACE 4.2</span><h2>Social Discovery Engine</h2><p class="muted">Suggestions are personalized from your relationships, interests, stated location, community activity and recent engagement.</p></div></div><div class="filter-row">'+trending+'</div>')+'<h2>People You May Know</h2><div class="grid">'+peopleHtml+'</div><h2>Suggested Groups</h2><div class="grid">'+groupHtml+'</div><h2>Suggested CrowRooms</h2><div class="grid">'+roomHtml+'</div><h2>Trending Communities</h2>'+card('<div class="filter-row">'+trending+'</div>'));
+ const suggestions=profiles.filter(p=>p.user_id!==user.id&&!following.has(p.user_id)).map(p=>({...p,_why:connectionScore(p)})).sort((a,b)=>b._why.score-a._why.score).slice(0,8);
+ const groupTrend=g=>acts.filter(x=>x.type==="group"&&String(x.reference_id)===String(g.id)).length;
+ const roomTrend=r=>acts.filter(x=>x.type==="room"&&String(x.reference_id)===String(r.id)).length;
+ const gs=(groups.data||[]).filter(g=>!myGroups.has(g.id)).map(g=>({...g,_trend:groupTrend(g)})).sort((a,b)=>b._trend-a._trend).slice(0,6);
+ const rs=(rooms.data||[]).map(r=>({...r,_trend:roomTrend(r)})).sort((a,b)=>b._trend-a._trend).slice(0,6);
+ const peopleHtml=suggestions.map(p=>card(avatar(p.display_name||p.username,p.avatar_url)+'<span class="kicker">SUGGESTED CONNECTION</span><h2>'+esc(p.display_name||p.username)+'</h2><p class="muted">'+esc(p._why.reasons.join(" · ")||"Discover a new CrowSpace connection")+'</p><p>'+esc(p.bio||"")+'</p><button class="btn" data-act="follow:'+p.user_id+'">Follow</button> <a class="btn" href="profile.html?id='+p.user_id+'">Profile</a>')).join("")||card('<p class="muted">No new connections to suggest yet.</p>');
+ const groupHtml=gs.map(g=>card('<span class="kicker">SUGGESTED GROUP</span><h2>'+esc(g.name)+'</h2><p>'+esc(g.description||"")+'</p><p class="muted">'+g._trend+' recent activity signals</p><a class="btn" href="group.html?id='+esc(g.slug)+'">Explore Group</a>')).join("")||card('<p class="muted">No new public groups available.</p>');
+ const roomHtml=rs.map(r=>card('<span class="kicker">SUGGESTED CROWROOM</span><h2>'+esc(r.name)+'</h2><p>'+esc(r.topic||"")+'</p><p class="muted">'+r._trend+' recent activity signals</p><a class="btn" href="room.html?id='+esc(r.slug)+'">Enter Room</a>')).join("")||card('<p class="muted">No public CrowRooms available.</p>');
+ const trend={};acts.filter(x=>["post","reaction","comment","event","group","room"].includes(x.type)).forEach(x=>{const k=x.type+"|"+(x.reference_id||x.id);trend[k]=(trend[k]||0)+1});
+ const trending=Object.entries(trend).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,n])=>{const [type]=k.split("|");return '<span class="filter-chip active">'+esc(type.toUpperCase())+' · '+n+' signals</span>'}).join(" ")||'<span class="muted">Trending signals will appear as the community grows.</span>';
+ app.innerHTML=shell("Discover","Social Graph Intelligence connects people, communities and conversations you may not have found yet.",card('<div class="community-head"><div><span class="kicker">CROWSPACE 4.3</span><h2>Social Graph Intelligence</h2><p class="muted">Suggestions consider mutual connection signals, follows, shared interests, communities, stated location and recent activity.</p></div></div><div class="filter-row">'+trending+'</div>')+'<h2>People You May Know</h2><div class="grid">'+peopleHtml+'</div><h2>Suggested Groups</h2><div class="grid">'+groupHtml+'</div><h2>Suggested CrowRooms</h2><div class="grid">'+roomHtml+'</div><h2>Trending Communities</h2>'+card('<div class="filter-row">'+trending+'</div>'));
 }
 async function customize(){
  if(!user){app.innerHTML=shell("Customize My Space","Persistent profile studio.",gate());return}
