@@ -104,18 +104,48 @@ async function media(){
 }
 async function activity(){
  if(!user){app.innerHTML=shell("Activity","Your unified CrowSpace social timeline.",gate());return}
- const types={friend:"FRIENDS",follow:"FOLLOWS",post:"POSTS",comment:"COMMENTS",reaction:"REACTIONS",event:"EVENTS",group:"GROUPS",room:"ROOMS"};
+ const modes={all:"ALL ACTIVITY",foryou:"FOR YOU",following:"FOLLOWING",friends:"FRIENDS",communities:"COMMUNITIES",local:"LOCAL",trending:"TRENDING",recent:"RECENT"};
+ const mode=(q("mode")||"foryou").toLowerCase();
  const icons={friend:"👥",follow:"➕",post:"✦",comment:"💬",reaction:"⚡",event:"📅",group:"◈",room:"◉"};
- const filter=(q("type")||"all").toLowerCase();
- const {data:rows,error}=await sb.from("crowspace_activity").select("*").order("created_at",{ascending:false}).limit(120);
- if(error){app.innerHTML=shell("Activity","Unified social timeline.",card("<p>"+esc(error.message)+"</p>"));return}
- const list=(rows||[]).filter(x=>filter==="all"||x.type===filter),ids=[...new Set(list.map(x=>x.actor_id).filter(Boolean))],people=await getProfiles(ids);
+ let rows=[];
+ if(mode==="foryou"){
+   const r=await sb.rpc("crowspace_activity_rank",{p_user:user.id,p_limit:120});
+   if(r.error){app.innerHTML=shell("Activity","Personalized social timeline.",card("<p>"+esc(r.error.message)+"</p>"));return}
+   rows=r.data||[];
+ }else{
+   const r=await sb.from("crowspace_activity").select("*").order("created_at",{ascending:false}).limit(200);
+   if(r.error){app.innerHTML=shell("Activity","Unified social timeline.",card("<p>"+esc(r.error.message)+"</p>"));return}
+   rows=r.data||[];
+ }
+ const ids=[...new Set(rows.map(x=>x.actor_id).filter(Boolean))],people=await getProfiles(ids);
+ const me=people.find(x=>x.user_id===user.id);
+ const friendIds=new Set(),followIds=new Set();
+ const [fr,fo]=await Promise.all([
+   sb.from("crowspace_friends").select("requester_id,recipient_id").eq("status","accepted").or("requester_id.eq."+user.id+",recipient_id.eq."+user.id),
+   sb.from("crowspace_follows").select("following_id").eq("follower_id",user.id)
+ ]);
+ (fr.data||[]).forEach(x=>friendIds.add(x.requester_id===user.id?x.recipient_id:x.requester_id));
+ (fo.data||[]).forEach(x=>followIds.add(x.following_id));
+ const now=Date.now(),week=now-7*86400000;
+ if(mode==="following")rows=rows.filter(x=>x.actor_id===user.id||followIds.has(x.actor_id));
+ if(mode==="friends")rows=rows.filter(x=>x.actor_id===user.id||friendIds.has(x.actor_id));
+ if(mode==="communities")rows=rows.filter(x=>["group","room","event"].includes(x.type));
+ if(mode==="local"){
+   const loc=(me?.location||"").trim().toLowerCase();
+   rows=loc?rows.filter(x=>{const p=people.find(y=>y.user_id===x.actor_id);return (p?.location||"").trim().toLowerCase()===loc}):[];
+ }
+ if(mode==="recent")rows=rows.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+ if(mode==="trending"){
+   rows=rows.filter(x=>new Date(x.created_at).getTime()>=week);
+   const counts={};rows.forEach(x=>{const k=x.type+"|"+(x.reference_id||x.id);counts[k]=(counts[k]||0)+1});
+   rows.sort((a,b)=>(counts[b.type+"|"+(b.reference_id||b.id)]||0)-(counts[a.type+"|"+(a.reference_id||a.id)]||0)||new Date(b.created_at)-new Date(a.created_at));
+ }
+ const groups={};rows.forEach(x=>{const key=x.type+"|"+(x.reference_id||x.id);(groups[key]??=[]).push(x)});
  const name=id=>{const p=people.find(x=>x.user_id===id);return p?.display_name||p?.username||"Member"};
- const target=x=>x.type==="post"||x.type==="comment"||x.type==="reaction"?"index.html#post-"+(x.reference_id||"") : x.type==="event"?"event.html?id="+(x.reference_id||"") : x.type==="group"?"group.html":x.type==="room"?"room.html":x.actor_id?"profile.html?id="+x.actor_id:"friends.html";
- const chips=["all","friend","follow","post","comment","reaction","event","group","room"].map(t=>'<a class="filter-chip '+(filter===t?"active":"")+'" href="activity.html'+(t==="all"?"":"?type="+t)+'">'+(t==="all"?"ALL ACTIVITY":types[t])+"</a>").join("");
- const groups={};list.forEach(x=>{const key=x.type+"|"+(x.reference_id||x.id);(groups[key]??=[]).push(x)});
- const cards=Object.values(groups).map(items=>{const x=items[0],count=items.length,actorIds=[...new Set(items.map(i=>i.actor_id).filter(Boolean))],names=actorIds.slice(0,3).map(name),more=Math.max(0,actorIds.length-3),who=names.join(", ")+(more?" + "+more+" more":"");const grouped=count>1&&(x.type==="reaction"||x.type==="comment"||x.type==="event");const msg=grouped?(x.type==="event"?count+" people responded to this event":who+" "+(x.type==="reaction"?"reacted to":"commented on")+" this post"):(x.message||types[x.type]||"Activity");return card('<div class="activity-row"><div class="activity-icon">'+(icons[x.type]||"•")+'</div><div class="activity-main"><div class="feed-meta"><span class="feed-type">'+esc(types[x.type]||"ACTIVITY")+'</span><span class="muted">'+esc(when(x.created_at))+'</span></div><b>'+esc(msg)+'</b><p class="muted">'+(grouped?count+" events · ":"")+(x.actor_id?'<a href="profile.html?id='+x.actor_id+'">'+esc(name(x.actor_id))+"</a>":"")+'</p><a class="btn" href="'+esc(target(x))+'">Open</a></div></div>')}).join("")||card('<p class="muted">No activity matches this filter yet.</p>');
- app.innerHTML=shell("Activity","One timeline for the CrowSpace universe.",card('<div class="community-head"><div><span class="kicker">UNIFIED ACTIVITY</span><h2>What’s happening</h2><p class="muted">Live social activity from people and communities connected to you.</p></div></div><div class="filter-row activity-filters">'+chips+'</div>')+cards);
+ const target=x=>x.type==="post"||x.type==="comment"||x.type==="reaction"?"index.html#post-"+(x.reference_id||""):x.type==="event"?"event.html?id="+(x.reference_id||""):x.type==="group"?"group.html":x.type==="room"?"room.html":x.actor_id?"profile.html?id="+x.actor_id:"friends.html";
+ const cards=Object.values(groups).map(items=>{const x=items[0],count=items.length,actorIds=[...new Set(items.map(i=>i.actor_id).filter(Boolean))],names=actorIds.slice(0,3).map(name),more=Math.max(0,actorIds.length-3),who=names.join(", ")+(more?" + "+more+" more":"");const grouped=count>1&&(x.type==="reaction"||x.type==="comment"||x.type==="event"),msg=grouped?(x.type==="event"?count+" people responded to this event":who+" "+(x.type==="reaction"?"reacted to":"commented on")+" this post"):(x.message||modes[x.type]||"Activity");return card('<div class="activity-row"><div class="activity-icon">'+(icons[x.type]||"•")+'</div><div class="activity-main"><div class="feed-meta"><span class="feed-type">'+esc((modes[x.type]||x.type||"ACTIVITY").toUpperCase())+'</span><span class="muted">'+esc(when(x.created_at))+'</span></div><b>'+esc(msg)+'</b><p class="muted">'+(grouped?count+" events · ":"")+(x.actor_id?'<a href="profile.html?id='+x.actor_id+'">'+esc(name(x.actor_id))+"</a>":"")+'</p><a class="btn" href="'+esc(target(x))+'">Open</a></div></div>')}).join("")||card('<p class="muted">No activity matches this view yet.</p>');
+ const chips=Object.entries(modes).map(([k,v])=>'<a class="filter-chip '+(mode===k?"active":"")+'" href="activity.html?mode='+k+'">'+v+'</a>').join("");
+ app.innerHTML=shell("Activity","Personalized social intelligence across the CrowSpace universe.",card('<div class="community-head"><div><span class="kicker">ACTIVITY INTELLIGENCE</span><h2>'+esc(modes[mode]||modes.foryou)+'</h2><p class="muted">Realtime activity, personalized from your relationships, communities, location, recency and engagement.</p></div></div><div class="filter-row activity-filters">'+chips+'</div>')+cards);
 }
 async function notifications(){
  if(!user){app.innerHTML=shell("Notifications","Persistent activity inbox.",gate());return}
