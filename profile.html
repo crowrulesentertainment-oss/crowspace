@@ -224,6 +224,14 @@ body{background:radial-gradient(circle at 15% 0%,rgba(85,230,255,.13),transparen
 .nest-live strong{color:var(--nest-cyan)}.nest-live span{color:#8c9bb4;font-size:12px}
 .nest-os-nav{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.nest-os-nav a{padding:8px 11px;border:1px solid var(--nest-border);border-radius:10px;color:#b9c6dd;text-decoration:none;background:rgba(255,255,255,.025);font-size:12px}.nest-os-nav a:hover{color:var(--nest-cyan);border-color:rgba(85,230,255,.3)}
 @media(max-width:900px){.nest-os{grid-template-columns:1fr}.nest-pulse{order:-1}}@media(max-width:520px){.nest-metrics{grid-template-columns:1fr}}
+</style><style id="nest-activity-stream">
+.nest-activity{margin:18px 0;border:1px solid rgba(255,255,255,.09);border-radius:22px;background:rgba(8,13,25,.76);overflow:hidden}
+.nest-activity-head{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,rgba(85,230,255,.09),rgba(155,124,255,.07))}
+.nest-activity-head strong{letter-spacing:.12em;text-transform:uppercase;font-size:11px}.nest-activity-head span{font-size:10px;color:#8090aa}
+.nest-activity-list{display:grid}.nest-activity-item{display:grid;grid-template-columns:38px 1fr 24px;gap:11px;align-items:center;padding:12px 15px;border-bottom:1px solid rgba(255,255,255,.055);text-decoration:none;color:#e9eef8;transition:.18s}.nest-activity-item:hover{background:rgba(85,230,255,.055)}.nest-activity-item:last-child{border-bottom:0}
+.nest-activity-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(85,230,255,.14),rgba(155,124,255,.14));color:#55e6ff;font-size:17px}
+.nest-activity-copy b{font-size:13px}.nest-activity-copy small{display:block;color:#7f8da6;font-size:10px;margin-top:3px}.nest-activity-arrow{color:#65738c}
+.nest-activity-empty{padding:22px;color:#8290a8;text-align:center;font-size:12px}
 </style></head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav aria-label="CrowSpace global navigation"></nav><div id="account"></div></header>
@@ -362,6 +370,9 @@ body{background:radial-gradient(circle at 15% 0%,rgba(85,230,255,.13),transparen
 <div class="nest-metrics"><div class="nest-metric"><b id="nestMetricFriends">—</b><span>Friends</span></div><div class="nest-metric"><b id="nestMetricPosts">—</b><span>Wall Posts</span></div><div class="nest-metric"><b id="nestMetricVisitors">—</b><span>Visitors</span></div></div>
 </div>
 <aside class="nest-pulse"><div class="nest-kicker">NEST PULSE</div><h3 style="margin:7px 0">Live from your universe</h3><div class="pulse-list" id="nestPulseList"><div class="pulse-item">Connecting to your CrowSpace data…</div></div></aside>
+</section><section class="nest-activity" id="nestActivity">
+<div class="nest-activity-head"><strong>⚡ Nest Activity</strong><span id="nestActivityState">Live · Supabase</span></div>
+<div class="nest-activity-list" id="nestActivityList"><div class="nest-activity-empty">Building your live activity stream…</div></div>
 </section><div class="modern-command-strip"><div class="modern-command"><div class="k">Your digital home</div><div class="v">One Nest. One Universe.</div></div><div class="modern-command"><div class="k">Presence</div><div class="v" id="modernPresence">● Connected</div></div><div class="modern-command"><div class="k">Identity</div><div class="v" id="modernIdentity">CrowSpace Member</div></div><div class="modern-command"><div class="k">Universe</div><div class="v">CrowRules</div></div></div><div class="profile-retro">
   <div class="retro-box">
     <div class="retro-title">MY CROWSPACE URL</div>
@@ -976,6 +987,42 @@ body.avatar-modal-open{overflow:hidden}
  }
  document.addEventListener("DOMContentLoaded",()=>setTimeout(start,1400));
  window.addEventListener("beforeunload",()=>{if(channel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(channel);});
+})();
+</script><script id="nest-activity-js">
+(function(){
+let activityChannel=null;
+const escA=v=>window.CS&&CS.escape?CS.escape(String(v??"")):String(v??"");
+function ago(v){const s=Math.max(0,Math.floor((Date.now()-new Date(v).getTime())/1000));if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
+function addActivity(icon,title,detail,url,createdAt){
+ const list=document.getElementById("nestActivityList");if(!list)return;
+ const empty=list.querySelector(".nest-activity-empty");if(empty)empty.remove();
+ const a=document.createElement("a");a.className="nest-activity-item";a.href=url||"#";
+ a.innerHTML='<div class="nest-activity-icon">'+icon+'</div><div class="nest-activity-copy"><b>'+escA(title)+'</b><small>'+escA(detail)+" · "+ago(createdAt||new Date())+'</small></div><div class="nest-activity-arrow">›</div>';
+ list.prepend(a);while(list.children.length>10)list.lastElementChild.remove();
+}
+async function actorName(id){if(!id||typeof people!=="function")return"Someone";const m=await people([id]);const p=m[id];return p?(p.display_name||("@"+p.username)):"Someone"}
+async function initialActivity(){
+ if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
+ const {data}=await crowSupabase.from("crowspace_notifications").select("id,actor_id,type,body,post_id,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(10);
+ const list=document.getElementById("nestActivityList");if(!list)return;
+ if(data&&data.length){
+  list.innerHTML="";
+  data.forEach(n=>{const label=n.body||("New "+(n.type||"activity"));let url=n.post_id?"index.html#post-"+n.post_id:"notifications.html";addActivity("🔔",label,"Notification",url,n.created_at)});
+ }else list.innerHTML='<div class="nest-activity-empty">Your Nest is quiet. New activity will appear here automatically.</div>';
+}
+async function startActivity(){
+ if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
+ await initialActivity();
+ activityChannel=crowSupabase.channel("nest-activity:"+uid)
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},async p=>{const n=p.new||{};const name=await actorName(n.actor_id);addActivity("🔔",n.body||"New activity",name,n.post_id?"index.html#post-"+n.post_id:"notifications.html",n.created_at)})
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_comments"},async p=>{const n=p.new||{};const post=await crowSupabase.from("crowspace_posts").select("user_id").eq("id",n.post_id).maybeSingle();if(post.data&&post.data.user_id===uid){const name=await actorName(n.user_id);addActivity("💬",name+" commented on your Caw","Conversation","index.html#post-"+n.post_id,n.created_at)}})
+ .on("postgres_changes",{event:"UPDATE",schema:"public",table:"crowspace_friendships"},async p=>{const n=p.new||{};if(n.status==="accepted"&&(n.requester_id===uid||n.addressee_id===uid)){const other=n.requester_id===uid?n.addressee_id:n.requester_id;const name=await actorName(other);addActivity("👥",name+" connected with you","Friendship","friends.html",n.updated_at||n.created_at)}})
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_group_posts"},async p=>{const n=p.new||{};const mem=await crowSupabase.from("crowspace_group_members").select("user_id").eq("group_id",n.group_id).eq("user_id",uid).maybeSingle();if(mem.data){const g=await crowSupabase.from("crowspace_groups").select("name").eq("id",n.group_id).maybeSingle();addActivity("◉","New activity in "+(g.data?.name||"your group"),"Group", "group.html?id="+n.group_id,n.created_at)}})
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_presence"},async p=>{const n=p.new||{};if(n.user_id!==uid&&Date.now()-new Date(n.last_seen_at).getTime()<90000){addActivity("●","A member is online","Live presence","people.html",n.last_seen_at)}})
+ .subscribe(status=>{const s=document.getElementById("nestActivityState");if(s&&status==="SUBSCRIBED")s.textContent="● Live · Supabase Realtime";});
+}
+document.addEventListener("DOMContentLoaded",()=>setTimeout(startActivity,1500));
+window.addEventListener("beforeunload",()=>{if(activityChannel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(activityChannel)});
 })();
 </script></body>
 </html>
