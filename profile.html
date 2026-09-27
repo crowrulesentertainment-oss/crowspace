@@ -6,7 +6,137 @@
 <title>My Nest | CrowSpace</title>
 <link rel="stylesheet" href="css/crowspace.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<style>
+/* MySpace-inspired Nest layout */
+:root{
+  --myspace-blue:#1877c9;
+  --myspace-dark:#0b1830;
+  --myspace-light:#eef6ff;
+  --myspace-pink:#ff4fb3;
+}
+body{
+  background:
+    radial-gradient(circle at 15% 5%,rgba(24,119,201,.18),transparent 28%),
+    radial-gradient(circle at 85% 10%,rgba(255,79,179,.10),transparent 25%),
+    #060914;
+}
+.nest-shell{max-width:1180px}
+.nest-cover{
+  display:grid;
+  grid-template-columns:245px 1fr;
+  gap:0;
+  padding:0;
+  border:1px solid rgba(91,164,230,.55);
+  border-radius:4px;
+  background:linear-gradient(135deg,#071326,#0d1f3d 55%,#101022);
+  box-shadow:0 12px 45px rgba(0,0,0,.45);
+}
+.nest-avatar{
+  width:210px!important;height:210px!important;
+  margin:25px auto;
+  border-radius:4px!important;
+  border:5px solid #fff!important;
+  box-shadow:0 0 0 1px #1877c9,0 12px 30px rgba(0,0,0,.5);
+  background:#10223d;
+  font-size:5rem!important;
+}
+.nest-cover-copy{
+  padding:28px 30px 25px 10px;
+}
+.nest-name{
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:clamp(2rem,5vw,3.5rem)!important;
+  letter-spacing:-.03em!important;
+  text-shadow:2px 2px 0 rgba(0,0,0,.45);
+}
+.nest-handle{color:#9ccdf5;font-family:monospace}
+.nest-cover .eyebrow{color:#70b9ff;font-weight:800}
+.nest-cover .lead{font-size:1.05rem}
+.nest-stats{display:flex;flex-wrap:wrap;gap:0;margin-top:15px}
+.nest-stat{
+  padding:7px 13px;
+  border-right:1px solid rgba(255,255,255,.15);
+  color:#dcecff;
+  font-size:.86rem;
+}
+.myspace-profile-nav{
+  display:flex;flex-wrap:wrap;
+  margin:10px 0 14px;
+  border:1px solid #287fc9;
+  background:linear-gradient(#1877c9,#0d5da4);
+  box-shadow:0 3px 10px rgba(0,0,0,.3);
+}
+.myspace-profile-nav a{
+  color:#fff!important;
+  text-decoration:none!important;
+  font-weight:800;
+  font-size:.9rem;
+  padding:10px 15px;
+  border-right:1px solid rgba(255,255,255,.22);
+}
+.myspace-profile-nav a:hover{background:rgba(255,255,255,.15)}
+.myspace-quick-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+.myspace-contact-box,.myspace-profile-box,.myspace-about-strip{
+  border:1px solid #8bb9dd;
+  border-radius:3px;
+  background:#edf6ff;
+  color:#14243a;
+  box-shadow:0 5px 18px rgba(0,0,0,.25);
+}
+.myspace-box-title{
+  padding:8px 12px;
+  color:#fff;
+  background:linear-gradient(#2c8bd2,#1264a9);
+  font:bold 12px Arial,sans-serif;
+  letter-spacing:.08em;
+}
+.myspace-contact-links{display:grid;gap:7px;padding:12px}
+.myspace-contact-links a{color:#075a9e!important;font-weight:700;text-decoration:none!important}
+.myspace-contact-links a:hover{text-decoration:underline!important}
+.myspace-snapshot-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:#b8d2e7;
+}
+.myspace-snapshot-grid div{background:#f7fbff;padding:10px}
+.myspace-snapshot-grid span{display:block;font-size:.68rem;color:#53718c;font-weight:800}
+.myspace-snapshot-grid strong{font-size:.88rem;color:#172d46}
+.myspace-about-strip{padding-bottom:12px;margin-bottom:14px}
+.myspace-about-strip .nest-section-title{margin:0 0 10px}
+.myspace-welcome{padding:0 14px;margin:0;color:#253d56;line-height:1.65}
+.nest-box{
+  border-radius:3px!important;
+  border-color:rgba(85,145,194,.65)!important;
+}
+.nest-section-title h2{
+  font-family:Arial,Helvetica,sans-serif!important;
+  letter-spacing:.01em!important;
+}
+.nest-sidebar .nest-box h2{
+  color:#8fc9ff;
+}
+.event-tag{
+  border-radius:2px!important;
+}
+.avatar-editable:after{
+  border-radius:2px!important;
+  background:#1877c9!important;
+}
+@media(max-width:800px){
+  .nest-cover{grid-template-columns:1fr}
+  .nest-avatar{width:170px!important;height:170px!important;margin:20px auto 5px}
+  .nest-cover-copy{padding:16px}
+  .myspace-quick-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .myspace-profile-nav a{flex:1 1 33%;text-align:center;padding:9px 5px}
+  .myspace-snapshot-grid{grid-template-columns:1fr}
+}
+</style></head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav aria-label="CrowSpace global navigation"></nav><div id="account"></div></header>
 
@@ -31,7 +161,40 @@
   </div>
 </section>
 
+<section class="myspace-profile-nav" aria-label="Profile sections">
+  <a href="#wall">Wall</a>
+  <a href="#about-me">About Me</a>
+  <a href="#top8Section">Top 8</a>
+  <a href="#photosSection">Photos</a>
+  <a href="#cawsSection">Caws</a>
+  <a href="#groupsSection">Groups</a>
+  <a href="#guestbookSection">Guestbook</a>
+</section>
 
+<section class="myspace-quick-grid">
+  <div class="myspace-contact-box">
+    <div class="myspace-box-title">CONTACT ME</div>
+    <div id="myspaceContact" class="myspace-contact-links">
+      <a href="#guestbookSection">✉ Leave a Guestbook Message</a>
+      <a href="friends.html">★ View Friends</a>
+      <a href="caws.html">▶ Watch Caws</a>
+    </div>
+  </div>
+  <div class="myspace-profile-box">
+    <div class="myspace-box-title">PROFILE SNAPSHOT</div>
+    <div class="myspace-snapshot-grid">
+      <div><span>MOOD</span><strong id="moodSnapshot">Online in CrowSpace</strong></div>
+      <div><span>MEMBER SINCE</span><strong id="memberSinceSnapshot">CrowSpace Member</strong></div>
+      <div><span>STATUS</span><strong id="statusSnapshot">—</strong></div>
+      <div><span>UNIVERSE</span><strong>CrowRules</strong></div>
+    </div>
+  </div>
+</section>
+
+<section class="nest-box myspace-about-strip" id="wall">
+  <div class="nest-section-title"><h2>WELCOME TO MY CROWSPACE</h2><span class="event-tag">MY PROFILE</span></div>
+  <p class="myspace-welcome">This is my space on CrowSpace — a place for friends, photos, Caws, groups, conversations, and the wider CrowRules universe.</p>
+</section>
 
 <section class="nest-box universal-nest-panel" id="nestMembership">
   <div class="nest-section-title"><div><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h2>Universal CrowRules Membership</h2></div><a href="membership.html">Membership Center →</a></div>
