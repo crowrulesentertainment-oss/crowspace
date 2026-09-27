@@ -238,56 +238,149 @@ body{background:
   }
 
   async function loadCommunitySignal(){
-    const newest=document.getElementById("rankNewest");
+    const dbClient=window.crowSupabase||CS.client;
+    const setLoading=(id,textValue="Loading…")=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML='<div class="rank-empty">'+esc(textValue)+'</div>';
+    };
+    const setError=(id,textValue="Temporarily unavailable")=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML='<div class="rank-empty">'+esc(textValue)+'</div>';
+    };
+    const safe=async (queryFn)=>{
+      try{
+        const result=await queryFn();
+        return result?.error?{data:[],error:result.error}:{data:result?.data||[],error:null};
+      }catch(error){
+        return {data:[],error};
+      }
+    };
+
     try{
-      const client=window.crowSupabase||CS.client;
-      if(!client) throw new Error("CrowSpace database client is not ready.");
-      const {data:members,error:memberError}=await client.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(1000);
-      if(memberError) throw memberError;
-      const all=members||[];
-      if(!all.length){newest.innerHTML='<div class="rank-empty">No public members yet.</div>';}
-      else newest.innerHTML=all.slice(0,5).map((r,i)=>rankItem(r,new Date(r.created_at).toLocaleDateString(),"Joined",i)).join("");
-      const [posts,caws,friends]=await Promise.all([
-        db.from("crowspace_posts").select("user_id"),
-        db.from("crowspace_caws").select("user_id"),
-        db.from("crowspace_friendships").select("requester_id,addressee_id").eq("status","accepted")
+      if(!dbClient) throw new Error("CrowSpace database client is not ready.");
+
+      /* Every Community Signal card loads independently.
+         One unavailable table can no longer stop the other cards from rendering. */
+      const membersResult=await safe(()=>dbClient
+        .from("membership_profiles")
+        .select("id,display_name,username,avatar_url,created_at")
+        .order("created_at",{ascending:false})
+        .limit(1000));
+
+      const all=membersResult.data||[];
+      const newest=document.getElementById("rankNewest");
+      if(membersResult.error){
+        setError("rankNewest","Newest members are temporarily unavailable.");
+      }else if(!all.length){
+        newest.innerHTML='<div class="rank-empty">No public members yet.</div>';
+      }else{
+        newest.innerHTML=all.slice(0,5).map((r,i)=>rankItem(r,new Date(r.created_at).toLocaleDateString(),"Joined",i)).join("");
+      }
+
+      const [postsResult,cawsResult,friendsResult]=await Promise.all([
+        safe(()=>dbClient.from("crowspace_posts").select("user_id")),
+        safe(()=>dbClient.from("crowspace_caws").select("user_id")),
+        safe(()=>dbClient.from("crowspace_friendships").select("requester_id,addressee_id").eq("status","accepted"))
       ]);
+
       const postMap=new Map(),cawMap=new Map(),friendMap=new Map();
-      (posts.data||[]).forEach(x=>postMap.set(x.user_id,(postMap.get(x.user_id)||0)+1));
-      (caws.data||[]).forEach(x=>cawMap.set(x.user_id,(cawMap.get(x.user_id)||0)+1));
-      (friends.data||[]).forEach(x=>{
+      (postsResult.data||[]).forEach(x=>postMap.set(x.user_id,(postMap.get(x.user_id)||0)+1));
+      (cawsResult.data||[]).forEach(x=>cawMap.set(x.user_id,(cawMap.get(x.user_id)||0)+1));
+      (friendsResult.data||[]).forEach(x=>{
         if(x.requester_id)friendMap.set(x.requester_id,(friendMap.get(x.requester_id)||0)+1);
         if(x.addressee_id)friendMap.set(x.addressee_id,(friendMap.get(x.addressee_id)||0)+1);
       });
-      const rank=(map,minimum=1)=>all.map(r=>({...r,_count:map.get(r.id)||0})).filter(r=>r._count>=minimum).sort((a,b)=>b._count-a._count||String(a.display_name||"").localeCompare(String(b.display_name||""))).slice(0,5);
-      const active=all.map(r=>({...r,_count:(postMap.get(r.id)||0)+(cawMap.get(r.id)||0)})).filter(r=>r._count>0).sort((a,b)=>b._count-a._count).slice(0,5);
+
+      const rank=(map,minimum=1)=>all
+        .map(r=>({...r,_count:map.get(r.id)||0}))
+        .filter(r=>r._count>=minimum)
+        .sort((a,b)=>b._count-a._count||String(a.display_name||"").localeCompare(String(b.display_name||"")))
+        .slice(0,5);
+
+      const active=all
+        .map(r=>({...r,_count:(postMap.get(r.id)||0)+(cawMap.get(r.id)||0)}))
+        .filter(r=>r._count>0)
+        .sort((a,b)=>b._count-a._count)
+        .slice(0,5);
+
       const connections=rank(friendMap);
-      document.getElementById("rankActive").innerHTML=active.length?active.map((r,i)=>rankItem(r,r._count,"Activity",i)).join(""):'<div class="rank-empty">Activity will appear as the community grows.</div>';
-      document.getElementById("rankConnections").innerHTML=connections.length?connections.map((r,i)=>rankItem(r,r._count,"Connections",i)).join(""):'<div class="rank-empty">Connections will appear here.</div>';
-      const fill=(id,html,empty)=>{const el=document.getElementById(id);if(el)el.innerHTML=html||'<div class="rank-empty">'+empty+'</div>'};
-      const groups=(await db.from("crowspace_groups").select("id,name").order("created_at",{ascending:false}).limit(5)).data||[];
-      fill("rankGroups",groups.map((r,i)=>'<a class="rank-item" href="group.html?id='+encodeURIComponent(r.id)+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">G</span><span><span class="rank-name">'+esc(r.name)+'</span><span class="rank-handle">Community group</span></span><span class="rank-value">GROUP</span></a>').join(""),"Groups will appear here.");
-      const events=(await db.from("crowspace_events").select("id,title,event_date").order("event_date",{ascending:true}).limit(5)).data||[];
-      fill("rankEvents",events.map((r,i)=>'<a class="rank-item" href="event.html?id='+encodeURIComponent(r.id)+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">E</span><span><span class="rank-name">'+esc(r.title||"CrowSpace Event")+'</span><span class="rank-handle">'+(r.event_date?esc(new Date(r.event_date).toLocaleDateString()):"Community event")+'</span></span><span class="rank-value">EVENT</span></a>').join(""),"Upcoming events will appear here.");
-      const caws=(await db.from("crowspace_caws").select("id,title").order("created_at",{ascending:false}).limit(5)).data||[];
-      fill("rankCaws",caws.map((r,i)=>'<a class="rank-item" href="caws.html"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">C</span><span><span class="rank-name">'+esc(r.title||"Community Caw")+'</span><span class="rank-handle">New video</span></span><span class="rank-value">CAW</span></a>').join(""),"New Caws will appear here.");
-      const albums=(await db.from("crowspace_albums").select("id,title").order("created_at",{ascending:false}).limit(5)).data||[];
-      fill("rankAlbums",albums.map((r,i)=>'<a class="rank-item" href="albums.html"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">A</span><span><span class="rank-name">'+esc(r.title||"Photo Album")+'</span><span class="rank-handle">New album</span></span><span class="rank-value">ALBUM</span></a>').join(""),"New albums will appear here.");
-      const posts=(await db.from("crowspace_posts").select("id,body,created_at").order("created_at",{ascending:false}).limit(5)).data||[];
-      fill("rankPosts",posts.map((r,i)=>'<a class="rank-item" href="profile.html"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">P</span><span><span class="rank-name">'+esc((r.body||"Community post").slice(0,42))+'</span><span class="rank-handle">'+esc(new Date(r.created_at).toLocaleDateString())+'</span></span><span class="rank-value">POST</span></a>').join(""),"New conversations will appear here.");
-      const [pod,ds,mem]=await Promise.all([db.from("podcasts").select("id,title").order("created_at",{ascending:false}).limit(2),db.from("ds_projects").select("id,title").order("created_at",{ascending:false}).limit(2),db.from("memorials").select("id,full_name").eq("published",true).order("created_at",{ascending:false}).limit(2)]);
-      const universe=[...(pod.data||[]).map(r=>({label:r.title||"Podcast",sub:"Podcasting",href:"podcasting.html",tag:"POD"})),...(ds.data||[]).map(r=>({label:r.title||"Dreamscape",sub:"Dreamscapes",href:"dreamscapes.html",tag:"DREAM"})),...(mem.data||[]).map(r=>({label:r.full_name||"Memorial",sub:"Memorials",href:"memorials.html",tag:"MEM"}))].slice(0,5);
-      fill("rankUniverse",universe.map((r,i)=>'<a class="rank-item" href="'+r.href+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">U</span><span><span class="rank-name">'+esc(r.label)+'</span><span class="rank-handle">'+esc(r.sub)+'</span></span><span class="rank-value">'+r.tag+'</span></a>').join(""),"The wider universe is getting ready.");
+      const activeEl=document.getElementById("rankActive");
+      const connectionsEl=document.getElementById("rankConnections");
+      activeEl.innerHTML=active.length
+        ?active.map((r,i)=>rankItem(r,r._count,"Activity",i)).join("")
+        :'<div class="rank-empty">Activity will appear as the community grows.</div>';
+      connectionsEl.innerHTML=connections.length
+        ?connections.map((r,i)=>rankItem(r,r._count,"Connections",i)).join("")
+        :'<div class="rank-empty">Connections will appear here.</div>';
+
+      const loadCategory=async(id,queryFn,renderFn,empty)=>{
+        setLoading(id);
+        const result=await safe(queryFn);
+        if(result.error){setError(id,empty+" unavailable.");return;}
+        const html=renderFn(result.data||[]);
+        const el=document.getElementById(id);
+        if(el)el.innerHTML=html||'<div class="rank-empty">'+esc(empty)+'</div>';
+      };
+
+      await Promise.all([
+        loadCategory(
+          "rankGroups",
+          ()=>dbClient.from("crowspace_groups").select("id,name,created_at").order("created_at",{ascending:false}).limit(5),
+          rows=>rows.map((r,i)=>'<a class="rank-item" href="group.html?id='+encodeURIComponent(r.id)+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">G</span><span><span class="rank-name">'+esc(r.name)+'</span><span class="rank-handle">Community group</span></span><span class="rank-value">GROUP</span></a>').join(""),
+          "Groups will appear here."
+        ),
+        loadCategory(
+          "rankEvents",
+          ()=>dbClient.from("crowspace_events").select("id,title,event_date").gte("event_date",new Date().toISOString()).order("event_date",{ascending:true}).limit(5),
+          rows=>rows.map((r,i)=>'<a class="rank-item" href="event.html?id='+encodeURIComponent(r.id)+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">E</span><span><span class="rank-name">'+esc(r.title||"CrowSpace Event")+'</span><span class="rank-handle">'+(r.event_date?esc(new Date(r.event_date).toLocaleDateString()):"Community event")+'</span></span><span class="rank-value">EVENT</span></a>').join(""),
+          "Upcoming events will appear here."
+        ),
+        loadCategory(
+          "rankCaws",
+          ()=>dbClient.from("crowspace_caws").select("id,title,created_at").order("created_at",{ascending:false}).limit(5),
+          rows=>rows.map((r,i)=>'<a class="rank-item" href="caws.html"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">C</span><span><span class="rank-name">'+esc(r.title||"Community Caw")+'</span><span class="rank-handle">New video</span></span><span class="rank-value">CAW</span></a>').join(""),
+          "New Caws will appear here."
+        ),
+        loadCategory(
+          "rankAlbums",
+          ()=>dbClient.from("crowspace_albums").select("id,title,created_at").order("created_at",{ascending:false}).limit(5),
+          rows=>rows.map((r,i)=>'<a class="rank-item" href="albums.html"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">A</span><span><span class="rank-name">'+esc(r.title||"Photo Album")+'</span><span class="rank-handle">New album</span></span><span class="rank-value">ALBUM</span></a>').join(""),
+          "New albums will appear here."
+        ),
+        loadCategory(
+          "rankPosts",
+          ()=>dbClient.from("crowspace_posts").select("id,body,created_at,user_id").order("created_at",{ascending:false}).limit(5),
+          rows=>rows.map((r,i)=>'<a class="rank-item" href="profile.html'+(r.user_id?('?id='+encodeURIComponent(r.user_id)):"")+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">P</span><span><span class="rank-name">'+esc((r.body||"Community post").slice(0,42))+'</span><span class="rank-handle">'+esc(new Date(r.created_at).toLocaleDateString())+'</span></span><span class="rank-value">POST</span></a>').join(""),
+          "New conversations will appear here."
+        ),
+        (async()=>{
+          setLoading("rankUniverse");
+          const [pod,ds,mem]=await Promise.all([
+            safe(()=>dbClient.from("podcasts").select("id,title,created_at").order("created_at",{ascending:false}).limit(2)),
+            safe(()=>dbClient.from("ds_projects").select("id,title,created_at").order("created_at",{ascending:false}).limit(2)),
+            safe(()=>dbClient.from("memorials").select("id,full_name,created_at").eq("published",true).order("created_at",{ascending:false}).limit(2))
+          ]);
+          const universe=[
+            ...(pod.data||[]).map(r=>({label:r.title||"Podcast",sub:"Podcasting",href:"podcasting.html",tag:"POD"})),
+            ...(ds.data||[]).map(r=>({label:r.title||"Dreamscape",sub:"Dreamscapes",href:"dreamscapes.html",tag:"DREAM"})),
+            ...(mem.data||[]).map(r=>({label:r.full_name||"Memorial",sub:"Memorials",href:"memorials.html",tag:"MEM"}))
+          ].slice(0,5);
+          const el=document.getElementById("rankUniverse");
+          el.innerHTML=universe.length
+            ?universe.map((r,i)=>'<a class="rank-item" href="'+r.href+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">U</span><span><span class="rank-name">'+esc(r.label)+'</span><span class="rank-handle">'+esc(r.sub)+'</span></span><span class="rank-value">'+esc(r.tag)+'</span></a>').join("")
+            :'<div class="rank-empty">The wider universe is getting ready.</div>';
+        })()
+      ]);
+
+      document.querySelector('.home-section .home-section-head .home-link[href="rankings.html"]')?.setAttribute("href","rankings.html");
     }catch(error){
       console.error("CrowSpace community signal:",error);
-      if(newest && newest.innerHTML.includes("Loading")) newest.innerHTML='<div class="rank-empty">Member directory is temporarily unavailable. <a href="people.html">Open People →</a></div>';
-      ["rankActive","rankConnections","rankGroups","rankEvents","rankCaws","rankAlbums","rankPosts","rankUniverse"].forEach(id=>{
+      ["rankNewest","rankActive","rankConnections","rankGroups","rankEvents","rankCaws","rankAlbums","rankPosts","rankUniverse"].forEach(id=>{
         const el=document.getElementById(id);
-        if(el && el.innerHTML.includes("Loading")) el.innerHTML='<div class="rank-empty">Community signal is temporarily unavailable.</div>';
+        if(el && el.innerHTML.includes("Loading")) setError(id,"Community Signal is temporarily unavailable.");
       });
     }
   }
-
   async function loadHeroCounts(){
     const jobs=[
       ["crowspace_groups","heroGroups"],
