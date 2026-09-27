@@ -15,7 +15,12 @@ CS.navItems=[
  {label:"Dreamscapes",href:"dreamscapes.html",group:"universe"},
  {label:"Memorials",href:"memorials.html",group:"universe"},
  {label:"Notifications",href:"notifications.html",group:"account"},
- {label:"Membership",href:"membership.html",group:"account"}
+ {label:"Membership",href:"membership.html",group:"account"},
+ {label:"Create Caw",href:"create-caw.html",group:"quick"},
+ {label:"Create Album",href:"create-album.html",group:"quick"},
+ {label:"Create Group",href:"create-group.html",group:"quick"},
+ {label:"Create Event",href:"create-event.html",group:"quick"},
+ {label:"Customize Nest",href:"customize.html",group:"quick"}
 ];
 CS.installGlobalSearch=()=>{
  if(document.getElementById("crowGlobalSearch"))return;
@@ -46,9 +51,9 @@ CS.refreshHeader=async()=>{
  if(header){
    let nav=header.querySelector("nav"); if(!nav){nav=document.createElement("nav");header.appendChild(nav)}
    const path=location.pathname.split("/").pop()||"index.html";
-   const core=CS.navItems.filter(x=>x.group==="core"), connect=CS.navItems.filter(x=>x.group==="connect"), create=CS.navItems.filter(x=>x.group==="create"), universe=CS.navItems.filter(x=>x.group==="universe"), account=CS.navItems.filter(x=>x.group==="account");
+   const core=CS.navItems.filter(x=>x.group==="core"), connect=CS.navItems.filter(x=>x.group==="connect"), create=CS.navItems.filter(x=>x.group==="create"), universe=CS.navItems.filter(x=>x.group==="universe"), account=CS.navItems.filter(x=>x.group==="account"), quick=CS.navItems.filter(x=>x.group==="quick");
    const link=(x)=>'<a href="'+x.href+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
-   nav.innerHTML='<div class="nav-cluster nav-core">'+core.map(link).join("")+'</div><div class="nav-cluster nav-connect">'+connect.map(link).join("")+'</div><div class="nav-cluster nav-create">'+create.map(link).join("")+'</div><details class="nav-more"><summary>More</summary><div class="nav-more-menu">'+universe.map(link).join("")+account.map(link).join("")+'</div></details>';
+   nav.innerHTML='<div class="nav-cluster nav-core">'+core.map(link).join("")+'</div><div class="nav-cluster nav-connect">'+connect.map(link).join("")+'</div><div class="nav-cluster nav-create">'+create.map(link).join("")+'</div><details class="nav-more"><summary>More</summary><div class="nav-more-menu">'+universe.map(link).join("")+account.map(link).join("")+quick.map(link).join("")+'</div></details>';
    let toggle=header.querySelector(".nav-toggle"); if(!toggle){toggle=document.createElement("button");toggle.className="nav-toggle";toggle.type="button";toggle.setAttribute("aria-label","Open navigation");toggle.setAttribute("aria-expanded","false");toggle.innerHTML="☰";header.insertBefore(toggle,nav);toggle.addEventListener("click",()=>{const open=nav.classList.toggle("nav-open");toggle.setAttribute("aria-expanded",String(open));toggle.setAttribute("aria-label",open?"Close navigation":"Open navigation");toggle.innerHTML=open?"✕":"☰"})}
    CS.installGlobalSearch();
  }
