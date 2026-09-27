@@ -1,1 +1,92 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace — Your Space. Your People. Your Universe.</title><link rel="stylesheet" href="css/crowspace.css"></head><body><div id="app"></div><script src="js/demo-data.js"></script><script src="js/navigation.js"></script><script src="js/crowspace.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CrowSpace — Your Space. Your People. Your Universe.">
+<title>CrowSpace — Your Space. Your People. Your Universe.</title>
+<link rel="stylesheet" href="css/crowspace.css">
+</head>
+<body>
+<main id="app">
+  <div class="wrap">
+    <section class="hero">
+      <span class="eyebrow">CROWSPACE</span>
+      <h1>Your Space.<br>Your People.<br>Your Universe.</h1>
+      <p>Welcome to CrowSpace — a social universe for profiles, people, communities, conversations, media and events.</p>
+      <div class="stack">
+        <a class="btn" href="profile.html">MY SPACE</a>
+        <a class="btn" href="discover.html">DISCOVER</a>
+        <a class="btn" href="groups.html">GROUPS</a>
+      </div>
+    </section>
+
+    <div class="layout">
+      <main>
+        <article class="card">
+          <span class="kicker">CROWBOARD</span>
+          <h2>What's happening?</h2>
+          <p class="muted">Share an update with your CrowSpace community.</p>
+          <form id="quickPost">
+            <textarea class="search" name="text" rows="4" placeholder="What are you building, watching, listening to or thinking about?" required></textarea>
+            <button class="btn" type="submit">＋ POST TO CROWBOARD</button>
+          </form>
+        </article>
+
+        <h2>YOUR CROWFEED</h2>
+        <div id="crowFeed">
+          <article class="card">
+            <span class="kicker">CROWSPACE</span>
+            <h3>Welcome to the CrowSpace social universe.</h3>
+            <p>Build your profile, find your people, join communities and start conversations.</p>
+          </article>
+          <article class="card">
+            <span class="kicker">COMMUNITY</span>
+            <h3>What are you building?</h3>
+            <p>Share a project, idea or goal with the people around you.</p>
+          </article>
+        </div>
+      </main>
+
+      <aside>
+        <article class="card">
+          <span class="kicker">QUICK ACTIONS</span>
+          <div class="stack">
+            <a class="btn" href="create-post.html">CREATE POST</a>
+            <a class="btn" href="discover.html">FIND PEOPLE</a>
+            <a class="btn" href="groups.html">EXPLORE GROUPS</a>
+            <a class="btn" href="rooms.html">ENTER CROWROOMS</a>
+            <a class="btn" href="events.html">VIEW EVENTS</a>
+          </div>
+        </article>
+        <article class="card">
+          <span class="kicker">THE UNIVERSE</span>
+          <p><b>People</b><br><span class="muted">Profiles, friends, follows and circles.</span></p>
+          <p><b>Communities</b><br><span class="muted">Groups, CrowSpaces and CrowRooms.</span></p>
+          <p><b>Live</b><br><span class="muted">Messages, activity, notifications and events.</span></p>
+        </article>
+      </aside>
+    </div>
+
+    <footer class="footer">CROWSPACE · Your Space. Your People. Your Universe.</footer>
+  </div>
+</main>
+
+<script src="js/navigation.js"></script>
+<script>
+document.addEventListener("submit", function(e){
+  if(e.target.id !== "quickPost") return;
+  e.preventDefault();
+  const text = new FormData(e.target).get("text");
+  const feed = document.getElementById("crowFeed");
+  if(!feed || !text) return;
+  const article = document.createElement("article");
+  article.className = "card";
+  article.innerHTML = '<span class="kicker">YOUR POST</span><h3></h3><p class="muted">Just now · CrowBoard</p>';
+  article.querySelector("h3").textContent = text;
+  feed.prepend(article);
+  e.target.reset();
+});
+</script>
+</body>
+</html>
