@@ -54,3 +54,5 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 /* CrowSpace 4.40 — Graph Intelligence Studio */
 .cr-graph-studio{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 14px}
 .cr-graph-studio .search{min-width:140px}
+
+.cr-shared-banner{margin:10px 0 14px;padding:9px 12px;border:1px solid currentColor;border-radius:8px;font-size:.76rem;letter-spacing:.08em;opacity:.8}
