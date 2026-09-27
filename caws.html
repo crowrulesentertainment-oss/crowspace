@@ -82,13 +82,18 @@ function setRecordedFile(blob){
   try{const dt=new DataTransfer();dt.items.add(file);fileInput.files=dt.files}catch(e){}
   fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB";
 }
-async function enableCamera(){
+async function enableCamera(facing=cameraFacing){
   try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error("Camera API unavailable");
     if(stream) stream.getTracks().forEach(t=>t.stop());
-    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    preview.srcObject=stream; recordBtn.disabled=false; cameraBtn.textContent="Camera Enabled";
-    liveBadge.textContent="● CAMERA LIVE"; recStatus.textContent="Ready to record";
-  }catch(e){msg.textContent="Camera/microphone access was not granted. You can still upload a Caw below.";}
+    cameraFacing=facing;
+    const videoConstraints={facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}};
+    try{stream=await navigator.mediaDevices.getUserMedia({video:videoConstraints,audio:{echoCancellation:true,noiseSuppression:true}})}catch(firstErr){
+      stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    }
+    preview.srcObject=stream; recordBtn.disabled=false; document.getElementById("switchCameraBtn").disabled=false; cameraBtn.textContent="Camera Enabled";
+    liveBadge.textContent="● "+(facing==="environment"?"REAR CAMERA":"FRONT CAMERA"); recStatus.textContent="Ready to record"; msg.textContent="";
+  }catch(e){msg.textContent="Camera/microphone access was not granted. Check browser permissions or use Upload a Caw."; }
 }
 cameraBtn.addEventListener("click",()=>enableCamera(cameraFacing));\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
 recordBtn.addEventListener("click",()=>{
@@ -116,6 +121,7 @@ clearBtn.addEventListener("click",()=>{
   recStatus.textContent=stream?"Ready to record":"Camera not enabled";liveBadge.textContent=stream?"● "+(cameraFacing==="environment"?"REAR CAMERA":"FRONT CAMERA"):"● CAMERA READY";msg.textContent="";
 });
 fileInput.addEventListener("change",()=>{
+  recordedBlob=null;
   const f=fileInput.files[0]; if(!f){fileInfo.textContent="No video selected.";return}
   if(f.size>MAX_BYTES){fileInfo.textContent="File is over the 512 MB limit.";return}
   fileInfo.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB · Ready to publish";
@@ -123,8 +129,9 @@ fileInput.addEventListener("change",()=>{
 });
 form.addEventListener("submit",async e=>{
   e.preventDefault(); const u=await CS.user(); if(!u){location.href="login.html";return}
-  const file=fileInput.files[0]; if(!file){msg.textContent="Record a Caw or choose a video file first.";return}
+  const file=fileInput.files[0] || (recordedBlob ? new File([recordedBlob],"recorded-caw.webm",{type:recordedBlob.type||"video/webm"}) : null); if(!file){msg.textContent="Record a Caw or choose a video file first.";return}
   if(file.size>MAX_BYTES){msg.textContent="Video is larger than the 512 MB CrowSpace limit.";return}
+  const isRecorded=!!recordedBlob && !fileInput.files[0];
   const ext=(file.name.split(".").pop()||"webm").toLowerCase().replace(/[^a-z0-9]/g,"")||"webm";
   const path=u.id+"/"+crypto.randomUUID()+"."+ext;
   const btn=document.getElementById("publishBtn");btn.disabled=true;msg.textContent="Uploading your Caw…";
@@ -132,7 +139,7 @@ form.addEventListener("submit",async e=>{
     const {error:upErr}=await crowSupabase.storage.from("crowspace-caws").upload(path,file,{contentType:file.type||"video/webm",upsert:false});
     if(upErr) throw upErr;
     const {data:pub}=crowSupabase.storage.from("crowspace-caws").getPublicUrl(path);
-    const {error:dbErr}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:title.value.trim()||"Untitled Caw",caption:caption.value.trim()||null,video_url:pub.publicUrl,storage_path:path,mime_type:file.type||null,file_size:file.size});
+    const {error:dbErr}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:title.value.trim()||"Untitled Caw",caption:caption.value.trim()||null,video_url:pub.publicUrl,storage_path:path,mime_type:file.type||null,file_size:file.size,source_type:isRecorded?"recorded":"uploaded"});
     if(dbErr){await crowSupabase.storage.from("crowspace-caws").remove([path]);throw dbErr}
     msg.textContent="Your Caw is live in CrowSpace.";form.reset();fileInfo.textContent="No video selected.";
     setTimeout(()=>location.reload(),700);
