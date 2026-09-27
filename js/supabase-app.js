@@ -498,12 +498,63 @@ async function startRealtime(){
   liveChannels.push(personal);
  }
 }
+async function messages(){
+ if(!user){app.innerHTML=shell("CrowMail","Persistent private conversations.",gate());return}
+ const target=q("user");
+ let query=sb.from("crowspace_messages").select("*").or("sender_id.eq."+user.id+",recipient_id.eq."+user.id).order("created_at",{ascending:true}).limit(300);
+ if(target)query=sb.from("crowspace_messages").select("*").or("sender_id.eq."+user.id+",recipient_id.eq."+user.id).order("created_at",{ascending:true}).limit(300);
+ const rows=(await query).data||[], ids=[...new Set(rows.flatMap(x=>[x.sender_id,x.recipient_id]))], people=await getProfiles(ids), targetPerson=people.find(x=>x.user_id===target);
+ const grouped=new Map(); rows.forEach(m=>{const other=m.sender_id===user.id?m.recipient_id:m.sender_id;if(!grouped.has(other))grouped.set(other,[]);grouped.get(other).push(m)});
+ const selected=target||[...grouped.keys()][0];
+ const list=[...grouped.entries()].map(([id,ms])=>{const p=people.find(x=>x.user_id===id);return card('<div class="person-row">'+avatar(p?.display_name,p?.avatar_url)+'<div><a href="messages.html?user='+id+'"><b>'+esc(p?.display_name||"Member")+'</b></a><p class="muted">'+esc(ms.at(-1)?.content||"")+' · '+when(ms.at(-1)?.created_at)+'</p></div></div>')}).join("")||empty("No conversations yet.");
+ const thread=(grouped.get(selected)||[]).map(m=>'<div class="wall '+(m.sender_id===user.id?"":"cr-message-in")+'"><b>'+esc(m.sender_id===user.id?"You":(people.find(x=>x.user_id===m.sender_id)?.display_name||"Member"))+'</b><p>'+esc(m.content)+'</p><small class="muted">'+when(m.created_at)+'</small></div>').join("");
+ const compose=selected?card('<span class="kicker">SEND MESSAGE</span><form id="crMessage"><input type="hidden" name="recipient_id" value="'+esc(selected)+'"><textarea class="search" name="content" rows="3" placeholder="Write a private message…" required></textarea><button class="btn">Send</button></form>'):"";
+ app.innerHTML=shell("CrowMail","Private conversations across your CrowSpace.",'<div class="layout"><aside>'+card('<span class="kicker">CONVERSATIONS</span>'+list)+'</aside><main>'+card('<span class="kicker">CONVERSATION</span><h2>'+esc(targetPerson?.display_name||"Select a conversation")+'</h2>'+(thread||'<p class="muted">Choose a conversation from the left.</p>'))+compose+'</main></div>');
+}
+async function circles(){
+ if(!user){app.innerHTML=shell("Circles","Your people and communities.",gate());return}
+ const [fr,fo]=await Promise.all([sb.from("crowspace_friends").select("requester_id,recipient_id,status").or("requester_id.eq."+user.id+",recipient_id.eq."+user.id),sb.from("crowspace_follows").select("following_id").eq("follower_id",user.id)]);
+ const ids=[...new Set([...(fr.data||[]).flatMap(x=>[x.requester_id,x.recipient_id]),...(fo.data||[]).map(x=>x.following_id)].filter(x=>x&&x!==user.id))],people=await getProfiles(ids);
+ const friends=new Set((fr.data||[]).filter(x=>x.status==="accepted").map(x=>x.requester_id===user.id?x.recipient_id:x.requester_id)),following=new Set((fo.data||[]).map(x=>x.following_id));
+ const personCard=p=>card('<div class="person-row">'+avatar(p.display_name,p.avatar_url)+'<div><a href="profile.html?id='+p.user_id+'"><b>'+esc(p.display_name||p.username||"Member")+'</b></a><p class="muted">'+(friends.has(p.user_id)?"Friend":"Following")+'</p></div></div>');
+ app.innerHTML=shell("Circles","A visual home for the people you connect with.",'<div class="layout"><main>'+card('<span class="kicker">FRIENDS</span>'+people.filter(p=>friends.has(p.user_id)).map(personCard).join("")||empty("No accepted friends yet."))+card('<span class="kicker">FOLLOWING</span>'+people.filter(p=>following.has(p.user_id)).map(personCard).join("")||empty("You are not following anyone yet."))+'</main><aside>'+card('<span class="kicker">YOUR CIRCLE</span><h2>'+people.length+'</h2><p class="muted">People connected to your CrowSpace.</p>')+'</aside></div>');
+}
+async function settings(){
+ if(!user){app.innerHTML=shell("Settings","Manage your CrowSpace account.",gate());return}
+ const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).maybeSingle()).data||{};
+ app.innerHTML=shell("Settings","Account, profile and privacy controls.",card('<span class="kicker">PROFILE SETTINGS</span><form id="crProfile"><label>Display name</label><input class="search" name="display_name" value="'+esc(u.display_name||"")+'"><label>Username</label><input class="search" name="username" value="'+esc(u.username||"")+'"><label>Bio</label><textarea class="search" name="bio" rows="4">'+esc(u.bio||"")+'</textarea><label>Location</label><input class="search" name="location" value="'+esc(u.location||"")+'"><label>Avatar URL</label><input class="search" name="avatar_url" value="'+esc(u.avatar_url||"")+'"><label>Banner URL</label><input class="search" name="banner_url" value="'+esc(u.banner_url||"")+'"><label>Interests</label><input class="search" name="interests" value="'+esc(u.interests||"")+'"><label>Music URL</label><input class="search" name="music_url" value="'+esc(u.music_url||"")+'"><button class="btn">Save Settings</button></form>')+card('<span class="kicker">SESSION</span><p class="muted">'+esc(user.email||"Signed in")+'</p><button class="btn" data-cr-action="signout">Sign Out</button>'));
+}
+async function authPage(){
+ if(user){app.innerHTML=shell("Your Account","You are signed in to CrowSpace.",card('<span class="kicker">ACCOUNT</span><h2>'+esc(user.email||"CrowSpace Member")+'</h2><p class="muted">Your CrowSpace account is active.</p>'+button("My Space","goto:profile.html")+" "+button("Settings","goto:settings.html")+" "+button("Sign Out","signout")));return}
+ app.innerHTML=shell("Welcome to CrowSpace","Create your account or sign in.",card('<span class="kicker">ACCOUNT</span><form id="crAuth"><input class="search" name="email" type="email" placeholder="Email address" required><input class="search" name="password" type="password" placeholder="Password" required><button class="btn">Sign In</button><p class="muted">New here? Use the same form to create an account if the email does not have an account yet.</p></form>'));
+}
+async function roomDetail(){
+ const id=q("id"),r=(await sb.from("crowspace_rooms").select("*").or("id.eq."+id+",slug.eq."+id).maybeSingle()).data;
+ if(!r){app.innerHTML=shell("CrowRoom","Room not found.",card("This room does not exist."));return}
+ const msgs=(await sb.from("crowspace_room_messages").select("*").eq("room_id",r.id).order("created_at",{ascending:true}).limit(100)).data||[],ids=[...new Set(msgs.map(x=>x.user_id||x.sender_id).filter(Boolean))],people=await getProfiles(ids);
+ const body=msgs.map(m=>'<div class="wall"><b>'+esc(people.find(x=>x.user_id===(m.user_id||m.sender_id))?.display_name||"Member")+'</b><p>'+esc(m.content||m.body||"")+'</p><small class="muted">'+when(m.created_at)+'</small></div>').join("")||'<p class="muted">No room messages yet.</p>';
+ app.innerHTML=shell(r.name,"CrowRoom · "+esc(r.topic||"Live community conversation"),card('<span class="kicker">LIVE ROOM</span>'+body)+(user?card('<span class="kicker">JOIN THE CONVERSATION</span><p>Room messaging is connected to the persistent CrowRoom.</p>'):gate()));
+}
+async function spaceDetail(){
+ const id=q("id"),s=(await sb.from("crowspace_spaces").select("*").or("id.eq."+id+",slug.eq."+id).maybeSingle()).data;
+ if(!s){app.innerHTML=shell("CrowSpace","Space not found.",card("This space does not exist."));return}
+ const groups=(await sb.from("crowspace_groups").select("*").eq("visibility","public").order("name")).data||[], rooms=(await sb.from("crowspace_rooms").select("*").eq("visibility","public").order("name")).data||[];
+ app.innerHTML=shell(s.name,"Community hub · "+esc(s.description||""),card('<span class="kicker">ABOUT THIS SPACE</span><p>'+esc(s.description||"")+'</p>')+card('<span class="kicker">GROUPS</span><div class="grid">'+groups.slice(0,12).map(g=>'<div><h3>'+esc(g.name)+'</h3><a class="btn" href="group.html?id='+esc(g.slug)+'">Open Group</a></div>').join("")+'</div>')+card('<span class="kicker">CROWROOMS</span><div class="grid">'+rooms.slice(0,8).map(r=>'<div><h3>'+esc(r.name)+'</h3><a class="btn" href="room.html?id='+esc(r.slug)+'">Enter Room</a></div>').join("")+'</div>'));
+}
+async function eventDetail(){
+ const id=q("id"),e=(await sb.from("crowspace_events").select("*").eq("id",id).maybeSingle()).data;
+ if(!e){app.innerHTML=shell("Event","Event not found.",card("This event does not exist."));return}
+ const interested=user?(await sb.from("crowspace_event_members").select("event_id").eq("event_id",e.id).eq("user_id",user.id).maybeSingle()).data:null;
+ app.innerHTML=shell(e.title,"Community event · "+esc(e.event_type||"event"),card((e.image_url?'<img class="media-thumb" src="'+esc(e.image_url)+'" alt="">':"")+'<span class="kicker">EVENT DETAILS</span><p>'+esc(e.description||"")+'</p><p class="muted">'+when(e.starts_at)+(e.ends_at?" → "+when(e.ends_at):"")+' · '+esc(e.location||"")+'</p>'+(e.stream_url?'<p><a class="btn" href="'+esc(e.stream_url)+'" target="_blank" rel="noopener">Open Stream</a></p>':"")+(user?button(interested?"✓ Interested":"I’m Interested","rsvp:"+e.id):gate())));
+}
 async function render(){
- const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"activity.html":activity,"friends.html":friends,"graph.html":graph,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
+ const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":eventDetail,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"activity.html":activity,"friends.html":friends,"circles.html":circles,"messages.html":messages,"crowmail.html":messages,"graph.html":graph,"discover.html":discover,"customize.html":customize,"settings.html":settings,"auth.html":authPage,"room.html":roomDetail,"space.html":spaceDetail,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
  if(map[p])await map[p]();
  await startRealtime();
 }
 document.addEventListener("submit",submit);
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cr-action]");if(b)act(b.dataset.crAction)});
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-})();
+})() if(f.id==="crMessage"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_messages").insert({sender_id:user.id,recipient_id:String(d.get("recipient_id")),content:String(d.get("content")).trim(),is_read:false});if(r.error)alert(r.error.message);else messages()}
+ if(f.id==="crAuth"){e.preventDefault();const d=new FormData(f),email=String(d.get("email")).trim(),password=String(d.get("password"));let r=await sb.auth.signInWithPassword({email,password});if(r.error&&["invalid_credentials","user_not_found"].includes(r.error.code)){r=await sb.auth.signUp({email,password})}if(r.error)alert(r.error.message);else boot()}
+\n if(a==="signout"){await sb.auth.signOut();location.href="auth.html";return}\n;
