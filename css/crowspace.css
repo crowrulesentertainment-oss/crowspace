@@ -16,3 +16,21 @@
 .archive-card{position:relative;overflow:hidden}
 .archive-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(var(--purple),var(--cyan))}
 @media(max-width:760px){.nav{padding:9px 12px}.brand{font-size:17px}.nav-wide{padding:6px 12px}.universe-tag{display:none}.shell-status{font-size:11px}.shell{padding:16px}.hero{padding:30px 0 18px}.hero h1{font-size:clamp(32px,12vw,52px)}}
+
+/* CrowSpace 2.6 Creator Dashboard */
+.dashboard-hero{display:flex;justify-content:space-between;gap:28px;align-items:center;padding:34px;border:1px solid #1b1d32;border-radius:24px;background:radial-gradient(circle at 80% 10%,#17132d,transparent 42%),linear-gradient(135deg,#080811,#101022);margin-bottom:22px}
+.dashboard-hero h1{margin:8px 0 10px;font-size:clamp(32px,5vw,60px)}
+.dashboard-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;border:2px solid #35305e}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.dash-stat{display:flex;flex-direction:column;gap:6px;text-decoration:none}
+.dash-stat span{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.dash-stat strong{font:800 30px Orbitron,Montserrat,sans-serif;color:var(--cyan)}
+.dashboard-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.dash-links{display:grid;gap:8px;margin-top:14px}
+.dash-links a{display:block;padding:12px 14px;border:1px solid #20223a;border-radius:12px;color:var(--text);text-decoration:none;background:#090a14}
+.dash-links a:hover{border-color:#3c3a68;transform:translateY(-1px)}
+.analytics-list{display:grid;gap:10px;margin:16px 0}
+.analytics-list div{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #20223a}
+.analytics-list strong{font-family:Orbitron,Montserrat,sans-serif;color:var(--cyan)}
+@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.dashboard-columns{grid-template-columns:1fr}}
+@media(max-width:600px){.dashboard-hero{padding:22px;align-items:flex-start}.dashboard-avatar{width:72px;height:72px}.dashboard-grid{grid-template-columns:1fr 1fr}.dash-stat strong{font-size:24px}}
