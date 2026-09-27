@@ -728,7 +728,7 @@ async function load(){
     const {data,error}=await crowSupabase.rpc("crowspace_profile_public",{target:uid});
     if(error){err("profile",error);throw error}
     prof=Array.isArray(data)?data[0]:data;
-    if(!prof){$("nestCover").outerHTML='<section class="nest-box"><h1>Nest not found</h1><p class="muted">This CrowSpace profile does not exist or is unavailable.</p><a class="btn" href="index.html">Back Home</a></section>';return}
+    if(!prof){const cover=document.querySelector(".nest-cover");if(cover)cover.outerHTML='<section class="nest-box"><h1>Nest not found</h1><p class="muted">This CrowSpace profile does not exist or is unavailable.</p><a class="btn" href="index.html">Back Home</a></section>';return}
     const {data:s,error:se}=await crowSupabase.from("crowspace_nest_settings").select("*").eq("user_id",uid).maybeSingle();
     err("Nest settings",se);nestSettings=s||{};applyNestStyle(nestSettings);
     const n=prof.display_name||prof.username||"CrowSpace Member";
