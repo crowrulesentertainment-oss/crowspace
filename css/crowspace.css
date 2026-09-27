@@ -155,3 +155,117 @@ main.crow-main{max-width:1380px;margin:auto}
 .nest-avatar{background:linear-gradient(135deg,#071a24,#241039)!important;border-color:rgba(89,231,255,.4)!important;box-shadow:0 0 45px rgba(89,231,255,.13),0 0 65px rgba(168,121,255,.08)!important}
 footer{color:#65728b!important;border-top-color:rgba(89,231,255,.14)!important}
 @media(max-width:800px){.site-header{position:sticky!important}.site-header .crow-nav-groups{background:#05060c!important}.site-header .crow-nav-panel{background:#070912!important}}
+
+
+/* CROWSPACE NAV FIT // FINAL RESPONSIVE LAYOUT */
+.site-header{
+  gap:10px!important;
+  padding-left:max(12px,calc((100% - 1380px)/2))!important;
+  padding-right:max(12px,calc((100% - 1380px)/2))!important;
+}
+.site-header>.brand{
+  flex:0 0 auto;
+}
+.site-header>nav{
+  flex:1 1 auto!important;
+  min-width:0!important;
+}
+.site-header>.crow-account,#account{
+  flex:0 0 auto;
+}
+.site-header .crow-nav-shell{
+  width:100%!important;
+  min-width:0!important;
+  border:0!important;
+  padding:2px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.site-header .crow-nav-home{
+  flex:0 0 auto!important;
+  padding:7px 9px!important;
+  font-size:11px!important;
+}
+.site-header .crow-nav-groups{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  justify-content:flex-end!important;
+  gap:2px!important;
+}
+.site-header .crow-nav-trigger{
+  padding:7px 8px!important;
+  font-size:10.5px!important;
+  gap:4px!important;
+}
+.site-header .crow-nav-trigger .chevron{font-size:8px!important}
+.site-header .crow-nav-panel{width:220px!important}
+.site-header #account{font-size:11px!important}
+
+@media(max-width:1050px){
+  .site-header{gap:7px!important}
+  .site-header .brand{font-size:15px!important;letter-spacing:1px!important}
+  .site-header .crow-nav-home{padding:7px 7px!important}
+  .site-header .crow-nav-trigger{padding:7px 6px!important;font-size:10px!important}
+  .site-header #account{font-size:10px!important}
+}
+
+@media(max-width:900px){
+  .site-header{
+    flex-wrap:nowrap!important;
+    min-height:62px!important;
+  }
+  .site-header>nav{
+    flex:0 0 auto!important;
+    width:auto!important;
+  }
+  .site-header .crow-nav-shell{
+    justify-content:flex-end!important;
+  }
+  .site-header .crow-nav-groups{
+    display:none!important;
+  }
+  .site-header .crow-menu-toggle{
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:6px!important;
+    padding:8px 11px!important;
+  }
+  .site-header .crow-menu-toggle span{display:inline!important}
+  .site-header .crow-nav-shell.mobile-open .crow-nav-groups{
+    display:flex!important;
+    position:absolute!important;
+    left:8px!important;
+    right:8px!important;
+    top:calc(100% + 8px)!important;
+    width:auto!important;
+    padding:10px!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    background:#05060c!important;
+    border:1px solid rgba(89,231,255,.22)!important;
+    border-radius:12px!important;
+    box-shadow:0 25px 70px rgba(0,0,0,.72)!important;
+    z-index:4000!important;
+  }
+  .site-header .crow-nav-group{width:100%!important}
+  .site-header .crow-nav-trigger{
+    width:100%!important;
+    justify-content:space-between!important;
+    padding:11px 12px!important;
+    font-size:12px!important;
+  }
+  .site-header .crow-nav-panel{
+    position:static!important;
+    width:100%!important;
+    margin:3px 0 5px!important;
+    box-shadow:none!important;
+  }
+}
+
+@media(max-width:600px){
+  .site-header{padding:8px 10px!important}
+  .site-header .brand{font-size:14px!important}
+  .site-header #account a{font-size:10px!important}
+  .site-header .crow-menu-toggle{font-size:16px!important;padding:7px 9px!important}
+  .site-header .crow-menu-toggle span{display:none!important}
+}
