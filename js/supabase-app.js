@@ -329,7 +329,7 @@ async function startRealtime(){
  }
 }
 async function render(){
- const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"activity.html":activity,"friends.html":friends,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
+ const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"activity.html":activity,"friends.html":friends,"graph.html":graph,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
  if(map[p])await map[p]();
  await startRealtime();
 }
