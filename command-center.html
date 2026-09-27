@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CrowSpace Command Center</title>
+<link rel="stylesheet" href="css/crowspace.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">CrowSpace</a>
+  <nav></nav>
+  <div id="account"></div>
+</header>
+<main class="wrap command-center">
+  <section class="hero card">
+    <p class="eyebrow">CROWRULES · CROWSPACE 7.0</p>
+    <h1>Universal Command Center</h1>
+    <p>Search People, Posts, Caws, Groups, Events, Dreamscapes and Memorials from one place.</p>
+    <form id="commandSearch" class="command-search">
+      <input id="commandInput" type="search" autocomplete="off" placeholder="Search the CrowRules universe…" autofocus>
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+    <div id="filters" class="command-filters" aria-label="Search categories"></div>
+  </section>
+  <section id="status" class="section"><div class="card"><strong>Ready.</strong><p class="muted">Enter a search above.</p></div></section>
+  <section id="results" class="command-results"></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",async()=>{
+ const input=document.getElementById("commandInput"),form=document.getElementById("commandSearch"),results=document.getElementById("results"),status=document.getElementById("status"),filters=document.getElementById("filters");
+ const types=[["all","Everything"],["people","People"],["posts","Posts"],["caws","Caws"],["groups","Groups"],["events","Events"],["dreamscapes","Dreamscapes"],["memorials","Memorials"]];
+ let active="all";
+ filters.innerHTML=types.map(([id,label])=>'<button type="button" class="command-filter '+(id==="all"?"active":"")+'" data-type="'+id+'">'+label+'</button>').join("");
+ filters.querySelectorAll("button").forEach(b=>b.onclick=()=>{active=b.dataset.type;filters.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));if(input.value.trim())search()});
+ const esc=CS.escape;
+ const label=t=>t.charAt(0).toUpperCase()+t.slice(1);
+ const search=async()=>{
+   const q=input.value.trim(); if(q.length<2){status.innerHTML='<div class="card"><strong>Keep searching.</strong><p class="muted">Enter at least 2 characters.</p></div>';results.innerHTML="";return}
+   status.innerHTML='<div class="card"><strong>Searching the CrowRules universe…</strong></div>';results.innerHTML="";
+   const {data,error}=await CS.client.rpc("crowspace_global_search",{search_text:q,result_limit:100,result_type_filter:active==="all"?null:active});
+   if(error){status.innerHTML='<div class="card"><strong>Search unavailable</strong><p>'+esc(error.message)+'</p></div>';return}
+   const rows=data||[];
+   status.innerHTML='<div class="card command-summary"><strong>'+rows.length+' result'+(rows.length===1?"":"s")+'</strong><span> for “'+esc(q)+'”</span></div>';
+   if(!rows.length){results.innerHTML='<div class="card"><h2>No results</h2><p class="muted">Try another name, title, topic or keyword.</p></div>';return}
+   results.innerHTML=rows.map(r=>'<a class="command-result card" href="'+esc(r.target_url||"#")+'">'+(r.image_url?'<img src="'+esc(r.image_url)+'" alt="">':'<div class="command-result-icon">'+esc(label(r.result_type).slice(0,1))+'</div>')+'<div class="command-result-copy"><span class="event-tag">'+esc(label(r.result_type))+'</span><h2>'+esc(r.title||"Untitled")+'</h2><strong>'+esc(r.subtitle||"")+'</strong><p>'+esc(r.description||"")+'</p><small>'+ (r.created_at?new Date(r.created_at).toLocaleString():"")+'</small></div></a>').join("");
+ };
+ form.addEventListener("submit",e=>{e.preventDefault();search()});
+ const params=new URLSearchParams(location.search); const initial=params.get("q"); if(initial){input.value=initial;search()}
+ try{await CS.refreshHeader();CS.renderUniverseBar();CS.renderUniversalStats()}catch(e){console.warn(e)}
+});
+</script>
+<style>
+.command-center{max-width:1180px;margin:24px auto;padding:0 16px}
+.command-center .hero{padding:28px}
+.command-search{display:flex;gap:10px;margin-top:20px}
+.command-search input{flex:1;min-width:0;padding:14px 16px;border:1px solid var(--line);border-radius:10px;font-size:16px}
+.command-filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.command-filter{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-weight:800;cursor:pointer}
+.command-filter.active{background:var(--blue2);color:var(--blue);border-color:#b7d6ff}
+.command-summary{display:flex;gap:5px}
+.command-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:40px}
+.command-result{display:flex;gap:14px;padding:16px;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
+.command-result:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.09)}
+.command-result>img,.command-result-icon{width:76px;height:76px;flex:0 0 76px;border-radius:12px;object-fit:cover;background:#eef2f7;display:grid;place-items:center;font-weight:900;font-size:24px}
+.command-result-copy{min-width:0}
+.command-result h2{margin:5px 0 4px;font-size:18px}
+.command-result p{margin:5px 0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.command-result small{color:var(--muted)}
+@media(max-width:800px){.command-results{grid-template-columns:1fr}.command-search{flex-direction:column}.command-search .btn{width:100%}}
+</style>
+</body>
+</html>
