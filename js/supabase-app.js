@@ -266,29 +266,48 @@ async function graph(){
   sb.rpc("crowspace_intelligence_neighbors",{p_kind:"person",p_id:user.id,p_limit:100}),
   sb.rpc("crowspace_predictive_trends",{p_limit:50})
  ]);
- const rows=edges.data||[];
- const nodes=new Map();
+ const rows=edges.data||[], nodes=new Map();
  rows.forEach(x=>{
-  const other=x.source_kind==="person"&&x.source_id===user.id?{kind:x.target_kind,id:x.target_id}:x.target_kind==="person"&&x.target_id===user.id?{kind:x.source_kind,id:x.source_id}:null;
+  const other=x.source_kind==="person"&&x.source_id===user.id?{kind:x.target_kind,id:x.target_id,edge:x}:x.target_kind==="person"&&x.target_id===user.id?{kind:x.source_kind,id:x.source_id,edge:x}:null;
   if(other&&!(other.kind==="person"&&other.id===user.id)){
-   const key=other.kind+":"+other.id;
-   const prev=nodes.get(key);
-   nodes.set(key,{...other,strength:Math.max(Number(prev?.strength||0),Number(x.strength||0)),count:Math.max(Number(prev?.count||0),Number(x.interaction_count||0)),relationship:x.relationship,last_seen_at:x.last_seen_at});
+   const key=other.kind+":"+other.id,prev=nodes.get(key);
+   nodes.set(key,{...other,strength:Math.max(Number(prev?.strength||0),Number(other.edge.strength||0)),count:Math.max(Number(prev?.count||0),Number(other.edge.interaction_count||0)),relationship:other.edge.relationship,last_seen_at:other.edge.last_seen_at});
   }
  });
  const ids=[...nodes.values()].filter(x=>x.kind==="person").map(x=>x.id), people=await getProfiles(ids),pmap=new Map(people.map(p=>[p.user_id,p]));
- const label=(kind,id)=>kind==="person"?(pmap.get(id)?.display_name||pmap.get(id)?.username||"Member"):kind.replace("_"," ");
- const items=[...nodes.values()].sort((a,b)=>b.strength-a.strength).slice(0,24);
- const w=900,h=Math.max(420,Math.min(680,220+items.length*18)),cx=w/2,cy=h/2;
- const positioned=items.map((x,i)=>{const ang=(Math.PI*2*i/Math.max(1,items.length))-(Math.PI/2),r=Math.min(190,145+items.length*2);return {...x,x:cx+Math.cos(ang)*r,y:cy+Math.sin(ang)*r}});
- const svg='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Personal CrowSpace social graph" style="width:100%;height:auto;display:block">'+
-  positioned.map(x=>'<line x1="'+cx+'" y1="'+cy+'" x2="'+x.x.toFixed(1)+'" y2="'+x.y.toFixed(1)+'" stroke="currentColor" opacity=".22" />').join("")+
-  '<circle cx="'+cx+'" cy="'+cy+'" r="34" fill="none" stroke="currentColor" stroke-width="2"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" font-size="13" fill="currentColor">'+esc((profile.data?.display_name||"YOU").slice(0,18))+'</text>'+
-  positioned.map(x=>'<g><circle cx="'+x.x.toFixed(1)+'" cy="'+x.y.toFixed(1)+'" r="25" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="'+x.x.toFixed(1)+'" y="'+(x.y+4).toFixed(1)+'" text-anchor="middle" font-size="10" fill="currentColor">'+esc(label(x.kind,x.id).slice(0,12))+'</text></g>').join("")+
-  '</svg>';
- const cards=items.map(x=>card('<span class="kicker">GRAPH NODE · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(label(x.kind,x.id))+'</h2><p class="muted">'+esc(x.relationship||"connected")+' · Strength '+esc(String(x.strength))+' · Interactions '+esc(String(x.count))+'</p>')).join("")||card('<p class="muted">Your personal graph is beginning to build. New relationships appear as you follow, connect, post, join communities, enter CrowRooms and RSVP to events.</p>');
+ const idsBy=k=>[...nodes.values()].filter(x=>x.kind===k).map(x=>x.id);
+ const [groupsR,roomsR,eventsR]=await Promise.all([
+  idsBy("group").length?sb.from("crowspace_groups").select("id,slug,name").in("id",idsBy("group")):Promise.resolve({data:[]}),
+  idsBy("room").length?sb.from("crowspace_rooms").select("id,slug,name").in("id",idsBy("room")):Promise.resolve({data:[]}),
+  idsBy("event").length?sb.from("crowspace_events").select("id,title").in("id",idsBy("event")):Promise.resolve({data:[]})
+ ]);
+ const meta={group:new Map((groupsR.data||[]).map(x=>[x.id,x])),room:new Map((roomsR.data||[]).map(x=>[x.id,x])),event:new Map((eventsR.data||[]).map(x=>[x.id,x]))};
+ const label=(kind,id)=>kind==="person"?(pmap.get(id)?.display_name||pmap.get(id)?.username||"Member"):meta[kind]?.get(id)?.name||meta[kind]?.get(id)?.title||kind.replace("_"," ");
+ const href=x=>x.kind==="person"?"profile.html?id="+encodeURIComponent(x.id):x.kind==="group"?"group.html?id="+encodeURIComponent(meta.group.get(x.id)?.slug||x.id):x.kind==="room"?"room.html?id="+encodeURIComponent(meta.room.get(x.id)?.slug||x.id):x.kind==="event"?"event.html?id="+encodeURIComponent(x.id):x.kind==="post"?"index.html#post-"+encodeURIComponent(x.id):null;
+ const types=[...new Set([...nodes.values()].map(x=>x.kind))],rels=[...new Set([...nodes.values()].map(x=>x.relationship).filter(Boolean))];
+ const items=[...nodes.values()].sort((a,b)=>b.strength-a.strength).slice(0,40);
+ const positioned=items.map((x,i)=>{const ang=(Math.PI*2*i/Math.max(1,items.length))-(Math.PI/2),r=Math.min(210,150+items.length*1.5);return {...x,x:450+Math.cos(ang)*r,y:320+Math.sin(ang)*r}});
+ const nodeSvg=positioned.map((x,i)=>'<g class="cr-graph-node" tabindex="0" role="button" data-kind="'+esc(x.kind)+'" data-id="'+esc(x.id)+'" data-index="'+i+'"><circle cx="'+x.x.toFixed(1)+'" cy="'+x.y.toFixed(1)+'" r="28" fill="none" stroke="currentColor" stroke-width="1.8"/><text x="'+x.x.toFixed(1)+'" y="'+(x.y+4).toFixed(1)+'" text-anchor="middle" font-size="10" fill="currentColor">'+esc(label(x.kind,x.id).slice(0,13))+'</text></g>').join("");
+ const lineSvg=positioned.map(x=>'<line class="cr-graph-line" x1="450" y1="320" x2="'+x.x.toFixed(1)+'" y2="'+x.y.toFixed(1)+'" stroke="currentColor" opacity=".2"/>').join("");
+ const svg='<svg id="crGraphSvg" viewBox="0 0 900 640" role="img" aria-label="Interactive personal CrowSpace social graph" style="width:100%;height:auto;display:block;touch-action:none"><g id="crGraphWorld">'+lineSvg+'<circle cx="450" cy="320" r="36" fill="none" stroke="currentColor" stroke-width="2"/><text x="450" y="325" text-anchor="middle" font-size="13" fill="currentColor">'+esc((profile.data?.display_name||"YOU").slice(0,18))+'</text>'+nodeSvg+'</g></svg>';
+ const filters='<div class="filter-row"><select id="crGraphType" class="search"><option value="">All node types</option>'+types.map(x=>'<option value="'+esc(x)+'">'+esc(x.replace("_"," "))+'</option>').join("")+'</select><select id="crGraphRel" class="search"><option value="">All relationships</option>'+rels.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("")+'</select><button class="btn" id="crGraphReset" type="button">Reset View</button><button class="btn" id="crGraphZoomIn" type="button">＋ Zoom</button><button class="btn" id="crGraphZoomOut" type="button">− Zoom</button></div>';
+ const cards=items.map((x,i)=>card('<span class="kicker">'+esc(x.kind.toUpperCase())+'</span><h2>'+esc(label(x.kind,x.id))+'</h2><p class="muted">'+esc(x.relationship||"connected")+' · Strength '+esc(String(x.strength))+' · Interactions '+esc(String(x.count))+'</p><a class="btn" href="'+esc(href(x)||"#")+'">Open</a> <button class="btn" type="button" data-cr-action="graph:select:'+i+'">Details</button>')).join("")||card('<p class="muted">Your personal graph is beginning to build. New relationships appear as you follow, connect, post, join communities, enter CrowRooms and RSVP to events.</p>');
  const trendHtml=(trends.data||[]).filter(x=>x.direction==="rising").slice(0,6).map(x=>card('<span class="kicker">RISING · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(x.kind)+'</h2><p class="muted">'+esc(x.explanation)+'</p><p>Momentum: <strong>'+esc(String(x.momentum))+'</strong> · Acceleration: <strong>'+esc(String(x.acceleration))+'</strong></p>')).join("")||card('<p class="muted">No rising graph trends yet.</p>');
- app.innerHTML=shell("My Graph","A live view of your personal CrowSpace universe.",card('<span class="kicker">CROWSPACE 4.26</span><h2>Interactive Personal Graph</h2><p class="muted">'+esc(profile.data?.display_name||"Your")+" graph visualizes the real relationships currently captured by CrowSpace intelligence.</p><div class="filter-row"><button class="btn" data-act="graph:refresh">Refresh Graph</button><a class="btn" href="discover.html">Discover</a></div>')+'<section class="card" style="overflow:hidden;margin-bottom:24px">'+svg+'</section><h2>🔗 Graph Connections</h2><div class="grid">'+cards+'</div><h2>🔥 Rising Around Your Universe</h2><div class="grid">'+trendHtml+'</div>');
+ app.innerHTML=shell("My Graph","A live view of your personal CrowSpace universe.",card('<span class="kicker">CROWSPACE 4.27</span><h2>Graph Interaction Engine</h2><p class="muted">'+esc(profile.data?.display_name||"Your")+" graph is actionable: select nodes for details, open connected destinations, filter relationships, and navigate the network.</p>"+filters+'<div id="crGraphDetails" class="muted" aria-live="polite" style="margin-top:12px">Select a connection to see why it is in your graph.</div>')+'<section class="card" style="overflow:hidden;margin-bottom:24px">'+svg+'</section><h2>🔗 Graph Connections</h2><div class="grid">'+cards+'</div><h2>🔥 Rising Around Your Universe</h2><div class="grid">'+trendHtml+'</div>');
+ const svgEl=document.getElementById("crGraphSvg"),world=document.getElementById("crGraphWorld"),details=document.getElementById("crGraphDetails"),state={scale:1,x:0,y:0,drag:false,px:0,py:0};
+ const apply=()=>{world.setAttribute("transform","translate("+state.x+" "+state.y+") scale("+state.scale+")")};
+ const selectNode=x=>{const destination=href(x);details.innerHTML='<strong>'+esc(label(x.kind,x.id))+'</strong> · '+esc(x.kind)+'<br><span class="muted">Relationship: '+esc(x.relationship||"connected")+' · Strength: '+esc(String(x.strength))+' · Interactions: '+esc(String(x.count))+' · Last seen: '+esc(when(x.last_seen_at))+'</span><br><span class="muted">Why connected: '+esc(x.relationship==="follow"?"You follow this member.":x.relationship==="friend"?"You are connected as friends.":x.relationship==="member"?"You share a community or room.":x.relationship==="rsvp"?"You are connected through an event RSVP.":x.relationship==="authored"?"You created this content.":x.relationship==="commented"?"You interacted through a comment.":x.relationship==="reacted"?"You interacted through a reaction.":"This relationship was captured from your CrowSpace activity.")+'</span>'+(destination?' · <a href="'+esc(destination)+'">Open</a>':"");document.querySelectorAll(".cr-graph-node").forEach(n=>n.style.opacity=n.dataset.index===String(x._index)?"1":"");};
+ positioned.forEach((x,i)=>x._index=i);
+ svgEl?.querySelectorAll(".cr-graph-node").forEach((n,i)=>{const x=positioned[i];n.addEventListener("click",()=>selectNode(x));n.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectNode(x)}})});
+ document.getElementById("crGraphType")?.addEventListener("change",e=>{const v=e.target.value;svgEl?.querySelectorAll(".cr-graph-node").forEach(n=>n.style.display=!v||n.dataset.kind===v?"":"none");svgEl?.querySelectorAll(".cr-graph-line").forEach((l,i)=>{const x=positioned[i];l.style.display=!v||x.kind===v?"":"none"})});
+ document.getElementById("crGraphRel")?.addEventListener("change",e=>{const v=e.target.value;svgEl?.querySelectorAll(".cr-graph-node").forEach((n,i)=>n.style.display=(!v||positioned[i].relationship===v)?"":"none");svgEl?.querySelectorAll(".cr-graph-line").forEach((l,i)=>l.style.display=(!v||positioned[i].relationship===v)?"":"none")});
+ document.getElementById("crGraphReset")?.addEventListener("click",()=>{state.scale=1;state.x=0;state.y=0;apply()});
+ document.getElementById("crGraphZoomIn")?.addEventListener("click",()=>{state.scale=Math.min(2.5,state.scale+.15);apply()});
+ document.getElementById("crGraphZoomOut")?.addEventListener("click",()=>{state.scale=Math.max(.6,state.scale-.15);apply()});
+ svgEl?.addEventListener("wheel",e=>{e.preventDefault();state.scale=Math.max(.6,Math.min(2.5,state.scale+(e.deltaY<0?.12:-.12)));apply()},{passive:false});
+ svgEl?.addEventListener("pointerdown",e=>{if(e.target.closest(".cr-graph-node"))return;state.drag=true;state.px=e.clientX;state.py=e.clientY;svgEl.setPointerCapture(e.pointerId)});
+ svgEl?.addEventListener("pointermove",e=>{if(!state.drag)return;state.x+=(e.clientX-state.px);state.y+=(e.clientY-state.py);state.px=e.clientX;state.py=e.clientY;apply()});
+ svgEl?.addEventListener("pointerup",()=>{state.drag=false});
 }async function customize(){
  if(!user){app.innerHTML=shell("Customize My Space","Persistent profile studio.",gate());return}
  const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single()).data;
