@@ -50,3 +50,7 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 .cr-physics-controls input[type=range]{width:110px}
 .cr-physics-help{font-size:.75rem;opacity:.6}
 .cr-frozen-node{stroke-width:4!important;stroke-dasharray:3 3}
+
+/* CrowSpace 4.40 — Graph Intelligence Studio */
+.cr-graph-studio{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 14px}
+.cr-graph-studio .search{min-width:140px}
