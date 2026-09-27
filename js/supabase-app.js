@@ -303,7 +303,7 @@ async function graph(){
  const edgeWeight=(x,y)=>{const ex=(x.relationship||"").toLowerCase(),ey=(y.relationship||"").toLowerCase();return Math.max(0.15,Math.min(1,(Number(x.strength)||0.5)/5,(Number(y.strength)||0.5)/5))+(ex===ey?.2:0);
  };
  const neighborRows=[...rows];
- for(let iter=0;iter<8;iter++){for(const n of forceNodes){let fx=0,fy=0;for(const m of forceNodes){if(n===m)continue;const dx=m.x-n.x,dy=m.y-n.y,d=Math.max(24,Math.hypot(dx,dy)),w=edgeWeight(n,m);fx+=(dx/d)*w*7;fy+=(dy/d)*w*7;const repel=2200/(d*d);fx-=(dx/d)*repel;fy-=(dy/d)*repel}const z=zones[n.kind]||{x:450,y:320};fx+=(z.x-n.x)*0.025;fy+=(z.y-n.y)*0.025;n.x=Math.max(40,Math.min(860,n.x+fx));n.y=Math.max(60,Math.min(580,n.y+fy))}}
+ for(let iter=0;iter<8;iter++){for(const n of forceNodes){let fx=0,fy=0;for(const m of forceNodes){if(n===m)continue;const nk=n.kind+":"+n.id,mk=m.kind+":"+m.id;const linked=neighborRows.some(r=>{const rk=r.node_kind+":"+r.node_id,vk=r.via_kind+":"+r.via_id;return (rk===nk&&vk===mk)||(rk===mk&&vk===nk)});const dx=m.x-n.x,dy=m.y-n.y,d=Math.max(24,Math.hypot(dx,dy));if(linked){const w=edgeWeight(n,m);fx+=(dx/d)*w*12;fy+=(dy/d)*w*12}else{const repel=1200/(d*d);fx-=(dx/d)*repel;fy-=(dy/d)*repel}}const z=zones[n.kind]||{x:450,y:320};fx+=(z.x-n.x)*0.025;fy+=(z.y-n.y)*0.025;n.x=Math.max(40,Math.min(860,n.x+fx));n.y=Math.max(60,Math.min(580,n.y+fy))}}
  positioned.forEach(x=>{const k=x.kind+":"+x.id,p=window.__crowspaceGraphPositions[k];if(p){x.x=p.x;x.y=p.y}else if(!window.__crowspaceGraphForceInitialized){window.__crowspaceGraphPositions[k]={x:x.x,y:x.y}}});
  window.__crowspaceGraphForceInitialized=true;
  positioned.forEach(x=>{const k=x.kind+":"+x.id,p=window.__crowspaceGraphPositions[k];if(p){x.x=p.x;x.y=p.y}});
