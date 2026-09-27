@@ -40,7 +40,6 @@
 window.__CAW_FEED_BUILD="2026-09-27-v4";
 (()=>{const s=document.getElementById("status");if(s)s.textContent="Caw Feed v4 · Starting…";})();
 </script>
-<script src="js/global-nav.js"></script>
 <script>
 (()=>{"use strict";
 const CONFIG={url:"https://cevylpnoexugwgygvtgu.supabase.co",key:"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"};
@@ -135,8 +134,9 @@ async function load(){
   render();status.textContent=caws.length?"Member Caw Feed · "+caws.length+" Caw"+(caws.length===1?"":"s"):"No playable Caws";
  }catch(e){console.error("Caw Feed:",e);showBox("Caw Feed Error",e.message||"Unable to load the Caw Feed.");status.textContent="Feed error"}
 }
+async function installNav(){try{await new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="js/global-nav.js?v=20260927";s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}catch(e){console.warn("CrowSpace navigation:",e)}}
 async function start(){
- try{await bootClient();status.textContent="CrowSpace connection ready";if(!(await requireMember()))return;try{const sub=client.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"||!session){user=null;location.replace(loginUrl())}else if(session.user)user=session.user});authSubscription=sub?.data?.subscription||sub?.subscription||null}catch(e){console.warn("Auth listener:",e)}await load()}
+ try{await bootClient();status.textContent="CrowSpace connection ready";if(!(await requireMember()))return;try{const sub=client.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"||!session){user=null;location.replace(loginUrl())}else if(session.user)user=session.user});authSubscription=sub?.data?.subscription||sub?.subscription||null}catch(e){console.warn("Auth listener:",e)}await load();installNav()}
  catch(e){console.error("Caw Feed startup:",e);showBox("CrowSpace Connection Error",e.message||"Unable to connect to CrowSpace.","Retry",()=>location.reload());status.textContent="Connection error"}
 }
 window.addEventListener("pagehide",()=>{observer?.disconnect();viewTimers.forEach(clearTimeout);authSubscription?.unsubscribe?.()});
