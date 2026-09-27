@@ -242,7 +242,7 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 @media(max-width:900px){.os-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.nest-os{padding:16px}.nest-os-head{display:block}.os-live{margin-top:12px}.os-grid{grid-template-columns:1fr 1fr}.os-card{min-height:100px}}
 </style></head>
 <body>
-<header class="nest-topbar"><a class="nest-logo" href="index.html"><span>◉</span> CROWSPACE</a><div class="top-actions"><a href="notifications.html">Notifications</a><a href="membership.html">Membership</a><div id="account"></div></div></header>
+<header class="site-header"><a class="brand" href="index.html">CROW<span>SPACE</span></a><nav aria-label="CrowSpace global navigation"></nav><div id="account"></div></header>
 <main class="nest-app">
 <section class="identity-card">
   <div class="identity-art"><div class="avatar-orb" id="avatar">C</div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div></div>
@@ -733,9 +733,7 @@ text("tagline",nestSettings.tagline||"Welcome to my CrowSpace Nest.");text("stat
       const {error:ve}=await crowSupabase.from("crowspace_profile_visits").insert({profile_id:uid,visitor_id:viewer.id});
       err("profile visit",ve);
     }
-    const {data:n31,error:n31Error}=await crowSupabase.rpc("crowspace_nest_3_1",{target:uid});
-    err("Nest dashboard",n31Error);
-    const d=n31||{};
+    const d={};
     await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]); renderClassicDetails(); renderClassicMusic(); await renderClassicTop8(); await renderClassicTestimonials(); setupClassicThemes(); text("shareUrl",classicUrl());
     const map={top8Section:"show_top_friends",interestsSection:"show_interests",musicSection:"show_music",photosSection:"show_photos",cawsSection:"show_caws",groupsSection:"show_groups",eventsSection:"show_events",guestbookSection:"show_guestbook"};
     Object.keys(map).forEach(id=>{const el=$(id);if(el&&nestSettings[map[id]]===false)el.style.display="none"});
@@ -808,14 +806,14 @@ body.avatar-modal-open{overflow:hidden}
 .nest-photo-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
 @media(max-width:800px){.inline-comment-form{flex-direction:column}}
 </style>
-<script src="js/global-nav.js"></script><script>(function(){function modernizeProfile(){const p=document.getElementById("modernIdentity");if(p&&typeof prof!=="undefined"&&prof)p.textContent=prof.display_name||("@"+(prof.username||"member"));const s=document.getElementById("modernPresence");if(s&&typeof prof!=="undefined"&&prof)s.textContent=prof.is_online?"● Online now":"● In CrowSpace"}document.addEventListener("DOMContentLoaded",()=>setTimeout(modernizeProfile,1200));})();</script><script>
+<script>(function(){function modernizeProfile(){const p=document.getElementById("modernIdentity");if(p&&typeof prof!=="undefined"&&prof)p.textContent=prof.display_name||("@"+(prof.username||"member"));const s=document.getElementById("modernPresence");if(s&&typeof prof!=="undefined"&&prof)s.textContent=prof.is_online?"● Online now":"● In CrowSpace"}document.addEventListener("DOMContentLoaded",()=>setTimeout(modernizeProfile,1200));})();</script><script>
 (function(){
  async function loadNestOS(){
   if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
   const [friends,posts,visits]=await Promise.all([
-   crowSupabase.from("crowspace_friendships").select("*",{count:"exact",head:true}).or("user_id.eq."+uid+",friend_id.eq."+uid),
+   crowSupabase.from("crowspace_friendships").select("id",{count:"exact",head:true}).or("requester_id.eq."+uid+",addressee_id.eq."+uid).eq("status","accepted"),
    crowSupabase.from("crowspace_posts").select("id,created_at",{count:"exact",head:true}).eq("user_id",uid),
-   crowSupabase.from("crowspace_nest_3_1").select("id,created_at",{count:"exact",head:true}).eq("profile_id",uid)
+   crowSupabase.from("crowspace_profile_visits").select("id,created_at",{count:"exact",head:true}).eq("profile_id",uid)
   ]);
   if(friends.count!==undefined)document.getElementById("nestMetricFriends").textContent=Math.floor((friends.count||0)/2);
   if(posts.count!==undefined)document.getElementById("nestMetricPosts").textContent=posts.count||0;
@@ -853,7 +851,6 @@ body.avatar-modal-open{overflow:hidden}
    .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},p=>{pulse("New wall post","Your Nest received a new post.");refreshCounts();})
    .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_comments"},p=>{pulse("New comment","A conversation changed on your Nest.");})
    .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_friendships"},p=>{const x=p.new||{};if(x.requester_id===uid||x.addressee_id===uid){pulse("Network update","Your friendship network changed.");}})
-   .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_nest_3_1",filter:"profile_id=eq."+uid},p=>{pulse("New visitor","Someone visited your Nest.");})
    .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},p=>{const x=p.new||{};pulse("Notification",x.body||"You have a new notification.");})
    .subscribe(status=>{const s=document.getElementById("nestLiveStatus"),d=document.getElementById("nestLiveDetail");if(status==="SUBSCRIBED"){if(s)s.textContent="Realtime online";if(d)d.textContent="Live Supabase sync active";}});
  }
@@ -893,8 +890,8 @@ async function startOS(){
  .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>{counts();pulse("✦","Your Caw is live","New post","caws.html")})
  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"crowspace_friendships"},p=>{const x=p.new||{};if(x.status==="accepted"&&(x.requester_id===uid||x.addressee_id===uid)){counts();pulse("👥","A connection was accepted","Network","friends.html")}})
  .subscribe(async status=>{
-   if(status==="SUBSCRIBED"){set("osLiveText","1 ONLINE");if(q("osDot"))q("osDot").style.background="#55e6ff";await osChannel.track({user_id:uid,page:"profile",online_at:new Date().toISOString()});}
-   else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){set("osLiveText","RECONNECTING")}
+   if(status==="SUBSCRIBED"){set("osLiveText","1 ONLINE");if(q("osDot"))q("osDot").style.background="#55e6ff";set("nestLiveStatus","REALTIME ONLINE");set("nestLiveDetail","Live CrowSpace sync active");await osChannel.track({user_id:uid,page:"profile",online_at:new Date().toISOString()});}
+   else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){set("osLiveText","LIVE SYNC RETRYING"); const vis=document.getElementById("nestLiveStatus"); const det=document.getElementById("nestLiveDetail"); if(vis)vis.textContent="LIVE SYNC RETRYING"; if(det)det.textContent="CrowSpace is reconnecting automatically";}
  });
 }
 document.addEventListener("DOMContentLoaded",()=>setTimeout(startOS,1200));
