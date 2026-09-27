@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Caws | CrowSpace</title>
 <link rel="stylesheet" href="css/crowspace.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,302 +11,205 @@
 .caw-recorder{position:relative;overflow:hidden;min-height:360px;background:#02030a;border:1px solid rgba(89,231,255,.22);box-shadow:0 0 40px rgba(89,231,255,.07)}
 #preview{width:100%;height:100%;min-height:360px;display:block;object-fit:cover;background:#010207}
 .recorder-overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 30%,transparent 65%,rgba(0,0,0,.75))}
-.live-badge{position:absolute;top:16px;left:16px;padding:7px 11px;border:1px solid rgba(255,79,216,.45);background:rgba(3,4,10,.78);font-size:11px;font-weight:800;letter-spacing:.14em;color:#ff9bea}
-.rec-status{position:absolute;right:16px;top:16px;padding:7px 11px;background:rgba(3,4,10,.78);font-size:12px;color:#fff}
-.rec-controls{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.camera-help{font-size:12px;line-height:1.45;max-width:520px}.camera-select{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.camera-select select{min-width:150px}
-.record-btn{border-radius:999px!important}
-.camera-diagnostics{margin-top:10px;padding:12px;border:1px solid rgba(89,231,255,.18);background:rgba(2,3,10,.72);font-size:12px;line-height:1.55;color:#cbd5e1}
-.camera-diagnostics strong{display:block;color:#59e7ff;margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase}
-.camera-select select{background:#080b14;color:#fff;border:1px solid rgba(89,231,255,.25);padding:9px 10px;border-radius:6px}
-.record-btn.recording{background:#ff4fd8!important;box-shadow:0 0 24px rgba(255,79,216,.4)}
-.mode-active{border-color:rgba(89,231,255,.7)!important;box-shadow:0 0 18px rgba(89,231,255,.16)}
-.source-note{font-size:11px;opacity:.65;margin-top:-4px}
-.studio-copy h2{margin-top:0}.studio-copy .muted{line-height:1.65}
-.caw-form{display:grid;gap:12px;margin-top:14px}.caw-form input,.caw-form textarea{width:100%;box-sizing:border-box}
-.file-chip{padding:10px 12px;border:1px solid var(--cp-line,rgba(112,132,180,.22));background:rgba(8,11,20,.7);font-size:13px}
+.live-badge,.rec-status{position:absolute;top:16px;padding:7px 11px;background:rgba(3,4,10,.82);font-size:11px;font-weight:800;letter-spacing:.1em}.live-badge{left:16px;color:#ff9bea;border:1px solid rgba(255,79,216,.45)}.rec-status{right:16px;color:#fff}
+.rec-controls{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.camera-select{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.camera-select select{min-width:150px;background:#080b14;color:#fff;border:1px solid rgba(89,231,255,.25);padding:9px 10px;border-radius:6px}
+.record-btn{border-radius:999px!important}.record-btn.recording{background:#ff4fd8!important;box-shadow:0 0 24px rgba(255,79,216,.4)}
+.camera-diagnostics{margin-top:10px;padding:12px;border:1px solid rgba(89,231,255,.18);background:rgba(2,3,10,.72);font-size:12px;line-height:1.55;color:#cbd5e1}.camera-diagnostics strong{display:block;color:#59e7ff;margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase}
+.mobile-only-message{height:100%;min-height:360px;display:grid;place-items:center;text-align:center;padding:30px;box-sizing:border-box;font:800 17px Orbitron;line-height:1.5;color:#c9f7ff;background:radial-gradient(circle at center,rgba(89,231,255,.09),transparent 58%)}
+.mobile-recording-panel{display:none}
+.mobile-recording-panel.show{display:block}
+.studio-copy h2{margin-top:0}.studio-copy .muted{line-height:1.65}.caw-form{display:grid;gap:12px;margin-top:14px}.caw-form input,.caw-form textarea{width:100%;box-sizing:border-box}.file-chip{padding:10px 12px;border:1px solid var(--cp-line,rgba(112,132,180,.22));background:rgba(8,11,20,.7);font-size:13px}.source-note{font-size:11px;opacity:.65;margin-top:-4px}
 @media(max-width:850px){.caw-studio{grid-template-columns:1fr}.caw-recorder,#preview{min-height:300px}}
+@media(max-width:600px){.caw-recorder{min-height:calc(100svh - 210px)}#preview{min-height:calc(100svh - 210px);max-height:72svh}.rec-controls{left:10px;right:10px;bottom:10px;gap:7px}.rec-controls .camera-select{width:100%}.rec-controls .btn{flex:1}.camera-select select{flex:1;min-width:0}.live-badge,.rec-status{top:10px}.live-badge{left:10px}.rec-status{right:10px}}
 </style>
 </head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header>
-
 <main class="section">
   <div class="section-head">
-    <div><p class="eyebrow">SHORT FORM / CREATOR STUDIO</p><h1>Caws</h1><p class="muted">Record a Caw with your camera and microphone, or upload a video from your device.</p></div>
+    <div><p class="eyebrow">SHORT FORM / CREATOR STUDIO</p><h1>Caws</h1><p class="muted">Record a Caw on your mobile device, or upload a video from any device.</p></div>
     <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn primary" href="caw-feed.html">▶ Watch Caw Feed</a><a class="btn" href="create-caw.html">Full Upload Studio</a></div>
   </div>
-
   <section class="caw-studio">
-    <div class="card caw-recorder">
+    <div class="card caw-recorder" id="recorderCard">
       <video id="preview" autoplay muted playsinline></video>
       <div class="recorder-overlay"></div>
-      <div class="live-badge" id="liveBadge">● CAMERA READY</div>
-      <div class="rec-status" id="recStatus">Ready to record</div>
-      <div class="rec-controls">
-        <div class="camera-select"><button id="phoneModeBtn" class="btn primary" type="button">📱 Record with Phone</button><button id="webcamModeBtn" class="btn" type="button">🖥️ Record with Webcam</button></div><div class="camera-select"><button id="cameraBtn" class="btn" type="button">Enable Camera</button><button id="switchCameraBtn" class="btn" type="button" disabled>↔ Switch Camera</button></div>
-        <div class="camera-select"><select id="cameraDevice" aria-label="Camera"><option value="">Default camera</option></select><select id="micDevice" aria-label="Microphone"><option value="">Default microphone</option></select></div>
+      <div class="live-badge" id="liveBadge">● MOBILE CAMERA</div>
+      <div class="rec-status" id="recStatus">Checking device…</div>
+      <div class="rec-controls" id="recControls">
+        <button id="cameraBtn" class="btn primary" type="button">📷 Enable Camera</button>
+        <button id="switchCameraBtn" class="btn" type="button" disabled>↔ Switch Camera</button>
         <button id="recordBtn" class="btn primary record-btn" type="button" disabled>● Start Recording</button>
         <button id="stopBtn" class="btn" type="button" disabled>■ Stop</button>
         <button id="clearBtn" class="btn" type="button">Clear</button>
       </div>
     </div>
-
     <div class="card studio-copy">
       <p class="eyebrow">MAKE A CAW</p>
-      <h2>Record or upload.</h2>
-      <p class="muted">Use a desktop webcam or your phone camera and microphone for a quick Caw. On mobile, CrowSpace can use the front or rear camera. You can also upload a video already saved on your device.</p><p class="muted camera-help">Camera access normally requires HTTPS and your browser’s permission. On phones, hold the device upright or sideways before recording; the preview will adapt to the available camera.</p>
-      <div id="cameraDiagnostics" class="camera-diagnostics" aria-live="polite">
-        <strong>Camera diagnostics</strong>
-        <div id="cameraDiagText">Choose Phone or Webcam mode, then enable the camera.</div>
-      </div>
+      <h2 id="studioTitle">Record on mobile. Upload anywhere.</h2>
+      <p id="studioIntro" class="muted">CrowSpace recording is designed for phones and tablets. The mobile camera opens directly in the browser, with front/rear camera switching and microphone capture.</p>
+      <p class="muted camera-help">Camera access requires a secure HTTPS page and browser permission. On iPhone/iPad, use Safari or another browser that supports camera access and allow both Camera and Microphone when prompted.</p>
+      <div class="camera-diagnostics" aria-live="polite"><strong>Camera diagnostics</strong><div id="cameraDiagText">Checking mobile camera support…</div></div>
       <form id="cawForm" class="caw-form">
         <label>Title<input id="title" maxlength="120" required placeholder="Give your Caw a title"></label>
         <label>Caption<textarea id="caption" maxlength="2000" rows="5" placeholder="What's this Caw about?"></textarea></label>
-        <label>Upload a Caw<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" capture="environment"></label><div class="source-note">Phone recording uses the browser camera. Webcam recording uses your computer camera. If camera access is unavailable, you can always upload a saved video.</div>
+        <label>Upload a Caw<input id="video_file" type="file" accept="video/*" capture="environment"></label>
+        <div class="source-note" id="sourceNote">Mobile users can record directly above or choose an existing video. Desktop users can upload a saved video.</div>
         <div id="fileInfo" class="file-chip">No video selected.</div>
         <button id="publishBtn" class="btn primary" type="submit">Upload &amp; Publish Caw</button>
         <p id="msg" class="muted" role="status"></p>
       </form>
     </div>
   </section>
-
   <div id="filter" class="filter-banner"></div>
   <div id="cawsGrid" class="grid three"></div>
 </main>
-
 <script src="js/config.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/crowspace.js"></script>
 <script>
 const MAX_BYTES=512*1024*1024;
-const preview=document.getElementById("preview"), cameraBtn=document.getElementById("cameraBtn"), recordBtn=document.getElementById("recordBtn"), stopBtn=document.getElementById("stopBtn"), clearBtn=document.getElementById("clearBtn"), recStatus=document.getElementById("recStatus"), liveBadge=document.getElementById("liveBadge"), fileInput=document.getElementById("video_file"), fileInfo=document.getElementById("fileInfo"), form=document.getElementById("cawForm"), msg=document.getElementById("msg");
-let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null, cameraFacing="user", captureMode="phone";
-const phoneModeBtn=document.getElementById("phoneModeBtn"), webcamModeBtn=document.getElementById("webcamModeBtn");
-function setCaptureMode(mode){captureMode=mode;phoneModeBtn.classList.toggle("mode-active",mode==="phone");webcamModeBtn.classList.toggle("mode-active",mode==="webcam");liveBadge.textContent=mode==="phone"?"● PHONE CAMERA READY":"● WEBCAM READY";document.getElementById("cameraDiagText").textContent=(mode==="phone"?"Phone mode selected. Use the front/rear camera on a mobile device.":"Webcam mode selected. Use your desktop/laptop webcam and microphone.")+" Click Enable Camera to start.";}
-function detectCaptureMode(){
-  const mobile=/Android|iPhone|iPad|iPod|Windows Phone|Mobile/i.test(navigator.userAgent)||window.matchMedia?.("(pointer:coarse)").matches;
-  const mode=mobile?"phone":"webcam";
-  setCaptureMode(mode);
-  const label=mode==="phone"?"📱 Phone detected":"🖥️ Webcam detected";
-  liveBadge.textContent="● "+label.toUpperCase();
-  document.getElementById("cameraDiagText").textContent=(mode==="phone"?"CrowSpace detected a mobile device. Phone camera mode is ready.":"CrowSpace detected a desktop/laptop device. Webcam mode is ready.")+" Click Enable Camera to start.";
-  return mode;
+const $=id=>document.getElementById(id);
+const preview=$("preview"),cameraBtn=$("cameraBtn"),switchBtn=$("switchCameraBtn"),recordBtn=$("recordBtn"),stopBtn=$("stopBtn"),clearBtn=$("clearBtn"),recStatus=$("recStatus"),liveBadge=$("liveBadge"),fileInput=$("video_file"),fileInfo=$("fileInfo"),form=$("cawForm"),msg=$("msg"),diag=$("cameraDiagText");
+let stream=null,recorder=null,chunks=[],recordedBlob=null,recordedUrl=null,cameraFacing="user",isMobile=false;
+const mobileQuery=window.matchMedia?.("(max-width: 850px)");
+function detectMobile(){
+  const ua=navigator.userAgent||"";
+  isMobile=/Android|iPhone|iPad|iPod|Windows Phone|Mobile/i.test(ua)||!!mobileQuery?.matches;
+  return isMobile;
 }
-detectCaptureMode();
-
-async function autoStartDetectedCamera(){
-  if(!navigator.mediaDevices?.getUserMedia){
-    document.getElementById("cameraDiagText").textContent="This browser does not support camera access. Use Upload a Caw instead.";
+function setMobileUI(){
+  if(!isMobile){
+    $("recorderCard").innerHTML='<div class="mobile-only-message">📱<br>CAW RECORDING IS MOBILE-ONLY<br><small style="font:600 12px Montserrat;color:#aeb8c8">Use a phone or tablet to record a Caw.<br>Desktop users can upload a saved video below.</small></div>';
+    $("studioTitle").textContent="Upload on desktop.";
+    $("studioIntro").textContent="Caw recording is restricted to mobile devices. Desktop users can still publish Caws by uploading a video file.";
+    diag.innerHTML="Desktop device detected. Camera recording is disabled on this device. Use the Upload a Caw field below.";
+    $("sourceNote").textContent="Desktop recording is disabled. Choose a saved video to publish a Caw.";
     return;
   }
-  const isMobile=captureMode==="phone";
-  document.getElementById("cameraDiagText").textContent=isMobile
-    ?"Phone camera detected. Requesting camera and microphone access…"
-    :"Webcam detected. Finding the available webcam and requesting camera access…";
-  try{
-    // First request access so browsers reveal real device labels/IDs.
-    const probe=await navigator.mediaDevices.getUserMedia({video:true});
-    probe.getTracks().forEach(t=>t.stop());
-    await listDevices();
-    const cams=[...document.getElementById("cameraDevice").options].filter(o=>o.value);
-    if(cams.length){
-      const preferred=cams.find(o=>/webcam|integrated|facetime|camera|hd/i.test(o.textContent));
-      document.getElementById("cameraDevice").value=(preferred||cams[0]).value;
-    }
-    await enableCamera(captureMode==="phone"?"user":"user");
-    document.getElementById("cameraDiagText").textContent=
-      captureMode==="phone" ? "Phone camera is live. You can switch between front and rear cameras."
-      : "Webcam is live. CrowSpace automatically selected the available webcam.";
-  }catch(e){
-    recordBtn.disabled=true;
-    recStatus.textContent="Camera permission needed";
-    msg.textContent=cameraError(e);
-    await cameraStatus();
-  }
+  recStatus.textContent="Camera ready";
+  liveBadge.textContent="● MOBILE CAMERA";
 }
-setTimeout(autoStartDetectedCamera,250);
-
-phoneModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("phone");cameraFacing="user";enableCamera("user");});
-webcamModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("webcam");cameraFacing="user";enableCamera("user");});
-
-function pickMime(){
-  if(!window.MediaRecorder) return "";
-  const types=[
-    "video/mp4;codecs=h264,aac","video/mp4",
-    "video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"
-  ];
-  return types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+function mimeType(){
+  if(!window.MediaRecorder)return "";
+  return ["video/mp4;codecs=h264,aac","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(x=>MediaRecorder.isTypeSupported(x))||"";
 }
-function blobExtension(type){
-  return (type||"").includes("mp4")?"mp4":(type||"").includes("quicktime")?"mov":"webm";
-}
-function stopStream(){
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
-}
-function restoreLivePreview(){
-  if(stream){
-    preview.srcObject=stream;preview.removeAttribute("src");preview.controls=false;preview.muted=true;preview.playsInline=true;preview.play().catch(()=>{});
-  }
-}
-function setRecordedFile(blob){
-  const ext=blobExtension(blob.type);
-  const file=new File([blob],"recorded-caw-"+Date.now()+"."+ext,{type:blob.type||"video/webm"});
-  try{
-    const dt=new DataTransfer();
-    dt.items.add(file);
-    fileInput.files=dt.files;
-  }catch(e){
-    // Some mobile browsers do not allow programmatic file inputs.
-  }
-  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB · "+ext.toUpperCase()+" · "+(captureMode==="phone"?"Phone":"Webcam")+" recording";
-}
-async function listDevices(){
-  const cameraDevice=document.getElementById("cameraDevice"),micDevice=document.getElementById("micDevice");
-  if(!navigator.mediaDevices?.enumerateDevices) return;
-  try{
-    const devices=await navigator.mediaDevices.enumerateDevices();
-    const cams=devices.filter(d=>d.kind==="videoinput"),mics=devices.filter(d=>d.kind==="audioinput");
-    cameraDevice.innerHTML='<option value="">Default camera</option>'+cams.map((d,i)=>'<option value="'+CS.escape(d.deviceId)+'">'+CS.escape(d.label||("Camera "+(i+1)))+'</option>').join("");
-    micDevice.innerHTML='<option value="">Default microphone</option>'+mics.map((d,i)=>'<option value="'+CS.escape(d.deviceId)+'">'+CS.escape(d.label||("Microphone "+(i+1)))+'</option>').join("");
-    return {cams,mics};
-  }catch(e){return {cams:[],mics:[]}}
-}
-async function cameraStatus(){
-  const diag=document.getElementById("cameraDiagText");
-  const secure=window.isSecureContext?"HTTPS secure context: YES":"HTTPS secure context: NO";
-  const media=navigator.mediaDevices?"MediaDevices API: YES":"MediaDevices API: NO";
-  let perms="Permissions API: unavailable";
-  try{
-    if(navigator.permissions?.query){
-      const cam=await navigator.permissions.query({name:"camera"});
-      const mic=await navigator.permissions.query({name:"microphone"});
-      perms="Camera permission: "+cam.state+" · Microphone permission: "+mic.state;
-    }
-  }catch(e){perms="Permission status could not be read by this browser."}
-  diag.textContent=secure+" · "+media+" · "+perms;
-}
+function extension(type){return (type||"").includes("mp4")?"mp4":"webm"}
 function cameraError(e){
-  const name=e?.name||"CameraError";
-  return name==="NotAllowedError"?"Permission was blocked. Allow camera and microphone for this CrowSpace site, then click Enable Camera again."
-    :name==="NotFoundError"?"No camera or microphone was found. Check Windows camera settings or use Upload a Caw."
-    :name==="NotReadableError"?"The camera or microphone is busy. Close Camera, Zoom, Teams, OBS, or another browser tab using it."
-    :name==="OverconstrainedError"?"The selected camera setting is unavailable. Choose Default camera and try again."
-    :name==="SecurityError"?"Browser security blocked camera access. Make sure you are using the HTTPS CrowSpace site."
-    :"Camera setup failed ("+name+"): "+(e?.message||"unknown error");
+  const n=e?.name||"CameraError";
+  if(n==="NotAllowedError")return "Camera or microphone permission was blocked. Allow both for CrowSpace, then tap Enable Camera again.";
+  if(n==="NotFoundError")return "No camera was found. Check the phone camera and browser permissions, then try again.";
+  if(n==="NotReadableError")return "The camera is busy. Close another app or browser tab using the camera and try again.";
+  if(n==="OverconstrainedError")return "That camera mode is unavailable. Try the other camera.";
+  if(n==="SecurityError")return "Camera access was blocked by browser security. Open CrowSpace over HTTPS.";
+  return "Camera setup failed ("+n+"). "+(e?.message||"Try again or upload a video.");
 }
-async function enableCamera(facing=cameraFacing){
+function stopStream(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+async function enableCamera(){
+  if(!isMobile){msg.textContent="Caw recording is mobile-only.";return}
+  if(!navigator.mediaDevices?.getUserMedia){diag.textContent="This browser does not expose camera access. Use the Upload a Caw option.";return}
+  stopStream();
+  const facing=cameraFacing;
   try{
-    if(!navigator.mediaDevices?.getUserMedia) throw new Error("MediaDevices/getUserMedia is unavailable.");
-    if(stream) stream.getTracks().forEach(t=>t.stop());
-    cameraFacing=facing;
-    const cameraId=document.getElementById("cameraDevice").value;
-    const micId=document.getElementById("micDevice").value;
-    const video={width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30,max:30}};
-    if(cameraId) video.deviceId={exact:cameraId}; else if(captureMode==="phone") video.facingMode={ideal:facing};
-    const audio=micId?{deviceId:{exact:micId},echoCancellation:true,noiseSuppression:true}:{echoCancellation:true,noiseSuppression:true};
+    const constraints={video:{facingMode:{ideal:facing},width:{ideal:1280,max:1920},height:{ideal:720,max:1080},frameRate:{ideal:30,max:30}},audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
     let next;
-    try{
-      next=await navigator.mediaDevices.getUserMedia({video,audio});
-    }catch(first){
-      // A camera should still work when the selected/default microphone is unavailable.
-      let videoOnly=null,audioOnly=null;
-      try{videoOnly=await navigator.mediaDevices.getUserMedia({video})}catch(v){}
-      try{audioOnly=await navigator.mediaDevices.getUserMedia({audio})}catch(a){}
-      if(videoOnly || audioOnly){
-        next=new MediaStream([...(videoOnly?.getVideoTracks()||[]),...(audioOnly?.getAudioTracks()||[])]);
-      }else{
-        throw first;
-      }
+    try{next=await navigator.mediaDevices.getUserMedia(constraints)}
+    catch(first){
+      next=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing}},audio:true});
     }
     stream=next;
-    preview.srcObject=stream; preview.removeAttribute("src"); preview.controls=false; await preview.play().catch(()=>{});
-    recordBtn.disabled=false; document.getElementById("switchCameraBtn").disabled=false; cameraBtn.textContent="Camera Enabled";
-    liveBadge.textContent="● "+(facing==="environment"?"REAR CAMERA":"CAMERA LIVE"); recStatus.textContent="Ready to record"; msg.textContent="";
-    await listDevices(); await cameraStatus();
+    preview.srcObject=stream;
+    preview.removeAttribute("src");
+    preview.controls=false;
+    preview.muted=true;
+    preview.setAttribute("playsinline","");
+    await preview.play().catch(()=>{});
+    cameraBtn.textContent="✓ Camera Enabled";
+    switchBtn.disabled=false;
+    recordBtn.disabled=!stream.getVideoTracks().length||!window.MediaRecorder;
+    liveBadge.textContent="● "+(facing==="environment"?"REAR CAMERA":"FRONT CAMERA");
+    recStatus.textContent="Ready to record";
+    diag.textContent="Mobile camera is live. Tap Start Recording, then Stop when finished.";
+    await listDevices();
   }catch(e){
-    recordBtn.disabled=true; recStatus.textContent="Camera unavailable"; msg.textContent=cameraError(e);
-    await cameraStatus(); await listDevices();
+    recordBtn.disabled=true;switchBtn.disabled=true;recStatus.textContent="Camera unavailable";msg.textContent=cameraError(e);diag.textContent=msg.textContent;
   }
 }
-document.getElementById("cameraDevice").addEventListener("change",()=>enableCamera(cameraFacing));
-document.getElementById("micDevice").addEventListener("change",()=>enableCamera(cameraFacing));
-cameraBtn.addEventListener("click",async()=>{await cameraStatus();await enableCamera(cameraFacing)});\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
-recordBtn.addEventListener("click",()=>{
-  if(!stream){msg.textContent="Enable the camera before recording.";return}
-  if(!window.MediaRecorder){msg.textContent="This browser does not support video recording. Use Upload a Caw.";return}
-  if(!stream.getVideoTracks().length){msg.textContent="No camera video track is available.";return}
+async function listDevices(){
+  if(!navigator.mediaDevices?.enumerateDevices||!isMobile)return;
+  try{
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    const cameras=devices.filter(x=>x.kind==="videoinput");
+    const micCount=devices.filter(x=>x.kind==="audioinput").length;
+    diag.textContent="Camera live · "+cameras.length+" camera"+(cameras.length===1?"":"s")+" available · "+micCount+" microphone"+(micCount===1?"":"s")+" detected.";
+  }catch(e){}
+}
+function setRecordedFile(blob){
+  const ext=extension(blob.type),name="recorded-caw-"+Date.now()+"."+ext;
+  try{const dt=new DataTransfer();dt.items.add(new File([blob],name,{type:blob.type||"video/webm"}));fileInput.files=dt.files}catch(e){}
+  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB · "+ext.toUpperCase();
+}
+function startRecording(){
+  if(!isMobile){msg.textContent="Recording Caws is mobile-only.";return}
+  if(!stream){msg.textContent="Enable the camera first.";return}
   chunks=[];recordedBlob=null;
-  const mime=pickMime();
+  const mime=mimeType();
   try{recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}
-  catch(e){msg.textContent="This browser cannot start camera recording. Try Upload a Caw.";return}
-  recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  recorder.onerror=e=>{console.error("Caw recorder error",e);msg.textContent="Recording stopped because the browser reported a recorder error.";recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording")};
+  catch(e){msg.textContent="This browser cannot start recording. Try uploading a saved video.";return}
+  recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+  recorder.onerror=()=>{msg.textContent="The browser stopped recording unexpectedly.";recordBtn.disabled=false;stopBtn.disabled=true};
   recorder.onstop=()=>{
-    if(!chunks.length){msg.textContent="No video data was captured. Check camera permission and try again.";recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording");restoreLivePreview();return}
-    const type=recorder.mimeType||mime||"video/webm";
-    recordedBlob=new Blob(chunks,{type});
-    if(recordedUrl) URL.revokeObjectURL(recordedUrl);
+    if(!chunks.length){msg.textContent="No video data was captured. Please try again.";restorePreview();return}
+    recordedBlob=new Blob(chunks,{type:recorder.mimeType||mime||"video/webm"});
+    if(recordedUrl)URL.revokeObjectURL(recordedUrl);
     recordedUrl=URL.createObjectURL(recordedBlob);
-    preview.srcObject=null;preview.src=recordedUrl;preview.controls=true;preview.muted=true;preview.playsInline=true;
+    preview.srcObject=null;preview.src=recordedUrl;preview.controls=true;preview.muted=true;preview.setAttribute("playsinline","");
     preview.play().catch(()=>{});
     setRecordedFile(recordedBlob);
-    recStatus.textContent="Recording complete";liveBadge.textContent="● RECORDED";
-    recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording");
+    recStatus.textContent="Recording complete";liveBadge.textContent="● RECORDED";recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording");
   };
-  try{
-    recorder.start(250);
-    recordBtn.disabled=true;stopBtn.disabled=false;recordBtn.classList.add("recording");recStatus.textContent="Recording…";liveBadge.textContent="● REC";
-  }catch(e){
-    msg.textContent="The browser could not start recording: "+(e.message||"unknown error");
-  }
-});
-stopBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();recordBtn.classList.remove("recording")});
-clearBtn.addEventListener("click",()=>{
-  if(recorder&&recorder.state!=="inactive")recorder.stop();
-  chunks=[];recordedBlob=null;fileInput.value="";fileInfo.textContent="No video selected.";preview.controls=false;
-  if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}
-  if(stream) preview.srcObject=stream; else {preview.removeAttribute("src");preview.load()}
-  recStatus.textContent=stream?"Ready to record":"Camera not enabled";liveBadge.textContent=stream?"● "+(cameraFacing==="environment"?"REAR CAMERA":"FRONT CAMERA"):"● CAMERA READY";msg.textContent="";
-});
-fileInput.addEventListener("change",()=>{
-  recordedBlob=null;
-  const f=fileInput.files[0]; if(!f){fileInfo.textContent="No video selected.";return}
-  if(f.size>MAX_BYTES){fileInfo.textContent="File is over the 512 MB limit.";return}
-  fileInfo.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB · Ready to publish";
-  preview.srcObject=null;preview.src=URL.createObjectURL(f);preview.controls=true;
-});
-form.addEventListener("submit",async e=>{
-  e.preventDefault(); const u=await CS.user(); if(!u){location.href="login.html";return}
-  const file=fileInput.files[0] || (recordedBlob ? new File([recordedBlob],"recorded-caw-"+Date.now()+"."+blobExtension(recordedBlob.type),{type:recordedBlob.type||"video/webm"}) : null); if(!file){msg.textContent="Record a Caw or choose a video file first.";return}
-  if(file.size>MAX_BYTES){msg.textContent="Video is larger than the 512 MB CrowSpace limit.";return}
-  const isRecorded=!!recordedBlob && !fileInput.files[0];
-  const ext=(file.name.split(".").pop()||"webm").toLowerCase().replace(/[^a-z0-9]/g,"")||"webm";
-  const path=u.id+"/"+crypto.randomUUID()+"."+ext;
-  const btn=document.getElementById("publishBtn");btn.disabled=true;msg.textContent="Uploading your Caw…";
-  try{
-    const {error:upErr}=await crowSupabase.storage.from("crowspace-caws").upload(path,file,{contentType:file.type||"video/webm",upsert:false});
-    if(upErr) throw upErr;
-    const {data:pub}=crowSupabase.storage.from("crowspace-caws").getPublicUrl(path);
-    const {error:dbErr}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:title.value.trim()||"Untitled Caw",caption:caption.value.trim()||null,video_url:pub.publicUrl,storage_path:path,mime_type:file.type||null,file_size:file.size,source_type:isRecorded?"recorded":"uploaded"});
-    if(dbErr){await crowSupabase.storage.from("crowspace-caws").remove([path]);throw dbErr}
-    msg.textContent="Your Caw is live in CrowSpace.";form.reset();fileInfo.textContent="No video selected.";
-    setTimeout(()=>location.reload(),700);
-  }catch(err){msg.textContent=err.message||"Upload failed. Please try again.";btn.disabled=false}
-});
-
-document.addEventListener("DOMContentLoaded",async()=>{
-  if(!await CS.user()){location.href="login.html";return}
-  await CS.refreshHeader();
-  const params=new URLSearchParams(location.search),user=params.get("user");
-  const {data,error}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(100);
-  const box=document.getElementById("cawsGrid");
-  if(error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(error.message)+'</p></div>';return}
-  let rows=data||[];
-  if(user){rows=rows.filter(x=>x.user_id===user);document.getElementById("filter").innerHTML='<div class="card"><strong>Showing Caws from this member.</strong> <a href="caws.html">Show all Caws</a></div>'}
-  const graph=await CS.socialGraphMap(250),esc=CS.escape;
-  box.innerHTML=rows.map(x=>{const p=graph[x.user_id]||{};return '<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+esc(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div><h3>'+esc(x.title||"Untitled Caw")+'</h3><p>'+esc(x.caption||"")+'</p>'+CS.activityLinks(p)+'<small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>'}).join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>';
-  if(CS.hydrateAvatars) await CS.hydrateAvatars();
-});
+  recorder.start(250);
+  recordBtn.disabled=true;stopBtn.disabled=false;recordBtn.classList.add("recording");recStatus.textContent="Recording…";liveBadge.textContent="● REC";
+}
+function restorePreview(){if(stream){preview.srcObject=stream;preview.removeAttribute("src");preview.controls=false;preview.play().catch(()=>{})}}
+cameraBtn.onclick=enableCamera;
+switchBtn.onclick=async()=>{if(!isMobile)return;if(recorder?.state==="recording"){msg.textContent="Stop the recording before switching cameras.";return}cameraFacing=cameraFacing==="user"?"environment":"user";await enableCamera()};
+recordBtn.onclick=startRecording;
+stopBtn.onclick=()=>{if(recorder?.state==="recording")recorder.stop()};
+clearBtn.onclick=()=>{if(recorder?.state==="recording")recorder.stop();chunks=[];recordedBlob=null;fileInput.value="";fileInfo.textContent="No video selected.";if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}restorePreview();recStatus.textContent=stream?"Ready to record":"Camera not enabled";liveBadge.textContent=stream?"● "+(cameraFacing==="environment"?"REAR CAMERA":"FRONT CAMERA"):"● MOBILE CAMERA";msg.textContent=""};
+fileInput.onchange=()=>{recordedBlob=null;const f=fileInput.files[0];if(!f){fileInfo.textContent="No video selected.";return}if(f.size>MAX_BYTES){fileInfo.textContent="File is over the 512 MB limit.";return}fileInfo.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB · Ready to publish";if(preview.srcObject)preview.srcObject=null;preview.src=URL.createObjectURL(f);preview.controls=true;preview.muted=true};
+form.onsubmit=async e=>{
+ e.preventDefault();const u=await CS.user();if(!u){location.href="login.html";return}
+ const file=fileInput.files[0]||(recordedBlob?new File([recordedBlob],"recorded-caw-"+Date.now()+"."+extension(recordedBlob.type),{type:recordedBlob.type||"video/webm"}):null);
+ if(!file){msg.textContent="Record a Caw on mobile or choose a video file first.";return}
+ if(file.size>MAX_BYTES){msg.textContent="Video is larger than the 512 MB CrowSpace limit.";return}
+ const isRecorded=!!recordedBlob&&!fileInput.files[0],ext=(file.name.split(".").pop()||"webm").toLowerCase().replace(/[^a-z0-9]/g,"")||"webm",path=u.id+"/"+crypto.randomUUID()+"."+ext,btn=$("publishBtn");
+ btn.disabled=true;msg.textContent="Uploading your Caw…";
+ try{
+  const {error:upErr}=await crowSupabase.storage.from("crowspace-caws").upload(path,file,{contentType:file.type||"video/webm",upsert:false});if(upErr)throw upErr;
+  const {data:pub}=crowSupabase.storage.from("crowspace-caws").getPublicUrl(path);
+  const {error:dbErr}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:$("title").value.trim()||"Untitled Caw",caption:$("caption").value.trim()||null,video_url:pub.publicUrl,storage_path:path,mime_type:file.type||null,file_size:file.size,source_type:isRecorded?"recorded":"uploaded"});
+  if(dbErr){await crowSupabase.storage.from("crowspace-caws").remove([path]);throw dbErr}
+  msg.textContent="Your Caw is live in CrowSpace.";form.reset();fileInfo.textContent="No video selected.";setTimeout(()=>location.reload(),700);
+ }catch(err){msg.textContent=err.message||"Upload failed. Please try again.";btn.disabled=false}
+};
+async function loadCaws(){
+ if(!await CS.user()){location.href="login.html";return}
+ await CS.refreshHeader();
+ const params=new URLSearchParams(location.search),user=params.get("user"),{data,error}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(100),box=$("cawsGrid");
+ if(error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(error.message)+'</p></div>';return}
+ let rows=data||[];
+ if(user){rows=rows.filter(x=>x.user_id===user);$("filter").innerHTML='<div class="card"><strong>Showing Caws from this member.</strong> <a href="caws.html">Show all Caws</a></div>'}
+ const graph=await CS.socialGraphMap(250),esc=CS.escape;
+ box.innerHTML=rows.map(x=>{const p=graph[x.user_id]||{};return '<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+esc(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div><h3>'+esc(x.title||"Untitled Caw")+'</h3><p>'+esc(x.caption||"")+'</p>'+CS.activityLinks(p)+'<small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>'}).join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>';
+ if(CS.hydrateAvatars)await CS.hydrateAvatars();
+}
+detectMobile();setMobileUI();
+if(isMobile)setTimeout(()=>{if(navigator.mediaDevices?.getUserMedia)diag.textContent="Mobile camera detected. Tap Enable Camera to grant camera and microphone access.";else diag.textContent="Camera access is not available in this browser. Use Upload a Caw.";},100);
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&recorder?.state==="recording")recorder.stop()});
+window.addEventListener("pagehide",()=>{if(recorder?.state==="recording")recorder.stop();stopStream();if(recordedUrl)URL.revokeObjectURL(recordedUrl)});
+document.addEventListener("DOMContentLoaded",loadCaws);
 </script>
 </body>
 </html>
