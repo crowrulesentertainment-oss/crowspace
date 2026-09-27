@@ -166,6 +166,38 @@ body{
 .profile-footer-note{margin:14px 0;padding:12px;text-align:center;border:1px dashed #3976a7;color:#86b8db;font-size:.8rem}
 @media(max-width:850px){.profile-columns,.profile-retro{grid-template-columns:1fr}}
 @media(max-width:520px){.profile-counter{grid-template-columns:1fr 1fr}.retro-links{grid-template-columns:1fr}}
+</style><style>
+/* Classic MySpace 2005-2008 layer */
+.ms2008-grid{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(260px,1fr);gap:14px;margin:14px 0}
+.ms-box{border:1px solid #9bbbd3;background:#fff;color:#333;border-radius:2px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.22)}
+.ms-head{background:linear-gradient(#3b91ce,#1764a3);color:#fff;padding:7px 10px;font:bold 12px Arial;text-transform:uppercase}
+.ms-body{padding:11px}
+.top8-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.top8-card{text-align:center;background:#eef6fd;border:1px solid #bfd7e8;padding:7px}
+.top8-card img,.top8-avatar{width:100%;aspect-ratio:1;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 1px #8eb4d0;background:#dbeaf5}
+.top8-avatar{display:grid;place-items:center;font-size:2rem;font-weight:800;color:#1764a3}
+.top8-card a{color:#075a9e!important;font-weight:700;text-decoration:none!important}
+.top8-card small{display:block;color:#5d7180;margin-top:4px}
+.testimonials{display:grid;gap:9px}
+.testimonial{padding:9px;background:#f1f7fc;border:1px solid #c4d9e8}
+.testimonial a{color:#075a9e!important;font-weight:700}
+.profile-details{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#c5d9e8}
+.profile-details div{background:#f8fbfe;padding:8px}
+.profile-details label{display:block;font-size:10px;color:#63809a;font-weight:800;text-transform:uppercase}
+.profile-details strong{font-size:13px}
+.ms-playlist{display:grid;gap:5px}
+.ms-track{display:flex;gap:8px;align-items:center;padding:7px;background:#eef6fd;border:1px solid #c6dceb}
+.ms-track b{color:#1764a3}
+.theme-row{display:flex;gap:6px;flex-wrap:wrap}
+.theme-btn{border:1px solid #7ea8c7;background:#e8f3fb;color:#12517e;padding:6px 9px;cursor:pointer;font-weight:700}
+.theme-btn:hover{background:#d5eafa}
+.copy-url{display:flex;gap:6px}
+.copy-url input{flex:1;min-width:0;padding:7px;border:1px solid #a9c7dc;background:#f4faff;color:#31506a}
+.copy-url button{padding:7px 10px;border:1px solid #2877ae;background:#1877c9;color:#fff;font-weight:700;cursor:pointer}
+.ms-blink{animation:msblink 1.5s steps(2,start) infinite}
+@keyframes msblink{50%{opacity:.35}}
+@media(max-width:850px){.ms2008-grid{grid-template-columns:1fr}.top8-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:520px){.top8-grid{grid-template-columns:repeat(2,1fr)}.profile-details{grid-template-columns:1fr}}
 </style></head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav aria-label="CrowSpace global navigation"></nav><div id="account"></div></header>
@@ -233,6 +265,66 @@ body{
 
 <div id="worldLinks" class="activity-links"></div>
 <div id="mutualPeople"></div>
+
+<div class="ms2008-grid">
+  <div class="ms-box">
+    <div class="ms-head">Who I’d Like To Meet</div>
+    <div class="ms-body" id="meetPeople">Friends, creators, dreamers and people building something.</div>
+  </div>
+  <div class="ms-box">
+    <div class="ms-head">Profile URL</div>
+    <div class="ms-body">
+      <div class="copy-url"><input id="shareUrl" readonly value=""><button id="copyProfileUrl" type="button">Copy</button></div>
+      <p id="copyStatus" style="margin:7px 0 0;font-size:11px;color:#53718c"></p>
+    </div>
+  </div>
+</div>
+
+<section class="ms-box" id="top8Classic" style="margin:14px 0">
+  <div class="ms-head">My Top 8</div>
+  <div class="ms-body"><div id="top8ClassicGrid" class="top8-grid"></div></div>
+</section>
+
+<div class="ms2008-grid">
+  <section class="ms-box" id="detailsClassic">
+    <div class="ms-head">Profile Details</div>
+    <div class="ms-body"><div id="profileDetailsClassic" class="profile-details"></div></div>
+  </section>
+  <section class="ms-box" id="playlistClassic">
+    <div class="ms-head">My Music</div>
+    <div class="ms-body">
+      <div class="music-marquee"><span id="classicNowPlaying">♫ No favorite song selected.</span></div>
+      <div id="classicPlaylist" class="ms-playlist" style="margin-top:8px"></div>
+    </div>
+  </section>
+</div>
+
+<section class="ms-box" id="testimonialsClassic" style="margin:14px 0">
+  <div class="ms-head">Comments / Testimonials</div>
+  <div class="ms-body">
+    <div id="testimonialFormWrap"></div>
+    <div id="classicTestimonials" class="testimonials"></div>
+  </div>
+</section>
+
+<div class="ms2008-grid">
+  <section class="ms-box">
+    <div class="ms-head">Profile Theme</div>
+    <div class="ms-body">
+      <div class="theme-row">
+        <button class="theme-btn" data-theme="blue">Classic Blue</button>
+        <button class="theme-btn" data-theme="pink">Pink Pulse</button>
+        <button class="theme-btn" data-theme="purple">Purple Night</button>
+        <button class="theme-btn" data-theme="cyan">Cyber Cyan</button>
+        <button class="theme-btn" data-theme="dark">Crow Dark</button>
+      </div>
+    </div>
+  </section>
+  <section class="ms-box">
+    <div class="ms-head">Customize MySpace</div>
+    <div class="ms-body"><a class="btn" href="customize.html">Edit My Profile →</a> <a class="btn" href="albums.html">Manage Photos →</a></div>
+  </section>
+</div>
 
 <div class="profile-retro">
   <div class="retro-box">
@@ -725,7 +817,7 @@ text("tagline",nestSettings.tagline||"Welcome to my CrowSpace Nest.");text("stat
     const {data:n31,error:n31Error}=await crowSupabase.rpc("crowspace_nest_3_1",{target:uid});
     err("Nest dashboard",n31Error);
     const d=n31||{};
-    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]);
+    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]); renderClassicDetails(); renderClassicMusic(); await renderClassicTop8(); await renderClassicTestimonials(); setupClassicThemes(); text("shareUrl",classicUrl());
     const map={top8Section:"show_top_friends",interestsSection:"show_interests",musicSection:"show_music",photosSection:"show_photos",cawsSection:"show_caws",groupsSection:"show_groups",eventsSection:"show_events",guestbookSection:"show_guestbook"};
     Object.keys(map).forEach(id=>{const el=$(id);if(el&&nestSettings[map[id]]===false)el.style.display="none"});
     $("guestForm").style.display=viewer?.id===uid?"none":"grid";
@@ -753,7 +845,7 @@ $("guestForm").addEventListener("submit",async e=>{
   if(error)alert(error.message);else{$("guestBody").value="";text("guestCount","0 / 1000");await load()}
 });
 
-document.addEventListener("DOMContentLoaded",async()=>{
+document.addEventListener("click",async e=>{if(e.target.id!=="copyProfileUrl")return;try{await navigator.clipboard.writeText($("shareUrl").value);text("copyStatus","Profile URL copied.");}catch(_){$("shareUrl").select();document.execCommand("copy");text("copyStatus","Profile URL copied.");}});\ndocument.addEventListener("DOMContentLoaded",async()=>{
   viewer=await CS.user();
   uid=qs.get("id")||viewer?.id;
   if(!uid){location.href="login.html";return}
