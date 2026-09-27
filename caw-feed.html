@@ -28,13 +28,18 @@
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header>
 <main id="feed" class="caw-feed" aria-label="CrowSpace Caw Feed"></main>
-<div id="status" class="status">Starting Caw Feed…</div>
+<div id="status" class="status">Caw Feed v4 · Booting…</div>
 <div id="toast" class="toast" role="status"></div>
 <section id="comments" class="comments" aria-hidden="true">
 <div class="comments-head"><strong>COMMENTS</strong><button id="closeComments" class="close" type="button" aria-label="Close comments">×</button></div>
 <div id="commentList" class="comment-list"></div>
 <form id="commentForm" class="comment-form"><input id="commentInput" maxlength="2000" autocomplete="off" placeholder="Add a comment…"><button type="submit">Post</button></form>
 </section>
+<script>
+// Caw Feed v4 boot marker: keep application startup independent of navigation.
+window.__CAW_FEED_BUILD="2026-09-27-v4";
+(()=>{const s=document.getElementById("status");if(s)s.textContent="Caw Feed v4 · Starting…";})();
+</script>
 <script src="js/global-nav.js"></script>
 <script>
 (()=>{"use strict";
@@ -61,7 +66,12 @@ function loadScript(src){
  });
 }
 async function bootClient(){
- if(window.supabase?.createClient)return;
+ if(window.supabase?.createClient){
+  client=window.supabase.createClient(CONFIG.url,CONFIG.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
+  window.crowSupabase=client;
+  status.textContent="CrowSpace connection ready";
+  return;
+ }
  status.textContent="Loading CrowSpace connection…";
  try{await timeout(loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"),10000,"Primary connection library timed out");}
  catch(e){
