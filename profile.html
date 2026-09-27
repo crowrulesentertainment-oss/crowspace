@@ -899,7 +899,7 @@ function safeUrl(v){try{const u=new URL(v);return ["http:","https:"].includes(u.
 function socialName(url){const h=new URL(url).hostname.replace(/^www\./,"");if(/instagram/.test(h))return["Instagram","IG"];if(/facebook/.test(h))return["Facebook","FB"];if(/youtube/.test(h))return["YouTube","YT"];if(/x\.com|twitter/.test(h))return["X","X"];if(/tiktok/.test(h))return["TikTok","TT"];if(/linkedin/.test(h))return["LinkedIn","IN"];if(/threads/.test(h))return["Threads","TH"];if(/github/.test(h))return["GitHub","GH"];if(/twitch/.test(h))return["Twitch","TW"];if(/discord/.test(h))return["Discord","DS"];return[h,"↗"]}
 async function loadSocialLinks(){
  if(!social||typeof crowSupabase==="undefined"||!window.CROW_PROFILE_UID)return;
- const {data,error}=await crowSupabase.from("membership_profiles").select("social_links").eq("id",window.CROW_PROFILE_UID).maybeSingle();
+ const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
  if(error||!data?.social_links){social.innerHTML='<div class="social-link-empty">No social links added yet.</div>';return}
  let links=data.social_links;if(!Array.isArray(links))links=Object.entries(links).map(([name,url])=>({name,url}));
  links=links.map(x=>({name:x.name||"",url:safeUrl(x.url||x.href||"")})).filter(x=>x.url);
