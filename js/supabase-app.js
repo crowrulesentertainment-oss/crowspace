@@ -330,6 +330,11 @@ async function submit(e){
  if(f.id==="crSpace"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_spaces").insert({name:String(d.get("name")).trim(),slug:String(d.get("slug")).trim(),description:String(d.get("description")).trim(),created_by:user.id,visibility:"public"});if(r.error)alert(r.error.message);else spaces()}
 }
 async function act(a){
+ if(a.startsWith("graph:select:")){
+  const i=Number(a.split(":")[2]);const n=document.querySelectorAll(".cr-graph-node")[i];if(n){n.dispatchEvent(new MouseEvent("click",{bubbles:true}))}return
+ }
+ if(a==="graph:refresh"){graph();return}
+
  if(a.startsWith("goto:")){location.href=a.slice(5);return} if(a.startsWith("discover:signal:")){if(!user){location.href="auth.html";return}const z=a.split(":");const action=z[2],kind=z[3],target=z[4];if(target)await sb.rpc("crowspace_record_discovery_signal",{p_target:target,p_kind:kind,p_action:action,p_weight:action==="not_interested"?-6:action==="dismiss"?-3:1});return} if(a.startsWith("discover:")){if(!user){location.href="auth.html";return}const z=a.split(":");if(z[1]==="refresh"){discover();return}const action=z[1],kind=z[2],target=z[3];if(target){await sb.from("crowspace_discovery_preferences").upsert({user_id:user.id,target_id:target,action},{onConflict:"user_id,target_id"});await sb.rpc("crowspace_record_adaptive_feedback",{p_user:user.id,p_kind:kind,p_target:target,p_action:action==="not_interested"?"not_interested":"dismiss",p_weight:action==="not_interested"?-6:-3});discover();return}}
  if(a.startsWith("message:")){location.href="messages.html?user="+a.slice(8);return}
  if(a.startsWith("friend:")){if(!user){location.href="auth.html";return}const r=await sb.from("crowspace_friends").insert({requester_id:user.id,recipient_id:a.slice(7),status:"pending"});if(r.error&&r.error.code!=="23505")alert(r.error.message);else profile();return}
