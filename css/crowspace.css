@@ -39,3 +39,7 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 .cr-graph-node{touch-action:none}
 .cr-graph-legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
 .cr-graph-legend-item{padding:6px 10px;border:1px solid currentColor;border-radius:999px;font-size:.78rem;opacity:.8}
+
+/* CrowSpace 4.36 — spatial intelligence regions */
+.cr-graph-zone-label{font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:.42;pointer-events:none}
+.cr-graph-node{touch-action:none}
