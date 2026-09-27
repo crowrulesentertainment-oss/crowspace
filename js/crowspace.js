@@ -48,43 +48,47 @@ CS.installGlobalSearch=()=>{
 };
 CS.injectGlobalNavStyles=()=>{if(document.getElementById("crow-global-nav-styles"))return;const s=document.createElement("style");s.id="crow-global-nav-styles";s.textContent=`
 .site-header{gap:10px;position:relative;z-index:100}
-.site-header>nav{display:flex!important;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex:0 0 auto}
-.crow-nav-tabs{display:flex;align-items:center;gap:3px}
-.crow-nav-tab{position:relative}
-.crow-nav-tab>summary{list-style:none;display:flex;align-items:center;gap:5px;cursor:pointer;padding:9px 11px;border-radius:8px;color:var(--text,#222);font-weight:800;font-size:12px;white-space:nowrap}
-.crow-nav-tab>summary::-webkit-details-marker{display:none}
-.crow-nav-tab>summary:hover,.crow-nav-tab[open]>summary{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
-.crow-nav-tab-chevron{font-size:9px;opacity:.65}
-.crow-nav-tab[open] .crow-nav-tab-chevron{transform:rotate(180deg)}
-.crow-nav-tab-panel{position:absolute;right:0;top:calc(100% + 7px);width:235px;background:#fff;border:1px solid var(--line,#ddd);border-radius:12px;padding:7px;box-shadow:0 15px 38px rgba(0,0,0,.16);z-index:300}
-.crow-nav-tab-panel a{display:flex!important;align-items:center;justify-content:space-between;padding:10px 11px;border-radius:8px;color:var(--text,#222);font-size:13px;font-weight:700;text-decoration:none}
-.crow-nav-tab-panel a:hover,.crow-nav-tab-panel a.active{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
-.crow-nav-tab-panel a.active:after{content:"•";font-size:16px}
-.crow-nav-tab-label{padding:7px 9px 5px;color:var(--muted,#6b7280);font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
-.crow-nav-home{padding:9px 11px!important}
-@media(max-width:1050px){
- .crow-nav-tab:nth-child(n+5)>summary{font-size:0}
- .crow-nav-tab:nth-child(n+5)>summary:before{content:"•••";font-size:16px;letter-spacing:2px}
+.site-header>nav{display:flex!important;align-items:center;justify-content:flex-end;gap:5px;min-width:0;flex:1 1 auto;overflow:visible}
+.crow-nav-shell{display:flex;align-items:center;gap:5px;width:100%;min-width:0}
+.crow-nav-home{display:inline-flex;align-items:center;justify-content:center;padding:9px 11px;border-radius:9px;color:var(--text,#222);font-weight:800;font-size:12px;white-space:nowrap}
+.crow-nav-home:hover,.crow-nav-home.active{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
+.crow-nav-groups{display:flex;align-items:center;gap:4px;min-width:0;flex:1;justify-content:flex-end}
+.crow-nav-group{position:relative;flex:0 0 auto}
+.crow-nav-trigger{appearance:none;border:0;background:transparent;color:var(--text,#222);display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:9px 10px;border-radius:9px;font-weight:800;font-size:12px;white-space:nowrap}
+.crow-nav-trigger:hover,.crow-nav-trigger.is-open{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
+.crow-nav-trigger .chevron{font-size:9px;opacity:.65;transition:transform .15s ease}
+.crow-nav-trigger.is-open .chevron{transform:rotate(180deg)}
+.crow-nav-panel{position:absolute;right:0;top:calc(100% + 7px);width:240px;background:#fff;border:1px solid var(--line,#ddd);border-radius:12px;padding:7px;box-shadow:0 15px 38px rgba(0,0,0,.16);z-index:500;display:none}
+.crow-nav-panel.is-open{display:block}
+.crow-nav-panel-title{padding:7px 9px 5px;color:var(--muted,#6b7280);font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.crow-nav-panel a{display:flex!important;align-items:center;justify-content:space-between;padding:10px 11px;border-radius:8px;color:var(--text,#222);font-size:13px;font-weight:700;text-decoration:none}
+.crow-nav-panel a:hover,.crow-nav-panel a.active{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
+.crow-nav-panel a.active:after{content:"•";font-size:16px}
+@media(max-width:1100px){
+ .crow-nav-trigger{font-size:11px;padding:8px}
+ .crow-nav-home{padding:8px 9px}
 }
-@media(max-width:800px){
- .site-header{flex-wrap:wrap}
- .site-header>nav{order:5;flex:1 1 100%;justify-content:center;border-top:1px solid var(--line,#eee);padding-top:5px}
- .crow-nav-tabs{width:100%;justify-content:space-between}
- .crow-nav-tab{flex:1}
- .crow-nav-tab>summary{justify-content:center;padding:10px 5px}
- .crow-nav-tab-panel{position:fixed;left:12px;right:12px;top:72px;width:auto;max-height:calc(100vh - 90px);overflow:auto}
+@media(max-width:900px){
+ .site-header>nav{flex-basis:100%;order:5;overflow:visible}
+ .crow-nav-shell{flex-wrap:wrap}
+ .crow-nav-groups{justify-content:center;flex-wrap:wrap;width:100%}
+ .crow-nav-group{flex:1 1 auto}
+ .crow-nav-trigger{width:100%;justify-content:center}
+ .crow-nav-panel{position:fixed;left:12px;right:12px;top:74px;width:auto;max-height:calc(100vh - 90px);overflow:auto}
 }
-@media(max-width:480px){
- .crow-nav-tab>summary{font-size:11px}
- .crow-nav-tab:nth-child(n+5)>summary:before{font-size:14px}
-}`;document.head.appendChild(s)};
+@media(max-width:520px){
+ .crow-nav-home{flex:1}
+ .crow-nav-trigger{font-size:11px;padding:9px 6px}
+ .crow-nav-group{min-width:30%}
+}
+`;document.head.appendChild(s)};
 CS.refreshHeader=async()=>{
  const currentUser=await CS.user();
  if(currentUser)await CS.ensureProfile(currentUser);
  const header=document.querySelector(".site-header");
  if(header){
    CS.injectGlobalNavStyles();
-   let nav=header.querySelector("nav"); if(!nav){nav=document.createElement("nav");header.appendChild(nav)}
+   let nav=header.querySelector("nav");if(!nav){nav=document.createElement("nav");header.appendChild(nav)}
    const path=location.pathname.split("/").pop()||"index.html";
    const groups=[
      ["Start",CS.navItems.filter(x=>x.group==="core")],
@@ -94,12 +98,13 @@ CS.refreshHeader=async()=>{
      ["Account",CS.navItems.filter(x=>x.group==="account")],
      ["More",CS.navItems.filter(x=>x.group==="quick")]
    ];
-   const link=x=>'<a href="'+x.href+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
-   const tabs=groups.map((g,i)=>'<details class="crow-nav-tab"><summary>'+CS.escape(g[0])+(i?' <span class="crow-nav-tab-chevron">▼</span>':"")+'</summary><div class="crow-nav-tab-panel">'+(i?'<div class="crow-nav-tab-label">'+CS.escape(g[0])+'</div>':"")+g[1].map(link).join("")+'</div></details>').join("");
-   nav.innerHTML='<div class="crow-nav-tabs"><details class="crow-nav-tab"><summary class="crow-nav-home" title="CrowSpace Home">⌂ Home</summary></details>'+tabs+'</div>';
-   const details=nav.querySelectorAll(".crow-nav-tab");
-   details.forEach(d=>d.addEventListener("toggle",()=>{if(d.open)details.forEach(other=>{if(other!==d)other.removeAttribute("open")})}));
-   nav.querySelectorAll(".crow-nav-tab-panel a").forEach(a=>a.addEventListener("click",()=>details.forEach(d=>d.removeAttribute("open"))));
+   const link=x=>'<a href="'+CS.escape(x.href)+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
+   nav.innerHTML='<div class="crow-nav-shell"><a class="crow-nav-home'+(path==="index.html"?' active" aria-current="page"':'"')+' href="index.html">⌂ Home</a><div class="crow-nav-groups">'+groups.map((g,i)=>'<div class="crow-nav-group"><button type="button" class="crow-nav-trigger" aria-expanded="false" aria-controls="crow-nav-panel-'+i+'">'+CS.escape(g[0])+' <span class="chevron">▼</span></button><div id="crow-nav-panel-'+i+'" class="crow-nav-panel" role="menu" aria-hidden="true"><div class="crow-nav-panel-title">'+CS.escape(g[0])+'</div>'+g[1].map(link).join("")+'</div></div>').join("")+'</div></div>';
+   const closeAll=()=>nav.querySelectorAll(".crow-nav-trigger").forEach(b=>{b.classList.remove("is-open");b.setAttribute("aria-expanded","false");const p=nav.querySelector("#"+CSS.escape(b.getAttribute("aria-controls")));if(p){p.classList.remove("is-open");p.setAttribute("aria-hidden","true")}});
+   nav.querySelectorAll(".crow-nav-trigger").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();const panel=nav.querySelector("#"+CSS.escape(btn.getAttribute("aria-controls")));const open=!btn.classList.contains("is-open");closeAll();if(open){btn.classList.add("is-open");btn.setAttribute("aria-expanded","true");panel?.classList.add("is-open");panel?.setAttribute("aria-hidden","false")}}));
+   nav.querySelectorAll(".crow-nav-panel a").forEach(a=>a.addEventListener("click",closeAll));
+   document.addEventListener("click",e=>{if(!nav.contains(e.target))closeAll()});
+   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll()});
    CS.installGlobalSearch();
  }
  const el=document.getElementById("account"); if(!el)return;
