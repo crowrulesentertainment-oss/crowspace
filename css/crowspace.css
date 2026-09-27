@@ -43,3 +43,10 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 /* CrowSpace 4.36 — spatial intelligence regions */
 .cr-graph-zone-label{font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:.42;pointer-events:none}
 .cr-graph-node{touch-action:none}
+
+/* CrowSpace 4.39 — interactive physics controls */
+.cr-physics-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0 14px}
+.cr-physics-controls label{display:flex;align-items:center;gap:6px;font-size:.78rem}
+.cr-physics-controls input[type=range]{width:110px}
+.cr-physics-help{font-size:.75rem;opacity:.6}
+.cr-frozen-node{stroke-width:4!important;stroke-dasharray:3 3}
