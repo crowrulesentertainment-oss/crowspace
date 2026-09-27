@@ -1,3 +1,158 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Caws | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header><main class="section"><div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h1>Caws</h1><p class="muted">Creator videos connected to their Nests, relationships and activity.</p></div><a class="btn primary" href="create-caw.html">Create a Caw</a></div><div id="filter" class="filter-banner"></div><div id="cawsGrid" class="grid three"></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>
-document.addEventListener("DOMContentLoaded",async()=>{if(!await CS.user()){location.href="login.html";return}await CS.refreshHeader();const params=new URLSearchParams(location.search),user=params.get("user");const {data,error}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(100);const box=cawsGrid;if(error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(error.message)+'</p></div>';return}let rows=data||[];if(user){rows=rows.filter(x=>x.user_id===user);filter.innerHTML='<div class="card"><strong>Showing Caws from this member.</strong> <a href="caws.html">Show all Caws</a></div>'}const graph=await CS.socialGraphMap(250);const esc=CS.escape;box.innerHTML=rows.map(x=>{const p=graph[x.user_id]||{};return '<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+CS.escape(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div><h3>'+CS.escape(x.title||"Untitled Caw")+'</h3><p>'+CS.escape(x.caption||"")+'</p>'+CS.activityLinks(p)+'<small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>'}).join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>'});
-</script><script src="js/global-nav.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caws | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.caw-studio{margin:24px 0 30px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:18px}
+.caw-recorder{position:relative;overflow:hidden;min-height:360px;background:#02030a;border:1px solid rgba(89,231,255,.22);box-shadow:0 0 40px rgba(89,231,255,.07)}
+#preview{width:100%;height:100%;min-height:360px;display:block;object-fit:cover;background:#010207}
+.recorder-overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 30%,transparent 65%,rgba(0,0,0,.75))}
+.live-badge{position:absolute;top:16px;left:16px;padding:7px 11px;border:1px solid rgba(255,79,216,.45);background:rgba(3,4,10,.78);font-size:11px;font-weight:800;letter-spacing:.14em;color:#ff9bea}
+.rec-status{position:absolute;right:16px;top:16px;padding:7px 11px;background:rgba(3,4,10,.78);font-size:12px;color:#fff}
+.rec-controls{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.record-btn{border-radius:999px!important}
+.record-btn.recording{background:#ff4fd8!important;box-shadow:0 0 24px rgba(255,79,216,.4)}
+.studio-copy h2{margin-top:0}.studio-copy .muted{line-height:1.65}
+.caw-form{display:grid;gap:12px;margin-top:14px}.caw-form input,.caw-form textarea{width:100%;box-sizing:border-box}
+.file-chip{padding:10px 12px;border:1px solid var(--cp-line,rgba(112,132,180,.22));background:rgba(8,11,20,.7);font-size:13px}
+@media(max-width:850px){.caw-studio{grid-template-columns:1fr}.caw-recorder,#preview{min-height:300px}}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header>
+
+<main class="section">
+  <div class="section-head">
+    <div><p class="eyebrow">SHORT FORM / CREATOR STUDIO</p><h1>Caws</h1><p class="muted">Record a Caw with your camera and microphone, or upload a video from your device.</p></div>
+    <a class="btn" href="create-caw.html">Full Upload Studio</a>
+  </div>
+
+  <section class="caw-studio">
+    <div class="card caw-recorder">
+      <video id="preview" autoplay muted playsinline></video>
+      <div class="recorder-overlay"></div>
+      <div class="live-badge" id="liveBadge">● CAMERA READY</div>
+      <div class="rec-status" id="recStatus">Ready to record</div>
+      <div class="rec-controls">
+        <button id="cameraBtn" class="btn" type="button">Enable Camera</button>
+        <button id="recordBtn" class="btn primary record-btn" type="button" disabled>● Start Recording</button>
+        <button id="stopBtn" class="btn" type="button" disabled>■ Stop</button>
+        <button id="clearBtn" class="btn" type="button">Clear</button>
+      </div>
+    </div>
+
+    <div class="card studio-copy">
+      <p class="eyebrow">MAKE A CAW</p>
+      <h2>Record or upload.</h2>
+      <p class="muted">Use your webcam and microphone for a quick Caw, or choose an existing MP4, WebM, MOV, M4V or OGG video.</p>
+      <form id="cawForm" class="caw-form">
+        <label>Title<input id="title" maxlength="120" required placeholder="Give your Caw a title"></label>
+        <label>Caption<textarea id="caption" maxlength="2000" rows="5" placeholder="What's this Caw about?"></textarea></label>
+        <label>Upload a Caw<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg"></label>
+        <div id="fileInfo" class="file-chip">No video selected.</div>
+        <button id="publishBtn" class="btn primary" type="submit">Upload &amp; Publish Caw</button>
+        <p id="msg" class="muted" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="filter" class="filter-banner"></div>
+  <div id="cawsGrid" class="grid three"></div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+const MAX_BYTES=512*1024*1024;
+const preview=document.getElementById("preview"), cameraBtn=document.getElementById("cameraBtn"), recordBtn=document.getElementById("recordBtn"), stopBtn=document.getElementById("stopBtn"), clearBtn=document.getElementById("clearBtn"), recStatus=document.getElementById("recStatus"), liveBadge=document.getElementById("liveBadge"), fileInput=document.getElementById("video_file"), fileInfo=document.getElementById("fileInfo"), form=document.getElementById("cawForm"), msg=document.getElementById("msg");
+let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null;
+
+function pickMime(){
+  const types=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"];
+  return types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||"";
+}
+function setRecordedFile(blob){
+  const ext=blob.type.includes("mp4")?"mp4":"webm";
+  const file=new File([blob],"recorded-caw-"+Date.now()+"."+ext,{type:blob.type||"video/webm"});
+  try{const dt=new DataTransfer();dt.items.add(file);fileInput.files=dt.files}catch(e){}
+  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB";
+}
+async function enableCamera(){
+  try{
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    preview.srcObject=stream; recordBtn.disabled=false; cameraBtn.textContent="Camera Enabled";
+    liveBadge.textContent="● CAMERA LIVE"; recStatus.textContent="Ready to record";
+  }catch(e){msg.textContent="Camera/microphone access was not granted. You can still upload a Caw below.";}
+}
+cameraBtn.addEventListener("click",enableCamera);
+recordBtn.addEventListener("click",()=>{
+  if(!stream) return;
+  chunks=[]; recordedBlob=null;
+  const mime=pickMime();
+  try{recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}catch(e){msg.textContent="This browser cannot record video.";return}
+  recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  recorder.onstop=()=>{
+    recordedBlob=new Blob(chunks,{type:recorder.mimeType||"video/webm"});
+    if(recordedUrl) URL.revokeObjectURL(recordedUrl);
+    recordedUrl=URL.createObjectURL(recordedBlob);
+    preview.srcObject=null;preview.src=recordedUrl;preview.controls=true;setRecordedFile(recordedBlob);
+    recStatus.textContent="Recording complete";liveBadge.textContent="● RECORDED";
+    recordBtn.disabled=false;stopBtn.disabled=true;
+  };
+  recorder.start(250);recordBtn.disabled=true;stopBtn.disabled=false;recordBtn.classList.add("recording");recStatus.textContent="Recording…";liveBadge.textContent="● REC";
+});
+stopBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();recordBtn.classList.remove("recording")});
+clearBtn.addEventListener("click",()=>{
+  if(recorder&&recorder.state!=="inactive")recorder.stop();
+  chunks=[];recordedBlob=null;fileInput.value="";fileInfo.textContent="No video selected.";preview.controls=false;
+  if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}
+  if(stream) preview.srcObject=stream; else {preview.removeAttribute("src");preview.load()}
+  recStatus.textContent=stream?"Ready to record":"Camera not enabled";liveBadge.textContent=stream?"● CAMERA LIVE":"● CAMERA READY";msg.textContent="";
+});
+fileInput.addEventListener("change",()=>{
+  const f=fileInput.files[0]; if(!f){fileInfo.textContent="No video selected.";return}
+  if(f.size>MAX_BYTES){fileInfo.textContent="File is over the 512 MB limit.";return}
+  fileInfo.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB";
+  preview.srcObject=null;preview.src=URL.createObjectURL(f);preview.controls=true;
+});
+form.addEventListener("submit",async e=>{
+  e.preventDefault(); const u=await CS.user(); if(!u){location.href="login.html";return}
+  const file=fileInput.files[0]; if(!file){msg.textContent="Record a Caw or choose a video file first.";return}
+  if(file.size>MAX_BYTES){msg.textContent="Video is larger than the 512 MB CrowSpace limit.";return}
+  const ext=(file.name.split(".").pop()||"webm").toLowerCase().replace(/[^a-z0-9]/g,"")||"webm";
+  const path=u.id+"/"+crypto.randomUUID()+"."+ext;
+  const btn=document.getElementById("publishBtn");btn.disabled=true;msg.textContent="Uploading your Caw…";
+  try{
+    const {error:upErr}=await crowSupabase.storage.from("crowspace-caws").upload(path,file,{contentType:file.type||"video/webm",upsert:false});
+    if(upErr) throw upErr;
+    const {data:pub}=crowSupabase.storage.from("crowspace-caws").getPublicUrl(path);
+    const {error:dbErr}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:title.value.trim()||"Untitled Caw",caption:caption.value.trim()||null,video_url:pub.publicUrl,storage_path:path,mime_type:file.type||null,file_size:file.size});
+    if(dbErr){await crowSupabase.storage.from("crowspace-caws").remove([path]);throw dbErr}
+    msg.textContent="Your Caw is live in CrowSpace.";form.reset();fileInfo.textContent="No video selected.";
+    setTimeout(()=>location.reload(),700);
+  }catch(err){msg.textContent=err.message||"Upload failed. Please try again.";btn.disabled=false}
+});
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  if(!await CS.user()){location.href="login.html";return}
+  await CS.refreshHeader();
+  const params=new URLSearchParams(location.search),user=params.get("user");
+  const {data,error}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(100);
+  const box=document.getElementById("cawsGrid");
+  if(error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(error.message)+'</p></div>';return}
+  let rows=data||[];
+  if(user){rows=rows.filter(x=>x.user_id===user);document.getElementById("filter").innerHTML='<div class="card"><strong>Showing Caws from this member.</strong> <a href="caws.html">Show all Caws</a></div>'}
+  const graph=await CS.socialGraphMap(250),esc=CS.escape;
+  box.innerHTML=rows.map(x=>{const p=graph[x.user_id]||{};return '<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+esc(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div><h3>'+esc(x.title||"Untitled Caw")+'</h3><p>'+esc(x.caption||"")+'</p>'+CS.activityLinks(p)+'<small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>'}).join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>';
+  if(CS.hydrateAvatars) await CS.hydrateAvatars();
+});
+</script>
+<script src="js/global-nav.js"></script>
+</body>
+</html>
