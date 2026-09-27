@@ -1,1 +1,55 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create a Caw | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><main class="auth"><div class="auth-card"><a class="brand" href="index.html">◉ CROWSPACE</a><p class="eyebrow">CREATE</p><h1>Create a Caw</h1><form id="cawForm"><input id="title" placeholder="Title"><textarea id="caption" maxlength="2000" placeholder="Caption"></textarea><input id="video_url" type="url" placeholder="Video URL (Supabase Storage or hosted MP4)"><button class="btn primary">Publish Caw</button></form><p id="msg" class="muted"></p><a href="caws.html">Back to Caws</a></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>cawForm.onsubmit=async e=>{e.preventDefault();const u=await CS.user();if(!u){location.href="login.html";return}const {error}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:title.value,caption:caption.value,video_url:video_url.value||null});msg.textContent=error?error.message:"Caw published!";if(!error)setTimeout(()=>location.href="caws.html",500)};</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create a Caw | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">◉ CROWSPACE</a>
+  <nav><a href="index.html">Home</a><a href="profile.html">Nest</a><a class="active" href="caws.html">Caws</a><a href="groups.html">Groups</a></nav>
+  <div id="account"></div>
+</header>
+<main class="section">
+  <div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h1>Create a Caw</h1><p class="muted">Upload a video directly to CrowSpace.</p></div><a class="btn" href="caws.html">Back to Caws</a></div>
+  <section class="card">
+    <form id="cawForm">
+      <label>Title<input id="title" maxlength="120" required placeholder="Give your Caw a title"></label>
+      <label>Caption<textarea id="caption" maxlength="2000" placeholder="Tell the CrowSpace community about this Caw"></textarea></label>
+      <label>Video file<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" required></label>
+      <div id="fileInfo" class="muted"></div>
+      <div id="progressWrap" hidden><progress id="uploadProgress" value="0" max="100"></progress><span id="progressText">Preparing upload…</span></div>
+      <button id="publishBtn" class="btn primary" type="submit">Upload &amp; Publish Caw</button>
+      <p id="msg" class="muted" role="status"></p>
+    </form>
+  </section>
+</main>
+<script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script>
+<script>
+const MAX_BYTES=512*1024*1024;
+const fileInput=document.getElementById("video_file");
+fileInput.addEventListener("change",()=>{const f=fileInput.files[0];document.getElementById("fileInfo").textContent=f?f.name+" · "+(f.size/1048576).toFixed(1)+" MB · "+f.type:"";});
+document.getElementById("cawForm").addEventListener("submit",async e=>{
+ e.preventDefault(); const u=await CS.user(); if(!u){location.href="login.html";return}
+ const file=fileInput.files[0]; if(!file){return}
+ if(file.size>MAX_BYTES){msg.textContent="Video is larger than the 512 MB CrowSpace limit.";return}
+ const ext=(file.name.split(".").pop()||"mp4").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const path=u.id+"/"+crypto.randomUUID()+"."+ext;
+ const btn=document.getElementById("publishBtn"), wrap=document.getElementById("progressWrap"), progress=document.getElementById("uploadProgress"), pt=document.getElementById("progressText");
+ btn.disabled=true;wrap.hidden=false;progress.value=15;pt.textContent="Uploading video…";
+ try{
+   const {error:upErr}=await crowSupabase.storage.from("crowspace-caws").upload(path,file,{contentType:file.type||"video/mp4",upsert:false});
+   if(upErr) throw upErr;
+   progress.value=80;pt.textContent="Saving your Caw…";
+   const {data:pub}=crowSupabase.storage.from("crowspace-caws").getPublicUrl(path);
+   const {error:dbErr}=await crowSupabase.from("crowspace_caws").insert({user_id:u.id,title:title.value.trim()||"Untitled Caw",caption:caption.value.trim()||null,video_url:pub.publicUrl,storage_path:path,mime_type:file.type||null,file_size:file.size});
+   if(dbErr){await crowSupabase.storage.from("crowspace-caws").remove([path]);throw dbErr}
+   progress.value=100;pt.textContent="Published!";
+   msg.textContent="Your Caw is live in CrowSpace.";
+   setTimeout(()=>location.href="caws.html",700);
+ }catch(err){msg.textContent=err.message||"Upload failed. Please try again.";btn.disabled=false}
+});
+</script>
+</body></html>
