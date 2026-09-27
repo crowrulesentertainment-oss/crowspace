@@ -238,13 +238,15 @@ body{background:
   }
 
   async function loadCommunitySignal(){
+    const newest=document.getElementById("rankNewest");
     try{
-      const {data:members}=await db.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(1000);
+      const client=window.crowSupabase||CS.client;
+      if(!client) throw new Error("CrowSpace database client is not ready.");
+      const {data:members,error:memberError}=await client.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(1000);
+      if(memberError) throw memberError;
       const all=members||[];
-      const newest=document.getElementById("rankNewest");
-      if(!all.length){newest.innerHTML='<div class="rank-empty">No members to show yet.</div>';}
+      if(!all.length){newest.innerHTML='<div class="rank-empty">No public members yet.</div>';}
       else newest.innerHTML=all.slice(0,5).map((r,i)=>rankItem(r,new Date(r.created_at).toLocaleDateString(),"Joined",i)).join("");
-
       const [posts,caws,friends]=await Promise.all([
         db.from("crowspace_posts").select("user_id"),
         db.from("crowspace_caws").select("user_id"),
@@ -278,7 +280,11 @@ body{background:
       fill("rankUniverse",universe.map((r,i)=>'<a class="rank-item" href="'+r.href+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar">U</span><span><span class="rank-name">'+esc(r.label)+'</span><span class="rank-handle">'+esc(r.sub)+'</span></span><span class="rank-value">'+r.tag+'</span></a>').join(""),"The wider universe is getting ready.");
     }catch(error){
       console.error("CrowSpace community signal:",error);
-      ["rankActive","rankConnections"].forEach(id=>document.getElementById(id).innerHTML='<div class="rank-empty">Community signal is temporarily unavailable.</div>');
+      if(newest && newest.innerHTML.includes("Loading")) newest.innerHTML='<div class="rank-empty">Member directory is temporarily unavailable. <a href="people.html">Open People →</a></div>';
+      ["rankActive","rankConnections","rankGroups","rankEvents","rankCaws","rankAlbums","rankPosts","rankUniverse"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el && el.innerHTML.includes("Loading")) el.innerHTML='<div class="rank-empty">Community signal is temporarily unavailable.</div>';
+      });
     }
   }
 
