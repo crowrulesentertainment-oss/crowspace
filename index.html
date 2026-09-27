@@ -3,186 +3,162 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060b">
 <title>CrowSpace | CrowRules Entertainment</title>
 <link rel="stylesheet" href="css/crowspace.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-.home-command{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-top:22px}
-.command-panel,.pulse-panel,.launch-card,.universe-node,.roadmap-card{background:linear-gradient(145deg,rgba(8,11,20,.96),rgba(12,16,30,.88));border:1px solid rgba(89,231,255,.18);box-shadow:0 16px 45px rgba(0,0,0,.22)}
-.command-panel{padding:24px;border-radius:18px;position:relative;overflow:hidden}
-.command-panel:after{content:"";position:absolute;inset:auto -20% -70% 20%;height:180px;background:radial-gradient(circle,rgba(168,121,255,.16),transparent 65%);pointer-events:none}
-.command-kicker{font-size:11px;letter-spacing:2px;font-weight:900;color:var(--cp-cyan,#59e7ff)}
-.command-panel h2{font-size:clamp(28px,4vw,48px);margin:8px 0}
-.command-panel p{max-width:720px}
-.command-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-.pulse-panel{border-radius:18px;padding:20px}
-.pulse-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.pulse-stat{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}
-.pulse-stat small{display:block;opacity:.65;text-transform:uppercase;letter-spacing:1px;font-size:9px}
-.pulse-stat strong{display:block;margin-top:5px;font-size:20px}
-.launch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.launch-card{padding:19px;border-radius:15px;transition:transform .18s ease,border-color .18s ease}
-.launch-card:hover{transform:translateY(-3px);border-color:rgba(89,231,255,.5)}
-.launch-icon{font-size:25px}
-.launch-card h3{margin:10px 0 6px}
-.launch-card p{font-size:13px;opacity:.75;min-height:38px}
-.launch-card a{font-weight:900}
-.universe-map{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.universe-node{padding:20px;border-radius:16px;min-height:150px}
-.universe-node .node-line{font-size:10px;letter-spacing:1.5px;color:var(--cp-cyan,#59e7ff);font-weight:900}
-.universe-node h3{margin:8px 0}
-.universe-node p{font-size:13px;opacity:.75}
-.roadmap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.roadmap-card{padding:18px;border-radius:14px}
-.roadmap-card strong{font-size:22px}
-.roadmap-card span{display:block;color:var(--cp-cyan,#59e7ff);font-size:11px;font-weight:900;margin:6px 0}
-.home-status{margin-top:12px;font-size:12px;opacity:.7}
-@media(max-width:900px){.home-command{grid-template-columns:1fr}.launch-grid,.roadmap-grid{grid-template-columns:1fr 1fr}.universe-map{grid-template-columns:1fr}}
-@media(max-width:520px){.launch-grid,.roadmap-grid{grid-template-columns:1fr}.command-panel{padding:18px}.pulse-grid{grid-template-columns:1fr 1fr}}
-.community-rankings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.ranking-card{background:linear-gradient(145deg,rgba(8,11,20,.96),rgba(12,16,30,.88));border:1px solid rgba(89,231,255,.18);border-radius:16px;padding:18px;min-height:250px}.ranking-card h3{margin:6px 0}.rank-kicker{font-size:10px;letter-spacing:1.5px;font-weight:900;color:var(--cp-cyan,#59e7ff)}.ranking-list{display:grid;gap:8px;margin-top:14px}.ranking-item{display:grid;grid-template-columns:26px 34px 1fr auto;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:inherit;text-decoration:none}.rank-num{font-family:Orbitron,Arial,sans-serif;font-weight:900;opacity:.65}.rank-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#162033,#283650);display:grid;place-items:center;font-size:11px;font-weight:900}.rank-name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-handle{display:block;font-size:10px;opacity:.55;margin-top:2px}.rank-value{font-size:10px;font-weight:900;color:var(--cp-cyan,#59e7ff);white-space:nowrap}.ranking-empty{font-size:12px;opacity:.6;padding:14px 0}@media(max-width:900px){.community-rankings{grid-template-columns:1fr 1fr}}@media(max-width:520px){.community-rankings{grid-template-columns:1fr}}<style>
-.community-groups .section-subtitle{max-width:720px;margin:.5rem 0 0;color:var(--muted,#98a3b8)}
-.community-group-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:18px 0}
-.group-search{display:flex;align-items:center;gap:9px;flex:1;max-width:520px;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035)}
-.group-search input{width:100%;border:0;outline:0;background:transparent;color:inherit;font:inherit}
-.group-filters{display:flex;gap:7px;flex-wrap:wrap}.group-filter{border:1px solid rgba(255,255,255,.1);background:transparent;color:inherit;border-radius:999px;padding:8px 13px;cursor:pointer}.group-filter.active{border-color:rgba(90,220,255,.65);box-shadow:0 0 18px rgba(90,220,255,.1)}
-.groups-explorer{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.group-explorer-card{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));padding:20px;min-height:190px;transition:.2s}.group-explorer-card:hover{transform:translateY(-3px);border-color:rgba(90,220,255,.4)}.group-explorer-top{display:flex;justify-content:space-between;gap:12px}.group-glyph{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(90,220,255,.16),rgba(174,91,255,.18));font-family:Orbitron,sans-serif;font-weight:800}.group-badge{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7ee7ff}.group-explorer-card h3{margin:18px 0 7px}.group-explorer-card p{color:var(--muted,#98a3b8);line-height:1.55;margin:0}.group-meta{display:flex;gap:12px;margin-top:15px;font-size:12px;color:#b9c2d4}.group-explorer-card .group-open{display:inline-block;margin-top:16px;color:#fff;text-decoration:none;font-weight:700}.community-loading,.group-empty{padding:26px;border:1px dashed rgba(255,255,255,.12);border-radius:18px;color:var(--muted,#98a3b8);grid-column:1/-1}
-@media(max-width:900px){.groups-explorer{grid-template-columns:repeat(2,minmax(0,1fr))}.community-group-toolbar{align-items:stretch;flex-direction:column}.group-search{max-width:none}}
-@media(max-width:600px){.groups-explorer{grid-template-columns:1fr}}
-<style>
-.community-members{position:relative}.member-directory-tools{display:flex;gap:12px;align-items:center;margin:0 0 18px}.member-search{flex:1;max-width:520px;display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035);padding:0 13px}.member-search span{font-size:22px;opacity:.7}.member-search input{width:100%;border:0;outline:0;background:transparent;color:inherit;padding:13px 0;font:inherit}.member-count{font-size:12px;color:var(--muted);font-weight:700}.community-member-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.community-member-card{display:flex;align-items:center;gap:12px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025);text-decoration:none;color:inherit;transition:.2s}.community-member-card:hover{transform:translateY(-2px);border-color:rgba(85,230,255,.35);background:rgba(85,230,255,.045)}.community-member-avatar{width:52px;height:52px;flex:0 0 52px;border-radius:15px;object-fit:cover;background:linear-gradient(135deg,rgba(85,230,255,.15),rgba(155,124,255,.18));display:grid;place-items:center;font-weight:900;color:#b9f6ff}.community-member-copy{min-width:0}.community-member-copy strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.community-member-copy span{display:block;color:var(--muted);font-size:11px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.community-member-empty{grid-column:1/-1;padding:24px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
-@media(max-width:1050px){.community-member-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.community-member-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.member-directory-tools{align-items:stretch;flex-direction:column}.member-search{max-width:none}}@media(max-width:480px){.community-member-grid{grid-template-columns:1fr}}
+:root{
+  --home-bg:#05060b;--home-panel:rgba(10,14,25,.82);--home-line:rgba(255,255,255,.09);
+  --home-cyan:#59e7ff;--home-purple:#a878ff;--home-pink:#ff65c7;--home-muted:#9aa6bb;
+}
+body{background:
+ radial-gradient(circle at 12% 0%,rgba(89,231,255,.08),transparent 30%),
+ radial-gradient(circle at 88% 12%,rgba(168,120,255,.09),transparent 28%),var(--home-bg)}
+.home-wrap{max-width:1320px;margin:0 auto;padding:0 22px}
+.home-hero{position:relative;min-height:590px;display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;padding:70px 0 54px;overflow:hidden}
+.home-hero:before{content:"";position:absolute;width:620px;height:620px;right:-150px;top:-100px;border:1px solid rgba(89,231,255,.11);border-radius:50%;box-shadow:0 0 120px rgba(89,231,255,.08),inset 0 0 100px rgba(168,120,255,.05)}
+.home-hero:after{content:"";position:absolute;width:390px;height:390px;right:-35px;top:15px;border:1px solid rgba(168,120,255,.14);border-radius:50%;transform:rotate(23deg)}
+.hero-copy{position:relative;z-index:2}.home-eyebrow{font-size:11px;letter-spacing:2.5px;font-weight:900;color:var(--home-cyan);margin:0 0 14px}
+.home-hero h1{font-size:clamp(42px,6.5vw,82px);line-height:.98;margin:0;max-width:800px;letter-spacing:-2px}
+.home-hero h1 span{background:linear-gradient(90deg,var(--home-cyan),#fff,var(--home-purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+.home-lead{font-size:18px;line-height:1.7;color:#c0c9d8;max-width:700px;margin:22px 0}
+.home-actions{display:flex;flex-wrap:wrap;gap:10px}.home-status{font-size:12px;color:var(--home-muted);margin-top:15px}
+.hero-console{position:relative;z-index:2;padding:22px;border:1px solid var(--home-line);border-radius:28px;background:linear-gradient(145deg,rgba(14,20,35,.88),rgba(6,9,17,.72));backdrop-filter:blur(18px);box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.console-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--home-line)}
+.console-live{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1.5px;font-weight:900}.console-dot{width:8px;height:8px;border-radius:50%;background:var(--home-cyan);box-shadow:0 0 15px var(--home-cyan)}
+.console-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.console-tile{padding:16px;border:1px solid var(--home-line);border-radius:16px;background:rgba(255,255,255,.025)}
+.console-tile small{display:block;text-transform:uppercase;letter-spacing:1.2px;color:var(--home-muted);font-size:9px}.console-tile strong{display:block;font:900 24px Orbitron,Arial,sans-serif;margin-top:7px}
+.console-footer{margin-top:14px;padding:13px 15px;border-radius:14px;background:linear-gradient(90deg,rgba(89,231,255,.08),rgba(168,120,255,.08));font-size:12px;color:#c6d0df}
+.home-section{padding:34px 0}.home-section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:18px}.home-section-head h2{font-size:clamp(26px,3vw,40px);margin:4px 0 0}.home-section-head p{color:var(--home-muted);max-width:760px;line-height:1.55;margin:7px 0 0}.home-link{color:var(--home-cyan);font-weight:900;text-decoration:none;white-space:nowrap}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.quick-card{padding:20px;border:1px solid var(--home-line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));text-decoration:none;color:inherit;transition:.2s}.quick-card:hover{transform:translateY(-3px);border-color:rgba(89,231,255,.38)}.quick-icon{font-size:25px}.quick-card h3{margin:11px 0 5px}.quick-card p{font-size:12px;line-height:1.5;color:var(--home-muted);margin:0}
+.community-shell{border:1px solid var(--home-line);border-radius:24px;padding:20px;background:linear-gradient(145deg,rgba(10,14,25,.94),rgba(8,10,18,.78))}
+.community-tools{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}.member-search{flex:1;max-width:560px;display:flex;align-items:center;gap:10px;padding:0 14px;border:1px solid var(--home-line);border-radius:14px;background:rgba(255,255,255,.035)}.member-search span{font-size:20px;color:var(--home-muted)}.member-search input{width:100%;border:0;outline:0;background:transparent;color:inherit;padding:13px 0;font:inherit}.member-count{font-size:11px;color:var(--home-muted);font-weight:800;white-space:nowrap}
+.member-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.member-card{display:flex;align-items:center;gap:12px;min-width:0;padding:14px;border:1px solid var(--home-line);border-radius:17px;background:rgba(255,255,255,.025);text-decoration:none;color:inherit;transition:.2s}.member-card:hover{transform:translateY(-2px);border-color:rgba(89,231,255,.42);background:rgba(89,231,255,.035)}.member-avatar{width:54px;height:54px;flex:0 0 54px;border-radius:16px;object-fit:cover;background:linear-gradient(135deg,rgba(89,231,255,.16),rgba(168,120,255,.2));display:grid;place-items:center;color:#c8f8ff;font:900 14px Orbitron,Arial,sans-serif}.member-copy{min-width:0}.member-copy strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.member-copy span{display:block;font-size:11px;color:var(--home-muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.member-badge{display:inline-flex;margin-top:7px;padding:4px 7px;border-radius:999px;background:rgba(89,231,255,.07);color:var(--home-cyan);font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.member-empty{grid-column:1/-1;padding:30px;text-align:center;border:1px dashed var(--home-line);border-radius:17px;color:var(--home-muted)}.member-more{display:flex;justify-content:center;margin-top:18px}
+.rank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.rank-card{padding:18px;border:1px solid var(--home-line);border-radius:19px;background:linear-gradient(145deg,rgba(10,14,25,.9),rgba(255,255,255,.018));min-height:220px}.rank-kicker{font-size:9px;letter-spacing:1.6px;font-weight:900;color:var(--home-cyan)}.rank-card h3{margin:7px 0}.rank-list{display:grid;gap:7px;margin-top:12px}.rank-item{display:grid;grid-template-columns:25px 34px 1fr auto;align-items:center;gap:8px;padding:7px;border:1px solid rgba(255,255,255,.065);border-radius:11px;text-decoration:none;color:inherit}.rank-num{font:900 11px Orbitron,Arial,sans-serif;color:var(--home-muted)}.rank-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#162033,#283650);display:grid;place-items:center;font-size:10px;font-weight:900}.rank-name{display:block;font-weight:800;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-handle{display:block;font-size:9px;color:var(--home-muted);margin-top:2px}.rank-value{font-size:9px;font-weight:900;color:var(--home-cyan);white-space:nowrap}.rank-empty{font-size:11px;color:var(--home-muted);padding:12px 0}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.feature-card{position:relative;overflow:hidden;min-height:180px;padding:22px;border-radius:21px;border:1px solid var(--home-line);background:linear-gradient(145deg,rgba(12,17,30,.92),rgba(8,10,18,.82))}.feature-card:after{content:"";position:absolute;width:180px;height:180px;right:-70px;bottom:-90px;border-radius:50%;background:radial-gradient(circle,rgba(89,231,255,.18),transparent 68%)}.feature-card .feature-code{font-size:9px;letter-spacing:1.6px;font-weight:900;color:var(--home-cyan)}.feature-card h3{font-size:22px;margin:9px 0}.feature-card p{color:var(--home-muted);font-size:12px;line-height:1.6;max-width:410px}.feature-card a{font-size:12px;font-weight:900;color:#fff;text-decoration:none}
+.feed-shell{border:1px solid var(--home-line);border-radius:22px;padding:18px;background:rgba(8,11,20,.72)}.discover-grid{margin-top:0}
+.world-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.world-card{padding:22px;border:1px solid var(--home-line);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.012))}.world-code{font-size:9px;letter-spacing:1.5px;color:var(--home-cyan);font-weight:900}.world-card h3{margin:8px 0}.world-card p{color:var(--home-muted);font-size:12px;line-height:1.55}.world-card a{font-size:11px;font-weight:900;color:#fff;text-decoration:none}
+.build-banner{position:relative;overflow:hidden;padding:30px;border:1px solid rgba(89,231,255,.18);border-radius:24px;background:linear-gradient(100deg,rgba(89,231,255,.08),rgba(168,120,255,.08),rgba(255,101,199,.05))}.build-banner h2{margin:4px 0 8px}.build-banner p{max-width:760px;color:#b8c2d1;line-height:1.6}.build-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+@media(max-width:1050px){.home-hero{grid-template-columns:1fr}.hero-console{max-width:650px}.member-grid{grid-template-columns:repeat(3,1fr)}.quick-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:820px){.rank-grid,.feature-grid,.world-grid{grid-template-columns:1fr 1fr}.home-section-head{align-items:start;flex-direction:column}.community-tools{align-items:stretch;flex-direction:column}.member-search{max-width:none}}
+@media(max-width:600px){.home-wrap{padding:0 14px}.home-hero{padding:46px 0 30px;min-height:auto}.home-hero h1{letter-spacing:-1px}.home-lead{font-size:16px}.quick-grid,.member-grid,.rank-grid,.feature-grid,.world-grid{grid-template-columns:1fr}.console-grid{grid-template-columns:1fr 1fr}.home-section{padding:27px 0}}
 </style>
-</style></style>
 </head>
 <body>
 <header class="site-header">
-<a class="brand" href="index.html"><span>●</span> CROWSPACE</a>
-<nav aria-label="CrowSpace global navigation"></nav>
-<div id="account"><a href="login.html">Sign In</a></div>
+  <a class="brand" href="index.html"><span>●</span> CROWSPACE</a>
+  <nav aria-label="CrowSpace global navigation"></nav>
+  <div id="account"><a href="login.html">Sign In</a></div>
 </header>
 
 <main>
-<section class="hero">
-<div>
-<p class="eyebrow">CROWRULES ENTERTAINMENT · CROWSPACE</p>
-<h1>Your social universe is <span>coming alive.</span></h1>
-<p class="lead">CrowSpace brings people, posts, Caws, photos, groups, events and the wider CrowRules universe into one connected community.</p>
-<div class="actions">
-<a class="btn primary" href="signup.html">Join CrowSpace</a>
-<a class="btn" href="profile.html">Enter your Nest</a>
-</div>
-<div class="home-status" id="homeStatus">Connecting to the CrowSpace universe…</div>
-</div>
-<div class="hero-orbit">◉</div>
-</section>
+<div class="home-wrap">
 
-<section class="section">
-<div class="home-command">
-<div class="command-panel">
-<div class="command-kicker">CROWSPACE COMMAND DECK</div>
-<h2 id="welcomeTitle">One Account. One Universe.</h2>
-<p id="welcomeCopy">Build your identity, find your people and move between every part of CrowSpace without leaving your Nest.</p>
-<div class="command-actions">
-<a class="btn primary" href="profile.html">Open My Nest →</a>
-<a class="btn" href="people.html">Discover People</a>
-<a class="btn" href="notifications.html">View Notifications</a>
-<a class="btn" href="command-center.html">Command Center</a>
-</div>
-</div>
-<div class="pulse-panel">
-<p class="eyebrow">ACTIVITY PULSE</p>
-<h3>At a glance</h3>
-<div class="pulse-grid">
-<div class="pulse-stat"><small>Identity</small><strong id="statIdentity">—</strong></div>
-<div class="pulse-stat"><small>Membership</small><strong id="statMembership">—</strong></div>
-<div class="pulse-stat"><small>CrowPoints</small><strong id="statPoints">—</strong></div>
-<div class="pulse-stat"><small>Connection</small><strong id="statConnection">—</strong></div>
-</div>
-</div>
-</div>
-</section>
-
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">QUICK LAUNCH</p><h2>Make something happen</h2></div><a href="command-center.html">Open Command Center →</a></div>
-<div class="launch-grid">
-<article class="launch-card"><div class="launch-icon">🎬</div><h3>Create a Caw</h3><p>Record or upload short-form video.</p><a href="create-caw.html">Start creating →</a></article>
-<article class="launch-card"><div class="launch-icon">📸</div><h3>Build an Album</h3><p>Upload photos and create a visual collection.</p><a href="create-album.html">Create album →</a></article>
-<article class="launch-card"><div class="launch-icon">👥</div><h3>Start a Group</h3><p>Bring people together around an idea.</p><a href="create-group.html">Create group →</a></article>
-<article class="launch-card"><div class="launch-icon">📅</div><h3>Create an Event</h3><p>Plan a meetup, livestream or community event.</p><a href="create-event.html">Create event →</a></article>
-</div>
-</section>
-
-<section class="section"><div class="section-head"><div><p class="eyebrow">COMMUNITY PULSE</p><h2>The CrowSpace Community</h2><p class="lead">Discover the newest members, active creators and the people shaping the community.</p></div><a href="people.html">Explore People →</a></div><div class="community-rankings"><article class="ranking-card"><div class="rank-kicker">JUST ARRIVED</div><h3>Newest Members</h3><div id="rankNewest" class="ranking-list"><div class="ranking-empty">Loading community…</div></div></article><article class="ranking-card"><div class="rank-kicker">COMMUNITY ENERGY</div><h3>Most Active Members</h3><div id="rankActive" class="ranking-list"><div class="ranking-empty">Loading activity…</div></div></article><article class="ranking-card"><div class="rank-kicker">NETWORK</div><h3>Most Connections</h3><div id="rankConnections" class="ranking-list"><div class="ranking-empty">Loading connections…</div></div></article><article class="ranking-card"><div class="rank-kicker">MEMORIES</div><h3>Most Pictures</h3><div id="rankPictures" class="ranking-list"><div class="ranking-empty">Loading photos…</div></div></article><article class="ranking-card"><div class="rank-kicker">SHORT FORM</div><h3>Most Caws</h3><div id="rankCaws" class="ranking-list"><div class="ranking-empty">Loading Caws…</div></div></article><article class="ranking-card"><div class="rank-kicker">COMMUNITY BUILDERS</div><h3>Group Creators</h3><div id="rankGroups" class="ranking-list"><div class="ranking-empty">Loading groups…</div></div></article><article class="ranking-card"><div class="rank-kicker">EVENT HOSTS</div><h3>Most Events</h3><div id="rankEvents" class="ranking-list"><div class="ranking-empty">Loading events…</div></div></article><article class="ranking-card"><div class="rank-kicker">COMMUNITY NETWORKS</div><h3>Most Groups</h3><div id="rankGroupMemberships" class="ranking-list"><div class="ranking-empty">Loading groups…</div></div></article></div></section>
-
-<section class="section community-members">
-<div class="section-head"><div><p class="eyebrow">THE COMMUNITY</p><h2>All CrowSpace Members</h2><p class="lead">Every member with a public CrowSpace profile, in one living directory.</p></div><a href="people.html">Open People →</a></div>
-<div class="member-directory-tools"><label class="member-search"><span>⌕</span><input id="communityMemberSearch" type="search" placeholder="Search members…" autocomplete="off"></label><span id="communityMemberCount" class="member-count">Loading members…</span></div>
-<div id="communityMembers" class="community-member-grid"><div class="ranking-empty">Loading the community…</div></div>
-</section>
-
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">SOCIAL FEED</p><h2>The Nest</h2></div><a href="profile.html">Create a post →</a></div>
-<div id="feed" class="feed"></div>
-</section>
-
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">DISCOVER</p><h2>People You May Know</h2></div><a href="people.html">Find People →</a></div>
-<div id="discover" class="grid three"></div>
-</section>
-
-<section class="section dark" id="caws">
-<div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h2>Caws</h2></div><a href="caws.html">View all →</a></div>
-<div class="caw-preview"><div class="caw-screen"><div class="play">▶</div><div><strong>Short-form video for CrowSpace</strong><small>Creators • community • CrowRules</small></div></div><div class="caw-copy"><p>Create and discover vertical video from the CrowRules community.</p><a class="btn primary" href="create-caw.html">Create a Caw</a></div></div>
-</section>
-
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">CONNECTED UNIVERSE</p><h2>Explore the CrowRules worlds</h2></div><a href="command-center.html">Universal Command Center →</a></div>
-<div class="universe-map">
-<article class="universe-node"><div class="node-line">DREAM · CREATE</div><h3>Dreamscapes</h3><p>Discover dreams, stories and ideas being developed through collaboration.</p><a href="dreamscapes.html">Enter Dreamscapes →</a></article>
-<article class="universe-node"><div class="node-line">REMEMBER · HONOR</div><h3>Memorials</h3><p>Explore the CrowRules Memorials universe and preserve stories that matter.</p><a href="memorials.html">Open Memorials →</a></article>
-<article class="universe-node"><div class="node-line">LISTEN · CONNECT</div><h3>Podcasting</h3><p>Find voices, conversations, original shows and community storytelling.</p><a href="podcasting.html">Explore Podcasting →</a></article>
-<article class="universe-node"><div class="node-line">CONNECT · COMMUNITY</div><h3>Groups</h3><p>Join communities or build your own space around shared interests.</p><a href="groups.html">Explore Groups →</a></article>
-<article class="universe-node"><div class="node-line">PLAN · GATHER</div><h3>Events</h3><p>Discover what's happening and create events for your community.</p><a href="events.html">Explore Events →</a></article>
-<article class="universe-node"><div class="node-line">YOU · YOUR NEST</div><h3>Profile</h3><p>Your identity, posts, photos, connections and creative home base.</p><a href="profile.html">Open My Nest →</a></article>
-</div>
-</section>
-
-<section class="section community-groups">
-<div class="section-head">
-  <div><p class="eyebrow">COMMUNITY</p><h2>Groups worth exploring</h2><p class="section-subtitle">Discover active communities across CrowSpace and find a place to connect, create and participate.</p></div>
-  <a class="btn" href="groups.html">Explore all groups →</a>
-</div>
-<div class="community-group-toolbar">
-  <label class="group-search"><span>⌕</span><input id="homeGroupSearch" type="search" placeholder="Search groups…" autocomplete="off"></label>
-  <div class="group-filters" role="group" aria-label="Group filters">
-    <button class="group-filter active" data-group-filter="all">All</button>
-    <button class="group-filter" data-group-filter="active">Active</button>
-    <button class="group-filter" data-group-filter="new">New</button>
+<section class="home-hero">
+  <div class="hero-copy">
+    <p class="home-eyebrow">CROWRULES ENTERTAINMENT · CROWSPACE</p>
+    <h1>A new kind of <span>social universe.</span></h1>
+    <p class="home-lead">CrowSpace is the community layer of CrowRules — a place to build your Nest, find your people, share Caws and photos, create groups and events, and connect everything through one account.</p>
+    <div class="home-actions">
+      <a class="btn primary" href="signup.html">Join CrowSpace →</a>
+      <a class="btn" href="people.html">Meet the Community</a>
+      <a class="btn" href="profile.html">Open My Nest</a>
+    </div>
+    <div id="homeStatus" class="home-status">Connecting to the CrowSpace universe…</div>
   </div>
-</div>
-<div id="homeGroups" class="groups-explorer"><div class="community-loading">Loading groups…</div></div>
-</section>
+  <aside class="hero-console" aria-label="CrowSpace live overview">
+    <div class="console-head">
+      <div><p class="home-eyebrow" style="margin:0">NEST OS</p><strong>Community command deck</strong></div>
+      <div class="console-live"><i class="console-dot"></i><span id="consoleState">LIVE</span></div>
+    </div>
+    <div class="console-grid">
+      <div class="console-tile"><small>Members</small><strong id="heroMembers">—</strong></div>
+      <div class="console-tile"><small>Groups</small><strong id="heroGroups">—</strong></div>
+      <div class="console-tile"><small>Caws</small><strong id="heroCaws">—</strong></div>
+      <div class="console-tile"><small>Events</small><strong id="heroEvents">—</strong></div>
+    </div>
+    <div class="console-footer" id="heroMessage">One Account. One Universe. Everything starts with your Nest.</div>
+  </aside>
 </section>
 
-<section class="section membership">
-<p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
-<h2>Universal CrowRules Membership</h2>
-<p>Your CrowSpace identity connects to the shared CrowRules membership system. One identity can move across the growing universe.</p>
-<div class="actions">
-<a class="btn primary" href="membership.html">Explore Membership →</a>
-<a class="btn" href="signup.html">Create your account</a>
-</div>
+<section class="home-section">
+  <div class="home-section-head"><div><p class="home-eyebrow">QUICK LAUNCH</p><h2>Jump into CrowSpace</h2><p>Create, connect and explore without digging through menus.</p></div></div>
+  <div class="quick-grid">
+    <a class="quick-card" href="create-caw.html"><div class="quick-icon">🎬</div><h3>Create a Caw</h3><p>Record or upload short-form video and share it with the community.</p></a>
+    <a class="quick-card" href="create-album.html"><div class="quick-icon">📸</div><h3>Build an Album</h3><p>Turn your photos into a visual collection inside your Nest.</p></a>
+    <a class="quick-card" href="create-group.html"><div class="quick-icon">👥</div><h3>Start a Group</h3><p>Create a community around an interest, project or shared idea.</p></a>
+    <a class="quick-card" href="create-event.html"><div class="quick-icon">◷</div><h3>Create an Event</h3><p>Bring people together online, locally or across the CrowRules universe.</p></a>
+  </div>
 </section>
 
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">THE ROAD AHEAD</p><h2>CrowSpace is still being built.</h2></div></div>
-<div class="roadmap-grid">
-<div class="roadmap-card"><strong>01</strong><span>NOW</span><p>Profiles, social connections, Caws, photos, groups and events.</p></div>
-<div class="roadmap-card"><strong>02</strong><span>CONNECT</span><p>Notifications, discovery, richer feeds and deeper community tools.</p></div>
-<div class="roadmap-card"><strong>03</strong><span>CREATE</span><p>More creator tools, live experiences and connected CrowRules projects.</p></div>
-<div class="roadmap-card"><strong>∞</strong><span>ONE UNIVERSE</span><p>One account connecting the worlds built by CrowRules and its community.</p></div>
-</div>
+<section class="home-section community-members">
+  <div class="home-section-head">
+    <div><p class="home-eyebrow">THE COMMUNITY</p><h2>Meet the people of CrowSpace</h2><p>One living directory of public CrowSpace profiles. Search by name or username and jump directly into a Nest.</p></div>
+    <a class="home-link" href="people.html">Open People →</a>
+  </div>
+  <div class="community-shell">
+    <div class="community-tools">
+      <label class="member-search"><span>⌕</span><input id="communityMemberSearch" type="search" placeholder="Search members by name or @username…" autocomplete="off"></label>
+      <span id="communityMemberCount" class="member-count">Loading members…</span>
+    </div>
+    <div id="communityMembers" class="member-grid"><div class="member-empty">Loading the community…</div></div>
+    <div class="member-more"><a class="btn" href="people.html">Explore the full member directory →</a></div>
+  </div>
 </section>
+
+<section class="home-section">
+  <div class="home-section-head"><div><p class="home-eyebrow">COMMUNITY SIGNAL</p><h2>What's happening across CrowSpace</h2><p>Discover the newest members and the people creating activity across the network.</p></div><a class="home-link" href="people.html">Discover People →</a></div>
+  <div class="rank-grid">
+    <article class="rank-card"><div class="rank-kicker">JUST ARRIVED</div><h3>Newest Members</h3><div id="rankNewest" class="rank-list"><div class="rank-empty">Loading…</div></div></article>
+    <article class="rank-card"><div class="rank-kicker">COMMUNITY ENERGY</div><h3>Most Active</h3><div id="rankActive" class="rank-list"><div class="rank-empty">Loading…</div></div></article>
+    <article class="rank-card"><div class="rank-kicker">NETWORK</div><h3>Most Connections</h3><div id="rankConnections" class="rank-list"><div class="rank-empty">Loading…</div></div></article>
+  </div>
+</section>
+
+<section class="home-section">
+  <div class="home-section-head"><div><p class="home-eyebrow">CREATOR SPOTLIGHT</p><h2>More ways to participate</h2></div></div>
+  <div class="feature-grid">
+    <article class="feature-card"><div class="feature-code">CREATE · SHARE</div><h3>Your Nest is your HQ.</h3><p>Customize your identity, social links, favorite media, status and profile sections. Make CrowSpace feel like your space.</p><a href="customize.html">Customize My Nest →</a></article>
+    <article class="feature-card"><div class="feature-code">CONNECT · DISCOVER</div><h3>Find your people.</h3><p>Build connections, follow community activity and move between profiles, groups and events from one shared identity.</p><a href="people.html">Explore People →</a></article>
+    <article class="feature-card"><div class="feature-code">BUILD · BELONG</div><h3>Start something new.</h3><p>Groups and events turn ideas into communities. Create a place where other CrowSpace members can participate.</p><a href="groups.html">Explore Groups →</a></article>
+  </div>
+</section>
+
+<section class="home-section">
+  <div class="home-section-head"><div><p class="home-eyebrow">SOCIAL STREAM</p><h2>The Nest Feed</h2><p>Recent community posts and conversations.</p></div><a class="home-link" href="profile.html">Create a post →</a></div>
+  <div class="feed-shell"><div id="feed" class="feed"></div></div>
+</section>
+
+<section class="home-section">
+  <div class="home-section-head"><div><p class="home-eyebrow">DISCOVERY</p><h2>People You May Know</h2></div><a class="home-link" href="people.html">Find more people →</a></div>
+  <div id="discover" class="grid three discover-grid"></div>
+</section>
+
+<section class="home-section">
+  <div class="home-section-head"><div><p class="home-eyebrow">THE CONNECTED UNIVERSE</p><h2>Explore CrowRules</h2><p>CrowSpace is one layer of a larger creative universe.</p></div><a class="home-link" href="command-center.html">Command Center →</a></div>
+  <div class="world-grid">
+    <article class="world-card"><div class="world-code">DREAM · CREATE</div><h3>Dreamscapes</h3><p>Ideas, stories and dreams moving toward production through collaboration.</p><a href="dreamscapes.html">Enter Dreamscapes →</a></article>
+    <article class="world-card"><div class="world-code">LISTEN · CONNECT</div><h3>Podcasting</h3><p>Shows, voices and conversations connected to the CrowRules ecosystem.</p><a href="podcasting.html">Explore Podcasting →</a></article>
+    <article class="world-card"><div class="world-code">REMEMBER · HONOR</div><h3>Memorials</h3><p>A place to preserve stories and remember people whose lives mattered.</p><a href="memorials.html">Open Memorials →</a></article>
+    <article class="world-card"><div class="world-code">COMMUNITY · BELONG</div><h3>Groups</h3><p>Find communities around shared interests or build one of your own.</p><a href="groups.html">Explore Groups →</a></article>
+    <article class="world-card"><div class="world-code">PLAN · GATHER</div><h3>Events</h3><p>Create and discover community gatherings, meetups and online experiences.</p><a href="events.html">Explore Events →</a></article>
+    <article class="world-card"><div class="world-code">VIDEO · NOW</div><h3>Caws</h3><p>Short-form video from the CrowSpace community and the creators building it.</p><a href="caws.html">Watch Caws →</a></article>
+  </div>
+</section>
+
+<section class="home-section">
+  <div class="build-banner">
+    <p class="home-eyebrow">BUILDING IN PUBLIC</p>
+    <h2>CrowSpace is growing with the community.</h2>
+    <p>The platform is being built one layer at a time — profiles, connections, media, groups, events, creator tools and the wider CrowRules universe. Your Nest is the starting point.</p>
+    <div class="build-actions"><a class="btn primary" href="signup.html">Create Your Nest →</a><a class="btn" href="membership.html">Explore Membership</a><a class="btn" href="command-center.html">Open Command Center</a></div>
+  </div>
+</section>
+
+</div>
 </main>
 
 <footer><strong>CrowRules Entertainment</strong><span>© 2026 CrowSpace • One company. One universe.</span></footer>
@@ -191,67 +167,134 @@
 <script src="js/supabase.js"></script>
 <script src="js/crowspace.js"></script>
 <script>
-function escRank(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function rankCard(row,value,label,rank){const name=row.display_name||row.username||"CrowSpace Member";const handle=row.username?"@"+row.username:"";const initials=name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();const av=row.avatar_url?'<img class="rank-avatar" src="'+escRank(row.avatar_url)+'" alt="">':'<span class="rank-avatar">'+escRank(initials)+'</span>';return '<a class="ranking-item" href="profile.html?id='+encodeURIComponent(row.id)+'"><span class="rank-num">'+rank+'</span>'+av+'<span><span class="rank-name">'+escRank(name)+'</span><span class="rank-handle">'+escRank(handle)+'</span></span><span class="rank-value">'+escRank(value)+' '+escRank(label)+'</span></a>'}
-async function loadCommunityRankings(){const db=CS.client;const {data:members}=await db.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(5);const allQ=await db.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(1000);const all=allQ.data||[];const render=(id,rows,valueFn,label)=>{const el=document.getElementById(id);if(!el)return;if(!rows?.length){el.innerHTML='<div class="ranking-empty">No members to show yet.</div>';return}el.innerHTML=rows.slice(0,5).map((r,i)=>rankCard(r,valueFn(r),label,i+1)).join("")};render("rankNewest",members,r=>new Date(r.created_at).toLocaleDateString(),"Joined");const [posts,caws,photos,friends,groups,events,groupMembers]=await Promise.all([db.from("crowspace_posts").select("user_id"),db.from("crowspace_caws").select("user_id"),db.from("crowspace_album_photos").select("user_id"),db.from("crowspace_friendships").select("requester_id,addressee_id").eq("status","accepted"),db.from("crowspace_groups").select("created_by"),db.from("crowspace_events").select("created_by"),db.from("crowspace_group_members").select("user_id,group_id")]);const countBy=(rows,key)=>{const m=new Map();(rows||[]).forEach(x=>{if(x[key])m.set(x[key],(m.get(x[key])||0)+1)});return m};const pc=countBy(posts.data,"user_id"),cc=countBy(caws.data,"user_id"),ph=countBy(photos.data,"user_id"),gc=countBy(groups.data,"created_by"),ec=countBy(events.data,"created_by"),gmc=countBy(groupMembers.data,"user_id"),fc=new Map();(friends.data||[]).forEach(x=>{if(x.requester_id)fc.set(x.requester_id,(fc.get(x.requester_id)||0)+1);if(x.addressee_id)fc.set(x.addressee_id,(fc.get(x.addressee_id)||0)+1)});const ranked=m=>all.map(x=>({...x,_count:m.get(x.id)||0})).filter(x=>x._count>0).sort((a,b)=>b._count-a._count);const active=all.map(x=>({...x,_count:(pc.get(x.id)||0)+(cc.get(x.id)||0)+(gc.get(x.id)||0)})).filter(x=>x._count>0).sort((a,b)=>b._count-a._count);render("rankActive",active,r=>r._count,"Activity");render("rankConnections",ranked(fc),r=>r._count,"Connections");render("rankPictures",ranked(ph),r=>r._count,"Pictures");render("rankCaws",ranked(cc),r=>r._count,"Caws");render("rankGroups",ranked(gc),r=>r._count,"Groups");render("rankEvents",ranked(ec),r=>r._count,"Events");render("rankGroupMemberships",ranked(gmc),r=>r._count,"Groups")}
-
-
-function renderCommunityMembers(){const db=CS.client,grid=document.getElementById("communityMembers"),search=document.getElementById("communityMemberSearch"),count=document.getElementById("communityMemberCount");let members=[];const esc=CS.escape;const initials=x=>(String(x||"CR").trim().split(/\\s+/).slice(0,2).map(v=>v[0]).join("").toUpperCase()||"CR").slice(0,2);function render(){const q=(search?.value||"").trim().toLowerCase();const rows=members.filter(m=>(m.display_name||"").toLowerCase().includes(q)||(m.username||"").toLowerCase().includes(q));if(count)count.textContent=rows.length+" of "+members.length+" members";if(!rows.length){grid.innerHTML='<div class="community-member-empty">No members match your search.</div>';return}grid.innerHTML=rows.map(m=>'<a class="community-member-card" href="profile.html?id='+encodeURIComponent(m.id)+'">'+(m.avatar_url?'<img class="community-member-avatar" src="'+esc(m.avatar_url)+'" alt="">':'<div class="community-member-avatar">'+esc(initials(m.display_name||m.username))+'</div>')+'<div class="community-member-copy"><strong>'+esc(m.display_name||"CrowSpace Member")+'</strong><span>'+(m.username?"@"+esc(m.username):"CrowSpace member")+'</span></div></a>').join("")}async function load(){const {data,error}=await db.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(1000);if(error){grid.innerHTML='<div class="community-member-empty">Member directory is temporarily unavailable. <a href="people.html">Open People →</a></div>';if(count)count.textContent="Unavailable";return}members=data||[];render()}search?.addEventListener("input",render);load()}
-document.addEventListener("DOMContentLoaded",async()=>{
-  try{await CS.refreshHeader()}catch(e){console.warn(e)}
-  try{await CS.homeFeed()}catch(e){console.warn(e)}
-  try{await CS.discovery()}catch(e){console.warn(e)}
-  try{await loadCommunityRankings()}catch(e){console.warn("Community rankings:",e)}
-  const status=document.getElementById("homeStatus");
-  const user=await CS.user().catch(()=>null);
-  if(!user){
-    status.textContent="Explore publicly, then sign in to unlock your personalized CrowSpace.";
-    return;
-  }
-  status.textContent="Your CrowSpace identity is connected.";
-  document.getElementById("welcomeTitle").textContent="Welcome back to your universe.";
-  document.getElementById("welcomeCopy").textContent="Your Nest is the home base for your people, creations, conversations and CrowRules connections.";
-  document.getElementById("statIdentity").textContent="Connected";
-  document.getElementById("statConnection").textContent="Active";
-  try{
-    const m=await CS.membership();
-    document.getElementById("statMembership").textContent=m?.plan?.name||"CROW · Free";
-  }catch{document.getElementById("statMembership").textContent="CROW · Free"}
-  try{
-    const {data:p}=await CS.client.from("membership_profiles").select("points").eq("id",user.id).maybeSingle();
-    document.getElementById("statPoints").textContent=Number(p?.points||0).toLocaleString();
-  }catch{document.getElementById("statPoints").textContent="0"}
-});
-</script>
-<script src="js/global-nav.js"></script>
-<script>
 (function(){
- const db=CS.client,wrap=document.getElementById("homeGroups"),search=document.getElementById("homeGroupSearch");let groups=[],members=new Map(),filter="all";
- const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
- function glyph(name){return esc((name||"CR").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase().slice(0,2)||"CR")}
- function render(){
-  const q=(search?.value||"").trim().toLowerCase(),now=Date.now();
-  let rows=groups.filter(g=>(g.name+" "+(g.description||"")).toLowerCase().includes(q));
-  if(filter==="new")rows=rows.filter(g=>now-new Date(g.created_at).getTime()<30*864e5);
-  if(filter==="active")rows=rows.filter(g=>(members.get(g.id)||0)>0);
-  rows=rows.slice(0,6);
-  if(!rows.length){wrap.innerHTML='<div class="group-empty">No matching groups yet. <a href="groups.html">Explore the full Groups directory →</a></div>';return}
-  wrap.innerHTML=rows.map(g=>'<article class="group-explorer-card"><div class="group-explorer-top"><div class="group-glyph">'+glyph(g.name)+'</div><span class="group-badge">'+(filter==="new"?"NEW":(members.get(g.id)||0)>0?"ACTIVE":"COMMUNITY")+'</span></div><h3>'+esc(g.name)+'</h3><p>'+esc(g.description||"A CrowSpace community waiting to be explored.")+'</p><div class="group-meta"><span>👥 '+(members.get(g.id)||0).toLocaleString()+' members</span><span>'+new Date(g.created_at).toLocaleDateString()+'</span></div><a class="group-open" href="group.html?id='+encodeURIComponent(g.id)+'">Open group →</a></article>').join("");
- }
- async function load(){
-  try{
-   const gq=await db.from("crowrules_groups").select("id,name,description,created_at").order("created_at",{ascending:false}).limit(12);
-   if(gq.error)throw gq.error;
-   groups=gq.data||[];
-   if(groups.length){const mq=await db.from("crowspace_group_members").select("group_id");if(!mq.error)(mq.data||[]).forEach(x=>members.set(x.group_id,(members.get(x.group_id)||0)+1))}
-   render();
-  }catch(e){
-   console.error("CrowSpace home groups:",e);
-   const fallback=await db.from("crowspace_groups").select("id,name,description,created_at").order("created_at",{ascending:false}).limit(12);
-   if(!fallback.error){groups=fallback.data||[];if(groups.length){const mq=await db.from("crowspace_group_members").select("group_id");if(!mq.error)(mq.data||[]).forEach(x=>members.set(x.group_id,(members.get(x.group_id)||0)+1))}render()}else wrap.innerHTML='<div class="group-empty">Groups are temporarily unavailable. <a href="groups.html">Open Groups →</a></div>';
+  const db=CS.client;
+  const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  const initials=v=>(String(v||"CR").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase()||"CR").slice(0,2);
+  const memberGrid=document.getElementById("communityMembers");
+  const memberSearch=document.getElementById("communityMemberSearch");
+  const memberCount=document.getElementById("communityMemberCount");
+  let allMembers=[];
+
+  function memberCard(m){
+    const name=m.display_name||m.username||"CrowSpace Member";
+    const handle=m.username?"@"+m.username:"Public profile";
+    const avatar=m.avatar_url
+      ? '<img class="member-avatar" src="'+esc(m.avatar_url)+'" alt="" loading="lazy">'
+      : '<div class="member-avatar">'+esc(initials(name))+'</div>';
+    return '<a class="member-card" href="profile.html?id='+encodeURIComponent(m.id)+'">'+avatar+
+      '<div class="member-copy"><strong>'+esc(name)+'</strong><span>'+esc(handle)+'</span><em class="member-badge">CrowSpace</em></div></a>';
   }
- }
- search?.addEventListener("input",render);document.querySelectorAll("[data-group-filter]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.groupFilter;document.querySelectorAll("[data-group-filter]").forEach(x=>x.classList.toggle("active",x===b));render()}));load();
+
+  function renderMembers(){
+    const q=(memberSearch?.value||"").trim().toLowerCase();
+    const rows=allMembers.filter(m=>
+      String(m.display_name||"").toLowerCase().includes(q) ||
+      String(m.username||"").toLowerCase().includes(q)
+    );
+    if(memberCount) memberCount.textContent=q ? rows.length+" matching · "+allMembers.length+" total" : allMembers.length+" public members";
+    if(!rows.length){
+      memberGrid.innerHTML='<div class="member-empty">No public members match that search. <a href="people.html">Open People →</a></div>';
+      return;
+    }
+    memberGrid.innerHTML=rows.slice(0,12).map(memberCard).join("");
+  }
+
+  async function loadMembers(){
+    memberGrid.innerHTML='<div class="member-empty">Loading the community…</div>';
+    try{
+      const {data,error,count}=await db.from("membership_profiles")
+        .select("id,display_name,username,avatar_url,created_at",{count:"exact"})
+        .order("created_at",{ascending:false})
+        .limit(1000);
+      if(error) throw error;
+      allMembers=data||[];
+      if(memberCount && typeof count==="number" && !memberSearch.value) memberCount.textContent=count+" public members";
+      renderMembers();
+      document.getElementById("heroMembers").textContent=(count??allMembers.length).toLocaleString();
+    }catch(error){
+      console.error("CrowSpace member directory:",error);
+      memberGrid.innerHTML='<div class="member-empty">The member directory could not load right now. <a href="people.html">Try People →</a></div>';
+      if(memberCount) memberCount.textContent="Unavailable";
+      document.getElementById("heroMembers").textContent="—";
+    }
+  }
+
+  function rankItem(row,value,label,index){
+    const name=row.display_name||row.username||"CrowSpace Member";
+    const handle=row.username?"@"+row.username:"";
+    const avatar=row.avatar_url
+      ? '<img class="rank-avatar" src="'+esc(row.avatar_url)+'" alt="" loading="lazy">'
+      : '<span class="rank-avatar">'+esc(initials(name))+'</span>';
+    return '<a class="rank-item" href="profile.html?id='+encodeURIComponent(row.id)+'"><span class="rank-num">'+(index+1)+'</span>'+avatar+
+      '<span><span class="rank-name">'+esc(name)+'</span><span class="rank-handle">'+esc(handle)+'</span></span>'+
+      '<span class="rank-value">'+esc(value)+" "+esc(label)+'</span></a>';
+  }
+
+  async function loadCommunitySignal(){
+    try{
+      const {data:members}=await db.from("membership_profiles").select("id,display_name,username,avatar_url,created_at").order("created_at",{ascending:false}).limit(1000);
+      const all=members||[];
+      const newest=document.getElementById("rankNewest");
+      if(!all.length){newest.innerHTML='<div class="rank-empty">No members to show yet.</div>';}
+      else newest.innerHTML=all.slice(0,5).map((r,i)=>rankItem(r,new Date(r.created_at).toLocaleDateString(),"Joined",i)).join("");
+
+      const [posts,caws,friends]=await Promise.all([
+        db.from("crowspace_posts").select("user_id"),
+        db.from("crowspace_caws").select("user_id"),
+        db.from("crowspace_friendships").select("requester_id,addressee_id").eq("status","accepted")
+      ]);
+      const postMap=new Map(),cawMap=new Map(),friendMap=new Map();
+      (posts.data||[]).forEach(x=>postMap.set(x.user_id,(postMap.get(x.user_id)||0)+1));
+      (caws.data||[]).forEach(x=>cawMap.set(x.user_id,(cawMap.get(x.user_id)||0)+1));
+      (friends.data||[]).forEach(x=>{
+        if(x.requester_id)friendMap.set(x.requester_id,(friendMap.get(x.requester_id)||0)+1);
+        if(x.addressee_id)friendMap.set(x.addressee_id,(friendMap.get(x.addressee_id)||0)+1);
+      });
+      const rank=(map,minimum=1)=>all.map(r=>({...r,_count:map.get(r.id)||0})).filter(r=>r._count>=minimum).sort((a,b)=>b._count-a._count||String(a.display_name||"").localeCompare(String(b.display_name||""))).slice(0,5);
+      const active=all.map(r=>({...r,_count:(postMap.get(r.id)||0)+(cawMap.get(r.id)||0)})).filter(r=>r._count>0).sort((a,b)=>b._count-a._count).slice(0,5);
+      const connections=rank(friendMap);
+      document.getElementById("rankActive").innerHTML=active.length?active.map((r,i)=>rankItem(r,r._count,"Activity",i)).join(""):'<div class="rank-empty">Activity will appear as the community grows.</div>';
+      document.getElementById("rankConnections").innerHTML=connections.length?connections.map((r,i)=>rankItem(r,r._count,"Connections",i)).join(""):'<div class="rank-empty">Connections will appear here.</div>';
+    }catch(error){
+      console.error("CrowSpace community signal:",error);
+      ["rankActive","rankConnections"].forEach(id=>document.getElementById(id).innerHTML='<div class="rank-empty">Community signal is temporarily unavailable.</div>');
+    }
+  }
+
+  async function loadHeroCounts(){
+    const jobs=[
+      ["crowspace_groups","heroGroups"],
+      ["crowspace_caws","heroCaws"],
+      ["crowspace_events","heroEvents"]
+    ];
+    await Promise.all(jobs.map(async ([table,id])=>{
+      try{
+        const {count,error}=await db.from(table).select("*",{count:"exact",head:true});
+        if(!error && typeof count==="number") document.getElementById(id).textContent=count.toLocaleString();
+      }catch(e){}
+    }));
+  }
+
+  memberSearch?.addEventListener("input",renderMembers);
+
+  document.addEventListener("DOMContentLoaded",async()=>{
+    try{await CS.refreshHeader()}catch(e){console.warn("Header:",e)}
+    try{await CS.homeFeed()}catch(e){console.warn("Feed:",e)}
+    try{await CS.discovery()}catch(e){console.warn("Discovery:",e)}
+    const user=await CS.user().catch(()=>null);
+    const status=document.getElementById("homeStatus");
+    const message=document.getElementById("heroMessage");
+    if(user){
+      status.textContent="Your CrowSpace identity is connected.";
+      message.textContent="Welcome back. Your Nest is the home base for your people, creations and conversations.";
+      document.getElementById("consoleState").textContent="CONNECTED";
+    }else{
+      status.textContent="Explore publicly, then sign in to unlock your personalized CrowSpace.";
+    }
+    await Promise.allSettled([loadMembers(),loadCommunitySignal(),loadHeroCounts()]);
+  });
 })();
-</script></body>
+</script>
+</body>
 </html>
