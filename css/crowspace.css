@@ -20,3 +20,13 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 /* CrowSpace 4.31 — visual connection path */
 .cr-path-node{filter:drop-shadow(0 0 10px currentColor);stroke-width:3!important}
 .cr-path-line{opacity:.85!important;stroke-width:3!important}
+
+/* CrowSpace 4.33 — live graph workspace */
+.cr-graph-node{cursor:pointer;transition:opacity .2s ease,transform .25s ease}
+.cr-graph-node:hover{filter:drop-shadow(0 0 14px currentColor)}
+.cr-selected-node{filter:drop-shadow(0 0 18px currentColor);stroke-width:3!important}
+.cr-path-node{animation:crGraphPulse 1.8s ease-in-out infinite}
+.cr-path-line{animation:crGraphLine 1.2s ease-out both}
+@keyframes crGraphPulse{0%,100%{opacity:1}50%{opacity:.65}}
+@keyframes crGraphLine{from{opacity:0;stroke-width:1}to{opacity:.9;stroke-width:3}}
+.cr-graph-line{transition:opacity .25s ease,stroke-width .25s ease}
