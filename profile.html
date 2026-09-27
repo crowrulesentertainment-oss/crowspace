@@ -791,6 +791,7 @@ document.addEventListener("click",async e=>{if(e.target.id!=="copyProfileUrl")re
 document.addEventListener("DOMContentLoaded",async()=>{
   viewer=await CS.user();
   uid=qs.get("id")||viewer?.id;
+  window.CROW_PROFILE_UID=uid;
   if(!uid){location.href="login.html";return}
   await CS.refreshHeader();
   CS.startNotificationBadge();
@@ -851,31 +852,31 @@ body.avatar-modal-open{overflow:hidden}
     const dot=q("osDot");if(dot)dot.style.background=state==="REALTIME ONLINE"?"#55e6ff":"#ffb454";
   };
   async function counts(){
-    if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
+    if(typeof crowSupabase==="undefined"||!window.CROW_PROFILE_UID)return;
     const [friends,caws,groups,notices]=await Promise.all([
-      crowSupabase.from("crowspace_friendships").select("id",{count:"exact",head:true}).or("requester_id.eq."+uid+",addressee_id.eq."+uid).eq("status","accepted"),
-      crowSupabase.from("crowspace_caws").select("id",{count:"exact",head:true}).eq("user_id",uid),
-      crowSupabase.from("crowspace_group_members").select("group_id",{count:"exact",head:true}).eq("user_id",uid),
-      crowSupabase.from("crowspace_notifications").select("id",{count:"exact",head:true}).eq("user_id",uid).is("read_at",null)
+      crowSupabase.from("crowspace_friendships").select("id",{count:"exact",head:true}).or("requester_id.eq."+window.CROW_PROFILE_UID+",addressee_id.eq."+window.CROW_PROFILE_UID).eq("status","accepted"),
+      crowSupabase.from("crowspace_caws").select("id",{count:"exact",head:true}).eq("user_id",window.CROW_PROFILE_UID),
+      crowSupabase.from("crowspace_group_members").select("group_id",{count:"exact",head:true}).eq("user_id",window.CROW_PROFILE_UID),
+      crowSupabase.from("crowspace_notifications").select("id",{count:"exact",head:true}).eq("user_id",window.CROW_PROFILE_UID).is("read_at",null)
     ]);
     set("osPeople",friends.count??0);set("osCaws",caws.count??0);set("osGroups",groups.count??0);set("osNotices",notices.count??0);
   }
   async function start(){
-    if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
+    if(typeof crowSupabase==="undefined"||typeof window.CROW_PROFILE_UID==="undefined"||!window.CROW_PROFILE_UID)return;
     if(channel)await crowSupabase.removeChannel(channel);
     status("CONNECTING","Opening live CrowSpace sync…");
-    channel=crowSupabase.channel("crowspace-nest-live:"+uid,{config:{presence:{key:uid}}});
+    channel=crowSupabase.channel("crowspace-nest-live:"+window.CROW_PROFILE_UID,{config:{presence:{key:window.CROW_PROFILE_UID}}});
     channel
       .on("presence",{event:"sync"},()=>{const state=channel.presenceState();let n=0;Object.values(state).forEach(x=>n+=x.length);set("osLiveText",n+" ONLINE")})
       .on("presence",{event:"join"},()=>pulse("●","A member entered the Nest","Live presence","people.html"))
       .on("broadcast",{event:"nest_event"},p=>{const x=p.payload||{};pulse(x.icon||"⚡",x.title||"Nest activity",x.detail||"Live update",x.url||"notifications.html")})
-      .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},p=>{const x=p.new||{};pulse("🔔",x.body||"New notification","Notification","notifications.html");counts()})
-      .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>{pulse("✦","A new post was added","Nest activity","profile.html?id="+encodeURIComponent(uid));counts()})
-      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"crowspace_friendships"},p=>{const x=p.new||{};if(x.status==="accepted"&&(x.requester_id===uid||x.addressee_id===uid)){pulse("👥","A connection was accepted","Network","friends.html");counts()}})
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+window.CROW_PROFILE_UID},p=>{const x=p.new||{};pulse("🔔",x.body||"New notification","Notification","notifications.html");counts()})
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+window.CROW_PROFILE_UID},()=>{pulse("✦","A new post was added","Nest activity","profile.html?id="+encodeURIComponent(window.CROW_PROFILE_UID));counts()})
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"crowspace_friendships"},p=>{const x=p.new||{};if(x.status==="accepted"&&(x.requester_id===window.CROW_PROFILE_UID||x.addressee_id===window.CROW_PROFILE_UID)){pulse("👥","A connection was accepted","Network","friends.html");counts()}})
       .subscribe(async s=>{
         if(s==="SUBSCRIBED"){
           status("REALTIME ONLINE","Live CrowSpace sync active");
-          try{await channel.track({user_id:uid,page:"profile",online_at:new Date().toISOString()})}catch(e){}
+          try{await channel.track({user_id:window.CROW_PROFILE_UID,page:"profile",online_at:new Date().toISOString()})}catch(e){}
           await counts();
         }else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT"){
           status("LIVE SYNC RETRYING","CrowSpace is reconnecting automatically…");
