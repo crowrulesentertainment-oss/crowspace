@@ -61,3 +61,7 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 html.cr-graph-present .cr-graph-studio,html.cr-graph-present .cr-physics-controls,html.cr-graph-present .filter-row,html.cr-graph-present .cr-graph-details,html.cr-graph-present .cr-shared-banner{display:none!important}
 html.cr-graph-present .cr-graph-canvas-card{margin:0;min-height:calc(100vh - 120px);display:flex;align-items:center}
 html.cr-graph-present .cr-graph-canvas-card svg{width:100%;height:calc(100vh - 160px);max-height:none}
+
+/* CrowSpace 4.42 — live collaboration */
+.cr-graph-presence{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;padding:7px 11px;border:1px solid currentColor;border-radius:999px;font-size:.76rem;letter-spacing:.06em;opacity:.8}
+.cr-graph-presence::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
