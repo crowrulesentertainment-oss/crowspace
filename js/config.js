@@ -1,1 +1,1 @@
-window.CROW_CONFIG={supabaseUrl:"https://cevylpnoexugwgygvtgu.supabase.co",supabaseKey:"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"};
+window.CROW_CONFIG={supabaseUrl:"https://cevylpnoexugwgygvtgu.supabase.co",supabaseKey:"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"};(function(){var s=document.createElement('script');s.src='js/global-nav.js';s.defer=true;document.head.appendChild(s)})();
