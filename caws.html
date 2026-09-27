@@ -15,6 +15,9 @@
 .rec-status{position:absolute;right:16px;top:16px;padding:7px 11px;background:rgba(3,4,10,.78);font-size:12px;color:#fff}
 .rec-controls{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.camera-help{font-size:12px;line-height:1.45;max-width:520px}.camera-select{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.camera-select select{min-width:150px}
 .record-btn{border-radius:999px!important}
+.camera-diagnostics{margin-top:10px;padding:12px;border:1px solid rgba(89,231,255,.18);background:rgba(2,3,10,.72);font-size:12px;line-height:1.55;color:#cbd5e1}
+.camera-diagnostics strong{display:block;color:#59e7ff;margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase}
+.camera-select select{background:#080b14;color:#fff;border:1px solid rgba(89,231,255,.25);padding:9px 10px;border-radius:6px}
 .record-btn.recording{background:#ff4fd8!important;box-shadow:0 0 24px rgba(255,79,216,.4)}
 .studio-copy h2{margin-top:0}.studio-copy .muted{line-height:1.65}
 .caw-form{display:grid;gap:12px;margin-top:14px}.caw-form input,.caw-form textarea{width:100%;box-sizing:border-box}
@@ -39,6 +42,7 @@
       <div class="rec-status" id="recStatus">Ready to record</div>
       <div class="rec-controls">
         <div class="camera-select"><button id="cameraBtn" class="btn" type="button">Enable Camera</button><button id="switchCameraBtn" class="btn" type="button" disabled>↔ Switch Camera</button></div>
+        <div class="camera-select"><select id="cameraDevice" aria-label="Camera"><option value="">Default camera</option></select><select id="micDevice" aria-label="Microphone"><option value="">Default microphone</option></select></div>
         <button id="recordBtn" class="btn primary record-btn" type="button" disabled>● Start Recording</button>
         <button id="stopBtn" class="btn" type="button" disabled>■ Stop</button>
         <button id="clearBtn" class="btn" type="button">Clear</button>
@@ -49,6 +53,10 @@
       <p class="eyebrow">MAKE A CAW</p>
       <h2>Record or upload.</h2>
       <p class="muted">Use a desktop webcam or your phone camera and microphone for a quick Caw. On mobile, CrowSpace can use the front or rear camera. You can also upload a video already saved on your device.</p><p class="muted camera-help">Camera access normally requires HTTPS and your browser’s permission. On phones, hold the device upright or sideways before recording; the preview will adapt to the available camera.</p>
+      <div id="cameraDiagnostics" class="camera-diagnostics" aria-live="polite">
+        <strong>Camera diagnostics</strong>
+        <div id="cameraDiagText">Not tested yet. Click Enable Camera.</div>
+      </div>
       <form id="cawForm" class="caw-form">
         <label>Title<input id="title" maxlength="120" required placeholder="Give your Caw a title"></label>
         <label>Caption<textarea id="caption" maxlength="2000" rows="5" placeholder="What's this Caw about?"></textarea></label>
@@ -82,24 +90,78 @@ function setRecordedFile(blob){
   try{const dt=new DataTransfer();dt.items.add(file);fileInput.files=dt.files}catch(e){}
   fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB";
 }
+async function listDevices(){
+  const cameraDevice=document.getElementById("cameraDevice"),micDevice=document.getElementById("micDevice");
+  if(!navigator.mediaDevices?.enumerateDevices) return;
+  try{
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    const cams=devices.filter(d=>d.kind==="videoinput"),mics=devices.filter(d=>d.kind==="audioinput");
+    cameraDevice.innerHTML='<option value="">Default camera</option>'+cams.map((d,i)=>'<option value="'+CS.escape(d.deviceId)+'">'+CS.escape(d.label||("Camera "+(i+1)))+'</option>').join("");
+    micDevice.innerHTML='<option value="">Default microphone</option>'+mics.map((d,i)=>'<option value="'+CS.escape(d.deviceId)+'">'+CS.escape(d.label||("Microphone "+(i+1)))+'</option>').join("");
+    return {cams,mics};
+  }catch(e){return {cams:[],mics:[]}}
+}
+async function cameraStatus(){
+  const diag=document.getElementById("cameraDiagText");
+  const secure=window.isSecureContext?"HTTPS secure context: YES":"HTTPS secure context: NO";
+  const media=navigator.mediaDevices?"MediaDevices API: YES":"MediaDevices API: NO";
+  let perms="Permissions API: unavailable";
+  try{
+    if(navigator.permissions?.query){
+      const cam=await navigator.permissions.query({name:"camera"});
+      const mic=await navigator.permissions.query({name:"microphone"});
+      perms="Camera permission: "+cam.state+" · Microphone permission: "+mic.state;
+    }
+  }catch(e){perms="Permission status could not be read by this browser."}
+  diag.textContent=secure+" · "+media+" · "+perms;
+}
+function cameraError(e){
+  const name=e?.name||"CameraError";
+  return name==="NotAllowedError"?"Permission was blocked. Allow camera and microphone for this CrowSpace site, then click Enable Camera again."
+    :name==="NotFoundError"?"No camera or microphone was found. Check Windows camera settings or use Upload a Caw."
+    :name==="NotReadableError"?"The camera or microphone is busy. Close Camera, Zoom, Teams, OBS, or another browser tab using it."
+    :name==="OverconstrainedError"?"The selected camera setting is unavailable. Choose Default camera and try again."
+    :name==="SecurityError"?"Browser security blocked camera access. Make sure you are using the HTTPS CrowSpace site."
+    :"Camera setup failed ("+name+"): "+(e?.message||"unknown error");
+}
 async function enableCamera(facing=cameraFacing){
   try{
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error("Camera access is unavailable. Open CrowSpace over HTTPS.");
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error("MediaDevices/getUserMedia is unavailable.");
     if(stream) stream.getTracks().forEach(t=>t.stop());
     cameraFacing=facing;
-    const constraints={video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}},audio:{echoCancellation:true,noiseSuppression:true}};
-    stream=await navigator.mediaDevices.getUserMedia(constraints);
-    preview.srcObject=stream; await preview.play().catch(()=>{});
+    const cameraId=document.getElementById("cameraDevice").value;
+    const micId=document.getElementById("micDevice").value;
+    const video={width:{ideal:1280},height:{ideal:720}};
+    if(cameraId) video.deviceId={exact:cameraId}; else video.facingMode={ideal:facing};
+    const audio=micId?{deviceId:{exact:micId},echoCancellation:true,noiseSuppression:true}:{echoCancellation:true,noiseSuppression:true};
+    let next;
+    try{
+      next=await navigator.mediaDevices.getUserMedia({video,audio});
+    }catch(first){
+      let videoOnly=null,audioOnly=null;
+      try{videoOnly=await navigator.mediaDevices.getUserMedia({video})}catch(v){}
+      try{audioOnly=await navigator.mediaDevices.getUserMedia({audio})}catch(a){}
+      if(videoOnly&&audioOnly){
+        next=new MediaStream([...videoOnly.getVideoTracks(),...audioOnly.getAudioTracks()]);
+      }else{
+        if(videoOnly) videoOnly.getTracks().forEach(t=>t.stop());
+        if(audioOnly) audioOnly.getTracks().forEach(t=>t.stop());
+        throw first;
+      }
+    }
+    stream=next;
+    preview.srcObject=stream; preview.removeAttribute("src"); preview.controls=false; await preview.play().catch(()=>{});
     recordBtn.disabled=false; document.getElementById("switchCameraBtn").disabled=false; cameraBtn.textContent="Camera Enabled";
     liveBadge.textContent="● "+(facing==="environment"?"REAR CAMERA":"CAMERA LIVE"); recStatus.textContent="Ready to record"; msg.textContent="";
+    await listDevices(); await cameraStatus();
   }catch(e){
-    recordBtn.disabled=true;
-    const name=e&&e.name?e.name:"CameraError";
-    const detail=name==="NotAllowedError"?"Camera or microphone permission was blocked. Click the camera icon in the browser address bar and choose Allow, then try again.":name==="NotFoundError"?"No camera or microphone was found. Connect a webcam/microphone or use Upload a Caw.":name==="NotReadableError"?"The camera is already being used by another app. Close Zoom, Teams, OBS, Camera, or another browser tab and try again.":name==="OverconstrainedError"?"That camera setting is unavailable. Try again.":"Camera could not be opened: "+(e.message||name);
-    msg.textContent=detail; recStatus.textContent="Camera unavailable";
+    recordBtn.disabled=true; recStatus.textContent="Camera unavailable"; msg.textContent=cameraError(e);
+    await cameraStatus(); await listDevices();
   }
 }
-cameraBtn.addEventListener("click",()=>enableCamera(cameraFacing));\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
+document.getElementById("cameraDevice").addEventListener("change",()=>enableCamera(cameraFacing));
+document.getElementById("micDevice").addEventListener("change",()=>enableCamera(cameraFacing));
+cameraBtn.addEventListener("click",async()=>{await cameraStatus();await enableCamera(cameraFacing)});\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
 recordBtn.addEventListener("click",()=>{
   if(!stream) return;
   chunks=[]; recordedBlob=null;
