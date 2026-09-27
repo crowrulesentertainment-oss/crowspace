@@ -105,7 +105,7 @@ async function autoStartDetectedCamera(){
     :"Webcam detected. Finding the available webcam and requesting camera access…";
   try{
     // First request access so browsers reveal real device labels/IDs.
-    const probe=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    const probe=await navigator.mediaDevices.getUserMedia({video:true});
     probe.getTracks().forEach(t=>t.stop());
     await listDevices();
     const cams=[...document.getElementById("cameraDevice").options].filter(o=>o.value);
@@ -208,14 +208,13 @@ async function enableCamera(facing=cameraFacing){
     try{
       next=await navigator.mediaDevices.getUserMedia({video,audio});
     }catch(first){
+      // A camera should still work when the selected/default microphone is unavailable.
       let videoOnly=null,audioOnly=null;
       try{videoOnly=await navigator.mediaDevices.getUserMedia({video})}catch(v){}
       try{audioOnly=await navigator.mediaDevices.getUserMedia({audio})}catch(a){}
-      if(videoOnly&&audioOnly){
-        next=new MediaStream([...videoOnly.getVideoTracks(),...audioOnly.getAudioTracks()]);
+      if(videoOnly || audioOnly){
+        next=new MediaStream([...(videoOnly?.getVideoTracks()||[]),...(audioOnly?.getAudioTracks()||[])]);
       }else{
-        if(videoOnly) videoOnly.getTracks().forEach(t=>t.stop());
-        if(audioOnly) audioOnly.getTracks().forEach(t=>t.stop());
         throw first;
       }
     }
