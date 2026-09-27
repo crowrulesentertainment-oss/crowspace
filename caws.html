@@ -81,14 +81,35 @@ const preview=document.getElementById("preview"), cameraBtn=document.getElementB
 let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null, cameraFacing="user";
 
 function pickMime(){
-  const types=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"];
-  return types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||"";
+  if(!window.MediaRecorder) return "";
+  const types=[
+    "video/mp4;codecs=h264,aac","video/mp4",
+    "video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"
+  ];
+  return types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+}
+function blobExtension(type){
+  return (type||"").includes("mp4")?"mp4":(type||"").includes("quicktime")?"mov":"webm";
+}
+function stopStream(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+}
+function restoreLivePreview(){
+  if(stream){
+    preview.srcObject=stream;preview.removeAttribute("src");preview.controls=false;preview.muted=true;preview.playsInline=true;preview.play().catch(()=>{});
+  }
 }
 function setRecordedFile(blob){
-  const ext=blob.type.includes("mp4")?"mp4":"webm";
+  const ext=blobExtension(blob.type);
   const file=new File([blob],"recorded-caw-"+Date.now()+"."+ext,{type:blob.type||"video/webm"});
-  try{const dt=new DataTransfer();dt.items.add(file);fileInput.files=dt.files}catch(e){}
-  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB";
+  try{
+    const dt=new DataTransfer();
+    dt.items.add(file);
+    fileInput.files=dt.files;
+  }catch(e){
+    // Some mobile browsers do not allow programmatic file inputs.
+  }
+  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB · "+ext.toUpperCase();
 }
 async function listDevices(){
   const cameraDevice=document.getElementById("cameraDevice"),micDevice=document.getElementById("micDevice");
@@ -163,20 +184,33 @@ document.getElementById("cameraDevice").addEventListener("change",()=>enableCame
 document.getElementById("micDevice").addEventListener("change",()=>enableCamera(cameraFacing));
 cameraBtn.addEventListener("click",async()=>{await cameraStatus();await enableCamera(cameraFacing)});\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
 recordBtn.addEventListener("click",()=>{
-  if(!stream) return;
-  chunks=[]; recordedBlob=null;
+  if(!stream){msg.textContent="Enable the camera before recording.";return}
+  if(!window.MediaRecorder){msg.textContent="This browser does not support video recording. Use Upload a Caw.";return}
+  if(!stream.getVideoTracks().length){msg.textContent="No camera video track is available.";return}
+  chunks=[];recordedBlob=null;
   const mime=pickMime();
-  try{recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}catch(e){msg.textContent="This browser cannot record video.";return}
+  try{recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}
+  catch(e){msg.textContent="This browser cannot start camera recording. Try Upload a Caw.";return}
   recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  recorder.onerror=e=>{console.error("Caw recorder error",e);msg.textContent="Recording stopped because the browser reported a recorder error.";recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording")};
   recorder.onstop=()=>{
-    recordedBlob=new Blob(chunks,{type:recorder.mimeType||"video/webm"});
+    if(!chunks.length){msg.textContent="No video data was captured. Check camera permission and try again.";recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording");restoreLivePreview();return}
+    const type=recorder.mimeType||mime||"video/webm";
+    recordedBlob=new Blob(chunks,{type});
     if(recordedUrl) URL.revokeObjectURL(recordedUrl);
     recordedUrl=URL.createObjectURL(recordedBlob);
-    preview.srcObject=null;preview.src=recordedUrl;preview.controls=true;setRecordedFile(recordedBlob);
+    preview.srcObject=null;preview.src=recordedUrl;preview.controls=true;preview.muted=true;preview.playsInline=true;
+    preview.play().catch(()=>{});
+    setRecordedFile(recordedBlob);
     recStatus.textContent="Recording complete";liveBadge.textContent="● RECORDED";
-    recordBtn.disabled=false;stopBtn.disabled=true;
+    recordBtn.disabled=false;stopBtn.disabled=true;recordBtn.classList.remove("recording");
   };
-  recorder.start(250);recordBtn.disabled=true;stopBtn.disabled=false;recordBtn.classList.add("recording");recStatus.textContent="Recording…";liveBadge.textContent="● REC";
+  try{
+    recorder.start(250);
+    recordBtn.disabled=true;stopBtn.disabled=false;recordBtn.classList.add("recording");recStatus.textContent="Recording…";liveBadge.textContent="● REC";
+  }catch(e){
+    msg.textContent="The browser could not start recording: "+(e.message||"unknown error");
+  }
 });
 stopBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive")recorder.stop();recordBtn.classList.remove("recording")});
 clearBtn.addEventListener("click",()=>{
@@ -195,7 +229,7 @@ fileInput.addEventListener("change",()=>{
 });
 form.addEventListener("submit",async e=>{
   e.preventDefault(); const u=await CS.user(); if(!u){location.href="login.html";return}
-  const file=fileInput.files[0] || (recordedBlob ? new File([recordedBlob],"recorded-caw.webm",{type:recordedBlob.type||"video/webm"}) : null); if(!file){msg.textContent="Record a Caw or choose a video file first.";return}
+  const file=fileInput.files[0] || (recordedBlob ? new File([recordedBlob],"recorded-caw-"+Date.now()+"."+blobExtension(recordedBlob.type),{type:recordedBlob.type||"video/webm"}) : null); if(!file){msg.textContent="Record a Caw or choose a video file first.";return}
   if(file.size>MAX_BYTES){msg.textContent="Video is larger than the 512 MB CrowSpace limit.";return}
   const isRecorded=!!recordedBlob && !fileInput.files[0];
   const ext=(file.name.split(".").pop()||"webm").toLowerCase().replace(/[^a-z0-9]/g,"")||"webm";
