@@ -1,163 +1,155 @@
 (()=> {
-const URL="https://cevylpnoexugwgygvtgu.supabase.co";
-const KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
-let sb=null, user=null;const app=document.getElementById("app");
-const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const q=k=>new URLSearchParams(location.search).get(k);
+const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
+const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const DEMO={
+ profiles:[
+  {user_id:"demo-1",display_name:"Maya Chen",username:"mayachen",bio:"Filmmaker, photographer and Tacoma creative building stories with local people.",location:"Tacoma, Washington",interests:"Film, Photography, Tacoma, Storytelling"},
+  {user_id:"demo-2",display_name:"Alex Rivera",username:"alexr",bio:"Game developer and community organizer. Always looking for the next collaboration.",location:"Pacific Northwest",interests:"Games, Technology, Creators"},
+  {user_id:"demo-3",display_name:"Jordan Blake",username:"jordanb",bio:"Musician, live-event producer and independent artist.",location:"Tacoma, Washington",interests:"Music, Events, Independent Artists"}
+ ],
+ posts:[
+  {id:"demo-p1",author_id:"demo-1",body:"Working on a new Tacoma short-film collaboration this weekend. Looking for storytellers, camera operators and editors.",created_at:"2026-09-26T20:00:00Z"},
+  {id:"demo-p2",author_id:"demo-2",body:"CrowSpace is about finding people who want to build something together. What are you creating?",created_at:"2026-09-26T18:00:00Z"},
+  {id:"demo-p3",author_id:"demo-3",body:"Live music, independent creators and community events belong in the same universe. Let’s make it happen.",created_at:"2026-09-25T23:00:00Z"}
+ ],
+ groups:[
+  {id:"demo-g1",slug:"tacoma-creatives",name:"Tacoma Creatives",description:"Film, design, music, photography and creative projects.",members:842},
+  {id:"demo-g2",slug:"pnw-gamers",name:"PNW Gamers",description:"Games, streams, tournaments and community.",members:1290},
+  {id:"demo-g3",slug:"independent-musicians",name:"Independent Musicians",description:"A home for independent artists and music makers.",members:516},
+  {id:"demo-g4",slug:"crowrules-fans",name:"CrowRules Fans",description:"Talk about CrowRules Entertainment projects.",members:311}
+ ],
+ spaces:[
+  {id:"demo-s1",slug:"tacoma",name:"Tacoma",description:"The people, places and ideas shaping Tacoma.",groups:18,rooms:7},
+  {id:"demo-s2",slug:"creators",name:"Creators",description:"A community hub for people building original work.",groups:26,rooms:12},
+  {id:"demo-s3",slug:"entertainment",name:"Entertainment",description:"Film, television, music, podcasts and live events.",groups:34,rooms:19}
+ ],
+ rooms:[
+  {id:"demo-r1",slug:"back-deck",name:"The Back Deck",topic:"Unscripted conversations, ideas and community building.",members:42},
+  {id:"demo-r2",slug:"creator-room",name:"Creator Room",topic:"Share projects, find collaborators and exchange feedback.",members:87},
+  {id:"demo-r3",slug:"tacoma-tonight",name:"Tacoma Tonight",topic:"What is happening around Tacoma?",members:63}
+ ],
+ events:[
+  {id:"demo-e1",slug:"creator-meetup",title:"Tacoma Creator Meetup",description:"Meet local creators, share projects and find collaborators.",starts_at:"2026-10-03T22:00:00Z",location:"Tacoma, WA"},
+  {id:"demo-e2",slug:"back-deck-live",title:"Back Deck Live",description:"A live community conversation about building CrowRules one step at a time.",starts_at:"2026-09-27T22:00:00Z",location:"Online / YouTube"},
+  {id:"demo-e3",slug:"community-game-night",title:"Community Game Night",description:"Games, conversation and community.",starts_at:"2026-10-10T02:00:00Z",location:"CrowRoom"}
+ ],
+ media:[
+  {id:"demo-m1",title:"Tacoma Nights",media_type:"image",media_url:"https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1000&q=80",description:"City lights and creative energy."},
+  {id:"demo-m2",title:"Creator Session",media_type:"image",media_url:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80",description:"Independent creators at work."},
+  {id:"demo-m3",title:"CrowSpace Video",media_type:"video",media_url:"https://www.youtube.com/",description:"Video content and community stories."}
+ ]
+};
+let sb=null,user=null;
+const app=()=>document.getElementById("app");
 const page=()=>location.pathname.split("/").pop()||"index.html";
-const card=x=>`<article class="card">${x}</article>`;
-const button=(label,action)=>`<button class="btn" data-cr-action="${esc(action)}">${esc(label)}</button>`;
-const avatar=(name,url)=>url?`<img class="avatar-img" src="${esc(url)}" alt="">`:`<div class="avatar">${esc(String(name||"?").slice(0,2).toUpperCase())}</div>`;
+const q=k=>new URLSearchParams(location.search).get(k);
+const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const card=x=>'<article class="card">'+x+'</article>';
+const btn=(label,action)=>'<button class="btn" data-cr-action="'+esc(action)+'">'+esc(label)+'</button>';
+const avatar=(name,url)=>url?'<img class="avatar-img" src="'+esc(url)+'" alt="">':'<div class="avatar">'+esc(String(name||"?").slice(0,2).toUpperCase())+'</div>';
 const when=x=>x?new Date(x).toLocaleString([],{dateStyle:"medium",timeStyle:"short"}):"";
-const shell=(title,sub,body)=>`<div class="wrap"><section class="hero"><span class="eyebrow">CROWSPACE 3.1 · SUPABASE</span><h1>${esc(title)}</h1><p>${esc(sub||"")}</p></section>${body}</div>`;
-const gate=()=>card('<span class="kicker">ACCOUNT REQUIRED</span><h2>Sign in to continue</h2><p class="muted">This feature is persistent and requires a CrowSpace account.</p><a class="btn" href="auth.html">Sign In / Create Account</a>');
+const shell=(title,sub,body)=>'<div class="wrap"><section class="hero"><span class="eyebrow">CROWSPACE · ONE ACCOUNT · ONE UNIVERSE</span><h1>'+esc(title)+'</h1><p>'+esc(sub||"")+'</p></section>'+body+'<footer class="footer">CrowSpace · A CrowRules Entertainment community universe</footer></div>';
+const gate=()=>card('<span class="kicker">ACCOUNT REQUIRED</span><h2>Sign in to continue</h2><p class="muted">Create your universal CrowRules account to use persistent social features.</p><a class="btn" href="auth.html">SIGN IN / CREATE ACCOUNT</a>');
 async function boot(){
  if(!window.supabase?.createClient){await new Promise(ok=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=ok;s.onerror=ok;document.head.appendChild(s)})}
- if(!window.supabase?.createClient)return;
- sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- user=(await sb.auth.getUser()).data.user;
- await ensureProfile();
+ if(!window.supabase?.createClient){renderError("Supabase could not load.");return}
+ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ user=(await sb.auth.getUser()).data.user||null;
+ if(user) await ensureProfile();
  await render();
- sb.auth.onAuthStateChange((_,u)=>{user=u;render()});
+ sb.auth.onAuthStateChange((_,u)=>{user=u||null;if(u)ensureProfile().then(render);else render()});
 }
 async function ensureProfile(){
  if(!user)return;
- const {data}=await sb.from("crowspace_profiles").select("user_id").eq("user_id",user.id).maybeSingle();
- if(!data)await sb.from("crowspace_profiles").insert({user_id:user.id,username:(user.email||"member").split("@")[0],display_name:user.user_metadata?.display_name||user.user_metadata?.full_name||"CrowSpace Member",profile_visibility:"public"});
+ const r=await sb.from("crowspace_profiles").select("user_id").eq("user_id",user.id).maybeSingle();
+ if(!r.data)await sb.from("crowspace_profiles").insert({user_id:user.id,username:(user.email||"member").split("@")[0].replace(/[^a-z0-9_]/gi,""),display_name:user.user_metadata?.display_name||user.user_metadata?.full_name||"CrowSpace Member",profile_visibility:"public"});
 }
-async function getProfiles(ids){
- if(!ids.length)return [];
- return (await sb.from("crowspace_profiles").select("*").in("user_id",ids)).data||[];
+async function safe(table,query,demo=[]){
+ try{const r=await query;if(!r.error&&Array.isArray(r.data)&&r.data.length)return r.data;return demo}catch(_){return demo}
+}
+async function profiles(ids){
+ if(!ids?.length)return [];
+ return safe("crowspace_profiles",sb.from("crowspace_profiles").select("*").in("user_id",ids),DEMO.profiles.filter(x=>ids.includes(x.user_id)));
 }
 async function feed(){
- const {data:posts,error}=await sb.from("crowspace_posts").select("*").eq("status","published").order("created_at",{ascending:false}).limit(60);
- if(error){app.innerHTML=shell("CrowFeed","Cloud feed error",card(esc(error.message)));return}
- const rows=posts||[], ids=[...new Set(rows.map(x=>x.author_id).filter(Boolean))], people=await getProfiles(ids);
- const comments=rows.length?(await sb.from("crowspace_comments").select("*").in("post_id",rows.map(x=>x.id)).order("created_at")).data||[]:[];
- const reactions=rows.length?(await sb.from("crowspace_post_reactions").select("*").in("post_id",rows.map(x=>x.id))).data||[]:[];
- const groups=(await sb.from("crowspace_groups").select("id,name,slug").eq("visibility","public").order("name")).data||[];
- const html=[];
- if(user)html.push(card(`<span class="kicker">SHARE WITH YOUR UNIVERSE</span><form id="crPost"><textarea class="search" name="body" rows="3" placeholder="What is happening in your space?" required></textarea><select class="search" name="group"><option value="">CrowFeed</option>${groups.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join("")}</select><button class="btn">Publish</button></form>`)); else html.push(gate());
+ const rows=await safe("crowspace_posts",sb.from("crowspace_posts").select("*").eq("status","published").order("created_at",{ascending:false}).limit(60),DEMO.posts);
+ const ids=[...new Set(rows.map(x=>x.author_id).filter(Boolean))],people=await profiles(ids);
+ let html=user?card('<span class="kicker">CROWFEED</span><form id="crPost"><textarea class="search" name="body" rows="3" placeholder="What is happening in your space?" required></textarea><button class="btn">PUBLISH</button></form>'):gate();
  for(const p of rows){
-  const author=people.find(x=>x.user_id===p.author_id), cs=comments.filter(x=>x.post_id===p.id), rs=reactions.filter(x=>x.post_id===p.id);
-  const counts={};rs.forEach(x=>counts[x.reaction]=(counts[x.reaction]||0)+1);
-  const chtml=cs.map(c=>{const a=people.find(x=>x.user_id===c.author_id);return `<div class="wall"><b>${esc(a?.display_name||"Member")}</b><p>${esc(c.content)}</p><small class="muted">${when(c.created_at)}</small></div>`}).join("");
-  const reacts=["like","love","fire","laugh","idea"].map(x=>button(({like:"👍",love:"❤️",fire:"🔥",laugh:"😂",idea:"💡"})[x]+" "+(counts[x]||0),"react:"+p.id+":"+x)).join("");
-  html.push(card(`<div class="post-head">${avatar(author?.display_name,author?.avatar_url)}<div><b>${esc(author?.display_name||"Member")}</b><div class="muted">${when(p.created_at)}</div></div></div><p class="post-copy">${esc(p.body)}</p><div class="signal">${reacts}</div><div class="comments">${chtml}${user?`<form class="inline-form" data-comment="${p.id}"><input class="search" name="body" placeholder="Add a comment…" required><button class="btn">Comment</button></form>`:""}</div>`));
+  const a=people.find(x=>x.user_id===p.author_id);
+  html+=card('<div class="post-head">'+avatar(a?.display_name,a?.avatar_url)+'<div><b>'+esc(a?.display_name||"Member")+'</b><div class="muted">'+when(p.created_at)+'</div></div></div><p class="post-copy">'+esc(p.body)+'</p><div class="signal">'+btn("👍 Like","react:"+p.id+":like")+btn("❤️ Love","react:"+p.id+":love")+btn("🔥 Fire","react:"+p.id+":fire")+'</div>');
  }
- app.innerHTML=shell("CrowFeed","The persistent community feed.",html.join("")||card("<p>No posts yet.</p>"));
+ app().innerHTML=shell("CrowFeed","Your home stream for people, ideas, projects and community.",html);
 }
 async function profile(){
- const id=q("id")||user?.id;
- if(!id){app.innerHTML=shell("My Space","Your CrowSpace profile.",gate());return}
- const {data:u,error}=await sb.from("crowspace_profiles").select("*").eq("user_id",id).maybeSingle();
- if(error||!u){app.innerHTML=shell("Profile","Profile not found.",card("<p>This member has no public profile yet.</p>"));return}
- if(user&&user.id!==id)await sb.from("crowspace_profile_visits").upsert({profile_id:id,visitor_id:user.id,visited_at:new Date().toISOString()},{onConflict:"profile_id,visitor_id"});
- const posts=(await sb.from("crowspace_posts").select("*").eq("author_id",id).eq("status","published").order("created_at",{ascending:false}).limit(20)).data||[];
- const fr=(await sb.from("crowspace_friends").select("*").or("requester_id.eq."+id+",recipient_id.eq."+id).eq("status","accepted")).data||[];
- const ids=[...new Set(fr.flatMap(x=>[x.requester_id,x.recipient_id]).filter(x=>x!==id))], friends=await getProfiles(ids);
- let actions="";
- if(user&&user.id!==id)actions=button("CrowMail","message:"+id)+" "+button("Add Friend","friend:"+id)+" "+button("Follow","follow:"+id);
- if(user&&user.id===id)actions=button("Customize","goto:customize.html");
- const postsHtml=posts.map(p=>`<div class="wall"><p>${esc(p.body)}</p><small class="muted">${when(p.created_at)}</small></div>`).join("")||'<p class="muted">No posts yet.</p>';
- const friendHtml=friends.map(f=>`<p><a href="profile.html?id=${f.user_id}">${esc(f.display_name||f.username||"Member")}</a></p>`).join("")||'<p class="muted">No connections yet.</p>';
- app.innerHTML=shell(u.display_name||u.username||"My Space","Persistent profile.",`<section class="profile-cover" style="background-image:url(${esc(u.banner_url||u.background_url||"")})"><div class="profile-overlay">${avatar(u.display_name,u.avatar_url)}<div><span class="eyebrow">PROFILE</span><h1>${esc(u.display_name||u.username||"Member")}</h1><p>@${esc(u.username||"member")} · ${esc(u.location||"")}</p></div></div></section><div class="profile-actions">${actions}</div><div class="layout profile-layout"><main>${card('<span class="kicker">ABOUT</span><p>'+esc(u.bio||"This member has not added a bio yet.")+'</p><p class="muted">'+esc(u.interests||"")+'</p>')}${card('<span class="kicker">POSTS</span>'+postsHtml)}</main><aside>${card('<span class="kicker">PROFILE</span><p>Joined '+esc(new Date(u.created_at).toLocaleDateString())+'</p><p>'+esc(u.website_url||"")+'</p>')}${card('<span class="kicker">FRIENDS</span>'+friendHtml)}</aside></div>`);
-}
-async function groups(){
- const rows=(await sb.from("crowspace_groups").select("*").eq("visibility","public").order("created_at",{ascending:false})).data||[];
- app.innerHTML=shell("Groups","Persistent communities.",'<div class="grid">'+rows.map(g=>card('<span class="kicker">GROUP</span><h2>'+esc(g.name)+'</h2><p>'+esc(g.description||"")+'</p>'+button("Open","group:"+g.slug)+(user?" "+button("Join","join:"+g.id):""))).join("")+'</div>');
-}
-async function group(){
- const slug=q("id")||"g0",g=(await sb.from("crowspace_groups").select("*").eq("slug",slug).maybeSingle()).data;
- if(!g){app.innerHTML=shell("Group","Not found.",card("<p>Group not found.</p>"));return}
- const threads=(await sb.from("crowspace_group_threads").select("*").eq("group_id",g.id).order("created_at",{ascending:false}).limit(50)).data||[];
- const ids=[...new Set(threads.map(x=>x.author_id))],authors=await getProfiles(ids);
- const replies=threads.length?(await sb.from("crowspace_group_thread_replies").select("*").in("thread_id",threads.map(x=>x.id)).order("created_at")).data||[]:[];
- let html=user?card('<span class="kicker">START A DISCUSSION</span><form id="crThread"><input class="search" name="title" placeholder="Discussion title" required><textarea class="search" name="body" rows="3" placeholder="Start the conversation…" required></textarea><button class="btn">Create Discussion</button></form>'):gate();
- for(const t of threads){
-  const a=authors.find(x=>x.user_id===t.author_id);
-  const rr=replies.filter(x=>x.thread_id===t.id).map(x=>{const ra=authors.find(y=>y.user_id===x.author_id);return `<div class="reply"><b>${esc(ra?.display_name||"Member")}</b>: ${esc(x.body)}</div>`}).join("");
-  html+=card(`<div class="feed-meta"><span class="feed-type">THREAD</span><span class="muted">${when(t.created_at)}</span></div><h3>${esc(t.title)}</h3><p>${esc(t.body)}</p><p class="muted">By ${esc(a?.display_name||"Member")}</p>${rr}${user?`<form class="inline-form" data-reply="${t.id}"><input class="search" name="body" placeholder="Reply…" required><button class="btn">Reply</button></form>`:""}`);
- }
- app.innerHTML=shell(g.name,g.description||"Community discussion.",html);
-}
-async function spaces(){
- const rows=(await sb.from("crowspace_spaces").select("*").eq("visibility","public").order("name")).data||[];
- app.innerHTML=shell("CrowSpaces","Persistent community hubs.",'<div class="grid">'+rows.map(s=>card('<span class="kicker">HUB</span><h2>'+esc(s.name)+'</h2><p>'+esc(s.description||"")+'</p><a class="btn" href="groups.html">Explore Groups</a>')).join("")+'</div>');
-}
-async function rooms(){
- const rows=(await sb.from("crowspace_rooms").select("*").eq("visibility","public").order("created_at")).data||[];
- app.innerHTML=shell("CrowRooms","Persistent live conversations.",'<div class="grid">'+rows.map(r=>card('<span class="kicker">CROWROOM</span><h2>'+esc(r.name)+'</h2><p>'+esc(r.topic||"")+'</p><a class="btn" href="room.html?id='+esc(r.slug)+'">Enter Room</a>')).join("")+'</div>');
-}
-async function events(){
- const rows=(await sb.from("crowspace_events").select("*").eq("visibility","public").order("starts_at")).data||[];
- const mine=user?(await sb.from("crowspace_event_members").select("event_id").eq("user_id",user.id)).data||[]:[];
- app.innerHTML=shell("Events","Persistent community calendar.",'<div class="grid">'+rows.map(e=>{const joined=mine.some(x=>x.event_id===e.id);return card('<span class="kicker">EVENT</span><h2>'+esc(e.title)+'</h2><p>'+esc(e.description||"")+'</p><p class="muted">'+when(e.starts_at)+' · '+esc(e.location||"")+'</p>'+(user?button(joined?"✓ Interested":"I’m Interested","rsvp:"+e.id):""))}).join("")+'</div>');
-}
-async function media(){
- let query=sb.from("crowspace_media").select("*").eq("visibility","public").order("created_at",{ascending:false});
- if(q("user"))query=query.eq("user_id",q("user"));
- const rows=(await query.limit(60)).data||[];
- let html=user?card('<span class="kicker">ADD MEDIA</span><form id="crMedia"><input class="search" name="title" placeholder="Title"><input class="search" name="url" placeholder="Media URL" required><select class="search" name="type"><option value="image">Photo</option><option value="video">Video</option><option value="audio">Audio</option></select><button class="btn">Add Media</button></form>'):gate();
- html+='<div class="media-grid">'+rows.map(m=>card(m.media_type==="image"?'<img class="media-thumb" src="'+esc(m.media_url)+'" alt="'+esc(m.title||"")+'"><h3>'+esc(m.title||"Untitled")+'</h3>':'<h3>'+esc(m.title||"Media")+'</h3><a class="btn" href="'+esc(m.media_url)+'" target="_blank" rel="noopener">Open '+esc(m.media_type)+'</a>')).join("")+'</div>';
- app.innerHTML=shell("Media Gallery","Persistent member media.",html);
-}
-async function notifications(){
- if(!user){app.innerHTML=shell("Notifications","Persistent activity inbox.",gate());return}
- const rows=(await sb.from("crowspace_notifications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100)).data||[];
- app.innerHTML=shell("Notifications","Your persistent activity inbox.",card(button("Mark All Read","readall"))+(rows.map(n=>'<div class="notification '+(!n.is_read?"unread":"")+'"><span class="notify-dot"></span><div><b>'+esc(n.message||n.type)+'</b><p class="muted">'+when(n.created_at)+'</p></div></div>').join("")||'<p class="muted">You are all caught up.</p>'));
-}
-async function friends(){
- if(!user){app.innerHTML=shell("Friends","Your social graph.",gate());return}
- const rows=(await sb.from("crowspace_friends").select("*").or("requester_id.eq."+user.id+",recipient_id.eq."+user.id).order("created_at",{ascending:false})).data||[];
- const ids=[...new Set(rows.flatMap(x=>[x.requester_id,x.recipient_id]).filter(x=>x!==user.id))],people=await getProfiles(ids);
- const html=rows.map(r=>{const id=r.requester_id===user.id?r.recipient_id:r.requester_id,p=people.find(x=>x.user_id===id);return '<div class="person-row">'+avatar(p?.display_name,p?.avatar_url)+'<div><a href="profile.html?id='+id+'"><b>'+esc(p?.display_name||"Member")+'</b></a><p class="muted">'+esc(r.status)+'</p></div>'+(r.status==="pending"&&r.recipient_id===user.id?button("Accept","accept:"+r.id):"")+'</div>'}).join("");
- app.innerHTML=shell("Friends & Connections","Persistent social graph.",card('<span class="kicker">CONNECTIONS</span>'+ (html||'<p class="muted">No connections yet.</p>')));
+ const id=q("id")||user?.id;if(!id){app().innerHTML=shell("My Space","Your CrowSpace profile.",gate());return}
+ let u=(await sb.from("crowspace_profiles").select("*").eq("user_id",id).maybeSingle()).data;
+ if(!u)u=DEMO.profiles.find(x=>x.user_id===id)||DEMO.profiles[0];
+ const posts=DEMO.posts.filter(x=>x.author_id===id);
+ const own=user&&user.id===id;
+ const actions=own?btn("CUSTOMIZE","goto:customize.html"):user?btn("CROWMAIL","message:"+id)+btn("ADD FRIEND","friend:"+id)+btn("FOLLOW","follow:"+id):"";
+ app().innerHTML=shell(u.display_name||"My Space","A personal corner of the CrowSpace universe.",'<section class="profile-cover" style="background-image:linear-gradient(135deg,#111827,#35134b)"><div class="profile-overlay">'+avatar(u.display_name,u.avatar_url)+'<div><span class="eyebrow">PROFILE</span><h1>'+esc(u.display_name||u.username||"Member")+'</h1><p>@'+esc(u.username||"member")+' · '+esc(u.location||"")+'</p></div></div></section><div class="profile-actions">'+actions+'</div><div class="layout profile-layout"><main>'+card('<span class="kicker">ABOUT</span><p>'+esc(u.bio||"This member has not added a bio yet.")+'</p><p class="muted">'+esc(u.interests||"")+'</p>')+card('<span class="kicker">POSTS</span>'+(posts.map(p=>'<div class="wall"><p>'+esc(p.body)+'</p><small class="muted">'+when(p.created_at)+'</small></div>').join("")||'<p class="muted">No posts yet.</p>'))+'</main><aside>'+card('<span class="kicker">SPACE STATS</span><div class="profile-stats"><div><b>128</b><span>Friends</span></div><div><b>12</b><span>Groups</span></div><div><b>342</b><span>Followers</span></div></div>')+card('<span class="kicker">INTERESTS</span><p>'+esc(u.interests||"Film · Music · Tacoma · Creators")+'</p>')+'</aside></div>');
 }
 async function discover(){
- const profileIds=((await sb.from("crowspace_profiles").select("user_id").eq("profile_visibility","public").limit(100)).data||[]).map(x=>x.user_id);
- const [people,groups,rooms]=await Promise.all([getProfiles(profileIds),sb.from("crowspace_groups").select("name,slug,description").eq("visibility","public"),sb.from("crowspace_rooms").select("name,slug,topic").eq("visibility","public")]);
- const term=(q("q")||"").toLowerCase(),ps=people.filter(x=>(x.display_name+" "+x.username+" "+(x.bio||"")).toLowerCase().includes(term));
- let html=ps.map(x=>card(avatar(x.display_name,x.avatar_url)+'<h2>'+esc(x.display_name||x.username)+'</h2><p>'+esc(x.bio||"")+'</p><a class="btn" href="profile.html?id='+x.user_id+'">Profile</a>')).join("");
- html+=(groups.data||[]).map(x=>card('<span class="kicker">GROUP</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.description||"")+'</p><a class="btn" href="group.html?id='+x.slug+'">Open</a>')).join("");
- html+=(rooms.data||[]).map(x=>card('<span class="kicker">ROOM</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.topic||"")+'</p><a class="btn" href="room.html?id='+x.slug+'">Open</a>')).join("");
- app.innerHTML=shell("Discover","Find people and communities.",'<div class="grid">'+html+'</div>');
+ const people=DEMO.profiles,groups=DEMO.groups,rooms=DEMO.rooms,term=(q("q")||"").toLowerCase();
+ const ps=people.filter(x=>(x.display_name+" "+x.username+" "+x.bio+" "+x.interests).toLowerCase().includes(term));
+ let html='<div class="community-tabs"><a href="discover.html">ALL</a><a href="discover.html?q=film">FILM</a><a href="discover.html?q=music">MUSIC</a><a href="discover.html?q=tacoma">TACOMA</a><a href="discover.html?q=creator">CREATORS</a></div>';
+ html+=ps.map(x=>card(avatar(x.display_name,x.avatar_url)+'<span class="kicker">PERSON</span><h2>'+esc(x.display_name)+'</h2><p>'+esc(x.bio)+'</p><p class="muted">'+esc(x.interests)+'</p><a class="btn" href="profile.html?id='+x.user_id+'">VIEW PROFILE</a>')).join("");
+ html+=groups.filter(x=>!term||((x.name+" "+x.description).toLowerCase().includes(term))).map(x=>card('<span class="kicker">GROUP</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.description)+'</p><p class="muted">'+x.members.toLocaleString()+' members</p><a class="btn" href="group.html?id='+x.slug+'">OPEN GROUP</a>')).join("");
+ html+=rooms.filter(x=>!term||((x.name+" "+x.topic).toLowerCase().includes(term))).map(x=>card('<span class="kicker">CROWROOM</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.topic)+'</p><a class="btn" href="room.html?id='+x.slug+'">ENTER ROOM</a>')).join("");
+ app().innerHTML=shell("Discover","Recommendation-ready discovery for people, groups and live conversations.",html);
 }
-async function customize(){
- if(!user){app.innerHTML=shell("Customize My Space","Persistent profile studio.",gate());return}
- const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single()).data;
- app.innerHTML=shell("Customize My Space","Changes are stored in Supabase.",card(`<form id="crProfile"><label>Display name</label><input class="search" name="display_name" value="${esc(u?.display_name||"")}"><label>Username</label><input class="search" name="username" value="${esc(u?.username||"")}"><label>Bio</label><textarea class="search" name="bio" rows="5">${esc(u?.bio||"")}</textarea><label>Location</label><input class="search" name="location" value="${esc(u?.location||"")}"><label>Avatar URL</label><input class="search" name="avatar_url" value="${esc(u?.avatar_url||"")}"><label>Banner URL</label><input class="search" name="banner_url" value="${esc(u?.banner_url||"")}"><label>Interests</label><input class="search" name="interests" value="${esc(u?.interests||"")}"><label>Music URL</label><input class="search" name="music_url" value="${esc(u?.music_url||"")}"><button class="btn">Save My Space</button></form>`));
-}
-async function createPost(){app.innerHTML=shell("Create Post","Publish a persistent CrowFeed post.",user?card('<form id="crPostFull"><textarea class="search" name="body" rows="7" placeholder="Tell your community more…" required></textarea><button class="btn">Publish Post</button></form>'):gate())}
-async function createEvent(){app.innerHTML=shell("Create Event","Create a persistent community event.",user?card('<form id="crEvent"><input class="search" name="title" placeholder="Event name" required><textarea class="search" name="description" rows="4" placeholder="Description"></textarea><input class="search" name="starts_at" type="datetime-local" required><input class="search" name="location" placeholder="Location or CrowRoom"><button class="btn">Create Event</button></form>'):gate())}
-async function createGroup(){app.innerHTML=shell("Create Group","Create a persistent community.",user?card('<form id="crGroup"><input class="search" name="name" placeholder="Group name" required><input class="search" name="slug" placeholder="group-slug" required><textarea class="search" name="description" rows="4" placeholder="Description"></textarea><button class="btn">Create Group</button></form>'):gate())}
-async function createSpace(){app.innerHTML=shell("Create CrowSpace","Create a persistent community hub.",user?card('<form id="crSpace"><input class="search" name="name" placeholder="CrowSpace name" required><input class="search" name="slug" placeholder="hub-slug" required><textarea class="search" name="description" rows="4" placeholder="Description"></textarea><button class="btn">Create CrowSpace</button></form>'):gate())}
+async function groups(){let rows=await safe("crowspace_groups",sb.from("crowspace_groups").select("*").eq("visibility","public").order("created_at",{ascending:false}),DEMO.groups);app().innerHTML=shell("Groups","Find communities built around shared interests.",'<div class="grid">'+rows.map(g=>card('<span class="kicker">GROUP</span><h2>'+esc(g.name)+'</h2><p>'+esc(g.description||"")+'</p><div class="community-counts"><span>'+Number(g.members||0).toLocaleString()+' members</span><span>Public</span></div><a class="btn" href="group.html?id='+esc(g.slug)+'">OPEN GROUP</a>'+(user?" "+btn("JOIN","join:"+g.id):""))).join("")+'</div>'+card('<a class="btn" href="create-group.html">CREATE A GROUP</a> <a class="btn" href="create-space.html">CREATE A CROWSPACE</a>'))}
+async function group(){const slug=q("id")||"tacoma-creatives";let g=DEMO.groups.find(x=>x.slug===slug);try{g=(await sb.from("crowspace_groups").select("*").eq("slug",slug).maybeSingle()).data||g}catch(_){}if(!g){app().innerHTML=shell("Group","Not found.",card("<p>That group could not be found.</p>"));return}let threads=[];try{threads=(await sb.from("crowspace_group_threads").select("*").eq("group_id",g.id).order("created_at",{ascending:false}).limit(30)).data||[]}catch(_){}let html=user?card('<span class="kicker">START A DISCUSSION</span><form id="crThread"><input class="search" name="title" placeholder="Discussion title" required><textarea class="search" name="body" rows="3" placeholder="Start the conversation…" required></textarea><button class="btn">CREATE DISCUSSION</button></form>'):"";html+=card('<span class="kicker">COMMUNITY</span><p>'+esc(g.description||"")+'</p><p class="muted">Community rules: Be constructive. Credit creators. Build each other up.</p>');if(threads.length)for(const t of threads)html+=card('<span class="kicker">THREAD</span><h3>'+esc(t.title)+'</h3><p>'+esc(t.body)+'</p><small class="muted">'+when(t.created_at)+'</small>');else html+=card('<span class="kicker">DISCUSSION STARTERS</span><h3>What are you building?</h3><p>Share a project, ask for collaborators, or start a conversation.</p>');app().innerHTML=shell(g.name,"A persistent CrowSpace community.",html)}
+async function spaces(){let rows=await safe("crowspace_spaces",sb.from("crowspace_spaces").select("*").eq("visibility","public").order("name"),DEMO.spaces);app().innerHTML=shell("CrowSpaces","Community hubs that connect groups, rooms and people.",'<div class="grid">'+rows.map(s=>card('<span class="kicker">HUB</span><h2>'+esc(s.name)+'</h2><p>'+esc(s.description||"")+'</p><div class="community-counts"><span>'+Number(s.groups||0)+' groups</span><span>'+Number(s.rooms||0)+' rooms</span></div><a class="btn" href="space.html?id='+esc(s.slug)+'">OPEN CROWSPACE</a>')).join("")+'</div>'+card('<a class="btn" href="create-space.html">CREATE A CROWSPACE</a>'))}
+async function space(){const slug=q("id")||"tacoma";const s=DEMO.spaces.find(x=>x.slug===slug)||DEMO.spaces[0];app().innerHTML=shell(s.name,s.description,card('<span class="kicker">COMMUNITY HUB</span><div class="community-counts"><span>'+s.groups+' groups</span><span>'+s.rooms+' CrowRooms</span></div><p>Explore the communities inside this hub.</p><a class="btn" href="groups.html">EXPLORE GROUPS</a> <a class="btn" href="rooms.html">CROWROOMS</a>'))}
+async function rooms(){let rows=await safe("crowspace_rooms",sb.from("crowspace_rooms").select("*").eq("visibility","public").order("created_at"),DEMO.rooms);app().innerHTML=shell("CrowRooms","Live community conversations inside CrowSpace.",'<div class="grid">'+rows.map(r=>card('<span class="kicker">CROWROOM</span><h2>'+esc(r.name)+'</h2><p>'+esc(r.topic||"")+'</p><p class="muted">'+Number(r.members||0)+' members</p><a class="btn" href="room.html?id='+esc(r.slug)+'">ENTER ROOM</a>')).join("")+'</div>')}
+async function room(){const slug=q("id")||"back-deck",r=DEMO.rooms.find(x=>x.slug===slug)||DEMO.rooms[0];let msgs=[];try{msgs=(await sb.from("crowspace_room_messages").select("*").eq("room_id",r.id).order("created_at",{ascending:false}).limit(40)).data||[]}catch(_){}const body=card('<span class="kicker">ROOM TOPIC</span><p>'+esc(r.topic)+'</p>')+(msgs.length?msgs.map(m=>card('<p>'+esc(m.content||m.body)+'</p><small class="muted">'+when(m.created_at)+'</small>')).join(""):card('<span class="kicker">WELCOME</span><h3>Start the conversation</h3><p>This CrowRoom is ready for members to share ideas and connect.</p>'))+(user?card('<form id="crRoomMessage"><input class="search" name="body" placeholder="Say something…" required><button class="btn">POST TO ROOM</button></form>'):gate());app().innerHTML=shell(r.name,"A live conversation room.",body)}
+async function events(){let rows=await safe("crowspace_events",sb.from("crowspace_events").select("*").eq("visibility","public").order("starts_at"),DEMO.events);app().innerHTML=shell("Events","Meetups, live shows, community gatherings and creator events.",'<div class="grid">'+rows.map(e=>card('<span class="kicker">EVENT</span><h2>'+esc(e.title)+'</h2><p>'+esc(e.description||"")+'</p><p class="muted">'+when(e.starts_at)+' · '+esc(e.location||"")+'</p>'+btn("VIEW EVENT","event:"+e.slug)+(user?" "+btn("I’M INTERESTED","rsvp:"+e.id):""))).join("")+'</div>'+card('<a class="btn" href="create-event.html">CREATE EVENT</a>'))}
+async function event(){const slug=q("id")||"creator-meetup";const e=DEMO.events.find(x=>x.slug===slug)||DEMO.events[0];app().innerHTML=shell(e.title,e.description,card('<span class="kicker">EVENT DETAILS</span><h2>'+esc(e.title)+'</h2><p>'+esc(e.description)+'</p><p><b>'+when(e.starts_at)+'</b></p><p>'+esc(e.location)+'</p>'+(user?btn("I’M INTERESTED","rsvp:"+e.id):gate())))}
+async function media(){let rows=await safe("crowspace_media",sb.from("crowspace_media").select("*").eq("visibility","public").order("created_at",{ascending:false}).limit(60),DEMO.media);app().innerHTML=shell("Media","Photos, videos and creative media from the CrowSpace community.",(user?card('<form id="crMedia"><input class="search" name="title" placeholder="Title"><input class="search" name="url" placeholder="Media URL" required><select class="search" name="type"><option value="image">Photo</option><option value="video">Video</option><option value="audio">Audio</option></select><button class="btn">ADD MEDIA</button></form>'):gate())+'<div class="media-grid">'+rows.map(m=>m.media_type==="image"?card('<img class="media-thumb" src="'+esc(m.media_url)+'" alt="'+esc(m.title||"")+'"><h3>'+esc(m.title||"Untitled")+'</h3><p class="muted">'+esc(m.description||"")+'</p>'):card('<span class="kicker">'+esc(String(m.media_type||"MEDIA").toUpperCase())+'</span><h3>'+esc(m.title||"Media")+'</h3><p>'+esc(m.description||"")+'</p><a class="btn" href="'+esc(m.media_url)+'" target="_blank" rel="noopener">OPEN MEDIA</a>')).join("")+'</div>')}
+async function photos(){await media()} async function videos(){await media()}
+async function notifications(){if(!user){app().innerHTML=shell("Notifications","Your activity inbox.",gate());return}const rows=await safe("crowspace_notifications",sb.from("crowspace_notifications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100),[]);app().innerHTML=shell("Notifications","Your CrowSpace activity inbox.",card(btn("MARK ALL READ","readall"))+(rows.map(n=>'<div class="notification"><span class="notify-dot"></span><div><b>'+esc(n.message||n.type||"Notification")+'</b><p class="muted">'+when(n.created_at)+'</p></div></div>').join("")||'<p class="muted">You are all caught up.</p>'))}
+async function friends(){if(!user){app().innerHTML=shell("Friends","Your social graph.",gate());return}let rows=[];try{rows=(await sb.from("crowspace_friends").select("*").or("requester_id.eq."+user.id+",recipient_id.eq."+user.id).order("created_at",{ascending:false})).data||[]}catch(_){}const people=await profiles([...new Set(rows.flatMap(x=>[x.requester_id,x.recipient_id]).filter(x=>x!==user.id))]);const html=rows.map(r=>{const id=r.requester_id===user.id?r.recipient_id:r.requester_id,p=people.find(x=>x.user_id===id);return '<div class="person-row">'+avatar(p?.display_name,p?.avatar_url)+'<div><a href="profile.html?id='+id+'"><b>'+esc(p?.display_name||"Member")+'</b></a><p class="muted">'+esc(r.status||"connected")+'</p></div></div>'}).join("");app().innerHTML=shell("Friends & Connections","People connected to your CrowSpace.",card(html||'<p class="muted">No connections yet. Use Discover to find people.</p>'))}
+async function messages(){if(!user){app().innerHTML=shell("CrowMail","Private conversations.",gate());return}let rows=[];try{rows=(await sb.from("crowspace_messages").select("*").or("sender_id.eq."+user.id+",recipient_id.eq."+user.id).order("created_at",{ascending:false}).limit(100)).data||[]}catch(_){}app().innerHTML=shell("CrowMail","Private conversations across the CrowSpace universe.",card('<span class="kicker">MESSAGES</span>'+(rows.map(m=>'<div class="wall"><p>'+esc(m.body||m.content||"")+'</p><small class="muted">'+when(m.created_at)+'</small></div>').join("")||'<p class="muted">No messages yet. Visit a member profile to start a conversation.</p>')))}
+async function activity(){if(!user){app().innerHTML=shell("Activity","Your social activity.",gate());return}let rows=[];try{rows=(await sb.from("crowspace_activity").select("*").eq("actor_id",user.id).order("created_at",{ascending:false}).limit(100)).data||[]}catch(_){}app().innerHTML=shell("Activity","A timeline of your CrowSpace actions.",card((rows.map(x=>'<div class="notification"><b>'+esc(x.type||"Activity")+'</b><p>'+esc(x.message||x.content||"")+'</p><small class="muted">'+when(x.created_at)+'</small></div>').join("")||'<p class="muted">No activity yet.</p>')))}
+async function graph(){app().innerHTML=shell("My Graph","Explore your people, communities and connections.",card('<div class="grid"><div><span class="kicker">PEOPLE</span><h2>3</h2><p class="muted">Suggested connections</p></div><div><span class="kicker">GROUPS</span><h2>4</h2><p class="muted">Featured communities</p></div><div><span class="kicker">ROOMS</span><h2>3</h2><p class="muted">Live conversations</p></div></div>')+card('<a class="btn" href="discover.html">DISCOVER CONNECTIONS</a> <a class="btn" href="friends.html">MY FRIENDS</a>'))}
+async function auth(){app().innerHTML=shell("CrowSpace Account","One account. One universe.",card('<div id="authStatus" class="notice"></div><div class="grid"><form id="uSignIn"><span class="kicker">SIGN IN</span><input class="search" type="email" name="email" placeholder="Email" required><input class="search" type="password" name="password" placeholder="Password" required><button class="btn">SIGN IN</button></form><form id="uSignUp"><span class="kicker">CREATE ACCOUNT</span><input class="search" type="email" name="email" placeholder="Email" required><input class="search" type="password" name="password" placeholder="Password" minlength="8" required><input class="search" name="display_name" placeholder="Display name"><button class="btn">CREATE ACCOUNT</button></form></div>')+card('<span class="kicker">ACCOUNT STATUS</span><p>'+(user?"Signed in as "+esc(user.email||"member"):"Not signed in")+'</p>'+(user?btn("SIGN OUT","signout"):"")))}
+async function customize(){if(!user){app().innerHTML=shell("Customize My Space","Personalize your profile.",gate());return}const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).maybeSingle()).data||{};app().innerHTML=shell("Customize My Space","Update the profile connected to your universal account.",card('<form id="crProfile"><label>Display name</label><input class="search" name="display_name" value="'+esc(u.display_name||"")+'"><label>Username</label><input class="search" name="username" value="'+esc(u.username||"")+'"><label>Bio</label><textarea class="search" name="bio" rows="5">'+esc(u.bio||"")+'</textarea><label>Location</label><input class="search" name="location" value="'+esc(u.location||"")+'"><label>Avatar URL</label><input class="search" name="avatar_url" value="'+esc(u.avatar_url||"")+'"><label>Banner URL</label><input class="search" name="banner_url" value="'+esc(u.banner_url||"")+'"><label>Interests</label><input class="search" name="interests" value="'+esc(u.interests||"")+'"><button class="btn">SAVE MY SPACE</button></form>'))}
+async function settings(){await customize()}
+async function createPost(){app().innerHTML=shell("Create Post","Publish to CrowFeed.",user?card('<form id="crPostFull"><textarea class="search" name="body" rows="7" placeholder="Tell your community more…" required></textarea><button class="btn">PUBLISH POST</button></form>'):gate())}
+async function createEvent(){app().innerHTML=shell("Create Event","Add a community gathering.",user?card('<form id="crEvent"><input class="search" name="title" placeholder="Event name" required><textarea class="search" name="description" rows="4" placeholder="Description"></textarea><input class="search" name="starts_at" type="datetime-local" required><input class="search" name="location" placeholder="Location or CrowRoom"><button class="btn">CREATE EVENT</button></form>'):gate())}
+async function createGroup(){app().innerHTML=shell("Create Group","Build a persistent community.",user?card('<form id="crGroup"><input class="search" name="name" placeholder="Group name" required><input class="search" name="slug" placeholder="group-slug" required><textarea class="search" name="description" rows="4" placeholder="Description"></textarea><button class="btn">CREATE GROUP</button></form>'):gate())}
+async function createSpace(){app().innerHTML=shell("Create CrowSpace","Build a community hub.",user?card('<form id="crSpace"><input class="search" name="name" placeholder="CrowSpace name" required><input class="search" name="slug" placeholder="hub-slug" required><textarea class="search" name="description" rows="4" placeholder="Description"></textarea><button class="btn">CREATE CROWSPACE</button></form>'):gate())}
 async function submit(e){
  const f=e.target;if(!sb)return;
- if(f.id==="crPost"||f.id==="crPostFull"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_posts").insert({author_id:user.id,body:String(d.get("body")).trim(),group_id:String(d.get("group")||"")||null,visibility:"public",status:"published"});if(r.error)alert(r.error.message);else feed()}
- if(f.id==="crThread"){e.preventDefault();const d=new FormData(f),g=(await sb.from("crowspace_groups").select("id").eq("slug",q("id")||"g0").single()).data,r=await sb.from("crowspace_group_threads").insert({group_id:g.id,author_id:user.id,title:String(d.get("title")).trim(),body:String(d.get("body")).trim()});if(r.error)alert(r.error.message);else group()}
- if(f.dataset.reply){e.preventDefault();const r=await sb.from("crowspace_group_thread_replies").insert({thread_id:f.dataset.reply,author_id:user.id,body:String(new FormData(f).get("body")).trim()});if(r.error)alert(r.error.message);else group()}
- if(f.dataset.comment){e.preventDefault();const r=await sb.from("crowspace_comments").insert({post_id:f.dataset.comment,author_id:user.id,content:String(new FormData(f).get("body")).trim()});if(r.error)alert(r.error.message);else feed()}
- if(f.id==="crProfile"){e.preventDefault();const d=new FormData(f),patch={display_name:String(d.get("display_name")).trim(),username:String(d.get("username")).trim(),bio:String(d.get("bio")).trim(),location:String(d.get("location")).trim(),avatar_url:String(d.get("avatar_url")).trim(),banner_url:String(d.get("banner_url")).trim(),interests:String(d.get("interests")).trim(),music_url:String(d.get("music_url")).trim(),updated_at:new Date().toISOString()},r=await sb.from("crowspace_profiles").update(patch).eq("user_id",user.id);if(r.error)alert(r.error.message);else profile()}
- if(f.id==="crMedia"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_media").insert({user_id:user.id,title:String(d.get("title")).trim(),media_url:String(d.get("url")).trim(),media_type:String(d.get("type")),visibility:"public"});if(r.error)alert(r.error.message);else media()}
- if(f.id==="crEvent"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_events").insert({owner_id:user.id,title:String(d.get("title")).trim(),description:String(d.get("description")).trim(),starts_at:new Date(String(d.get("starts_at"))).toISOString(),location:String(d.get("location")).trim(),visibility:"public"});if(r.error)alert(r.error.message);else events()}
- if(f.id==="crGroup"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_groups").insert({name:String(d.get("name")).trim(),slug:String(d.get("slug")).trim(),description:String(d.get("description")).trim(),owner_id:user.id,visibility:"public",status:"active"}).select().single();if(r.error){alert(r.error.message)}else{await sb.from("crowspace_group_members").upsert({group_id:r.data.id,user_id:user.id,role:"owner",status:"active"},{onConflict:"group_id,user_id"});location.href="group.html?id="+r.data.slug}}
- if(f.id==="crSpace"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_spaces").insert({name:String(d.get("name")).trim(),slug:String(d.get("slug")).trim(),description:String(d.get("description")).trim(),created_by:user.id,visibility:"public"});if(r.error)alert(r.error.message);else spaces()}
+ if(f.id==="uSignIn"||f.id==="uSignUp"){e.preventDefault();const d=new FormData(f),email=String(d.get("email")),password=String(d.get("password"));const r=f.id==="uSignIn"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password,options:{data:{display_name:String(d.get("display_name")||"")}}});document.getElementById("authStatus").textContent=r.error?r.error.message:(f.id==="uSignUp"?"Account created. Check your email if confirmation is enabled.":"Signed in.");if(!r.error)setTimeout(()=>location.href="profile.html",700);return}
+ if(f.id==="crPost"||f.id==="crPostFull"){e.preventDefault();const body=String(new FormData(f).get("body")).trim();const r=await sb.from("crowspace_posts").insert({author_id:user.id,body,visibility:"public",status:"published"});if(r.error)alert(r.error.message);else feed();return}
+ if(f.id==="crProfile"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_profiles").update({display_name:String(d.get("display_name")).trim(),username:String(d.get("username")).trim(),bio:String(d.get("bio")).trim(),location:String(d.get("location")).trim(),avatar_url:String(d.get("avatar_url")).trim(),banner_url:String(d.get("banner_url")).trim(),interests:String(d.get("interests")).trim(),updated_at:new Date().toISOString()}).eq("user_id",user.id);if(r.error)alert(r.error.message);else profile();return}
+ if(f.id==="crMedia"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_media").insert({user_id:user.id,title:String(d.get("title")).trim(),media_url:String(d.get("url")).trim(),media_type:String(d.get("type")),visibility:"public"});if(r.error)alert(r.error.message);else media();return}
+ if(f.id==="crEvent"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_events").insert({owner_id:user.id,title:String(d.get("title")).trim(),description:String(d.get("description")).trim(),starts_at:new Date(String(d.get("starts_at"))).toISOString(),location:String(d.get("location")).trim(),visibility:"public"});if(r.error)alert(r.error.message);else events();return}
+ if(f.id==="crGroup"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_groups").insert({name:String(d.get("name")).trim(),slug:String(d.get("slug")).trim(),description:String(d.get("description")).trim(),owner_id:user.id,visibility:"public",status:"active"}).select().single();if(r.error){alert(r.error.message)}else location.href="group.html?id="+r.data.slug;return}
+ if(f.id==="crSpace"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_spaces").insert({name:String(d.get("name")).trim(),slug:String(d.get("slug")).trim(),description:String(d.get("description")).trim(),created_by:user.id,visibility:"public"});if(r.error)alert(r.error.message);else spaces();return}
+ if(f.id==="crThread"){e.preventDefault();const d=new FormData(f),g=(await sb.from("crowspace_groups").select("id").eq("slug",q("id")||"tacoma-creatives").single()).data;if(!g){alert("Group not found");return}const r=await sb.from("crowspace_group_threads").insert({group_id:g.id,author_id:user.id,title:String(d.get("title")).trim(),body:String(d.get("body")).trim()});if(r.error)alert(r.error.message);else group();return}
+ if(f.id==="crRoomMessage"){e.preventDefault();const d=new FormData(f),r=await sb.from("crowspace_room_messages").insert({room_id:q("id"),author_id:user.id,content:String(d.get("body")).trim()});if(r.error)alert(r.error.message);else room();return}
 }
 async function act(a){
+ if(a==="signout"){await sb.auth.signOut();location.href="auth.html";return}
  if(a.startsWith("goto:")){location.href=a.slice(5);return}
  if(a.startsWith("message:")){location.href="messages.html?user="+a.slice(8);return}
  if(a.startsWith("friend:")){if(!user){location.href="auth.html";return}const r=await sb.from("crowspace_friends").insert({requester_id:user.id,recipient_id:a.slice(7),status:"pending"});if(r.error&&r.error.code!=="23505")alert(r.error.message);else profile();return}
  if(a.startsWith("follow:")){if(!user){location.href="auth.html";return}const id=a.slice(7),x=(await sb.from("crowspace_follows").select("*").eq("follower_id",user.id).eq("following_id",id).maybeSingle()).data;if(x)await sb.from("crowspace_follows").delete().eq("follower_id",user.id).eq("following_id",id);else await sb.from("crowspace_follows").insert({follower_id:user.id,following_id:id});profile();return}
- if(a.startsWith("join:")){if(!user){location.href="auth.html";return}await sb.from("crowspace_group_members").upsert({group_id:a.slice(5),user_id:user.id,role:"member",status:"active"},{onConflict:"group_id,user_id"});group();return}
- if(a.startsWith("accept:")){await sb.from("crowspace_friends").update({status:"accepted",updated_at:new Date().toISOString()}).eq("id",a.slice(7)).eq("recipient_id",user.id);friends();return}
+ if(a.startsWith("join:")){if(!user){location.href="auth.html";return}const id=a.slice(5);const r=await sb.from("crowspace_group_members").upsert({group_id:id,user_id:user.id,role:"member",status:"active"},{onConflict:"group_id,user_id"});if(r.error)alert(r.error.message);else group();return}
+ if(a.startsWith("accept:")){if(user)await sb.from("crowspace_friends").update({status:"accepted",updated_at:new Date().toISOString()}).eq("id",a.slice(7)).eq("recipient_id",user.id);friends();return}
  if(a.startsWith("react:")){if(!user){location.href="auth.html";return}const z=a.split(":"),pid=z[1],reaction=z[2],x=(await sb.from("crowspace_post_reactions").select("*").eq("post_id",pid).eq("user_id",user.id).eq("reaction",reaction).maybeSingle()).data;if(x)await sb.from("crowspace_post_reactions").delete().eq("post_id",pid).eq("user_id",user.id).eq("reaction",reaction);else await sb.from("crowspace_post_reactions").insert({post_id:pid,user_id:user.id,reaction});feed();return}
- if(a.startsWith("rsvp:")){if(!user){location.href="auth.html";return}const id=a.slice(5),x=(await sb.from("crowspace_event_members").select("*").eq("event_id",id).eq("user_id",user.id).maybeSingle()).data;if(x)await sb.from("crowspace_event_members").delete().eq("event_id",id).eq("user_id",user.id);else await sb.from("crowspace_event_members").insert({event_id:id,user_id:user.id,status:"going"});events();return}
- if(a==="readall"){await sb.from("crowspace_notifications").update({is_read:true}).eq("user_id",user.id);notifications()}
+ if(a.startsWith("rsvp:")){if(!user){location.href="auth.html";return}const id=a.slice(5);const x=(await sb.from("crowspace_event_members").select("*").eq("event_id",id).eq("user_id",user.id).maybeSingle()).data;if(x)await sb.from("crowspace_event_members").delete().eq("event_id",id).eq("user_id",user.id);else await sb.from("crowspace_event_members").insert({event_id:id,user_id:user.id,status:"going"});events();return}
+ if(a.startsWith("event:")){location.href="event.html?id="+a.slice(6);return}
+ if(a==="readall"&&user){await sb.from("crowspace_notifications").update({is_read:true}).eq("user_id",user.id);notifications()}
 }
+function renderError(msg){app().innerHTML=shell("CrowSpace","Connection status",card('<p>'+esc(msg)+'</p>'))}
 async function render(){
- const p=page(), map={"index.html":feed,"profile.html":profile,"groups.html":groups,"group.html":group,"spaces.html":spaces,"rooms.html":rooms,"events.html":events,"event.html":events,"media.html":media,"photos.html":media,"videos.html":media,"notifications.html":notifications,"friends.html":friends,"discover.html":discover,"customize.html":customize,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent,"create-media.html":media};
- if(map[p])await map[p]();
+ const map={"index.html":feed,"profile.html":profile,"discover.html":discover,"friends.html":friends,"groups.html":groups,"group.html":group,"spaces.html":spaces,"space.html":space,"rooms.html":rooms,"room.html":room,"events.html":events,"event.html":event,"media.html":media,"photos.html":photos,"videos.html":videos,"messages.html":messages,"crowmail.html":messages,"notifications.html":notifications,"activity.html":activity,"graph.html":graph,"auth.html":auth,"customize.html":customize,"settings.html":settings,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent};
+ const fn=map[page()];if(fn)await fn();else await feed();
 }
 document.addEventListener("submit",submit);
 document.addEventListener("click",e=>{const b=e.target.closest("[data-cr-action]");if(b)act(b.dataset.crAction)});
