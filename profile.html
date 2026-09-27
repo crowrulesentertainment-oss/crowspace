@@ -949,5 +949,33 @@ body.avatar-modal-open{overflow:hidden}
  }
  document.addEventListener("DOMContentLoaded",()=>setTimeout(loadNestOS,900));
 })();
+</script><script id="nest-realtime">
+(function(){
+ let channel=null;
+ const seen=new Map();
+ function pulse(title,body){
+  const list=document.getElementById("nestPulseList");if(!list)return;
+  const item=document.createElement("div");item.className="pulse-item";
+  item.innerHTML="<b>"+(window.CS&&CS.escape?CS.escape(title):title)+"</b><br>"+(window.CS&&CS.escape?CS.escape(body):body)+"<span class='pulse-time'>Just now</span>";
+  list.prepend(item);while(list.children.length>5)list.lastElementChild.remove();
+ }
+ function refreshCounts(){
+  if(typeof loadNestOS==="function")return;
+  const el=document.getElementById("nestLiveDetail");if(el)el.textContent="Realtime sync active";
+ }
+ async function start(){
+  if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
+  channel=crowSupabase.channel("nest:"+uid);
+  channel
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},p=>{pulse("New wall post","Your Nest received a new post.");refreshCounts();})
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_comments"},p=>{pulse("New comment","A conversation changed on your Nest.");})
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_friendships"},p=>{const x=p.new||{};if(x.requester_id===uid||x.addressee_id===uid){pulse("Network update","Your friendship network changed.");}})
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_nest_3_1",filter:"profile_id=eq."+uid},p=>{pulse("New visitor","Someone visited your Nest.");})
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},p=>{const x=p.new||{};pulse("Notification",x.body||"You have a new notification.");})
+   .subscribe(status=>{const s=document.getElementById("nestLiveStatus"),d=document.getElementById("nestLiveDetail");if(status==="SUBSCRIBED"){if(s)s.textContent="Realtime online";if(d)d.textContent="Live Supabase sync active";}});
+ }
+ document.addEventListener("DOMContentLoaded",()=>setTimeout(start,1400));
+ window.addEventListener("beforeunload",()=>{if(channel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(channel);});
+})();
 </script></body>
 </html>
