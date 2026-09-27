@@ -19,6 +19,8 @@
 .camera-diagnostics strong{display:block;color:#59e7ff;margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase}
 .camera-select select{background:#080b14;color:#fff;border:1px solid rgba(89,231,255,.25);padding:9px 10px;border-radius:6px}
 .record-btn.recording{background:#ff4fd8!important;box-shadow:0 0 24px rgba(255,79,216,.4)}
+.mode-active{border-color:rgba(89,231,255,.7)!important;box-shadow:0 0 18px rgba(89,231,255,.16)}
+.source-note{font-size:11px;opacity:.65;margin-top:-4px}
 .studio-copy h2{margin-top:0}.studio-copy .muted{line-height:1.65}
 .caw-form{display:grid;gap:12px;margin-top:14px}.caw-form input,.caw-form textarea{width:100%;box-sizing:border-box}
 .file-chip{padding:10px 12px;border:1px solid var(--cp-line,rgba(112,132,180,.22));background:rgba(8,11,20,.7);font-size:13px}
@@ -41,7 +43,7 @@
       <div class="live-badge" id="liveBadge">● CAMERA READY</div>
       <div class="rec-status" id="recStatus">Ready to record</div>
       <div class="rec-controls">
-        <div class="camera-select"><button id="cameraBtn" class="btn" type="button">Enable Camera</button><button id="switchCameraBtn" class="btn" type="button" disabled>↔ Switch Camera</button></div>
+        <div class="camera-select"><button id="phoneModeBtn" class="btn primary" type="button">📱 Record with Phone</button><button id="webcamModeBtn" class="btn" type="button">🖥️ Record with Webcam</button></div><div class="camera-select"><button id="cameraBtn" class="btn" type="button">Enable Camera</button><button id="switchCameraBtn" class="btn" type="button" disabled>↔ Switch Camera</button></div>
         <div class="camera-select"><select id="cameraDevice" aria-label="Camera"><option value="">Default camera</option></select><select id="micDevice" aria-label="Microphone"><option value="">Default microphone</option></select></div>
         <button id="recordBtn" class="btn primary record-btn" type="button" disabled>● Start Recording</button>
         <button id="stopBtn" class="btn" type="button" disabled>■ Stop</button>
@@ -55,12 +57,12 @@
       <p class="muted">Use a desktop webcam or your phone camera and microphone for a quick Caw. On mobile, CrowSpace can use the front or rear camera. You can also upload a video already saved on your device.</p><p class="muted camera-help">Camera access normally requires HTTPS and your browser’s permission. On phones, hold the device upright or sideways before recording; the preview will adapt to the available camera.</p>
       <div id="cameraDiagnostics" class="camera-diagnostics" aria-live="polite">
         <strong>Camera diagnostics</strong>
-        <div id="cameraDiagText">Not tested yet. Click Enable Camera.</div>
+        <div id="cameraDiagText">Choose Phone or Webcam mode, then enable the camera.</div>
       </div>
       <form id="cawForm" class="caw-form">
         <label>Title<input id="title" maxlength="120" required placeholder="Give your Caw a title"></label>
         <label>Caption<textarea id="caption" maxlength="2000" rows="5" placeholder="What's this Caw about?"></textarea></label>
-        <label>Upload a Caw<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" capture="environment"></label>
+        <label>Upload a Caw<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" capture="environment"></label><div class="source-note">Phone recording uses the browser camera. Webcam recording uses your computer camera. If camera access is unavailable, you can always upload a saved video.</div>
         <div id="fileInfo" class="file-chip">No video selected.</div>
         <button id="publishBtn" class="btn primary" type="submit">Upload &amp; Publish Caw</button>
         <p id="msg" class="muted" role="status"></p>
@@ -78,7 +80,12 @@
 <script>
 const MAX_BYTES=512*1024*1024;
 const preview=document.getElementById("preview"), cameraBtn=document.getElementById("cameraBtn"), recordBtn=document.getElementById("recordBtn"), stopBtn=document.getElementById("stopBtn"), clearBtn=document.getElementById("clearBtn"), recStatus=document.getElementById("recStatus"), liveBadge=document.getElementById("liveBadge"), fileInput=document.getElementById("video_file"), fileInfo=document.getElementById("fileInfo"), form=document.getElementById("cawForm"), msg=document.getElementById("msg");
-let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null, cameraFacing="user";
+let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null, cameraFacing="user", captureMode="phone";
+const phoneModeBtn=document.getElementById("phoneModeBtn"), webcamModeBtn=document.getElementById("webcamModeBtn");
+function setCaptureMode(mode){captureMode=mode;phoneModeBtn.classList.toggle("mode-active",mode==="phone");webcamModeBtn.classList.toggle("mode-active",mode==="webcam");liveBadge.textContent=mode==="phone"?"● PHONE CAMERA READY":"● WEBCAM READY";document.getElementById("cameraDiagText").textContent=(mode==="phone"?"Phone mode selected. Use the front/rear camera on a mobile device.":"Webcam mode selected. Use your desktop/laptop webcam and microphone.")+" Click Enable Camera to start.";}
+setCaptureMode("phone");
+phoneModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("phone");cameraFacing="user";enableCamera("user");});
+webcamModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("webcam");cameraFacing="user";enableCamera("user");});
 
 function pickMime(){
   if(!window.MediaRecorder) return "";
@@ -109,7 +116,7 @@ function setRecordedFile(blob){
   }catch(e){
     // Some mobile browsers do not allow programmatic file inputs.
   }
-  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB · "+ext.toUpperCase();
+  fileInfo.textContent="Recorded Caw ready · "+(blob.size/1048576).toFixed(1)+" MB · "+ext.toUpperCase()+" · "+(captureMode==="phone"?"Phone":"Webcam")+" recording";
 }
 async function listDevices(){
   const cameraDevice=document.getElementById("cameraDevice"),micDevice=document.getElementById("micDevice");
@@ -152,8 +159,8 @@ async function enableCamera(facing=cameraFacing){
     cameraFacing=facing;
     const cameraId=document.getElementById("cameraDevice").value;
     const micId=document.getElementById("micDevice").value;
-    const video={width:{ideal:1280},height:{ideal:720}};
-    if(cameraId) video.deviceId={exact:cameraId}; else video.facingMode={ideal:facing};
+    const video={width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30,max:30}};
+    if(cameraId) video.deviceId={exact:cameraId}; else if(captureMode==="phone") video.facingMode={ideal:facing};
     const audio=micId?{deviceId:{exact:micId},echoCancellation:true,noiseSuppression:true}:{echoCancellation:true,noiseSuppression:true};
     let next;
     try{
@@ -260,6 +267,5 @@ document.addEventListener("DOMContentLoaded",async()=>{
   if(CS.hydrateAvatars) await CS.hydrateAvatars();
 });
 </script>
-<script src="js/global-nav.js"></script>
 </body>
 </html>
