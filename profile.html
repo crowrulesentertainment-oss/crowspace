@@ -198,6 +198,18 @@ body{
 @keyframes msblink{50%{opacity:.35}}
 @media(max-width:850px){.ms2008-grid{grid-template-columns:1fr}.top8-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:520px){.top8-grid{grid-template-columns:repeat(2,1fr)}.profile-details{grid-template-columns:1fr}}
+</style><style id="crowspace-modern-profile">
+:root{--cr-bg:#05070d;--cr-panel:rgba(10,15,28,.78);--cr-line:rgba(255,255,255,.09);--cr-cyan:#5ee7ff;--cr-purple:#9b7bff;--cr-pink:#ff62c6;--cr-text:#f4f7ff;--cr-muted:#8d9ab4}
+body{background:radial-gradient(circle at 12% 5%,rgba(94,231,255,.12),transparent 28%),radial-gradient(circle at 88% 18%,rgba(155,123,255,.14),transparent 30%),#05070d!important;color:var(--cr-text)!important}
+.site-header{background:rgba(4,7,14,.82)!important;border-bottom:1px solid var(--cr-line)!important;backdrop-filter:blur(18px)}
+.nest-shell{max-width:1320px!important}.nest-cover{position:relative!important;overflow:hidden;border:1px solid var(--cr-line)!important;border-radius:30px!important;background:linear-gradient(135deg,rgba(12,20,38,.94),rgba(10,9,24,.88))!important;box-shadow:0 24px 80px rgba(0,0,0,.35)!important;padding:28px!important}.nest-cover:before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 120deg,transparent 0 25%,rgba(94,231,255,.08),transparent 40%,rgba(255,98,198,.07),transparent 60%);animation:orbitGlow 16s linear infinite;pointer-events:none}@keyframes orbitGlow{to{transform:rotate(360deg)}}.nest-cover>*{position:relative;z-index:1}
+.nest-cover .avatar-frame,.nest-cover #avatar{border-radius:26px!important}.nest-cover .avatar-frame img,.nest-cover #avatar img{border-radius:20px!important}
+.retro-box,.ms-box,.nest-box,.nest-sidebar{background:var(--cr-panel)!important;border:1px solid var(--cr-line)!important;border-radius:20px!important;box-shadow:0 14px 45px rgba(0,0,0,.2)!important;overflow:hidden}
+.retro-title,.ms-head{background:linear-gradient(90deg,rgba(94,231,255,.14),rgba(155,123,255,.12))!important;color:var(--cr-text)!important;border-bottom:1px solid var(--cr-line)!important;font-family:Montserrat,Arial,sans-serif!important;letter-spacing:.08em!important}
+.profile-columns{gap:20px!important}.profile-main,.profile-side{gap:18px!important}.profile-nav{background:rgba(8,13,25,.72)!important;border:1px solid var(--cr-line)!important;border-radius:16px!important;padding:7px!important;backdrop-filter:blur(16px)}.profile-nav a{border-radius:10px!important;color:#b9c7df!important}.profile-nav a:hover{background:rgba(94,231,255,.1)!important;color:var(--cr-cyan)!important}
+.top8-card{background:rgba(255,255,255,.035)!important;border:1px solid var(--cr-line)!important;border-radius:16px!important}.top8-card img,.top8-avatar{border-radius:12px!important}.ms-track,.testimonial{background:rgba(255,255,255,.035)!important;border:1px solid var(--cr-line)!important;border-radius:12px!important}.profile-details{background:var(--cr-line)!important;border-radius:12px!important;overflow:hidden}.profile-details div{background:rgba(255,255,255,.025)!important;color:var(--cr-text)!important}.copy-url input{background:rgba(255,255,255,.04)!important;color:#dce7fa!important;border:1px solid var(--cr-line)!important;border-radius:10px!important}.copy-url button,.theme-btn{border-radius:10px!important;border:1px solid rgba(94,231,255,.25)!important;background:rgba(94,231,255,.1)!important;color:var(--cr-cyan)!important}.music-marquee{border-radius:10px!important;background:linear-gradient(90deg,rgba(94,231,255,.08),rgba(155,123,255,.08))!important;border:1px solid var(--cr-line)!important}
+.modern-command-strip{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:12px;margin:18px 0}.modern-command{padding:16px;border:1px solid var(--cr-line);border-radius:18px;background:linear-gradient(145deg,rgba(14,22,40,.88),rgba(9,12,24,.72));min-height:78px}.modern-command .k{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--cr-muted)}.modern-command .v{font-size:19px;font-weight:800;margin-top:7px}.modern-command:first-child .v{font-size:24px;background:linear-gradient(90deg,var(--cr-cyan),var(--cr-purple),var(--cr-pink));-webkit-background-clip:text;background-clip:text;color:transparent}.modern-section-label{display:flex;align-items:center;gap:10px;margin:24px 0 10px;color:#c9d5ea;font-size:11px;letter-spacing:.15em;text-transform:uppercase}.modern-section-label:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--cr-line),transparent)}
+@media(max-width:850px){.modern-command-strip{grid-template-columns:1fr 1fr}.modern-command:first-child{grid-column:1/-1}}@media(max-width:520px){.modern-command-strip{grid-template-columns:1fr}.modern-command:first-child{grid-column:auto}}
 </style></head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav aria-label="CrowSpace global navigation"></nav><div id="account"></div></header>
@@ -326,7 +338,7 @@ body{
   </section>
 </div>
 
-<div class="profile-retro">
+<div class="modern-command-strip"><div class="modern-command"><div class="k">Your digital home</div><div class="v">One Nest. One Universe.</div></div><div class="modern-command"><div class="k">Presence</div><div class="v" id="modernPresence">● Connected</div></div><div class="modern-command"><div class="k">Identity</div><div class="v" id="modernIdentity">CrowSpace Member</div></div><div class="modern-command"><div class="k">Universe</div><div class="v">CrowRules</div></div></div><div class="profile-retro">
   <div class="retro-box">
     <div class="retro-title">MY CROWSPACE URL</div>
     <div class="retro-body"><div class="url-line" id="profileUrl">crowspace/profile</div></div>
@@ -889,5 +901,5 @@ body.avatar-modal-open{overflow:hidden}
 .nest-photo-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
 @media(max-width:800px){.inline-comment-form{flex-direction:column}}
 </style>
-<script src="js/global-nav.js"></script></body>
+<script src="js/global-nav.js"></script><script>(function(){function modernizeProfile(){const p=document.getElementById("modernIdentity");if(p&&typeof prof!=="undefined"&&prof)p.textContent=prof.display_name||("@"+(prof.username||"member"));const s=document.getElementById("modernPresence");if(s&&typeof prof!=="undefined"&&prof)s.textContent=prof.is_online?"● Online now":"● In CrowSpace"}document.addEventListener("DOMContentLoaded",()=>setTimeout(modernizeProfile,1200));})();</script></body>
 </html>
