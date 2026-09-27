@@ -261,13 +261,13 @@ async async async async function discover(){
 
 async function graph(){
  if(!user){app.innerHTML=shell("My Graph","Your personal CrowSpace universe.",gate());return}
- const [profile,edges,trends]=await Promise.all([
+ const [profile,edges,trends,sharedR]=await Promise.all([
   sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single(),
   sb.rpc("crowspace_graph_expand",{p_user:user.id,p_depth:Number(q("depth")||2),p_limit:150}),
   sb.rpc("crowspace_predictive_trends",{p_limit:50}),
   sb.rpc("crowspace_shared_discovery",{p_user:user.id,p_limit:50})
  ]);
- const rows=edges.data||[], shared=arguments, nodes=new Map();
+ const rows=edges.data||[], nodes=new Map();
  rows.forEach(x=>{
   const other={kind:x.node_kind,id:x.node_id,edge:x};
   if(other&&!(other.kind==="person"&&other.id===user.id)){
