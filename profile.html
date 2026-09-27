@@ -753,7 +753,7 @@ async function load(){
     prof=Array.isArray(data)?data[0]:data;
     if(!prof){const cover=document.querySelector(".nest-cover");if(cover)cover.outerHTML='<section class="nest-box"><h1>Nest not found</h1><p class="muted">This CrowSpace profile does not exist or is unavailable.</p><a class="btn" href="index.html">Back Home</a></section>';return}
     const {data:s,error:se}=await crowSupabase.from("crowspace_nest_settings").select("*").eq("user_id",uid).maybeSingle();
-    err("Nest settings",se);nestSettings=s||{};window.CROW_NEST_SETTINGS=nestSettings;applyNestStyle(nestSettings);
+    err("Nest settings",se);nestSettings=s||{};window.CROW_NEST_SETTINGS=nestSettings;applyNestStyle(nestSettings);window.dispatchEvent(new CustomEvent("crowspace:nest-settings-ready",{detail:nestSettings}));
     const n=prof.display_name||prof.username||"CrowSpace Member";
     document.title=n+" | CrowSpace";
     text("name",n);text("handle","@"+(prof.username||"member"));
@@ -944,8 +944,14 @@ function renderSocialLinksValue(value){
    return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+CS.escape(x.name||n[0])+'" title="'+CS.escape(x.name||n[0])+'"><span class="social-link-logo">'+logo(n[1])+'</span></a>';
  }).join("");
 }
-async function loadSocialLinks(){
- if(!social||typeof crowSupabase==="undefined"||!window.CROW_PROFILE_UID)return;
+async function loadSocialLinks(value){
+ if(!social||!window.CROW_PROFILE_UID)return;
+ if(value!==undefined){renderSocialLinksValue(value||[]);return}
+ if(window.CROW_NEST_SETTINGS&&Object.prototype.hasOwnProperty.call(window.CROW_NEST_SETTINGS,"social_links")){
+   renderSocialLinksValue(window.CROW_NEST_SETTINGS.social_links);
+   return;
+ }
+ if(typeof crowSupabase==="undefined")return;
  social.innerHTML='<div class="social-link-empty">Loading social links…</div>';
  try{
    const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
@@ -956,6 +962,7 @@ async function loadSocialLinks(){
    social.innerHTML='<div class="social-link-empty">Unable to load social links.</div>';
  }
 }
-window.addEventListener("DOMContentLoaded",()=>setTimeout(loadSocialLinks,300));})();
+window.addEventListener("crowspace:nest-settings-ready",event=>loadSocialLinks(event.detail?.social_links||[]));
+window.addEventListener("DOMContentLoaded",()=>setTimeout(()=>loadSocialLinks(),500));})();
 </script></body>
 </html>
