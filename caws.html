@@ -13,7 +13,7 @@
 .recorder-overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.45),transparent 30%,transparent 65%,rgba(0,0,0,.75))}
 .live-badge{position:absolute;top:16px;left:16px;padding:7px 11px;border:1px solid rgba(255,79,216,.45);background:rgba(3,4,10,.78);font-size:11px;font-weight:800;letter-spacing:.14em;color:#ff9bea}
 .rec-status{position:absolute;right:16px;top:16px;padding:7px 11px;background:rgba(3,4,10,.78);font-size:12px;color:#fff}
-.rec-controls{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rec-controls{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.camera-help{font-size:12px;line-height:1.45;max-width:520px}.camera-select{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.camera-select select{min-width:150px}
 .record-btn{border-radius:999px!important}
 .record-btn.recording{background:#ff4fd8!important;box-shadow:0 0 24px rgba(255,79,216,.4)}
 .studio-copy h2{margin-top:0}.studio-copy .muted{line-height:1.65}
@@ -38,7 +38,7 @@
       <div class="live-badge" id="liveBadge">● CAMERA READY</div>
       <div class="rec-status" id="recStatus">Ready to record</div>
       <div class="rec-controls">
-        <button id="cameraBtn" class="btn" type="button">Enable Camera</button>
+        <div class="camera-select"><button id="cameraBtn" class="btn" type="button">Enable Camera</button><button id="switchCameraBtn" class="btn" type="button" disabled>↔ Switch Camera</button></div>
         <button id="recordBtn" class="btn primary record-btn" type="button" disabled>● Start Recording</button>
         <button id="stopBtn" class="btn" type="button" disabled>■ Stop</button>
         <button id="clearBtn" class="btn" type="button">Clear</button>
@@ -48,11 +48,11 @@
     <div class="card studio-copy">
       <p class="eyebrow">MAKE A CAW</p>
       <h2>Record or upload.</h2>
-      <p class="muted">Use your webcam and microphone for a quick Caw, or choose an existing MP4, WebM, MOV, M4V or OGG video.</p>
+      <p class="muted">Use a desktop webcam or your phone camera and microphone for a quick Caw. On mobile, CrowSpace can use the front or rear camera. You can also upload a video already saved on your device.</p><p class="muted camera-help">Camera access normally requires HTTPS and your browser’s permission. On phones, hold the device upright or sideways before recording; the preview will adapt to the available camera.</p>
       <form id="cawForm" class="caw-form">
         <label>Title<input id="title" maxlength="120" required placeholder="Give your Caw a title"></label>
         <label>Caption<textarea id="caption" maxlength="2000" rows="5" placeholder="What's this Caw about?"></textarea></label>
-        <label>Upload a Caw<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg"></label>
+        <label>Upload a Caw<input id="video_file" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" capture="environment"></label>
         <div id="fileInfo" class="file-chip">No video selected.</div>
         <button id="publishBtn" class="btn primary" type="submit">Upload &amp; Publish Caw</button>
         <p id="msg" class="muted" role="status"></p>
@@ -70,7 +70,7 @@
 <script>
 const MAX_BYTES=512*1024*1024;
 const preview=document.getElementById("preview"), cameraBtn=document.getElementById("cameraBtn"), recordBtn=document.getElementById("recordBtn"), stopBtn=document.getElementById("stopBtn"), clearBtn=document.getElementById("clearBtn"), recStatus=document.getElementById("recStatus"), liveBadge=document.getElementById("liveBadge"), fileInput=document.getElementById("video_file"), fileInfo=document.getElementById("fileInfo"), form=document.getElementById("cawForm"), msg=document.getElementById("msg");
-let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null;
+let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null, cameraFacing="user";
 
 function pickMime(){
   const types=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"];
@@ -90,7 +90,7 @@ async function enableCamera(){
     liveBadge.textContent="● CAMERA LIVE"; recStatus.textContent="Ready to record";
   }catch(e){msg.textContent="Camera/microphone access was not granted. You can still upload a Caw below.";}
 }
-cameraBtn.addEventListener("click",enableCamera);
+cameraBtn.addEventListener("click",()=>enableCamera(cameraFacing));\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
 recordBtn.addEventListener("click",()=>{
   if(!stream) return;
   chunks=[]; recordedBlob=null;
@@ -113,12 +113,12 @@ clearBtn.addEventListener("click",()=>{
   chunks=[];recordedBlob=null;fileInput.value="";fileInfo.textContent="No video selected.";preview.controls=false;
   if(recordedUrl){URL.revokeObjectURL(recordedUrl);recordedUrl=null}
   if(stream) preview.srcObject=stream; else {preview.removeAttribute("src");preview.load()}
-  recStatus.textContent=stream?"Ready to record":"Camera not enabled";liveBadge.textContent=stream?"● CAMERA LIVE":"● CAMERA READY";msg.textContent="";
+  recStatus.textContent=stream?"Ready to record":"Camera not enabled";liveBadge.textContent=stream?"● "+(cameraFacing==="environment"?"REAR CAMERA":"FRONT CAMERA"):"● CAMERA READY";msg.textContent="";
 });
 fileInput.addEventListener("change",()=>{
   const f=fileInput.files[0]; if(!f){fileInfo.textContent="No video selected.";return}
   if(f.size>MAX_BYTES){fileInfo.textContent="File is over the 512 MB limit.";return}
-  fileInfo.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB";
+  fileInfo.textContent=f.name+" · "+(f.size/1048576).toFixed(1)+" MB · Ready to publish";
   preview.srcObject=null;preview.src=URL.createObjectURL(f);preview.controls=true;
 });
 form.addEventListener("submit",async e=>{
