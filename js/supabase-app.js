@@ -31,6 +31,9 @@ function startRealtime(){
  .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows"},refreshSoon)
  .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_media"},refreshSoon)
  .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_profiles"},refreshSoon)
+ .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_discovery_signals",filter:user?`user_id=eq.${user.id}`:undefined},refreshSoon)
+ .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_adaptive_feedback",filter:user?`user_id=eq.${user.id}`:undefined},refreshSoon)
+ .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_affinity_signals",filter:user?`user_id=eq.${user.id}`:undefined},refreshSoon)
  .subscribe();
 }
  if(!window.supabase?.createClient){await new Promise(ok=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=ok;s.onerror=ok;document.head.appendChild(s)})}
@@ -74,11 +77,17 @@ async function profile(){
 }
 async function discover(){
  const people=await safe('crowspace_profiles',sb.from('crowspace_profiles').select('*').eq('profile_visibility','public').limit(100)),groups=await safe('crowspace_groups',sb.from('crowspace_groups').select('*').eq('visibility','public').limit(100)),rooms=await safe('crowspace_rooms',sb.from('crowspace_rooms').select('*').eq('visibility','public').limit(100)),term=(q("q")||"").toLowerCase();
+ let signalRows=[];
+ if(user) signalRows=await safe('crowspace_discovery_signals',sb.from('crowspace_discovery_signals').select('target_id,target_kind,action,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(500),[]);
+ const score={};
+ for(const s of signalRows){const k=s.target_kind+":"+s.target_id;score[k]=(score[k]||0)+Number(s.weight||1);}
+ const rank=(arr,kind,idKey)=>arr.slice().sort((a,b)=>(score[kind+":"+b[idKey]]||0)-(score[kind+":"+a[idKey]]||0));
+ const rankedPeople=rank(people,'profile','user_id'),rankedGroups=rank(groups,'group','id'),rankedRooms=rank(rooms,'room','id');
  const ps=people.filter(x=>(x.display_name+" "+x.username+" "+x.bio+" "+x.interests).toLowerCase().includes(term));
  let html='<div class="community-tabs"><a href="discover.html">ALL</a><a href="discover.html?q=film">FILM</a><a href="discover.html?q=music">MUSIC</a><a href="discover.html?q=tacoma">TACOMA</a><a href="discover.html?q=creator">CREATORS</a></div>';
- html+=ps.map(x=>card(avatar(x.display_name,x.avatar_url)+'<span class="kicker">PERSON</span><h2>'+esc(x.display_name)+'</h2><p>'+esc(x.bio)+'</p><p class="muted">'+esc(x.interests)+'</p><a class="btn" href="profile.html?id='+x.user_id+'">VIEW PROFILE</a>')).join("");
- html+=groups.filter(x=>!term||((x.name+" "+x.description).toLowerCase().includes(term))).map(x=>card('<span class="kicker">GROUP</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.description)+'</p><p class="muted">'+x.members.toLocaleString()+' members</p><a class="btn" href="group.html?id='+x.slug+'">OPEN GROUP</a>')).join("");
- html+=rooms.filter(x=>!term||((x.name+" "+x.topic).toLowerCase().includes(term))).map(x=>card('<span class="kicker">CROWROOM</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.topic)+'</p><a class="btn" href="room.html?id='+x.slug+'">ENTER ROOM</a>')).join("");
+ html+=rankedPeople.filter(x=>ps.includes(x)).map(x=>card(avatar(x.display_name,x.avatar_url)+'<span class="kicker">PERSON</span><h2>'+esc(x.display_name)+'</h2><p>'+esc(x.bio)+'</p><p class="muted">'+esc(x.interests)+'</p><a class="btn" href="profile.html?id='+x.user_id+'">VIEW PROFILE</a>')).join("");
+ html+=rankedGroups.filter(x=>!term||((x.name+" "+x.description).toLowerCase().includes(term))).map(x=>card('<span class="kicker">GROUP</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.description)+'</p><p class="muted">'+x.members.toLocaleString()+' members</p><a class="btn" href="group.html?id='+x.slug+'">OPEN GROUP</a>')).join("");
+ html+=rankedRooms.filter(x=>!term||((x.name+" "+x.topic).toLowerCase().includes(term))).map(x=>card('<span class="kicker">CROWROOM</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.topic)+'</p><a class="btn" href="room.html?id='+x.slug+'">ENTER ROOM</a>')).join("");
  app().innerHTML=shell("Discover","Recommendation-ready discovery for people, groups and live conversations.",html);
 }
 async function groups(){let rows=await safe('crowspace_groups',sb.from('crowspace_groups').select('*').eq('visibility','public').order('created_at',{ascending:false}),[]);app().innerHTML=shell("Groups","Find communities built around shared interests.",'<div class="grid">'+rows.map(g=>card('<span class="kicker">GROUP</span><h2>'+esc(g.name)+'</h2><p>'+esc(g.description||"")+'</p><div class="community-counts"><span>'+Number(g.member_count||g.members||0).toLocaleString()+' members</span><span>Public</span></div><a class="btn" href="group.html?id='+esc(g.slug)+'">OPEN GROUP</a>'+(user?" "+btn("JOIN","join:"+g.id):""))).join("")+'</div>'+card('<a class="btn" href="create-group.html">CREATE A GROUP</a> <a class="btn" href="create-space.html">CREATE A CROWSPACE</a>'))}
