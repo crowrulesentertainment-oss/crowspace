@@ -139,10 +139,10 @@ async function uploadAvatar(){
     const avatarUrl=urlData?.publicUrl;
     if(!avatarUrl)throw new Error("Unable to create the avatar URL.");
 
-    const {data:old,error:oldError}=await crowSupabase.from("public_member_profiles").select("avatar_url").eq("id",viewer.id).maybeSingle();
+    const {data:old,error:oldError}=await crowSupabase.from("membership_profiles").select("avatar_url").eq("id",viewer.id).maybeSingle();
     err("old avatar lookup",oldError);
 
-    const {error:updateError}=await crowSupabase.from("public_member_profiles").update({avatar_url:avatarUrl}).eq("id",viewer.id);
+    const {error:updateError}=await crowSupabase.from("membership_profiles").update({avatar_url:avatarUrl}).eq("id",viewer.id);
     if(updateError){
       await crowSupabase.storage.from("crowspace-media").remove([path]);
       throw updateError;
@@ -176,9 +176,9 @@ async function removeAvatar(){
   const status=$("avatarUploadStatus");
   text("avatarUploadStatus","Removing avatar…");
   try{
-    const {data:old,error:oldError}=await crowSupabase.from("public_member_profiles").select("avatar_url").eq("id",viewer.id).maybeSingle();
+    const {data:old,error:oldError}=await crowSupabase.from("membership_profiles").select("avatar_url").eq("id",viewer.id).maybeSingle();
     if(oldError)throw oldError;
-    const {error:updateError}=await crowSupabase.from("public_member_profiles").update({avatar_url:null}).eq("id",viewer.id);
+    const {error:updateError}=await crowSupabase.from("membership_profiles").update({avatar_url:null}).eq("id",viewer.id);
     if(updateError)throw updateError;
     if(old?.avatar_url){
       const marker="/storage/v1/object/public/crowspace-media/";
