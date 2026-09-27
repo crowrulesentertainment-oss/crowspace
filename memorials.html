@@ -1,1 +1,53 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memorials | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html"><span>●</span> CROWSPACE</a><nav><a href="index.html">Home</a><a href="profile.html">My Nest</a><a href="caws.html">Caws</a><a href="groups.html">Groups</a><a href="events.html">Events</a><a href="dreamscapes.html">Dreamscapes</a><a href="memorials.html">Memorials</a><a href="notifications.html">Messages</a></nav><div id="account"><a href="login.html">Sign In</a></div></header><main class="section integrations"><div><p class="eyebrow">CONNECTED PROJECT</p><h1>CrowRules Memorials</h1><p>Explore the CrowRules Memorials project. This page provides the CrowSpace bridge to the memorial universe.</p><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/">Open Memorials</a></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memorials | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--mx:#070711;--mx2:#101022;--line:rgba(255,255,255,.12);--muted:#9da0b5;--accent:#b66cff;--accent2:#35d7ff}
+body{background:radial-gradient(circle at 15% 0%,rgba(182,108,255,.13),transparent 30%),radial-gradient(circle at 85% 10%,rgba(53,215,255,.10),transparent 28%),var(--mx)}
+.mem-wrap{max-width:1240px;margin:auto;padding:34px 20px 70px}.hero{padding:42px 0 26px}.hero h1{font-size:clamp(2.2rem,5vw,4.5rem);margin:.15rem 0}.hero p{max-width:760px;color:var(--muted);font-size:1.08rem}.eyebrow{letter-spacing:.18em;color:var(--accent2);font-size:.76rem;font-weight:800}.toolbar,.stats,.recent-grid,.archive-grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,1fr);margin:18px 0 30px}.stat,.recent-card,.archive-card,.panel{border:1px solid var(--line);background:rgba(10,10,24,.78);border-radius:18px}.stat{padding:18px}.stat strong{display:block;font-size:1.8rem}.muted{color:var(--muted)}.panel{padding:22px;margin-top:22px}.section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:18px}.recent-grid{grid-template-columns:repeat(4,1fr)}.recent-card{overflow:hidden;transition:.2s}.recent-card:hover{transform:translateY(-3px);border-color:rgba(182,108,255,.5)}.portrait{height:230px;background:linear-gradient(135deg,#18182b,#080810);display:grid;place-items:center;overflow:hidden}.portrait img{width:100%;height:100%;object-fit:cover}.placeholder{font-size:3rem;font-weight:900;color:#777}.card-body{padding:17px}.card-body h3{margin:0 0 7px}.date{font-weight:700;color:#e9e9f4}.tag{display:inline-block;margin-top:10px;margin-right:6px;padding:4px 8px;border-radius:999px;background:rgba(182,108,255,.12);font-size:.72rem;color:#d8baff}.toolbar{grid-template-columns:1fr 180px 180px}.toolbar input,.toolbar select{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:10px;border:1px solid var(--line);background:#0d0d1a;color:#fff}.archive-grid{grid-template-columns:repeat(3,1fr)}.archive-card{padding:17px;display:flex;gap:15px}.archive-thumb{width:78px;height:78px;border-radius:12px;overflow:hidden;background:#151525;flex:0 0 auto}.archive-thumb img{width:100%;height:100%;object-fit:cover}.empty{padding:30px;text-align:center;color:var(--muted)}@media(max-width:950px){.recent-grid{grid-template-columns:repeat(2,1fr)}.archive-grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.toolbar,.recent-grid,.archive-grid,.stats{grid-template-columns:1fr}.section-head{display:block}.portrait{height:260px}}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html"><span>●</span> CROWSPACE</a><nav><a href="index.html">Home</a><a href="profile.html">My Nest</a><a href="caws.html">Caws</a><a href="groups.html">Groups</a><a href="events.html">Events</a><a href="dreamscapes.html">Dreamscapes</a><a href="memorials.html">Memorials</a><a href="notifications.html">Messages</a></nav><div id="account"><a href="login.html">Sign In</a></div></header>
+<main class="mem-wrap">
+<section class="hero"><p class="eyebrow">CROWSPACE × CROWRULES MEMORIALS</p><h1>Remember. Honor. Never Forget.</h1><p>The CrowSpace Memorials hub brings the latest published memorial records from the CrowRules Memorials project into one living community feed.</p><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/">Explore Full Memorials Archive →</a></section>
+<section class="stats" id="stats"><div class="stat"><span class="muted">Published Memorials</span><strong id="total">—</strong></div><div class="stat"><span class="muted">Deaths Recorded</span><strong id="deathCount">—</strong></div><div class="stat"><span class="muted">Last 30 Days</span><strong id="recentCount">—</strong></div><div class="stat"><span class="muted">Celebrities</span><strong id="celebrityCount">—</strong></div></section>
+<section class="panel"><div class="section-head"><div><p class="eyebrow">LIVE FROM MEMORIALS</p><h2>Most Recent Deaths</h2><p class="muted">Latest published passing dates from the CrowRules Memorials database.</p></div><a class="btn" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/featured.html">Featured Memorials</a></div><div class="recent-grid" id="recentGrid"><div class="empty">Loading the latest memorials…</div></div></section>
+<section class="panel"><div class="section-head"><div><p class="eyebrow">MEMORIAL ARCHIVE</p><h2>Explore the Records</h2></div></div><div class="toolbar"><input id="search" type="search" placeholder="Search names, professions, locations…" autocomplete="off"><select id="filter"><option value="all">All Memorials</option><option value="celebrity">Celebrities</option><option value="community">Community</option></select><select id="sort"><option value="recent">Newest Passing</option><option value="added">Recently Added</option><option value="name">Name A–Z</option></select></div><div class="archive-grid" id="archiveGrid"><div class="empty">Loading archive…</div></div></section>
+</main>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+(()=>{
+const cfg=window.CROW_CONFIG||{};const esc=v=>{const d=document.createElement('div');d.textContent=v??'';return d.innerHTML};
+const fmt=v=>{if(!v)return 'Date unavailable';const d=new Date(v+'T00:00:00');return Number.isNaN(d.getTime())?v:d.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})};
+const initials=n=>(n||'Memorial').split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
+let rows=[];
+async function load(){
+ const grid=document.getElementById('recentGrid');
+ try{
+  const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
+  const {data,error}=await client.from('memorials').select('*').eq('published',true).order('passing_date',{ascending:false,nullsFirst:false}).limit(1000);
+  if(error)throw error;rows=data||[];
+  document.getElementById('total').textContent=rows.length.toLocaleString();
+  document.getElementById('deathCount').textContent=rows.filter(x=>x.passing_date).length.toLocaleString();
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+  document.getElementById('recentCount').textContent=rows.filter(x=>x.passing_date&&new Date(x.passing_date+'T00:00:00')>=cutoff).length.toLocaleString();
+  document.getElementById('celebrityCount').textContent=rows.filter(x=>x.is_celebrity===true||String(x.memorial_type||'').toLowerCase().includes('celebr')).length.toLocaleString();
+  renderRecent();renderArchive();
+ }catch(e){console.error(e);grid.innerHTML='<div class="empty">Unable to load the Memorials feed right now. Please refresh.</div>'}
+}
+function card(m){const n=esc(m.full_name||'Unnamed Memorial'),img=m.portrait_url;return `<article class="recent-card"><div class="portrait">${img?`<img src="${esc(img)}" alt="Portrait of ${n}" loading="lazy">`:`<span class="placeholder">${esc(initials(m.full_name))}</span>`}</div><div class="card-body"><h3>${n}</h3><div class="date">${fmt(m.passing_date)}</div>${m.profession?`<div class="muted">${esc(m.profession)}</div>`:''}${m.location?`<div class="muted">${esc(m.location)}</div>`:''}<span class="tag">${m.is_celebrity===true?'Celebrity':'Memorial'}</span><div style="margin-top:14px"><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/memorial.html?slug=${encodeURIComponent(m.slug||m.id)}">View Memorial →</a></div></div></article>`}
+function renderRecent(){const a=rows.filter(x=>x.passing_date).sort((a,b)=>String(b.passing_date).localeCompare(String(a.passing_date))).slice(0,8);document.getElementById('recentGrid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">No passing dates are currently published.</div>'}
+function renderArchive(){let a=[...rows],q=document.getElementById('search').value.trim().toLowerCase(),f=document.getElementById('filter').value,s=document.getElementById('sort').value;if(q)a=a.filter(x=>`${x.full_name||''} ${x.profession||''} ${x.location||''} ${x.short_bio||''}`.toLowerCase().includes(q));if(f==='celebrity')a=a.filter(x=>x.is_celebrity===true);if(f==='community')a=a.filter(x=>x.is_celebrity!==true);if(s==='name')a.sort((x,y)=>(x.full_name||'').localeCompare(y.full_name||''));else if(s==='added')a.sort((x,y)=>String(y.created_at||'').localeCompare(String(x.created_at||'')));else a.sort((x,y)=>String(y.passing_date||'0000').localeCompare(String(x.passing_date||'0000')));document.getElementById('archiveGrid').innerHTML=a.slice(0,60).map(m=>`<article class="archive-card"><div class="archive-thumb">${m.portrait_url?`<img src="${esc(m.portrait_url)}" alt="" loading="lazy">`:`<span class="placeholder">${esc(initials(m.full_name))}</span>`}</div><div><h3 style="margin:0 0 5px">${esc(m.full_name||'Unnamed Memorial')}</h3><div class="date">${fmt(m.passing_date)}</div><div class="muted">${esc(m.profession||m.location||'Memorial')}</div><a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/memorial.html?slug=${encodeURIComponent(m.slug||m.id)}">Open memorial →</a></div></article>`).join('')||'<div class="empty">No memorials match your search.</div>'}
+['search','filter','sort'].forEach(id=>document.getElementById(id).addEventListener(id==='search'?'input':'change',renderArchive));load();
+})();
+</script>
+</body>
+</html>
