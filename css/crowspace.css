@@ -72,3 +72,5 @@ html.cr-graph-present .cr-graph-canvas-card svg{width:100%;height:calc(100vh - 1
 /* CrowSpace 4.44 — live viewer presence */
 .cr-presence-members{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
 .cr-presence-member{padding:4px 8px;border:1px solid currentColor;border-radius:999px;font-size:.7rem;opacity:.78;white-space:nowrap}
+
+.cr-live-viewers{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}.cr-live-viewer{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid currentColor;border-radius:999px;font-size:.72rem;opacity:.82}.cr-live-viewer i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;display:inline-block}
