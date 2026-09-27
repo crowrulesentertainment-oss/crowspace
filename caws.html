@@ -84,16 +84,20 @@ function setRecordedFile(blob){
 }
 async function enableCamera(facing=cameraFacing){
   try{
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error("Camera API unavailable");
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error("Camera access is unavailable. Open CrowSpace over HTTPS.");
     if(stream) stream.getTracks().forEach(t=>t.stop());
     cameraFacing=facing;
-    const videoConstraints={facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}};
-    try{stream=await navigator.mediaDevices.getUserMedia({video:videoConstraints,audio:{echoCancellation:true,noiseSuppression:true}})}catch(firstErr){
-      stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    }
-    preview.srcObject=stream; recordBtn.disabled=false; document.getElementById("switchCameraBtn").disabled=false; cameraBtn.textContent="Camera Enabled";
-    liveBadge.textContent="● "+(facing==="environment"?"REAR CAMERA":"FRONT CAMERA"); recStatus.textContent="Ready to record"; msg.textContent="";
-  }catch(e){msg.textContent="Camera/microphone access was not granted. Check browser permissions or use Upload a Caw."; }
+    const constraints={video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}},audio:{echoCancellation:true,noiseSuppression:true}};
+    stream=await navigator.mediaDevices.getUserMedia(constraints);
+    preview.srcObject=stream; await preview.play().catch(()=>{});
+    recordBtn.disabled=false; document.getElementById("switchCameraBtn").disabled=false; cameraBtn.textContent="Camera Enabled";
+    liveBadge.textContent="● "+(facing==="environment"?"REAR CAMERA":"CAMERA LIVE"); recStatus.textContent="Ready to record"; msg.textContent="";
+  }catch(e){
+    recordBtn.disabled=true;
+    const name=e&&e.name?e.name:"CameraError";
+    const detail=name==="NotAllowedError"?"Camera or microphone permission was blocked. Click the camera icon in the browser address bar and choose Allow, then try again.":name==="NotFoundError"?"No camera or microphone was found. Connect a webcam/microphone or use Upload a Caw.":name==="NotReadableError"?"The camera is already being used by another app. Close Zoom, Teams, OBS, Camera, or another browser tab and try again.":name==="OverconstrainedError"?"That camera setting is unavailable. Try again.":"Camera could not be opened: "+(e.message||name);
+    msg.textContent=detail; recStatus.textContent="Camera unavailable";
+  }
 }
 cameraBtn.addEventListener("click",()=>enableCamera(cameraFacing));\ndocument.getElementById("switchCameraBtn").addEventListener("click",async()=>{\n  if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the recording before switching cameras.";return}\n  cameraFacing=cameraFacing==="user"?"environment":"user";\n  await enableCamera(cameraFacing);\n});
 recordBtn.addEventListener("click",()=>{
