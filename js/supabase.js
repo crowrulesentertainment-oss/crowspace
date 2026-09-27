@@ -1,0 +1,1 @@
+window.crowSupabase=null;if(window.CROW_CONFIG?.supabaseUrl&&window.CROW_CONFIG?.supabaseKey){window.crowSupabase=window.supabase.createClient(window.CROW_CONFIG.supabaseUrl,window.CROW_CONFIG.supabaseKey);}
