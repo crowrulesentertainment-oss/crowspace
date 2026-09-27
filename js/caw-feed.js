@@ -6,28 +6,33 @@ function st(id){return stats[id]||{like_count:0,comment_count:0,viewer_liked:fal
 function media(x){return x.video_url||((x.storage_path)?C.url+"/storage/v1/object/public/crowspace-caws/"+String(x.storage_path).split("/").map(encodeURIComponent).join("/"):"")}
 async function boot(){
  status.textContent="Connecting to CrowSpace…";
- if(window.crowSupabase?.auth){db=window.crowSupabase}
- else if(window.supabase?.createClient){db=window.supabase.createClient(C.url,C.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.crowSupabase=db}
- else{
-   const urls=["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js","https://unpkg.com/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"];
-   let loaded=false;
-   for(const src of urls){try{await new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;s.dataset.crowFeed="supabase";document.head.appendChild(s);setTimeout(()=>reject(Error("timeout")),8000)});if(window.supabase?.createClient){loaded=true;break}}catch(e){}}
-   if(!loaded)throw Error("Supabase library could not be loaded. Please refresh.");
-   db=window.supabase.createClient(C.url,C.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.crowSupabase=db
- }
- const r=await Promise.race([db.auth.getSession(),wait(10000).then(()=>{throw Error("CrowSpace authentication timed out")})]);
- if(r.error)throw r.error;
- user=r.data?.session?.user;
- if(!user){location.href="login.html?next="+encodeURIComponent(location.href);return false}
- db.auth.onAuthStateChange((e,s)=>{if(e==="SIGNED_OUT")location.href="login.html?next="+encodeURIComponent(location.href)});
- return true;
+ const timeout=(p,ms,label)=>Promise.race([p,wait(ms).then(()=>{throw Error(label+" timed out after "+ms/1000+" seconds")})]);
+ try{
+  if(window.crowSupabase?.auth){db=window.crowSupabase}
+  else{
+   if(!window.supabase?.createClient){
+    const urls=["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js","https://unpkg.com/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"];
+    let loaded=false;
+    for(const src of urls){
+     status.textContent="Loading Supabase…";
+     try{await timeout(new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.async=true;s.onload=resolve;s.onerror=()=>reject(Error("library load failed"));document.head.appendChild(s)}),7000,"Supabase library");if(window.supabase?.createClient){loaded=true;break}}catch(e){}
+    }
+    if(!loaded)throw Error("Supabase could not be loaded. Check your connection and refresh.");
+   }
+   status.textContent="Creating CrowSpace session…";
+   db=window.supabase.createClient(C.url,C.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+   window.crowSupabase=db;
+  }
+  status.textContent="Checking member session…";
+  const r=await timeout(db.auth.getSession(),6000,"CrowSpace authentication");
+  if(r.error)throw r.error;
+  user=r.data?.session?.user||null;
+  if(!user){status.textContent="Sign in required…";location.href="login.html?next="+encodeURIComponent(location.href);return false}
+  db.auth.onAuthStateChange((e)=>{if(e==="SIGNED_OUT")location.href="login.html?next="+encodeURIComponent(location.href)});
+  return true;
+ }catch(e){throw e}
 }
-function loadGlobalNav(){
- const nav=document.querySelector(".site-header nav"); if(!nav)return;
- const s=document.createElement("script"); s.src="js/global-nav.js?v=20260927-2"; s.async=true;
- s.onload=()=>{status.textContent="CrowSpace · Feed ready"}; s.onerror=()=>{status.textContent="CrowSpace · Feed ready"};
- document.head.appendChild(s);
-}
+function loadGlobalNav(){return true}
 function card(x,i){const p=profiles[x.user_id]||{},s=st(x.id),name=p.display_name||p.username||"CrowSpace Member";return '<article class="cf-card" data-id="'+esc(x.id)+'"><div class="cf-media"><video class="cf-video" src="'+esc(media(x))+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'"':'')+' playsinline muted loop preload="'+(i<2?"auto":"metadata")+'"></video><div class="cf-shade"></div><div class="cf-creator"><a class="cf-avatar" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':esc(initial(name)))+'</a><div><strong>'+esc(name)+'</strong><span>'+(p.username?"@"+esc(p.username):"")+'</span></div></div><button class="cf-play" data-play="'+esc(x.id)+'">▶</button></div><div class="cf-info"><h2>'+esc(x.title||"Untitled Caw")+'</h2><div class="cf-caption">'+esc(x.caption||"")+'</div><div class="cf-meta"><span data-views="'+esc(x.id)+'">'+Number(x.views||0).toLocaleString()+'</span> views · <span data-likes="'+esc(x.id)+'">'+Number(s.like_count||0)+'</span> likes · <span data-comments-count="'+esc(x.id)+'">'+Number(s.comment_count||0)+'</span> comments</div></div><div class="cf-actions"><button class="cf-act '+(s.viewer_liked?"active":"")+'" data-like="'+esc(x.id)+'">♥ <span>'+Number(s.like_count||0)+'</span></button><button class="cf-act" data-comments="'+esc(x.id)+'">💬 <span>'+Number(s.comment_count||0)+'</span></button><button class="cf-act" data-share="'+esc(x.id)+'">↗</button><button class="cf-act cf-follow '+(s.viewer_follows?"active":"")+'" data-follow="'+esc(x.user_id)+'">'+(s.viewer_follows?"Following":"Follow")+'</button></div></article>}
 async function loadProfileAndStats(items){
  const ids=[...new Set(items.map(x=>x.user_id).filter(Boolean))];
