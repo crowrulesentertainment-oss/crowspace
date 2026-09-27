@@ -1,1 +1,16 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Caws | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">◉ CROWSPACE</a><nav><a href="index.html">Home</a><a href="profile.html">Nest</a><a class="active" href="caws.html">Caws</a><a href="groups.html">Groups</a></nav><div id="account"></div></header><main class="section"><div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h1>Caws</h1></div><a class="btn primary" href="create-caw.html">Create a Caw</a></div><div id="cawsGrid" class="grid three"></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>document.addEventListener("DOMContentLoaded",async()=>{const {data}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(30);document.getElementById("cawsGrid").innerHTML=(data||[]).map(x=>'<article class="card caw-card">'+(x.video_url?'<video controls playsinline src="'+CS.escape(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<h3>'+CS.escape(x.title||"Untitled Caw")+'</h3><p>'+CS.escape(x.caption||"")+'</p><small>'+x.views+' views</small></article>').join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>'});</script></body></html>
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Caws | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
+<body>
+<header class="site-header"><a class="brand" href="index.html">◉ CROWSPACE</a><nav><a href="index.html">Home</a><a href="profile.html">Nest</a><a class="active" href="caws.html">Caws</a><a href="groups.html">Groups</a></nav><div id="account"></div></header>
+<main class="section"><div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h1>Caws</h1><p class="muted">Creator videos, uploaded directly to CrowSpace.</p></div><a class="btn primary" href="create-caw.html">Create a Caw</a></div><div id="cawsGrid" class="grid three"></div></main>
+<script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",async()=>{
+ const {data,error}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(30);
+ const box=document.getElementById("cawsGrid");
+ if(error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(error.message)+'</p></div>';return}
+ box.innerHTML=(data||[]).map(x=>'<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+CS.escape(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><h3>'+CS.escape(x.title||"Untitled Caw")+'</h3><p>'+CS.escape(x.caption||"")+'</p><small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>').join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>';
+});
+</script></body></html>
