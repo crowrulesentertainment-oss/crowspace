@@ -1,0 +1,1 @@
+window.CROW_CONFIG={supabaseUrl:"https://cevylpnoexugwgygvtgu.supabase.co",supabaseKey:""};
