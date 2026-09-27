@@ -753,7 +753,7 @@ async function load(){
     prof=Array.isArray(data)?data[0]:data;
     if(!prof){const cover=document.querySelector(".nest-cover");if(cover)cover.outerHTML='<section class="nest-box"><h1>Nest not found</h1><p class="muted">This CrowSpace profile does not exist or is unavailable.</p><a class="btn" href="index.html">Back Home</a></section>';return}
     const {data:s,error:se}=await crowSupabase.from("crowspace_nest_settings").select("*").eq("user_id",uid).maybeSingle();
-    err("Nest settings",se);nestSettings=s||{};applyNestStyle(nestSettings);
+    err("Nest settings",se);nestSettings=s||{};window.CROW_NEST_SETTINGS=nestSettings;applyNestStyle(nestSettings);
     const n=prof.display_name||prof.username||"CrowSpace Member";
     document.title=n+" | CrowSpace";
     text("name",n);text("handle","@"+(prof.username||"member"));
@@ -934,13 +934,21 @@ function logo(type){
  };
  return svg[type]||svg.website;
 }
+function renderSocialLinksValue(value){
+ if(!social)return;
+ let links=Array.isArray(value)?value:Object.entries(value||{}).map(([name,url])=>({name,url}));
+ links=links.map(x=>({name:String(x.name||"").trim(),url:safeUrl(x.url||x.href||"")})).filter(x=>x.url);
+ social.innerHTML=links.length?links.slice(0,12).map(x=>{const n=socialName(x.url);return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+CS.escape(x.name||n[0])+'"><span class="social-link-logo">'+logo(n[1])+'</span><span class="social-link-name">'+CS.escape(x.name||n[0])+'</span></a>'}).join(""):'<div class="social-link-empty">No social links added yet.</div>';
+}
 async function loadSocialLinks(){
  if(!social||typeof crowSupabase==="undefined"||!window.CROW_PROFILE_UID)return;
+ if(window.CROW_NEST_SETTINGS&&Object.prototype.hasOwnProperty.call(window.CROW_NEST_SETTINGS,"social_links")){
+   renderSocialLinksValue(window.CROW_NEST_SETTINGS.social_links);
+   return;
+ }
  const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
- if(error||!data?.social_links){social.innerHTML='<div class="social-link-empty">No social links added yet.</div>';return}
- let links=Array.isArray(data.social_links)?data.social_links:Object.entries(data.social_links).map(([name,url])=>({name,url}));
- links=links.map(x=>({name:x.name||"",url:safeUrl(x.url||x.href||"")})).filter(x=>x.url);
- social.innerHTML=links.length?links.slice(0,12).map(x=>{const n=socialName(x.url);return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+CS.escape(x.name||n[0])+'"><span class="social-link-logo">'+logo(n[1])+'</span><span class="social-link-name">'+CS.escape(x.name||n[0])+'</span></a>'}).join(""):'<div class="social-link-empty">No social links added yet.</div>';
+ if(error){social.innerHTML='<div class="social-link-empty">Social links are temporarily unavailable.</div>';return}
+ renderSocialLinksValue(data?.social_links||[]);
 }
 window.addEventListener("DOMContentLoaded",()=>setTimeout(loadSocialLinks,300));
 })();
