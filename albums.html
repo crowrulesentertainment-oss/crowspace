@@ -1,3 +1,275 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Photo Albums | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header><main class="section"><div class="section-head"><div><p class="eyebrow">MEMORIES / MEDIA VAULT</p><h1>Photo Albums</h1><p class="muted">Create albums, upload photos and build your CrowSpace visual history.</p></div><div class="form-actions"><a class="btn" href="profile.html">My Nest</a><a class="btn primary" href="create-album.html">＋ Create Album & Upload Photos</a></div></div><div id="filter" class="filter-banner"></div><div id="albums" class="grid three"></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>
-document.addEventListener("DOMContentLoaded",async()=>{if(!await CS.user()){location.href="login.html";return}await CS.refreshHeader();const params=new URLSearchParams(location.search),user=params.get("user");const [{data,error},{data:photos}]=await Promise.all([crowSupabase.from("crowspace_albums").select("*").eq("visibility","public").order("created_at",{ascending:false}),crowSupabase.from("crowspace_album_photos").select("album_id")]);if(error){albums.innerHTML='<div class="card"><p>'+CS.escape(error.message)+'</p></div>';return}let rows=data||[];if(user){rows=rows.filter(x=>x.user_id===user);filter.innerHTML='<div class="card"><strong>Showing public albums from this member.</strong> <a href="albums.html">Show all albums</a></div>'}const graph=await CS.socialGraphMap(250),counts={};const esc=CS.escape;(photos||[]).forEach(x=>counts[x.album_id]=(counts[x.album_id]||0)+1);albums.innerHTML=rows.map(a=>{const p=graph[a.user_id]||{};return '<article class="card social-card">'+(a.cover_url?'<img class="card-media" src="'+CS.escape(a.cover_url)+'" alt="">':'<div class="caw-placeholder" style="aspect-ratio:16/9">📷</div>')+'<h3>'+CS.escape(a.title)+'</h3><p>'+CS.escape(a.description||"")+'</p><p class="group-members">'+Number(counts[a.id]||0)+' photos</p><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(a.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(a.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div><div class="activity-links"><a href="albums.html?user='+encodeURIComponent(a.user_id)+'">All Photos</a><a href="caws.html?user='+encodeURIComponent(a.user_id)+'">'+Number(p.caw_count||0)+' Caws</a><a href="events.html?user='+encodeURIComponent(a.user_id)+'">'+Number(p.event_count||0)+' Events</a></div></article>'}).join("")||'<div class="card"><h3>No albums yet.</h3><p>Create the first photo album.</p></div>'});
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Photo Albums | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.album-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.album-tools .btn{font-size:.78rem}
+.btn.danger{border-color:rgba(255,70,110,.5);color:#ff7d9b}
+.btn.danger:hover{background:rgba(255,50,90,.12)}
+.upload-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.78);backdrop-filter:blur(10px)}
+.upload-modal.open{display:flex}
+.upload-panel{width:min(680px,100%);max-height:90vh;overflow:auto;background:#080b14;border:1px solid rgba(89,231,255,.3);box-shadow:0 0 60px rgba(89,231,255,.12);padding:24px;border-radius:16px}
+.upload-panel h2{margin:0 0 6px}
+.upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:14px}
+.upload-thumb{position:relative;aspect-ratio:1;overflow:hidden;border:1px solid rgba(112,132,180,.25);border-radius:10px;background:#05070d}
+.upload-thumb img{width:100%;height:100%;object-fit:cover}
+.upload-thumb span{position:absolute;left:5px;right:5px;bottom:5px;padding:3px 5px;background:rgba(0,0,0,.7);font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+.status-line{min-height:22px;margin-top:10px}
+.owner-badge{display:inline-block;margin-top:7px;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+@media(max-width:700px){.upload-panel{padding:18px}.section-head .form-actions{width:100%}.section-head .form-actions .btn{width:100%;text-align:center}}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header>
+
+<main class="section">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">MEMORIES / MEDIA VAULT</p>
+      <h1>Photo Albums</h1>
+      <p class="muted">Create albums, use albums as photo folders, upload more pictures anytime, and manage your own albums.</p>
+    </div>
+    <div class="form-actions">
+      <a class="btn" href="profile.html">My Nest</a>
+      <a class="btn primary" href="create-album.html">＋ Create Album</a>
+    </div>
+  </div>
+
+  <div id="filter" class="filter-banner"></div>
+  <div id="albums" class="grid three"></div>
+</main>
+
+<div id="uploadModal" class="upload-modal" aria-hidden="true">
+  <div class="upload-panel">
+    <p class="eyebrow">PHOTO FOLDER</p>
+    <h2 id="uploadTitle">Upload Photos</h2>
+    <p id="uploadDescription" class="muted">Add pictures to this album.</p>
+
+    <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+    <p class="muted" style="font-size:.82rem">Up to 25 photos per batch · 10 MB per photo</p>
+    <div id="uploadPreview" class="upload-grid"></div>
+    <div id="uploadStatus" class="status-line muted"></div>
+
+    <div class="modal-actions">
+      <button id="cancelUpload" class="btn" type="button">Cancel</button>
+      <button id="uploadPhotos" class="btn primary" type="button">Upload to Folder</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",async()=>{
+  const viewer=await CS.user();
+  if(!viewer){location.href="login.html";return}
+  await CS.refreshHeader();
+
+  const params=new URLSearchParams(location.search);
+  const user=params.get("user");
+  const albumGrid=document.getElementById("albums");
+  const filter=document.getElementById("filter");
+  const modal=document.getElementById("uploadModal");
+  const photoInput=document.getElementById("photoInput");
+  const preview=document.getElementById("uploadPreview");
+  const status=document.getElementById("uploadStatus");
+  const uploadTitle=document.getElementById("uploadTitle");
+  const uploadDescription=document.getElementById("uploadDescription");
+  const uploadButton=document.getElementById("uploadPhotos");
+  let selectedAlbum=null;
+
+  const esc=CS.escape;
+
+  function closeModal(){
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden","true");
+    photoInput.value="";
+    preview.innerHTML="";
+    status.textContent="";
+    selectedAlbum=null;
+  }
+
+  function showModal(album){
+    selectedAlbum=album;
+    uploadTitle.textContent="Upload to “"+album.title+"”";
+    uploadDescription.textContent="This album is your photo folder. New pictures will be added to it.";
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden","false");
+    photoInput.value="";
+    preview.innerHTML="";
+    status.textContent="";
+    setTimeout(()=>photoInput.focus(),50);
+  }
+
+  photoInput.addEventListener("change",()=>{
+    preview.innerHTML="";
+    const files=Array.from(photoInput.files||[]);
+    if(files.length>25){
+      status.textContent="Please select no more than 25 photos at a time.";
+      photoInput.value="";
+      return;
+    }
+    for(const file of files){
+      if(!file.type.startsWith("image/") || file.size>10*1024*1024){
+        status.textContent=file.name+" is not a supported image or is larger than 10 MB.";
+        photoInput.value="";
+        preview.innerHTML="";
+        return;
+      }
+      const wrap=document.createElement("div");
+      wrap.className="upload-thumb";
+      const img=document.createElement("img");
+      img.alt="";
+      img.src=URL.createObjectURL(file);
+      const label=document.createElement("span");
+      label.textContent=file.name;
+      wrap.append(img,label);
+      preview.append(wrap);
+    }
+    status.textContent=files.length+" photo"+(files.length===1?"":"s")+" ready.";
+  });
+
+  document.getElementById("cancelUpload").addEventListener("click",closeModal);
+  modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))closeModal()});
+
+  uploadButton.addEventListener("click",async()=>{
+    if(!selectedAlbum)return;
+    const files=Array.from(photoInput.files||[]);
+    if(!files.length){status.textContent="Choose at least one photo.";return}
+    uploadButton.disabled=true;
+    document.getElementById("cancelUpload").disabled=true;
+    status.textContent="Uploading "+files.length+" photo"+(files.length===1?"":"s")+"…";
+    const uploaded=[];
+    try{
+      for(let i=0;i<files.length;i++){
+        const file=files[i];
+        const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+        const path=viewer.id+"/albums/"+selectedAlbum.id+"/"+Date.now()+"-"+crypto.randomUUID()+"."+ext;
+        const up=await crowSupabase.storage.from("crowspace-media").upload(path,file,{contentType:file.type,upsert:false});
+        if(up.error)throw up.error;
+        const pub=crowSupabase.storage.from("crowspace-media").getPublicUrl(path);
+        const ins=await crowSupabase.from("crowspace_album_photos").insert({
+          album_id:selectedAlbum.id,user_id:viewer.id,image_url:pub.data.publicUrl,caption:file.name
+        }).select("id").single();
+        if(ins.error){
+          await crowSupabase.storage.from("crowspace-media").remove([path]);
+          throw ins.error;
+        }
+        uploaded.push({id:ins.data.id,path,url:pub.data.publicUrl});
+        status.textContent="Uploaded "+(i+1)+" of "+files.length+"…";
+      }
+      if(!selectedAlbum.cover_url && uploaded[0]){
+        await crowSupabase.from("crowspace_albums").update({cover_url:uploaded[0].url}).eq("id",selectedAlbum.id).eq("user_id",viewer.id);
+      }
+      status.textContent="Upload complete.";
+      setTimeout(()=>{closeModal();loadAlbums()},500);
+    }catch(error){
+      status.textContent="Upload stopped: "+(error?.message||"Unknown error");
+    }finally{
+      uploadButton.disabled=false;
+      document.getElementById("cancelUpload").disabled=false;
+    }
+  });
+
+  async function deleteAlbum(album){
+    if(album.user_id!==viewer.id){
+      alert("You can only delete albums you created.");
+      return;
+    }
+    const ok=confirm("Delete “"+album.title+"” and all photos inside this folder? This cannot be undone.");
+    if(!ok)return;
+
+    const result=await crowSupabase.from("crowspace_album_photos").select("id,image_url").eq("album_id",album.id).eq("user_id",viewer.id);
+    if(result.error){alert(result.error.message);return}
+
+    const paths=(result.data||[]).map(row=>{
+      try{
+        const u=new URL(row.image_url);
+        const marker="/storage/v1/object/public/crowspace-media/";
+        const idx=u.pathname.indexOf(marker);
+        return idx>=0?decodeURIComponent(u.pathname.slice(idx+marker.length)):null;
+      }catch(_){return null}
+    }).filter(Boolean);
+
+    const button=document.querySelector('[data-delete="'+album.id+'"]');
+    if(button){button.disabled=true;button.textContent="Deleting…"}
+    try{
+      if(paths.length){
+        const storage=await crowSupabase.storage.from("crowspace-media").remove(paths);
+        if(storage.error)throw storage.error;
+      }
+      const photos=await crowSupabase.from("crowspace_album_photos").delete().eq("album_id",album.id).eq("user_id",viewer.id);
+      if(photos.error)throw photos.error;
+      const deleted=await crowSupabase.from("crowspace_albums").delete().eq("id",album.id).eq("user_id",viewer.id);
+      if(deleted.error)throw deleted.error;
+      await loadAlbums();
+    }catch(error){
+      alert("Could not delete the album: "+(error?.message||"Unknown error"));
+      if(button){button.disabled=false;button.textContent="Delete Album"}
+    }
+  }
+
+  async function loadAlbums(){
+    albumGrid.innerHTML='<div class="card"><p class="muted">Loading photo folders…</p></div>';
+    const [{data,error},{data:photos}]=await Promise.all([
+      crowSupabase.from("crowspace_albums").select("*").eq("visibility","public").order("created_at",{ascending:false}),
+      crowSupabase.from("crowspace_album_photos").select("album_id")
+    ]);
+    if(error){albumGrid.innerHTML='<div class="card"><p>'+esc(error.message)+'</p></div>';return}
+
+    let rows=data||[];
+    if(user){
+      rows=rows.filter(x=>x.user_id===user);
+      filter.innerHTML='<div class="card"><strong>Showing public albums from this member.</strong> <a href="albums.html">Show all albums</a></div>';
+    }else filter.innerHTML="";
+
+    const graph=await CS.socialGraphMap(250);
+    const counts={};
+    (photos||[]).forEach(x=>counts[x.album_id]=(counts[x.album_id]||0)+1);
+
+    albumGrid.innerHTML=rows.map(a=>{
+      const p=graph[a.user_id]||{};
+      const owner=a.user_id===viewer.id;
+      return '<article class="card social-card">'+
+        (a.cover_url?'<img class="card-media" src="'+esc(a.cover_url)+'" alt="">':'<div class="caw-placeholder" style="aspect-ratio:16/9">📷</div>')+
+        '<h3>'+esc(a.title)+'</h3>'+
+        '<p>'+esc(a.description||"")+'</p>'+
+        '<p class="group-members">'+Number(counts[a.id]||0)+' photos</p>'+
+        '<span class="owner-badge">'+(owner?"YOUR PHOTO FOLDER":"PHOTO FOLDER")+'</span>'+
+        '<div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(a.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(a.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div>'+
+        '<div class="activity-links"><a href="albums.html?user='+encodeURIComponent(a.user_id)+'">All Photos</a><a href="caws.html?user='+encodeURIComponent(a.user_id)+'">'+Number(p.caw_count||0)+' Caws</a><a href="events.html?user='+encodeURIComponent(a.user_id)+'">'+Number(p.event_count||0)+' Events</a></div>'+
+        '<div class="album-tools">'+
+          (owner?'<button class="btn primary upload-folder" data-id="'+esc(a.id)+'">＋ Upload Photos</button><button class="btn danger delete-album" data-delete="'+esc(a.id)+'">Delete Album</button>':'')+
+        '</div>'+
+      '</article>';
+    }).join("")||'<div class="card"><h3>No albums yet.</h3><p>Create the first photo folder.</p></div>';
+
+    albumGrid.querySelectorAll(".upload-folder").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const album=rows.find(x=>x.id===btn.dataset.id);
+        if(album)showModal(album);
+      });
+    });
+    albumGrid.querySelectorAll(".delete-album").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const album=rows.find(x=>x.id===btn.dataset.delete);
+        if(album)deleteAlbum(album);
+      });
+    });
+    await CS.hydrateAvatars();
+  }
+
+  await loadAlbums();
+});
+</script>
+<script src="js/global-nav.js"></script>
+</body>
+</html>
