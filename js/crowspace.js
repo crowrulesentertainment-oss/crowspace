@@ -3,8 +3,58 @@ CS.escape=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&
 CS.user=async()=>{if(!CS.client)return null;try{const {data,error}=await CS.client.auth.getUser();return error?null:data?.user||null}catch{return null}};
 CS.profile=async id=>{if(!CS.client||!id)return null;try{const {data,error}=await CS.client.rpc("crowspace_profile_public",{target:id});if(error)return null;return Array.isArray(data)?data[0]||null:data||null}catch{return null}};
 CS.ensureProfile=async user=>{if(!user||!CS.client)return null;const meta=user.user_metadata||{},email=user.email||"",base=(email.split("@")[0]||"crowmember").toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,30)||"crowmember";const {data:existing}=await CS.client.from("membership_profiles").select("id,display_name,username,bio,avatar_url").eq("id",user.id).maybeSingle();if(existing)return existing;const display_name=meta.display_name||meta.full_name||meta.name||email.split("@")[0]||"CrowSpace Member",avatar_url=meta.avatar_url||meta.picture||"";let username=(meta.username||base).toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,30)||"crowmember";let {data,error}=await CS.client.from("membership_profiles").insert({id:user.id,display_name,username,bio:"",avatar_url,updated_at:new Date().toISOString()}).select().maybeSingle();if(error?.code==="23505"){username=(username.slice(0,23)||"crowmember")+"_"+user.id.replace(/-/g,"").slice(0,6);const retry=await CS.client.from("membership_profiles").insert({id:user.id,display_name,username,bio:"",avatar_url,updated_at:new Date().toISOString()}).select().maybeSingle();data=retry.data;error=retry.error}if(error){console.warn("CrowSpace profile:",error.message);return null}return data||null};
-CS.refreshHeader=async()=>{const currentUser=await CS.user();if(currentUser)await CS.ensureProfile(currentUser);const header=document.querySelector(".site-header");if(header){let nav=header.querySelector("nav");if(!nav){nav=document.createElement("nav");header.appendChild(nav)}nav.innerHTML='<a href="index.html">Home</a><a href="profile.html">My Nest</a><a href="people.html">People</a><a href="friends.html">Friends</a><a href="caws.html">Caws</a><a href="albums.html">Photos</a><a href="groups.html">Groups</a><a href="events.html">Events</a><a href="dreamscapes.html">Dreamscapes</a><a href="memorials.html">Memorials</a><a href="notifications.html">🔔 Notifications</a><a href="membership.html">Membership</a>';const path=location.pathname.split("/").pop()||"index.html";nav.querySelectorAll("a").forEach(a=>{if(a.getAttribute("href")===path)a.classList.add("active")});let toggle=header.querySelector(".nav-toggle");if(!toggle){toggle=document.createElement("button");toggle.className="nav-toggle";toggle.type="button";toggle.setAttribute("aria-label","Open navigation");toggle.setAttribute("aria-expanded","false");toggle.innerHTML="☰";header.insertBefore(toggle,nav);toggle.addEventListener("click",()=>{const open=nav.classList.toggle("nav-open");toggle.setAttribute("aria-expanded",String(open));toggle.setAttribute("aria-label",open?"Close navigation":"Open navigation");toggle.innerHTML=open?"✕":"☰"})}}
-const el=document.getElementById("account");if(!el)return;if(currentUser){const p=await CS.profile(currentUser.id);el.innerHTML='<a href="profile.html">'+CS.escape(p?.display_name||currentUser.email)+'</a> · <a href="notifications.html" id="notificationLink">🔔 <span id="notificationBadge"></span></a> · <span id="membershipBadge"></span> · <button class="linkbtn" id="logoutBtn">Sign Out</button>';CS.startNotificationBadge();document.getElementById("logoutBtn").onclick=async()=>{await CS.client.auth.signOut();location.href="index.html"}}else el.innerHTML='<a href="login.html">Sign In</a>'};
+CS.navItems=[
+ {label:"Home",href:"index.html",group:"core"},
+ {label:"My Nest",href:"profile.html",group:"core"},
+ {label:"People",href:"people.html",group:"connect"},
+ {label:"Friends",href:"friends.html",group:"connect"},
+ {label:"Caws",href:"caws.html",group:"create"},
+ {label:"Photos",href:"albums.html",group:"create"},
+ {label:"Groups",href:"groups.html",group:"connect"},
+ {label:"Events",href:"events.html",group:"connect"},
+ {label:"Dreamscapes",href:"dreamscapes.html",group:"universe"},
+ {label:"Memorials",href:"memorials.html",group:"universe"},
+ {label:"Notifications",href:"notifications.html",group:"account"},
+ {label:"Membership",href:"membership.html",group:"account"}
+];
+CS.installGlobalSearch=()=>{
+ if(document.getElementById("crowGlobalSearch"))return;
+ const header=document.querySelector(".site-header"); if(!header)return;
+ const box=document.createElement("div"); box.id="crowGlobalSearch"; box.className="crow-global-search";
+ box.innerHTML='<button type="button" class="crow-search-button" aria-label="Search CrowSpace">⌕</button><input id="crowSearchInput" type="search" autocomplete="off" placeholder="Search CrowSpace…"><div id="crowSearchResults" class="crow-search-results" hidden></div>';
+ const nav=header.querySelector("nav"); if(nav)header.insertBefore(box,nav); else header.appendChild(box);
+ const input=box.querySelector("#crowSearchInput"), results=box.querySelector("#crowSearchResults");
+ const render=async()=>{
+   const q=input.value.trim().toLowerCase();
+   if(q.length<2){results.hidden=true;results.innerHTML="";return}
+   const users=await CS.socialGraph(250);
+   const people=(users||[]).filter(p=>(p.display_name||"").toLowerCase().includes(q)||(p.username||"").toLowerCase().includes(q)).slice(0,6);
+   const links=CS.navItems.filter(x=>x.label.toLowerCase().includes(q)).slice(0,4);
+   const html=links.map(x=>'<a class="crow-search-item" href="'+x.href+'"><strong>'+CS.escape(x.label)+'</strong><small>Open section</small></a>').join("")+
+     people.map(p=>'<a class="crow-search-item" href="profile.html?id='+encodeURIComponent(p.id)+'"><strong>'+CS.escape(p.display_name||"CrowSpace Member")+'</strong><small>@'+CS.escape(p.username||"member")+'</small></a>').join("");
+   results.innerHTML=html||'<div class="crow-search-empty">No matching CrowSpace people or sections.</div>';
+   results.hidden=false;
+ };
+ input.addEventListener("input",()=>{clearTimeout(box._timer);box._timer=setTimeout(render,180)});
+ box.querySelector(".crow-search-button").addEventListener("click",()=>{input.focus();input.select()});
+ document.addEventListener("click",e=>{if(!box.contains(e.target))results.hidden=true});
+};
+CS.refreshHeader=async()=>{
+ const currentUser=await CS.user();
+ if(currentUser)await CS.ensureProfile(currentUser);
+ const header=document.querySelector(".site-header");
+ if(header){
+   let nav=header.querySelector("nav"); if(!nav){nav=document.createElement("nav");header.appendChild(nav)}
+   const path=location.pathname.split("/").pop()||"index.html";
+   const core=CS.navItems.filter(x=>x.group==="core"), connect=CS.navItems.filter(x=>x.group==="connect"), create=CS.navItems.filter(x=>x.group==="create"), universe=CS.navItems.filter(x=>x.group==="universe"), account=CS.navItems.filter(x=>x.group==="account");
+   const link=(x)=>'<a href="'+x.href+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
+   nav.innerHTML='<div class="nav-cluster nav-core">'+core.map(link).join("")+'</div><div class="nav-cluster nav-connect">'+connect.map(link).join("")+'</div><div class="nav-cluster nav-create">'+create.map(link).join("")+'</div><details class="nav-more"><summary>More</summary><div class="nav-more-menu">'+universe.map(link).join("")+account.map(link).join("")+'</div></details>';
+   let toggle=header.querySelector(".nav-toggle"); if(!toggle){toggle=document.createElement("button");toggle.className="nav-toggle";toggle.type="button";toggle.setAttribute("aria-label","Open navigation");toggle.setAttribute("aria-expanded","false");toggle.innerHTML="☰";header.insertBefore(toggle,nav);toggle.addEventListener("click",()=>{const open=nav.classList.toggle("nav-open");toggle.setAttribute("aria-expanded",String(open));toggle.setAttribute("aria-label",open?"Close navigation":"Open navigation");toggle.innerHTML=open?"✕":"☰"})}
+   CS.installGlobalSearch();
+ }
+ const el=document.getElementById("account"); if(!el)return;
+ if(currentUser){const p=await CS.profile(currentUser.id);el.innerHTML='<a href="profile.html">'+CS.escape(p?.display_name||currentUser.email)+'</a> · <a href="notifications.html" id="notificationLink">🔔 <span id="notificationBadge"></span></a> · <span id="membershipBadge"></span> · <button class="linkbtn" id="logoutBtn">Sign Out</button>';CS.startNotificationBadge();document.getElementById("logoutBtn").onclick=async()=>{await CS.client.auth.signOut();location.href="index.html"}}else el.innerHTML='<a href="login.html">Sign In</a>';
+};
 CS.renderUniverseBar=async()=>{let bar=document.getElementById("crowUniverseBar");if(!bar){bar=document.createElement("div");bar.id="crowUniverseBar";bar.className="crow-universe-bar";const header=document.querySelector(".site-header");if(header)header.insertAdjacentElement("afterend",bar)}if(!bar)return;const u=await CS.user();if(!u){bar.innerHTML='<div><strong>ONE ACCOUNT. ONE UNIVERSE.</strong><span>Connect your CrowRules identity across CrowSpace.</span></div><a class="btn primary" href="signup.html">Join CrowRules →</a>';return}const m=await CS.membership();const name=CS.escape((await CS.profile(u.id))?.display_name||u.email||"CrowRules Member");const plan=CS.escape(m?.plan?.name||"CROW · Free");bar.innerHTML='<div><strong>◉ '+name+'</strong><span>Universal CrowRules Membership · '+plan+'</span></div><div class="crow-universe-links"><a href="profile.html">My Nest</a><a href="membership.html">Membership</a><a href="people.html">People</a><a href="groups.html">Groups</a><a href="events.html">Events</a></div>'};
 CS.heartbeat=async()=>{const u=await CS.user();if(!u)return;try{await CS.client.from("crowspace_presence").upsert({user_id:u.id,last_seen_at:new Date().toISOString()},{onConflict:"user_id"})}catch(e){console.warn("CrowSpace presence:",e.message)}};
 CS.renderUniversalStats=async()=>{let el=document.getElementById("universalStats");const main=document.querySelector("body>main");if(!el&&main&&!main.classList.contains("auth")&&!location.pathname.endsWith("profile.html")){const section=document.createElement("section");section.id="universalStats";section.className="section universal-account-panel";section.innerHTML="<div class=\"section-head\"><div><p class=\"eyebrow\">UNIVERSAL ACCOUNT</p><h2>CrowRules Membership</h2></div><a href=\"membership.html\">Open Membership →</a></div>";main.insertBefore(section,main.firstElementChild);el=section}if(!el)return;const u=await CS.user();if(!u){el.innerHTML='<div class="card"><strong>Universal CrowRules Account</strong><p class="muted">Sign in to connect your CrowSpace identity, membership and activity.</p><a class="btn primary" href="login.html">Sign In →</a></div>';return}const m=await CS.membership();let points=0,watch=0;try{const {data:p}=await CS.client.from("membership_profiles").select("points,watch_hours").eq("id",u.id).maybeSingle();points=Number(p?.points||0);watch=Number(p?.watch_hours||0)}catch{}const renewal=m?.subscription?.current_period_end?new Date(m.subscription.current_period_end).toLocaleDateString():"—";const stats=[["Membership",m?.plan?.name||"CROW · Free"],["CrowPoints",points.toLocaleString()],["Watch Hours",watch.toFixed(1)],["Status",m?.status||"free"],["Renewal",renewal],["Multiplier",(Number(m?.plan?.crowpoints_multiplier||1))+"×"]];el.innerHTML='<div class="universal-stat-grid">'+stats.map(x=>'<div class="universal-stat"><small>'+CS.escape(x[0])+'</small><strong>'+CS.escape(String(x[1]))+'</strong></div>').join("")+'</div>'};
