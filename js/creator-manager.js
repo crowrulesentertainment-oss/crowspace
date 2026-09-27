@@ -15,11 +15,11 @@ function setHTML(id,v){const el=document.getElementById(id);if(el)el.innerHTML=v
 async function safe(label,fn,fallback=[]){
   try{
     const result=await fn();
-    if(result?.error){console.warn("[CrowSpace]",label,result.error);return{data:fallback,error:result.error}}
-    return{data:result?.data??result??fallback,error:null}
+    if(result?.error){console.warn("[CrowSpace]",label,result.error);return{data:fallback,count:null,error:result.error}}
+    return{data:result?.data??result??fallback,count:result?.count??null,error:null}
   }catch(error){
     console.warn("[CrowSpace]",label,error);
-    return{data:fallback,error}
+    return{data:fallback,count:null,error}
   }
 }
 
@@ -80,12 +80,12 @@ async function main(){
   renderUser(user,account.data||dash.data,profile.data);
   const totalLikes=(caws.data||[]).reduce((n,r)=>n+Number(r.likes||0),0);
   const totalViews=(caws.data||[]).reduce((n,r)=>n+Number(r.views||0),0);
-  setText("postsKpi",num(postCount.data===null?dash.data?.posts_count:postCount.data?.length??0));
-  setText("cawsKpi",num(cawCount.data===null?dash.data?.caws_count:cawCount.data?.length??0));
-  setText("picturesKpi",num(pictureCount.data===null?0:pictureCount.data?.length??0));
-  setText("groupsKpi",num(groupCount.data===null?dash.data?.groups_count:groupCount.data?.length??0));
-  setText("liveKpi",num(liveCount.data===null?dash.data?.broadcasts_count:liveCount.data?.length??0));
-  setText("replaysKpi",num(replayCount.data===null?dash.data?.replays_count:replayCount.data?.length??0));
+  setText("postsKpi",num(postCount.count??dash.data?.posts_count??0));
+  setText("cawsKpi",num(cawCount.count??dash.data?.caws_count??0));
+  setText("picturesKpi",num(pictureCount.count??0));
+  setText("groupsKpi",num(groupCount.count??dash.data?.groups_count??0));
+  setText("liveKpi",num(liveCount.count??dash.data?.broadcasts_count??0));
+  setText("replaysKpi",num(replayCount.count??dash.data?.replays_count??0));
   setText("viewsKpi",num(totalViews));
   setText("likesKpi",num(totalLikes));
 
