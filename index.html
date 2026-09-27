@@ -39,7 +39,16 @@
 .home-status{margin-top:12px;font-size:12px;opacity:.7}
 @media(max-width:900px){.home-command{grid-template-columns:1fr}.launch-grid,.roadmap-grid{grid-template-columns:1fr 1fr}.universe-map{grid-template-columns:1fr}}
 @media(max-width:520px){.launch-grid,.roadmap-grid{grid-template-columns:1fr}.command-panel{padding:18px}.pulse-grid{grid-template-columns:1fr 1fr}}
-.community-rankings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.ranking-card{background:linear-gradient(145deg,rgba(8,11,20,.96),rgba(12,16,30,.88));border:1px solid rgba(89,231,255,.18);border-radius:16px;padding:18px;min-height:250px}.ranking-card h3{margin:6px 0}.rank-kicker{font-size:10px;letter-spacing:1.5px;font-weight:900;color:var(--cp-cyan,#59e7ff)}.ranking-list{display:grid;gap:8px;margin-top:14px}.ranking-item{display:grid;grid-template-columns:26px 34px 1fr auto;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:inherit;text-decoration:none}.rank-num{font-family:Orbitron,Arial,sans-serif;font-weight:900;opacity:.65}.rank-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#162033,#283650);display:grid;place-items:center;font-size:11px;font-weight:900}.rank-name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-handle{display:block;font-size:10px;opacity:.55;margin-top:2px}.rank-value{font-size:10px;font-weight:900;color:var(--cp-cyan,#59e7ff);white-space:nowrap}.ranking-empty{font-size:12px;opacity:.6;padding:14px 0}@media(max-width:900px){.community-rankings{grid-template-columns:1fr 1fr}}@media(max-width:520px){.community-rankings{grid-template-columns:1fr}}</style>
+.community-rankings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.ranking-card{background:linear-gradient(145deg,rgba(8,11,20,.96),rgba(12,16,30,.88));border:1px solid rgba(89,231,255,.18);border-radius:16px;padding:18px;min-height:250px}.ranking-card h3{margin:6px 0}.rank-kicker{font-size:10px;letter-spacing:1.5px;font-weight:900;color:var(--cp-cyan,#59e7ff)}.ranking-list{display:grid;gap:8px;margin-top:14px}.ranking-item{display:grid;grid-template-columns:26px 34px 1fr auto;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);color:inherit;text-decoration:none}.rank-num{font-family:Orbitron,Arial,sans-serif;font-weight:900;opacity:.65}.rank-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#162033,#283650);display:grid;place-items:center;font-size:11px;font-weight:900}.rank-name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-handle{display:block;font-size:10px;opacity:.55;margin-top:2px}.rank-value{font-size:10px;font-weight:900;color:var(--cp-cyan,#59e7ff);white-space:nowrap}.ranking-empty{font-size:12px;opacity:.6;padding:14px 0}@media(max-width:900px){.community-rankings{grid-template-columns:1fr 1fr}}@media(max-width:520px){.community-rankings{grid-template-columns:1fr}}<style>
+.community-groups .section-subtitle{max-width:720px;margin:.5rem 0 0;color:var(--muted,#98a3b8)}
+.community-group-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:18px 0}
+.group-search{display:flex;align-items:center;gap:9px;flex:1;max-width:520px;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.035)}
+.group-search input{width:100%;border:0;outline:0;background:transparent;color:inherit;font:inherit}
+.group-filters{display:flex;gap:7px;flex-wrap:wrap}.group-filter{border:1px solid rgba(255,255,255,.1);background:transparent;color:inherit;border-radius:999px;padding:8px 13px;cursor:pointer}.group-filter.active{border-color:rgba(90,220,255,.65);box-shadow:0 0 18px rgba(90,220,255,.1)}
+.groups-explorer{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.group-explorer-card{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));padding:20px;min-height:190px;transition:.2s}.group-explorer-card:hover{transform:translateY(-3px);border-color:rgba(90,220,255,.4)}.group-explorer-top{display:flex;justify-content:space-between;gap:12px}.group-glyph{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(90,220,255,.16),rgba(174,91,255,.18));font-family:Orbitron,sans-serif;font-weight:800}.group-badge{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7ee7ff}.group-explorer-card h3{margin:18px 0 7px}.group-explorer-card p{color:var(--muted,#98a3b8);line-height:1.55;margin:0}.group-meta{display:flex;gap:12px;margin-top:15px;font-size:12px;color:#b9c2d4}.group-explorer-card .group-open{display:inline-block;margin-top:16px;color:#fff;text-decoration:none;font-weight:700}.community-loading,.group-empty{padding:26px;border:1px dashed rgba(255,255,255,.12);border-radius:18px;color:var(--muted,#98a3b8);grid-column:1/-1}
+@media(max-width:900px){.groups-explorer{grid-template-columns:repeat(2,minmax(0,1fr))}.community-group-toolbar{align-items:stretch;flex-direction:column}.group-search{max-width:none}}
+@media(max-width:600px){.groups-explorer{grid-template-columns:1fr}}
+</style></style>
 </head>
 <body>
 <header class="site-header">
@@ -128,13 +137,21 @@
 </div>
 </section>
 
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">COMMUNITY</p><h2>Groups worth exploring</h2></div><a href="groups.html">Explore all groups →</a></div>
-<div class="grid three">
-<article class="card"><h3>Dreamscapes Creators</h3><p>Stories and worlds being developed through CrowRules Dreamscapes.</p></article>
-<article class="card"><h3>Tacoma Community</h3><p>Connect with the Tacoma CrowRules community.</p></article>
-<article class="card"><h3>CrowRules Community</h3><p>Discuss the growing CrowRules universe.</p></article>
+<section class="section community-groups">
+<div class="section-head">
+  <div><p class="eyebrow">COMMUNITY</p><h2>Groups worth exploring</h2><p class="section-subtitle">Discover active communities across CrowSpace and find a place to connect, create and participate.</p></div>
+  <a class="btn" href="groups.html">Explore all groups →</a>
 </div>
+<div class="community-group-toolbar">
+  <label class="group-search"><span>⌕</span><input id="homeGroupSearch" type="search" placeholder="Search groups…" autocomplete="off"></label>
+  <div class="group-filters" role="group" aria-label="Group filters">
+    <button class="group-filter active" data-group-filter="all">All</button>
+    <button class="group-filter" data-group-filter="active">Active</button>
+    <button class="group-filter" data-group-filter="new">New</button>
+  </div>
+</div>
+<div id="homeGroups" class="groups-explorer"><div class="community-loading">Loading groups…</div></div>
+</section>
 </section>
 
 <section class="section membership">
@@ -195,5 +212,34 @@ document.addEventListener("DOMContentLoaded",async()=>{
 });
 </script>
 <script src="js/global-nav.js"></script>
-</body>
+<script>
+(function(){
+ const db=CS.client,wrap=document.getElementById("homeGroups"),search=document.getElementById("homeGroupSearch");let groups=[],members=new Map(),filter="all";
+ const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+ function glyph(name){return esc((name||"CR").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase().slice(0,2)||"CR")}
+ function render(){
+  const q=(search?.value||"").trim().toLowerCase(),now=Date.now();
+  let rows=groups.filter(g=>(g.name+" "+(g.description||"")).toLowerCase().includes(q));
+  if(filter==="new")rows=rows.filter(g=>now-new Date(g.created_at).getTime()<30*864e5);
+  if(filter==="active")rows=rows.filter(g=>(members.get(g.id)||0)>0);
+  rows=rows.slice(0,6);
+  if(!rows.length){wrap.innerHTML='<div class="group-empty">No matching groups yet. <a href="groups.html">Explore the full Groups directory →</a></div>';return}
+  wrap.innerHTML=rows.map(g=>'<article class="group-explorer-card"><div class="group-explorer-top"><div class="group-glyph">'+glyph(g.name)+'</div><span class="group-badge">'+(filter==="new"?"NEW":(members.get(g.id)||0)>0?"ACTIVE":"COMMUNITY")+'</span></div><h3>'+esc(g.name)+'</h3><p>'+esc(g.description||"A CrowSpace community waiting to be explored.")+'</p><div class="group-meta"><span>👥 '+(members.get(g.id)||0).toLocaleString()+' members</span><span>'+new Date(g.created_at).toLocaleDateString()+'</span></div><a class="group-open" href="group.html?id='+encodeURIComponent(g.id)+'">Open group →</a></article>').join("");
+ }
+ async function load(){
+  try{
+   const gq=await db.from("crowrules_groups").select("id,name,description,created_at").order("created_at",{ascending:false}).limit(12);
+   if(gq.error)throw gq.error;
+   groups=gq.data||[];
+   if(groups.length){const mq=await db.from("crowspace_group_members").select("group_id");if(!mq.error)(mq.data||[]).forEach(x=>members.set(x.group_id,(members.get(x.group_id)||0)+1))}
+   render();
+  }catch(e){
+   console.error("CrowSpace home groups:",e);
+   const fallback=await db.from("crowspace_groups").select("id,name,description,created_at").order("created_at",{ascending:false}).limit(12);
+   if(!fallback.error){groups=fallback.data||[];if(groups.length){const mq=await db.from("crowspace_group_members").select("group_id");if(!mq.error)(mq.data||[]).forEach(x=>members.set(x.group_id,(members.get(x.group_id)||0)+1))}render()}else wrap.innerHTML='<div class="group-empty">Groups are temporarily unavailable. <a href="groups.html">Open Groups →</a></div>';
+  }
+ }
+ search?.addEventListener("input",render);document.querySelectorAll("[data-group-filter]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.groupFilter;document.querySelectorAll("[data-group-filter]").forEach(x=>x.classList.toggle("active",x===b));render()}));load();
+})();
+</script></body>
 </html>
