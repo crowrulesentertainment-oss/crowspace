@@ -3,23 +3,20 @@ const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
 const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
 const root=document.querySelector("#app"),page=location.pathname.split("/").pop()||"index.html";
-const nav=[
- ["index.html","Home"],["nest.html","Nests"],["caws.html","Caws"],["pictures.html","Pictures"],
- ["groups.html","Groups"],["live.html","Live"],["live-studio.html","Studio"],["dreamscapes.html","Dreamscapes"],["memorials.html","Memorials"],
- ["search.html","Search"],["notifications.html","🔔"],["create.html","Create"],["account.html","Account"]
-];
-const universe=[
- ["https://crowrulesentertainment-oss.github.io/dreamscapes/","Dreamscapes"],
- ["https://crowrulesentertainment-oss.github.io/memorials/","Memorials"],
- ["https://crowrulesentertainment-oss.github.io/sports/","Sports"],
- ["https://crowrulesentertainment-oss.github.io/podcasting/","Podcasting"],
- ["https://crowrulesentertainment-oss.github.io/crowrulestv/","CrowRules TV"],
- ["https://crowrulesentertainment-oss.github.io/spectrum/","Spectrum Awards"]
-];
+const nav=[["index.html","Home","⌂"],["nest.html","Nests","🪶"],["caws.html","Caws","🎬"],["pictures.html","Pictures","📸"],["groups.html","Groups","👥"],["live.html","Live","🔴"],["watch.html","Watch","▶"],["archive.html","Replays","↻"],["live-studio.html","Studio","🎙"],["search.html","Search","⌕"],["notifications.html","Alerts","🔔"],["create.html","Create","+"]];
+const universe=[["https://crowrulesentertainment-oss.github.io/dreamscapes/","Dreamscapes"],["https://crowrulesentertainment-oss.github.io/memorials/","Memorials"],["https://crowrulesentertainment-oss.github.io/sports/","Sports"],["https://crowrulesentertainment-oss.github.io/podcasting/","Podcasting"],["https://crowrulesentertainment-oss.github.io/crowrulestv/","CrowRules TV"],["https://crowrulesentertainment-oss.github.io/spectrum/","Spectrum Awards"]];
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function layout(title,body){
- root.innerHTML='<header class="top"><nav class="nav"><a class="brand" href="index.html">CROWSPACE</a>'+nav.map(([u,n])=>'<a class="'+(page===u?"active":"")+'" href="'+u+'">'+n+'</a>').join("")+'</nav></header><main class="shell">'+body+'</main><footer class="shell footer"><div><strong>CrowSpace 2.0</strong> • One CrowRules Account → One CrowSpace Identity → One Connected Universe.</div><div class="universe">'+universe.map(([u,n])=>'<a href="'+u+'">'+n+'</a>').join(" · ")+'</div></footer>';
+ root.innerHTML='<header class="top"><div class="universe-bar"><div class="nav-wide"><span class="universe-brand">CROWRULES</span><span class="universe-tag">ONE ACCOUNT • ONE UNIVERSE</span><span class="shell-status" id="shellStatus">Connecting…</span></div></div><nav class="nav"><a class="brand" href="index.html">CROWSPACE</a><div class="nav-scroll">'+nav.map(([u,n,i])=>'<a class="'+(page===u?"active":"")+'" href="'+u+'"><span>'+i+'</span>'+n+'</a>').join("")+'</div><a class="account-link '+(page==="account.html"?"active":"")+'" href="account.html">Account</a></nav></header><main class="shell">'+body+'</main><footer class="shell footer"><div><strong>CrowSpace 2.5</strong> • One CrowRules Account → One CrowSpace Identity → One Connected Universe.</div><div class="universe">'+universe.map(([u,n])=>'<a href="'+u+'">'+n+'</a>').join(" · ")+'</div></footer>';
  document.title=title+" — CrowSpace";
+ hydrateShell();
+}
+async function hydrateShell(){
+ const s=await session(); const el=document.querySelector("#shellStatus"); if(!el)return;
+ if(!s){el.innerHTML='<a href="account.html">Sign in to CrowSpace</a>';return}
+ const{data:a}=await supabase.from("crowspace_accounts").select("handle,display_name").eq("user_id",s.user.id).maybeSingle();
+ const{data:m}=await supabase.from("crowspace_membership_status").select("*").eq("user_id",s.user.id).maybeSingle();
+ el.innerHTML='🪶 @'+esc(a?.handle||s.user.email?.split("@")[0]||"member")+(m?.is_active?' <span class="member-live">MEMBER</span>':'');
 }
 async function session(){const{data}=await supabase.auth.getSession();return data.session}
 async function account(){const s=await session();if(!s)return null;const{data}=await supabase.from("crowspace_accounts").select("*,crowspace_profiles(*)").eq("user_id",s.user.id).maybeSingle();return{session:s,account:data}}
@@ -106,6 +103,12 @@ async function pictures(){
 async function groups(){
  const{data}=await supabase.from("crowspace_groups").select("*").eq("privacy","public").order("created_at",{ascending:false});
  layout("Groups",'<section class="hero"><div class="eyebrow">Communities</div><h1>Groups</h1><p>Build communities around shows, sports, Tacoma, Dreamscapes, Memorials and whatever comes next.</p></section><div class="grid">'+(data||[]).map(x=>'<article class="card">'+(x.cover_url?'<img class="media" src="'+esc(x.cover_url)+'" alt="">':"")+'<h2>'+esc(x.name)+'</h2><p class="muted">'+esc(x.description||"Community group")+'</p><span class="pill">'+Number(x.member_count||0)+' members</span></article>').join("")+'</div>')
+}
+async function archive(){
+ const a=await account();
+ const q=supabase.from("crowspace_live_streams").select("*").eq("status","ended").eq("recording_status","ready").order("archived_at",{ascending:false}).limit(30);
+ const{data,error}=await q;
+ layout("Replays",'<section class="hero"><div class="eyebrow">CrowSpace Broadcast Archive</div><h1>Replays</h1><p>Completed CrowSpace broadcasts become permanent replay experiences through their Cloudflare recording.</p><div class="hero-actions"><a class="btn" href="live.html">Watch Live</a>'+(a?'<a class="btn alt" href="live-studio.html">Open Studio</a>':'')+'</div></section><div class="section-head"><h2>Latest Replays</h2><span class="muted">'+(data||[]).length+' available</span></div><div class="grid">'+(error?'<article class="card"><h3>Archive unavailable</h3><p class="muted">'+esc(error.message)+'</p></article>':(data||[]).map(x=>'<article class="card archive-card"><span class="pill">REPLAY READY</span><h2>'+esc(x.recording_title||x.title)+'</h2><p>'+esc(x.description||"Completed CrowSpace broadcast.")+'</p><div class="stats"><span>'+new Date(x.archived_at||x.ended_at||x.created_at).toLocaleString()+'</span><span>'+esc(x.provider||"Cloudflare Stream")+'</span></div>'+(x.recording_thumbnail_url?'<img class="media" src="'+esc(x.recording_thumbnail_url)+'" alt="">':"")+'<div class="actions"><a class="btn" href="watch.html?id='+encodeURIComponent(x.id)+'">Watch Replay</a></div></article>').join("")||'<article class="card"><h3>No replays yet</h3><p class="muted">Your completed broadcasts will appear here automatically when their recordings are ready.</p></article>')+'</div>');
 }
 async function live(){
  const{data}=await supabase.from("crowspace_live_streams").select("*").in("status",["scheduled","live"]).order("scheduled_for",{ascending:true}).limit(30);
