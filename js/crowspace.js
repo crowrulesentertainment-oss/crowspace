@@ -46,27 +46,38 @@ CS.installGlobalSearch=()=>{
  box.querySelector(".crow-search-button").addEventListener("click",()=>{if(input.value.trim().length>=2)location.href="command-center.html?q="+encodeURIComponent(input.value.trim());else input.focus()});
  document.addEventListener("click",e=>{if(!box.contains(e.target))results.hidden=true});
 };
-CS.injectGlobalNavStyles=()=>{if(document.getElementById("crow-global-nav-styles"))return;const s=document.createElement("style");s.id="crow-global-nav-styles";s.textContent=\`
-.site-header{position:relative;z-index:1000}
-.site-header>nav{display:flex!important;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex:0 0 auto;overflow:visible!important;position:relative;z-index:1001}
-.crow-nav-tabs{display:flex;align-items:center;gap:4px;overflow:visible;position:relative}
-.crow-nav-dropdown{position:relative}
-.crow-nav-trigger{appearance:none;border:1px solid transparent;background:transparent;color:var(--text,#222);display:flex;align-items:center;gap:6px;cursor:pointer;padding:9px 12px;border-radius:9px;font:inherit;font-size:12px;font-weight:800;white-space:nowrap}
-.crow-nav-trigger:hover,.crow-nav-dropdown.is-open>.crow-nav-trigger{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2);border-color:var(--line,#ddd)}
-.crow-nav-chevron{font-size:9px;transition:transform .18s ease}
-.crow-nav-dropdown.is-open .crow-nav-chevron{transform:rotate(180deg)}
-.crow-nav-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;width:245px;background:#fff;color:var(--text,#222);border:1px solid var(--line,#ddd);border-radius:12px;padding:7px;box-shadow:0 18px 45px rgba(0,0,0,.2);z-index:99999}
-.crow-nav-dropdown.is-open>.crow-nav-panel{display:block}
-.crow-nav-panel:before{content:"";position:absolute;top:-6px;right:20px;width:10px;height:10px;background:#fff;border-left:1px solid var(--line,#ddd);border-top:1px solid var(--line,#ddd);transform:rotate(45deg)}
-.crow-nav-panel-label{padding:8px 10px 6px;color:var(--muted,#6b7280);font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
-.crow-nav-panel a{display:flex!important;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;padding:10px 11px;border-radius:8px;color:var(--text,#222)!important;text-decoration:none;font-size:13px;font-weight:700}
-.crow-nav-panel a:hover,.crow-nav-panel a.active{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)!important}
-.crow-nav-panel a.active:after{content:"•";font-size:16px}
-.crow-nav-home{color:var(--blue,#1877f2)!important}
-@media(max-width:1050px){.crow-nav-trigger{padding:9px 9px}.crow-nav-dropdown:nth-child(n+5)>.crow-nav-trigger{font-size:0}.crow-nav-dropdown:nth-child(n+5)>.crow-nav-trigger:after{content:"•••";font-size:16px;letter-spacing:2px}}
-@media(max-width:800px){.site-header{flex-wrap:wrap}.site-header>nav{order:5;flex:1 1 100%;justify-content:center;border-top:1px solid var(--line,#eee);padding-top:5px}.crow-nav-tabs{width:100%;justify-content:space-between}.crow-nav-dropdown{flex:1}.crow-nav-trigger{width:100%;justify-content:center;padding:10px 5px}.crow-nav-panel{position:absolute;left:0;right:0;top:calc(100% + 7px);width:auto;max-height:calc(100vh - 110px);overflow:auto}}
-@media(max-width:480px){.crow-nav-trigger{font-size:11px}.crow-nav-dropdown:nth-child(n+5)>.crow-nav-trigger:after{font-size:14px}}
-\`;document.head.appendChild(s)};
+CS.injectGlobalNavStyles=()=>{if(document.getElementById("crow-global-nav-styles"))return;const s=document.createElement("style");s.id="crow-global-nav-styles";s.textContent=`
+.site-header{gap:10px;position:relative;z-index:100}
+.site-header>nav{display:flex!important;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex:0 0 auto}
+.crow-nav-tabs{display:flex;align-items:center;gap:3px}
+.crow-nav-tab{position:relative}
+.crow-nav-tab>summary{list-style:none;display:flex;align-items:center;gap:5px;cursor:pointer;padding:9px 11px;border-radius:8px;color:var(--text,#222);font-weight:800;font-size:12px;white-space:nowrap}
+.crow-nav-tab>summary::-webkit-details-marker{display:none}
+.crow-nav-tab>summary:hover,.crow-nav-tab[open]>summary{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
+.crow-nav-tab-chevron{font-size:9px;opacity:.65}
+.crow-nav-tab[open] .crow-nav-tab-chevron{transform:rotate(180deg)}
+.crow-nav-tab-panel{position:absolute;right:0;top:calc(100% + 7px);width:235px;background:#fff;border:1px solid var(--line,#ddd);border-radius:12px;padding:7px;box-shadow:0 15px 38px rgba(0,0,0,.16);z-index:300}
+.crow-nav-tab-panel a{display:flex!important;align-items:center;justify-content:space-between;padding:10px 11px;border-radius:8px;color:var(--text,#222);font-size:13px;font-weight:700;text-decoration:none}
+.crow-nav-tab-panel a:hover,.crow-nav-tab-panel a.active{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
+.crow-nav-tab-panel a.active:after{content:"•";font-size:16px}
+.crow-nav-tab-label{padding:7px 9px 5px;color:var(--muted,#6b7280);font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.crow-nav-home{padding:9px 11px!important}
+@media(max-width:1050px){
+ .crow-nav-tab:nth-child(n+5)>summary{font-size:0}
+ .crow-nav-tab:nth-child(n+5)>summary:before{content:"•••";font-size:16px;letter-spacing:2px}
+}
+@media(max-width:800px){
+ .site-header{flex-wrap:wrap}
+ .site-header>nav{order:5;flex:1 1 100%;justify-content:center;border-top:1px solid var(--line,#eee);padding-top:5px}
+ .crow-nav-tabs{width:100%;justify-content:space-between}
+ .crow-nav-tab{flex:1}
+ .crow-nav-tab>summary{justify-content:center;padding:10px 5px}
+ .crow-nav-tab-panel{position:fixed;left:12px;right:12px;top:72px;width:auto;max-height:calc(100vh - 90px);overflow:auto}
+}
+@media(max-width:480px){
+ .crow-nav-tab>summary{font-size:11px}
+ .crow-nav-tab:nth-child(n+5)>summary:before{font-size:14px}
+}`;document.head.appendChild(s)};
 CS.refreshHeader=async()=>{
  const currentUser=await CS.user();
  if(currentUser)await CS.ensureProfile(currentUser);
@@ -84,18 +95,11 @@ CS.refreshHeader=async()=>{
      ["More",CS.navItems.filter(x=>x.group==="quick")]
    ];
    const link=x=>'<a href="'+x.href+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
-   const dropdown=(g,i)=>'<div class="crow-nav-dropdown" data-nav-dropdown><button type="button" class="crow-nav-trigger" aria-expanded="false" aria-haspopup="true">'+CS.escape(g[0])+' <span class="crow-nav-chevron">▼</span></button><div class="crow-nav-panel" role="menu"><div class="crow-nav-panel-label">'+CS.escape(g[0])+'</div>'+g[1].map(link).join("")+'</div></div>';
-   nav.innerHTML='<div class="crow-nav-tabs"><a class="crow-nav-trigger crow-nav-home" href="index.html"'+(path==="index.html"?' aria-current="page"':"")+' title="CrowSpace Home">⌂ Home</a>'+groups.map(dropdown).join("")+'</div>';
-   const dropdowns=nav.querySelectorAll("[data-nav-dropdown]");
-   const closeAll=()=>dropdowns.forEach(d=>{d.classList.remove("is-open");const t=d.querySelector(".crow-nav-trigger");if(t)t.setAttribute("aria-expanded","false")});
-   dropdowns.forEach(d=>{
-     const trigger=d.querySelector(".crow-nav-trigger");
-     trigger.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();const open=d.classList.contains("is-open");closeAll();if(!open){d.classList.add("is-open");trigger.setAttribute("aria-expanded","true")}});
-     trigger.addEventListener("keydown",e=>{if(e.key==="Escape"){closeAll();trigger.focus()}});
-   });
-   nav.querySelectorAll(".crow-nav-panel a").forEach(a=>a.addEventListener("click",closeAll));
-   document.addEventListener("click",e=>{if(!nav.contains(e.target))closeAll()},{capture:true});
-   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll()});
+   const tabs=groups.map((g,i)=>'<details class="crow-nav-tab"><summary>'+CS.escape(g[0])+(i?' <span class="crow-nav-tab-chevron">▼</span>':"")+'</summary><div class="crow-nav-tab-panel">'+(i?'<div class="crow-nav-tab-label">'+CS.escape(g[0])+'</div>':"")+g[1].map(link).join("")+'</div></details>').join("");
+   nav.innerHTML='<div class="crow-nav-tabs"><details class="crow-nav-tab"><summary class="crow-nav-home" title="CrowSpace Home">⌂ Home</summary></details>'+tabs+'</div>';
+   const details=nav.querySelectorAll(".crow-nav-tab");
+   details.forEach(d=>d.addEventListener("toggle",()=>{if(d.open)details.forEach(other=>{if(other!==d)other.removeAttribute("open")})}));
+   nav.querySelectorAll(".crow-nav-tab-panel a").forEach(a=>a.addEventListener("click",()=>details.forEach(d=>d.removeAttribute("open"))));
    CS.installGlobalSearch();
  }
  const el=document.getElementById("account"); if(!el)return;
