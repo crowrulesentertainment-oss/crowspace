@@ -1,1 +1,179 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Universal Membership | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav><a href="index.html">Home</a><a href="profile.html">My Nest</a><a href="people.html">People</a><a href="friends.html">Friends</a><a href="caws.html">Caws</a><a href="albums.html">Photos</a><a href="groups.html">Groups</a><a href="events.html">Events</a><a href="membership.html" class="active">Membership</a></nav><div id="account"></div></header><main><section class="hero"><div><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h1>Universal CrowRules Membership</h1><p class="lead">One identity for CrowSpace and the connected CrowRules universe.</p><div class="actions"><a class="btn primary" href="signup.html">Create Universal Account</a><a class="btn" href="login.html">Sign In</a></div></div><div class="hero-orbit">◉</div></section><section class="section"><div class="section-head"><div><p class="eyebrow">YOUR ACCOUNT</p><h2>Membership Status</h2></div></div><div id="memberStatus" class="card"><p class="muted">Loading membership…</p></div></section><section class="section"><div class="section-head"><div><p class="eyebrow">CROWRULES PLANS</p><h2>Membership Plans</h2><p class="muted">Live data from the shared Supabase membership system.</p></div></div><div id="plans" class="grid three"></div></section><section class="section"><div class="section-head"><div><p class="eyebrow">CONNECTED SITES</p><h2>One Membership Across the Universe</h2></div></div><div id="sites" class="grid three"></div></section></main><footer><strong>CrowRules Entertainment</strong><span>© 2026 CrowSpace • One company. One universe.</span></footer><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>const esc=CS.escape;async function load(){const u=await CS.user();if(!u){memberStatus.innerHTML='<p>Sign in to see your current CrowRules membership.</p><a class="btn primary" href="login.html">Sign In →</a>'}else{const m=await CS.membership();memberStatus.innerHTML=!m?.plan?'<h3>CROW · Free</h3><p>Your universal CrowRules account is active. Membership options are shown below.</p>':'<h3>'+esc(m.plan.name)+' <span class="event-tag">'+esc(m.status)+'</span></h3><p>'+esc(m.plan.description||"Universal CrowRules membership")+'</p><p><strong>CrowPoints multiplier:</strong> '+esc(String(m.plan.crowpoints_multiplier||1))+'×</p>'+(m.subscription?.current_period_end?'<p class="muted">Current period ends '+new Date(m.subscription.current_period_end).toLocaleDateString()+(m.subscription.cancel_at_period_end?' · cancellation scheduled':'')+'</p>':'')}const {data:ps,error}=await crowSupabase.from("membership_plans").select("plan_key,name,price_cents,billing_interval,description,features,crowpoints_multiplier").eq("is_active",true).order("sort_order");if(error){plans.innerHTML='<div class="card"><p>'+esc(error.message)+'</p></div>'}else plans.innerHTML=(ps||[]).map(p=>'<article class="card"><p class="eyebrow">'+esc(p.plan_key||"PLAN")+'</p><h3>'+esc(p.name)+'</h3><p><strong>'+(Number(p.price_cents)===0?'Free':'$'+(Number(p.price_cents)/100).toFixed(2)+' / '+esc(p.billing_interval||'month'))+'</strong></p><p>'+esc(p.description||"")+'</p><ul>'+(Array.isArray(p.features)?p.features.slice(0,8).map(f=>'<li>'+esc(f)+'</li>').join(""):"")+'</ul><p class="muted">'+esc(String(p.crowpoints_multiplier||1))+'× CrowPoints</p></article>').join("");const {data:ss}=await crowSupabase.from("membership_sites").select("site_key,site_name,site_url").eq("is_active",true).order("site_name");sites.innerHTML=(ss||[]).map(s=>'<article class="card"><h3>'+esc(s.site_name)+'</h3><p class="muted">'+esc(s.site_key)+'</p><a class="btn" href="'+esc(s.site_url)+'">Open →</a></article>').join("")||'<div class="card"><p>No connected sites are registered yet.</p></div>'}document.addEventListener("DOMContentLoaded",load);</script><script src="js/global-nav.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Universal Membership | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.membership-hero{position:relative;overflow:hidden}
+.membership-hero:after{content:"";position:absolute;width:420px;height:420px;right:-150px;top:-180px;background:radial-gradient(circle,rgba(89,231,255,.18),transparent 68%);pointer-events:none}
+.membership-status{display:grid;grid-template-columns:1.4fr .6fr;gap:16px}
+.current-plan{padding:24px;border-radius:18px;background:linear-gradient(145deg,#080b14,#11172a);border:1px solid rgba(89,231,255,.25)}
+.current-plan .plan-name{font-size:clamp(28px,4vw,44px);font-weight:900;margin:4px 0 8px}
+.current-plan .plan-meta{display:flex;gap:8px;flex-wrap:wrap}
+.status-pill{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:rgba(89,231,255,.1);border:1px solid rgba(89,231,255,.22);font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.billing-actions{padding:24px;border-radius:18px;border:1px solid rgba(168,121,255,.22);background:rgba(255,255,255,.025)}
+.plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.membership-plan{position:relative;padding:22px;border-radius:17px;min-height:330px;background:linear-gradient(145deg,rgba(8,11,20,.96),rgba(12,16,30,.9));border:1px solid rgba(112,132,180,.22);display:flex;flex-direction:column}
+.membership-plan.featured{border-color:rgba(89,231,255,.5);box-shadow:0 0 35px rgba(89,231,255,.08)}
+.membership-plan.current{outline:1px solid rgba(168,121,255,.55)}
+.plan-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.plan-price{font-size:27px;font-weight:900;margin:12px 0}
+.plan-price small{font-size:11px;opacity:.65}
+.plan-features{padding-left:18px;font-size:13px;line-height:1.65;flex:1}
+.plan-action{margin-top:14px}
+.checkout-message{display:none;margin:14px 0;padding:13px 15px;border-radius:12px;border:1px solid rgba(89,231,255,.25);background:rgba(89,231,255,.06)}
+.checkout-message.show{display:block}
+.security-note{font-size:12px;opacity:.7;margin-top:14px}
+@media(max-width:1050px){.plan-grid{grid-template-columns:repeat(2,1fr)}.membership-status{grid-template-columns:1fr}}
+@media(max-width:560px){.plan-grid{grid-template-columns:1fr}.membership-plan{min-height:0}}
+</style>
+</head>
+<body>
+<header class="site-header">
+<a class="brand" href="index.html">● CROWSPACE</a>
+<nav aria-label="CrowSpace global navigation"></nav>
+<div id="account"><a href="login.html">Sign In</a></div>
+</header>
+
+<main>
+<section class="hero membership-hero">
+<div>
+<p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
+<h1>Choose how you want to build with CrowRules.</h1>
+<p class="lead">Manage your Universal CrowRules Membership, upgrade to a higher plan and pay securely through the existing Stripe subscription system.</p>
+<div class="actions">
+<a class="btn primary" href="#plans">View Membership Plans</a>
+<a class="btn" href="profile.html">Back to My Nest</a>
+</div>
+</div>
+<div class="hero-orbit">◉</div>
+</section>
+
+<section class="section">
+<div class="section-head">
+<div><p class="eyebrow">YOUR ACCOUNT</p><h2>Membership Center</h2></div>
+</div>
+<div id="memberStatus" class="membership-status">
+<div class="current-plan"><p class="muted">Loading your membership…</p></div>
+</div>
+<div id="checkoutMessage" class="checkout-message"></div>
+</section>
+
+<section class="section" id="plans">
+<div class="section-head">
+<div><p class="eyebrow">CROWRULES PLANS</p><h2>Upgrade your membership</h2><p class="muted">Choose a higher plan to unlock its membership benefits. Paid plans use Stripe recurring billing.</p></div>
+</div>
+<div id="plansGrid" class="plan-grid"></div>
+<p class="security-note">Payments are handled by Stripe. CrowSpace never receives or stores your full card number.</p>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">CONNECTED SITES</p><h2>One Membership Across the Universe</h2></div></div>
+<div id="sites" class="grid three"></div>
+</section>
+</main>
+
+<footer><strong>CrowRules Entertainment</strong><span>© 2026 CrowSpace • One company. One universe.</span></footer>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+const esc=CS.escape;
+let currentMembership=null;
+let membershipPlans=[];
+
+function showMessage(message,error=false){
+ const el=document.getElementById("checkoutMessage");
+ el.classList.add("show");
+ el.textContent=message;
+ el.style.borderColor=error?"rgba(255,90,120,.35)":"rgba(89,231,255,.25)";
+}
+
+async function startMembershipAction(plan){
+ const u=await CS.user();
+ if(!u){location.href="login.html";return}
+ const button=document.querySelector('[data-plan="'+CSS.escape(plan.plan_key)+'"]');
+ if(button){button.disabled=true;button.textContent="Connecting to Stripe…"}
+ showMessage("Preparing your "+plan.name+" membership…");
+ try{
+   const origin=location.origin+location.pathname;
+   const {data,error}=await crowSupabase.functions.invoke("membership-checkout",{
+     body:{
+       plan_key:plan.plan_key,
+       success_url:origin+"?checkout=success#plans",
+       cancel_url:origin+"?checkout=cancelled#plans"
+     }
+   });
+   if(error)throw error;
+   if(data?.mode==="upgrade"){
+     showMessage("Your membership upgrade to "+(data.plan_name||plan.name)+" was submitted to Stripe. Your CrowRules membership will update after Stripe confirms the subscription change.");
+     setTimeout(()=>load(),1800);
+     return;
+   }
+   if(data?.url){location.href=data.url;return}
+   throw new Error("Stripe did not return a checkout URL.");
+ }catch(e){
+   showMessage(e?.message||"Unable to start Stripe checkout.",true);
+   if(button){button.disabled=false;button.textContent="Upgrade & Pay →"}
+ }
+}
+
+async function openPortal(){
+ const u=await CS.user();if(!u){location.href="login.html";return}
+ showMessage("Opening your Stripe billing portal…");
+ try{
+   const {data,error}=await crowSupabase.functions.invoke("membership-portal",{body:{}});
+   if(error)throw error;
+   if(data?.url){location.href=data.url;return}
+   throw new Error("Stripe billing portal URL was not returned.");
+ }catch(e){showMessage(e?.message||"Unable to open billing portal.",true)}
+}
+
+function renderPlans(){
+ const grid=document.getElementById("plansGrid");
+ if(!membershipPlans.length){grid.innerHTML='<div class="card"><p>No active membership plans are available.</p></div>';return}
+ const currentSort=Number(currentMembership?.plan?.sort_order||0);
+ grid.innerHTML=membershipPlans.map(p=>{
+   const price=Number(p.price_cents||0);
+   const isCurrent=currentMembership?.plan?.plan_key===p.plan_key;
+   const isHigher=!isCurrent&&price>0&&Number(p.sort_order)>currentSort;
+   const isFree=price===0;
+   let action="";
+   if(isCurrent) action='<button class="btn plan-action" disabled>Current Plan</button>';
+   else if(isFree) action='<button class="btn plan-action" disabled>Included</button>';
+   else if(isHigher||!currentMembership?.plan) action='<button class="btn primary plan-action" data-plan="'+esc(p.plan_key)+'">Upgrade & Pay →</button>';
+   else action='<button class="btn plan-action" disabled>Lower Plan</button>';
+   return '<article class="membership-plan '+(isCurrent?'current ':'')+(p.plan_key==="creator"?'featured':'')+'"><div class="plan-top"><p class="eyebrow">'+esc(p.plan_key||"PLAN")+'</p>'+(isCurrent?'<span class="status-pill">Current</span>':p.plan_key==="creator"?'<span class="status-pill">Popular</span>':"")+'</div><h3>'+esc(p.name)+'</h3><div class="plan-price">'+(isFree?"Free":"$"+(price/100).toFixed(2))+(isFree?"":' <small>/ '+esc(p.billing_interval||"month")+'</small>')+'</div><p>'+esc(p.description||"Universal CrowRules membership")+'</p><ul class="plan-features">'+(Array.isArray(p.features)?p.features.slice(0,10).map(f=>'<li>'+esc(f)+'</li>').join(""):"")+'</ul>'+('<p class="muted">'+esc(String(p.crowpoints_multiplier||1))+'× CrowPoints</p>')+action+'</article>';
+ }).join("");
+ grid.querySelectorAll("[data-plan]").forEach(btn=>btn.addEventListener("click",()=>{const p=membershipPlans.find(x=>x.plan_key===btn.dataset.plan);if(p)startMembershipAction(p)}));
+}
+
+async function load(){
+ const u=await CS.user();
+ if(!u){
+   document.getElementById("memberStatus").innerHTML='<div class="current-plan"><p class="eyebrow">NOT SIGNED IN</p><div class="plan-name">CROW · Free</div><p>Sign in to see your membership and upgrade from this page.</p><div class="actions"><a class="btn primary" href="login.html">Sign In →</a><a class="btn" href="signup.html">Create Account</a></div></div>';
+ }else{
+   currentMembership=await CS.membership();
+   const m=currentMembership;
+   const plan=m?.plan;
+   const renewal=m?.subscription?.current_period_end?new Date(m.subscription.current_period_end).toLocaleDateString():"—";
+   document.getElementById("memberStatus").innerHTML='<div class="current-plan"><p class="eyebrow">CURRENT MEMBERSHIP</p><div class="plan-name">'+esc(plan?.name||"CROW · Free")+'</div><div class="plan-meta"><span class="status-pill">'+esc(m?.status||"free")+'</span><span class="status-pill">'+esc(String(plan?.crowpoints_multiplier||1))+'× CrowPoints</span></div><p>'+esc(plan?.description||"Your free Universal CrowRules account is active.")+'</p>'+(plan?.price_cents?'<p><strong>$'+(Number(plan.price_cents)/100).toFixed(2)+' / '+esc(plan.billing_interval||"month")+'</strong> · Current period ends '+esc(renewal)+'</p>':"")+'</div>'+(plan?.price_cents?'<div class="billing-actions"><p class="eyebrow">BILLING</p><h3>Manage your Stripe subscription</h3><p class="muted">Update payment details, review billing or manage subscription settings in Stripe.</p><button class="btn" id="portalBtn">Open Stripe Billing →</button></div>':"");
+   const portal=document.getElementById("portalBtn");if(portal)portal.onclick=openPortal;
+ }
+ const {data:ps,error}=await crowSupabase.from("membership_plans").select("id,plan_key,name,price_cents,billing_interval,description,features,crowpoints_multiplier,sort_order").eq("is_active",true).order("sort_order");
+ if(error){document.getElementById("plansGrid").innerHTML='<div class="card"><p>'+esc(error.message)+'</p></div>'}else{membershipPlans=ps||[];renderPlans()}
+ const {data:ss}=await crowSupabase.from("membership_sites").select("site_key,site_name,site_url").eq("is_active",true).order("site_name");
+ document.getElementById("sites").innerHTML=(ss||[]).map(s=>'<article class="card"><h3>'+esc(s.site_name)+'</h3><p class="muted">'+esc(s.site_key)+'</p><a class="btn" href="'+esc(s.site_url)+'">Open →</a></article>').join("")||'<div class="card"><p>No connected sites are registered yet.</p></div>';
+ const q=new URLSearchParams(location.search);
+ if(q.get("checkout")==="success")showMessage("Stripe checkout completed. Your membership is being synchronized with CrowRules.");
+ if(q.get("checkout")==="cancelled")showMessage("Stripe checkout was cancelled. Your current membership was not changed.");
+}
+document.addEventListener("DOMContentLoaded",async()=>{try{await CS.refreshHeader()}catch(e){console.warn(e)};await load()});
+</script>
+<script src="js/global-nav.js"></script>
+</body>
+</html>
