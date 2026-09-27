@@ -195,15 +195,20 @@ form.onsubmit=async e=>{
  }catch(err){msg.textContent=err.message||"Upload failed. Please try again.";btn.disabled=false}
 };
 async function loadCaws(){
- if(!await CS.user()){location.href="login.html";return}
- await CS.refreshHeader();
- const params=new URLSearchParams(location.search),user=params.get("user"),{data,error}=await crowSupabase.from("crowspace_caws").select("*").order("created_at",{ascending:false}).limit(100),box=$("cawsGrid");
- if(error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(error.message)+'</p></div>';return}
- let rows=data||[];
+ const box=$("cawsGrid"),c=window.crowSupabase||window.CS?.client;
+ if(!c){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>CrowSpace database is still connecting. Refresh and try again.</p></div>';return}
+ try{if(window.CS?.refreshHeader)await window.CS.refreshHeader()}catch(e){console.warn("Caw header:",e)}
+ const params=new URLSearchParams(location.search),user=params.get("user");
+ let result=await c.from("crowspace_caws").select("id,user_id,title,caption,video_url,thumbnail_url,views,created_at,source_type,mime_type").not("video_url","is",null).neq("video_url","").order("created_at",{ascending:false}).limit(100);
+ if(result.error){console.warn("Caws query:",result.error.message);result=await c.from("crowspace_caws").select("id,user_id,title,caption,video_url,views,created_at").order("created_at",{ascending:false}).limit(100)}
+ if(result.error){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>'+CS.escape(result.error.message)+'</p><button class="btn primary" id="retryCawsPage" type="button">Retry Caws</button></div>';document.getElementById("retryCawsPage")?.addEventListener("click",loadCaws);return}
+ let rows=result.data||[];
  if(user){rows=rows.filter(x=>x.user_id===user);$("filter").innerHTML='<div class="card"><strong>Showing Caws from this member.</strong> <a href="caws.html">Show all Caws</a></div>'}
- const graph=await CS.socialGraphMap(250),esc=CS.escape;
- box.innerHTML=rows.map(x=>{const p=graph[x.user_id]||{};return '<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+esc(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a><br>'+CS.socialPersonMeta(p)+'</span></div><h3>'+esc(x.title||"Untitled Caw")+'</h3><p>'+esc(x.caption||"")+'</p>'+CS.activityLinks(p)+'<small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>'}).join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>';
- if(CS.hydrateAvatars)await CS.hydrateAvatars();
+ let graph={};
+ try{graph=await CS.socialGraphMap(250)}catch(e){console.warn("Caw social graph:",e)}
+ const esc=CS.escape;
+ box.innerHTML=rows.map(x=>{const p=graph[x.user_id]||{};return '<article class="card caw-card">'+(x.video_url?'<video controls playsinline preload="metadata" src="'+esc(x.video_url)+'"></video>':'<div class="caw-placeholder">▶</div>')+'<div class="caw-meta"><div class="media-owner"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((p.display_name||p.username||"C").slice(0,1).toUpperCase())+'</a><span><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(p.display_name||p.username||"CrowSpace Member")+'</a></span></div><h3>'+esc(x.title||"Untitled Caw")+'</h3><p>'+esc(x.caption||"")+'</p><small>'+Number(x.views||0).toLocaleString()+' views · '+new Date(x.created_at).toLocaleDateString()+'</small></div></article>'}).join("")||'<div class="card"><h3>No Caws yet.</h3><p>Be the first creator.</p></div>';
+ try{if(CS.hydrateAvatars)await CS.hydrateAvatars()}catch(e){}
 }
 detectMobile();setMobileUI();
 if(isMobile)setTimeout(()=>{if(navigator.mediaDevices?.getUserMedia)diag.textContent="Mobile camera detected. Tap Enable Camera to grant camera and microphone access.";else diag.textContent="Camera access is not available in this browser. Use Upload a Caw.";},100);
