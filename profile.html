@@ -490,25 +490,38 @@ function applyNestStyle(s){
 async function loadMembership(){
   const box=$("nestMembershipBody");
   if(!box)return;
+  const manage='<a class="btn" href="membership.html">Manage Membership →</a>';
+  box.innerHTML='<div class="universal-stat-grid"><div class="universal-stat"><small>ACCOUNT</small><strong>'+(viewer?"Connected":"Signed Out")+'</strong></div><div class="universal-stat"><small>STATUS</small><strong>Loading…</strong></div><div class="universal-stat"><small>PLAN</small><strong>Checking…</strong></div><div class="universal-stat"><small>CROWPOINTS</small><strong>—</strong></div></div>';
   if(!viewer){
-    box.innerHTML='<div class="universal-stat-grid"><div class="universal-stat"><small>ACCOUNT</small><strong>Signed Out</strong></div><div class="universal-stat"><small>ACCESS</small><strong>Public Nest</strong></div><div class="universal-stat"><small>JOIN</small><strong>Free</strong></div></div><p class="muted" style="margin-top:10px">Sign in to connect your CrowRules identity, membership, CrowPoints and activity.</p><a class="btn primary" href="login.html">Sign In →</a>';
+    box.innerHTML='<div class="universal-stat-grid"><div class="universal-stat"><small>ACCOUNT</small><strong>Signed Out</strong></div><div class="universal-stat"><small>ACCESS</small><strong>Public Nest</strong></div><div class="universal-stat"><small>PLAN</small><strong>CROW · Free</strong></div><div class="universal-stat"><small>CROWPOINTS</small><strong>—</strong></div></div><div class="form-actions" style="margin-top:12px"><span class="muted">Sign in to connect your CrowRules identity, membership, CrowPoints and activity.</span><a class="btn primary" href="login.html">Sign In →</a></div>';
     return;
   }
-  const m=await CS.membership();
-  const {data:p,error}=await crowSupabase.from("membership_profiles").select("points,watch_hours").eq("id",viewer.id).maybeSingle();
-  err("membership profile",error);
-  const isOwner=viewer.id===uid;
-  const renewal=m?.subscription?.current_period_end?new Date(m.subscription.current_period_end).toLocaleDateString():"—";
-  const values=[
-    ["Membership",m?.plan?.name||"CROW · Free"],
-    ["Status",m?.status||"free"],
-    ["CrowPoints",Number(p?.points||0).toLocaleString()],
-    ["Watch Hours",Number(p?.watch_hours||0).toFixed(1)]
-  ];
-  if(isOwner)values.push(["Renewal",renewal],["Multiplier",(Number(m?.plan?.crowpoints_multiplier||1))+"×"]);
-  box.innerHTML='<div class="universal-stat-grid">'+values.map(x=>'<div class="universal-stat"><small>'+esc(x[0])+'</small><strong>'+esc(x[1])+'</strong></div>').join("")+'</div><div class="form-actions" style="margin-top:12px"><span class="muted">'+(isOwner?"Your universal account powers CrowSpace and the wider CrowRules universe.":"This member is part of the CrowRules universe.")+'</span><a class="btn" href="membership.html">Manage Membership →</a></div>';
+  try{
+    const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Membership lookup timed out")),8000));
+    const lookup=(async()=>{
+      const [subRes,profileRes]=await Promise.all([
+        crowSupabase.from("membership_subscriptions").select("id,plan_id,status,current_period_end,cancel_at_period_end,created_at").eq("user_id",viewer.id).in("status",["active","trialing","past_due"]).order("created_at",{ascending:false}).limit(1),
+        crowSupabase.from("membership_profiles").select("points,watch_hours").eq("id",viewer.id).maybeSingle()
+      ]);
+      let sub=subRes.data?.[0]||null, plan=null;
+      if(sub?.plan_id){
+        const planRes=await crowSupabase.from("membership_plans").select("id,plan_key,name,price_cents,billing_interval,crowpoints_multiplier").eq("id",sub.plan_id).maybeSingle();
+        plan=planRes.data||null;
+      }
+      return {sub,plan,profile:profileRes.data,subError:subRes.error,profileError:profileRes.error};
+    })();
+    const m=await Promise.race([lookup,timeout]);
+    err("membership subscription",m.subError); err("membership profile",m.profileError);
+    const isOwner=viewer.id===uid, planName=m.plan?.name||"CROW · Free", status=m.sub?.status||"free";
+    const renewal=m.sub?.current_period_end?new Date(m.sub.current_period_end).toLocaleDateString():"—";
+    const values=[["Membership",planName],["Status",status],["CrowPoints",Number(m.profile?.points||0).toLocaleString()],["Watch Hours",Number(m.profile?.watch_hours||0).toFixed(1)]];
+    if(isOwner)values.push(["Renewal",renewal],["Multiplier",(Number(m.plan?.crowpoints_multiplier||1))+"×"]);
+    box.innerHTML='<div class="universal-stat-grid">'+values.map(x=>'<div class="universal-stat"><small>'+esc(x[0])+'</small><strong>'+esc(x[1])+'</strong></div>').join("")+'</div><div class="form-actions" style="margin-top:12px"><span class="muted">'+(isOwner?"Your universal account powers CrowSpace and the wider CrowRules universe.":"This member is part of the CrowRules universe.")+"</span>"+manage+"</div>";
+  }catch(e){
+    console.error("CrowSpace membership:",e);
+    box.innerHTML='<div class="universal-stat-grid"><div class="universal-stat"><small>ACCOUNT</small><strong>Connected</strong></div><div class="universal-stat"><small>PLAN</small><strong>CROW · Free</strong></div><div class="universal-stat"><small>STATUS</small><strong>Available</strong></div><div class="universal-stat"><small>SYNC</small><strong>Retry needed</strong></div></div><div class="form-actions" style="margin-top:12px"><span class="muted">Membership could not be loaded right now. Your account is still connected.</span>'+manage+'</div>';
+  }
 }
-
 async function relationshipButtons(){
   if(!viewer)return '<a class="btn primary" href="login.html">Sign In to Connect</a>';
   if(viewer.id===uid)return '<a class="btn primary" href="customize.html">Customize My Nest</a><a class="btn" href="friends.html">Friends</a>';
