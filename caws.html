@@ -195,7 +195,10 @@ form.onsubmit=async e=>{
  }catch(err){msg.textContent=err.message||"Upload failed. Please try again.";btn.disabled=false}
 };
 async function loadCaws(){
- const box=$("cawsGrid"),c=window.crowSupabase||window.CS?.client;
+ const box=$("cawsGrid");
+ const member=window.CS&&typeof window.CS.user==="function"?await window.CS.user():null;
+ if(!member){location.href="login.html?next="+encodeURIComponent(location.href);return}
+ const c=window.crowSupabase||window.CS?.client;
  if(!c){box.innerHTML='<div class="card"><h3>Caws unavailable</h3><p>CrowSpace database is still connecting. Refresh and try again.</p></div>';return}
  try{if(window.CS?.refreshHeader)await window.CS.refreshHeader()}catch(e){console.warn("Caw header:",e)}
  const params=new URLSearchParams(location.search),user=params.get("user");
