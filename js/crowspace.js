@@ -11,7 +11,7 @@ const nav=[
 const universe=[
  ["https://crowrulesentertainment-oss.github.io/dreamscapes/","Dreamscapes"],
  ["https://crowrulesentertainment-oss.github.io/memorials/","Memorials"],
- ["https://crowrulesentertainment-oss.github.io/crowrules-sports/","Sports"],
+ ["https://crowrulesentertainment-oss.github.io/sports/","Sports"],
  ["https://crowrulesentertainment-oss.github.io/podcasting/","Podcasting"],
  ["https://crowrulesentertainment-oss.github.io/crowrulestv/","CrowRules TV"],
  ["https://crowrulesentertainment-oss.github.io/spectrum/","Spectrum Awards"]
