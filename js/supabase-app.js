@@ -258,6 +258,24 @@ async async async async function discover(){
  const topicHtml=(topics.data||[]).slice(0,10).map(t=>'<span class="filter-chip active">'+esc(t.name)+' · '+esc(String(t.entity_count))+' connections</span>').join(" ")||'<span class="muted">Topics will appear after members create and engage with content.</span>';
  app.innerHTML=shell("Discover","Graph-powered predictive discovery across the CrowSpace universe.",card('<span class="kicker">CROWSPACE 4.23</span><h2>Graph-Powered Discovery</h2><p class="muted">CrowSpace now traverses people, topics, posts, communities, CrowRooms and events to build explainable discovery paths.</p><div class="filter-row"><button class="btn" data-act="discover:refresh">Refresh Intelligence</button><a class="btn" href="activity.html">Activity</a></div>')+'<h2>🌎 Explore Your Graph</h2><div class="grid">'+graphHtml+'</div><h2>🔮 What’s Rising</h2><div class="grid">'+rising+'</div><h2>🔥 Emerging Now</h2><div class="grid">'+emerging+'</div><h2>📈 Accelerating Communities</h2><div class="grid">'+accelerating+'</div><h2>🧠 Relevant to You</h2><div class="grid">'+peopleHtml+'</div><h2>🌎 Cross-Universe Trends</h2><div class="grid">'+crossHtml+'</div><h2>Your Topics</h2>'+card('<div class="filter-row">'+topicHtml+'</div>')+'<h2>Across Your Universe</h2><div class="grid">'+crossHtml+'</div>');
 }
+
+async function graph(){
+ if(!user){app.innerHTML=shell("My Graph","Your personal CrowSpace universe.",gate());return}
+ const [profile,edges,trends]=await Promise.all([
+  sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single(),
+  sb.rpc("crowspace_intelligence_neighbors",{p_kind:"person",p_id:user.id,p_limit:100}),
+  sb.rpc("crowspace_predictive_trends",{p_limit:50})
+ ]);
+ const rows=edges.data||[];
+ const ids=[...new Set(rows.filter(x=>x.source_kind==="person").map(x=>x.source_id).concat(rows.filter(x=>x.target_kind==="person").map(x=>x.target_id)))].filter(x=>x!==user.id);
+ const people=await getProfiles(ids),pmap=new Map(people.map(p=>[p.user_id,p]));
+ const names={person:id=>pmap.get(id)?.display_name||pmap.get(id)?.username||"Member"};
+ const label=(kind,id)=>kind==="person"?names.person(id):kind.replace("_"," ");
+ const nodes=new Map(); rows.forEach(x=>{nodes.set(x.source_kind+":"+x.source_id,{kind:x.source_kind,id:x.source_id});nodes.set(x.target_kind+":"+x.target_id,{kind:x.target_kind,id:x.target_id})});
+ const html=[...nodes.values()].filter(x=>!(x.kind==="person"&&x.id===user.id)).slice(0,40).map(x=>card('<span class="kicker">GRAPH NODE · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(label(x.kind,x.id))+'</h2><p class="muted">Connected to your CrowSpace graph.</p>')).join("")||card('<p class="muted">Your personal graph is beginning to build. New relationships appear as you follow, connect, post, join communities, enter CrowRooms and RSVP to events.</p>');
+ const trendHtml=(trends.data||[]).filter(x=>x.direction==="rising").slice(0,6).map(x=>card('<span class="kicker">RISING · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(x.kind)+'</h2><p class="muted">'+esc(x.explanation)+'</p><p>Momentum: <strong>'+esc(String(x.momentum))+'</strong> · Acceleration: <strong>'+esc(String(x.acceleration))+'</strong></p>')).join("")||card('<p class="muted">No rising graph trends yet.</p>');
+ app.innerHTML=shell("My Graph","A live view of your personal CrowSpace universe.",card('<span class="kicker">CROWSPACE 4.24</span><h2>Personal Social Graph</h2><p class="muted">'+esc(profile.data?.display_name||"Your")+" graph connects people, topics, content, communities, CrowRooms and events.</p><div class="filter-row"><button class="btn" data-act="graph:refresh">Refresh Graph</button><a class="btn" href="discover.html">Discover</a></div>')+'<h2>🌎 Your Connections</h2><div class="grid">'+html+'</div><h2>🔥 Rising Around Your Universe</h2><div class="grid">'+trendHtml+'</div>');
+}
 async function customize(){
  if(!user){app.innerHTML=shell("Customize My Space","Persistent profile studio.",gate());return}
  const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single()).data;
