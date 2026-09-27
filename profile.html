@@ -31,24 +31,7 @@
   </div>
 </section>
 
-<section class="nest-box avatar-editor" id="avatarEditor" style="display:none">
-  <div class="nest-section-title">
-    <div><p class="eyebrow">YOUR IDENTITY</p><h2>Profile Avatar</h2></div>
-    <span class="muted">JPG, PNG, WEBP or GIF · Max 5 MB</span>
-  </div>
-  <div class="avatar-editor-grid">
-    <div class="avatar-preview" id="avatarPreview"></div>
-    <div class="avatar-editor-controls">
-      <input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-      <small id="avatarFileName" class="muted">Choose a new profile image.</small>
-      <div class="form-actions">
-        <button class="btn primary" id="uploadAvatarBtn" type="button">Upload Avatar</button>
-        <button class="btn" id="removeAvatarBtn" type="button">Remove Avatar</button>
-      </div>
-      <p id="avatarUploadStatus" class="muted" role="status"></p>
-    </div>
-  </div>
-</section>
+
 
 <section class="nest-box universal-nest-panel" id="nestMembership">
   <div class="nest-section-title"><div><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h2>Universal CrowRules Membership</h2></div><a href="membership.html">Membership Center →</a></div>
@@ -220,26 +203,53 @@ async function removeAvatar(){
 }
 
 function setupAvatarEditor(){
-  const editor=$("avatarEditor");
-  if(!editor || !viewer || viewer.id!==uid)return;
-  editor.style.display="block";
-  const preview=$("avatarPreview");
-  if(preview){
-    preview.innerHTML=prof?.avatar_url
-      ? '<img src="'+esc(prof.avatar_url)+'" alt="Current avatar">'
-      : '<div class="avatar-placeholder">'+esc(initials(prof?.display_name||prof?.username||"C"))+'</div>';
-  }
+  if(!viewer || viewer.id!==uid)return;
+  const avatar=$("avatar");
+  if(!avatar || avatar.dataset.avatarEditorBound==="1")return;
+  avatar.dataset.avatarEditorBound="1";
+  avatar.classList.add("avatar-editable");
+  avatar.setAttribute("title","Change avatar");
+  avatar.setAttribute("role","button");
+  avatar.setAttribute("tabindex","0");
+  avatar.addEventListener("click",openAvatarModal);
+  avatar.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openAvatarModal()}});
+}
+function avatarModal(){
+  if($("avatarModal"))return;
+  const div=document.createElement("div");
+  div.id="avatarModal";
+  div.className="avatar-modal";
+  div.innerHTML='<div class="avatar-modal-backdrop" data-close-avatar></div><div class="avatar-modal-card" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle"><button class="avatar-modal-close" type="button" data-close-avatar aria-label="Close">×</button><p class="eyebrow">YOUR IDENTITY</p><h2 id="avatarModalTitle">Change Avatar</h2><div class="avatar-modal-preview" id="avatarPreview"></div><input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><small id="avatarFileName" class="muted">JPG, PNG, WEBP or GIF · Max 5 MB</small><div class="form-actions"><button class="btn primary" id="uploadAvatarBtn" type="button">Upload Avatar</button><button class="btn" id="removeAvatarBtn" type="button">Remove Avatar</button></div><p id="avatarUploadStatus" class="muted" role="status"></p></div>';
+  document.body.appendChild(div);
+  div.querySelectorAll("[data-close-avatar]").forEach(x=>x.addEventListener("click",closeAvatarModal));
   $("avatarFile")?.addEventListener("change",e=>{
     const file=e.target.files?.[0];
-    text("avatarFileName",file?file.name:"Choose a new profile image.");
+    text("avatarFileName",file?file.name:"JPG, PNG, WEBP or GIF · Max 5 MB");
+    const preview=$("avatarPreview");
     if(file && file.type.startsWith("image/") && file.size<=5*1024*1024){
       const reader=new FileReader();
       reader.onload=()=>{if(preview)preview.innerHTML='<img src="'+esc(reader.result)+'" alt="Avatar preview">';};
       reader.readAsDataURL(file);
+    }else if(file){
+      text("avatarUploadStatus","Please choose an image 5 MB or smaller.");
     }
   });
   $("uploadAvatarBtn")?.addEventListener("click",uploadAvatar);
   $("removeAvatarBtn")?.addEventListener("click",removeAvatar);
+}
+function openAvatarModal(){
+  avatarModal();
+  const modal=$("avatarModal"),preview=$("avatarPreview");
+  modal.classList.add("open");
+  if(preview)preview.innerHTML=prof?.avatar_url?'<img src="'+esc(prof.avatar_url)+'" alt="Current avatar">':'<div class="avatar-placeholder">'+esc(initials(prof?.display_name||prof?.username||"C"))+'</div>';
+  $("avatarFile").value="";
+  text("avatarFileName","JPG, PNG, WEBP or GIF · Max 5 MB");
+  text("avatarUploadStatus","");
+  document.body.classList.add("avatar-modal-open");
+}
+function closeAvatarModal(){
+  const modal=$("avatarModal");if(modal)modal.classList.remove("open");
+  document.body.classList.remove("avatar-modal-open");
 }
 
 function applyNestStyle(s){
@@ -543,13 +553,20 @@ document.addEventListener("DOMContentLoaded",async()=>{
 </script>
 <style>
 .nest-cover{position:relative;overflow:hidden}
-.avatar-editor-grid{display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
-.avatar-preview{width:150px;height:150px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--blue2);display:grid;place-items:center}
-.avatar-preview img{width:100%;height:100%;object-fit:cover}
-.avatar-placeholder{font-size:3rem;font-weight:800}
-.avatar-editor-controls{display:grid;gap:10px}
-.avatar-editor-controls input[type=file]{max-width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03)}
-.avatar-editor-controls .form-actions{justify-content:flex-start}
+.avatar-editable{cursor:pointer;position:relative}
+.avatar-editable:after{content:"✎";position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.82);color:#fff;font-size:16px;border:1px solid rgba(255,255,255,.2)}
+.avatar-modal{position:fixed;inset:0;z-index:9999;display:none}
+.avatar-modal.open{display:block}
+.avatar-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)}
+.avatar-modal-card{position:relative;z-index:1;width:min(440px,calc(100% - 30px));margin:8vh auto 0;padding:24px;border:1px solid var(--line);border-radius:18px;background:#080812;box-shadow:0 25px 80px rgba(0,0,0,.6);display:grid;gap:12px}
+.avatar-modal-close{position:absolute;top:10px;right:12px;background:none;border:0;color:inherit;font-size:30px;cursor:pointer}
+.avatar-modal-preview{width:180px;height:180px;margin:8px auto 4px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--blue2);display:grid;place-items:center}
+.avatar-modal-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-modal-preview .avatar-placeholder{font-size:4rem;font-weight:800}
+.avatar-modal-card input[type=file]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03)}
+.avatar-modal-card .form-actions{justify-content:center}
+body.avatar-modal-open{overflow:hidden}
+
 @media(max-width:600px){.avatar-editor-grid{grid-template-columns:1fr}.avatar-preview{width:120px;height:120px}}
 .nest-cover{position:relative;overflow:hidden}
 .nest-cover-copy{min-width:0}
