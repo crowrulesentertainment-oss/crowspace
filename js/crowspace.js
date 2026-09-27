@@ -153,6 +153,25 @@ CS.startNotificationBadge=()=>{CS.refreshNotificationBadge();if(!CS._badgeTimer)
 CS.membership=async()=>{const u=await CS.user();if(!u)return null;const {data:subs,error}=await CS.client.from("membership_subscriptions").select("id,plan_id,status,current_period_end,cancel_at_period_end,created_at").eq("user_id",u.id).in("status",["active","trialing","past_due"]).order("created_at",{ascending:false}).limit(1);if(error||!subs?.length)return {plan:null,status:"free",subscription:null};const s=subs[0];const {data:plan}=await CS.client.from("membership_plans").select("id,plan_key,name,price_cents,billing_interval,description,features,crowpoints_multiplier").eq("id",s.plan_id).maybeSingle();return {plan:plan||null,status:s.status,subscription:s}};
 CS.renderMembershipBadge=async()=>{const el=document.getElementById("membershipBadge");if(!el)return;const m=await CS.membership();el.innerHTML=!m?"<a href=\"membership.html\">Membership</a>":!m.plan?'<a href="membership.html">CROW · Free</a>':'<a href="membership.html">'+CS.escape(m.plan.name||"Membership")+"</a>"};
 CS.renderMembershipHome=async()=>{const el=document.getElementById("membershipHome");if(!el)return;const u=await CS.user();if(!u){el.innerHTML='<strong>Universal CrowRules Membership</strong><p class="muted">Create one account to connect your CrowRules identity across the universe.</p><a class="btn primary" href="signup.html">Create Universal Account →</a>';return}const m=await CS.membership();if(!m?.plan){el.innerHTML='<strong>CROW · Free</strong><p class="muted">Your universal CrowRules account is active. Explore membership options when you are ready.</p><a class="btn primary" href="membership.html">View Membership Plans →</a>';return}el.innerHTML='<strong>'+CS.escape(m.plan.name||"Membership")+'</strong><p class="muted">'+CS.escape(m.status)+' · '+CS.escape(String(m.plan.crowpoints_multiplier||1))+'× CrowPoints</p><a class="btn" href="membership.html">Open Membership Center →</a>'};
-CS.init=async()=>{if(CS._initialized)return;CS._initialized=true;try{await CS.refreshHeader();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.heartbeat();await CS.renderUniversalStats();if(CS.client&&!CS._authSubscription){CS._authSubscription=CS.client.auth.onAuthStateChange((event,session)=>{setTimeout(async()=>{try{await CS.refreshHeader();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.renderUniversalStats()}catch(e){console.warn("CrowSpace auth refresh:",e.message)}},0)})}}catch(e){console.warn("CrowSpace initialization:",e.message)}};
+CS.enhancePage=()=>{
+ if(document.body.classList.contains("crow-cinematic"))return;
+ document.body.classList.add("crow-cinematic");
+ const main=document.querySelector("main");
+ if(main){
+   main.classList.add("crow-main");
+   const path=(location.pathname.split("/").pop()||"index.html").replace(".html","");
+   main.dataset.page=path;
+   main.querySelectorAll(":scope > .section, :scope > .hero, :scope > .nest-shell, :scope > .auth-card").forEach((el,i)=>{
+     el.classList.add("cinematic-surface");
+     el.style.setProperty("--surface-index",i);
+   });
+   if("IntersectionObserver" in window){
+     const io=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("is-visible");io.unobserve(entry.target)}}),{threshold:.08});
+     main.querySelectorAll(".cinematic-surface").forEach(el=>io.observe(el));
+   }else main.querySelectorAll(".cinematic-surface").forEach(el=>el.classList.add("is-visible"));
+ }
+ const pulse=document.createElement("div");pulse.className="crow-ambient-pulse";pulse.setAttribute("aria-hidden","true");document.body.appendChild(pulse);
+};
+CS.init=async()=>{if(CS._initialized)return;CS._initialized=true;try{CS.enhancePage();await CS.refreshHeader();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.heartbeat();await CS.renderUniversalStats();if(CS.client&&!CS._authSubscription){CS._authSubscription=CS.client.auth.onAuthStateChange((event,session)=>{setTimeout(async()=>{try{await CS.refreshHeader();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.renderUniversalStats()}catch(e){console.warn("CrowSpace auth refresh:",e.message)}},0)})}}catch(e){console.warn("CrowSpace initialization:",e.message)}};
 window.CS=CS;
 document.addEventListener("DOMContentLoaded",()=>CS.init());
