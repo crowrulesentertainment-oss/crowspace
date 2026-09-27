@@ -46,17 +46,59 @@ CS.installGlobalSearch=()=>{
  box.querySelector(".crow-search-button").addEventListener("click",()=>{if(input.value.trim().length>=2)location.href="command-center.html?q="+encodeURIComponent(input.value.trim());else input.focus()});
  document.addEventListener("click",e=>{if(!box.contains(e.target))results.hidden=true});
 };
+CS.injectGlobalNavStyles=()=>{if(document.getElementById("crow-global-nav-styles"))return;const s=document.createElement("style");s.id="crow-global-nav-styles";s.textContent=`
+.site-header{gap:10px;position:relative;z-index:100}
+.site-header>nav{display:flex!important;align-items:center;justify-content:flex-end;gap:8px;min-width:0;flex:0 0 auto}
+.crow-nav-menu{position:relative}
+.crow-nav-menu summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 13px;border:1px solid var(--line,#ddd);border-radius:9px;background:#fff;color:var(--text,#222);font-weight:800;font-size:13px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.crow-nav-menu summary::-webkit-details-marker{display:none}
+.crow-nav-menu[open] summary,.crow-nav-menu summary:hover{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2);border-color:#c8dcfa}
+.crow-nav-chevron{font-size:11px;transition:transform .18s ease}
+.crow-nav-menu[open] .crow-nav-chevron{transform:rotate(180deg)}
+.crow-nav-panel{position:absolute;right:0;top:calc(100% + 8px);width:min(760px,calc(100vw - 24px));padding:12px;background:#fff;border:1px solid var(--line,#ddd);border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.18);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;z-index:200}
+.crow-nav-section{min-width:0}
+.crow-nav-section h4{margin:0 0 6px;padding:0 6px;color:var(--muted,#6b7280);font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.crow-nav-section a{display:flex!important;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;padding:9px 10px;border-radius:8px;color:var(--text,#222);font-size:13px;font-weight:700;text-decoration:none}
+.crow-nav-section a:hover,.crow-nav-section a.active{background:var(--blue2,#eef5ff);color:var(--blue,#1877f2)}
+.crow-nav-section a.active:after{content:"•";font-size:16px}
+.crow-nav-divider{height:1px;background:var(--line,#eee);margin:5px 0}
+.crow-nav-mobile-toggle{display:none}
+@media(max-width:900px){
+ .crow-nav-panel{grid-template-columns:repeat(2,minmax(0,1fr));width:min(560px,calc(100vw - 24px))}
+}
+@media(max-width:800px){
+ .site-header{flex-wrap:wrap}
+ .site-header>nav{order:5;display:flex!important;flex:1 1 100%;justify-content:flex-end}
+ .crow-nav-menu{width:auto}
+ .crow-nav-panel{position:fixed;right:12px;top:70px;max-height:calc(100vh - 88px);overflow:auto;grid-template-columns:1fr;width:min(420px,calc(100vw - 24px))}
+ .nav-toggle{display:none!important}
+}
+@media(max-width:480px){
+ .crow-nav-panel{left:12px;right:12px;width:auto}
+ .crow-nav-menu summary{padding:8px 11px}
+}`;document.head.appendChild(s)};
 CS.refreshHeader=async()=>{
  const currentUser=await CS.user();
  if(currentUser)await CS.ensureProfile(currentUser);
  const header=document.querySelector(".site-header");
  if(header){
+   CS.injectGlobalNavStyles();
    let nav=header.querySelector("nav"); if(!nav){nav=document.createElement("nav");header.appendChild(nav)}
    const path=location.pathname.split("/").pop()||"index.html";
-   const core=CS.navItems.filter(x=>x.group==="core"), connect=CS.navItems.filter(x=>x.group==="connect"), create=CS.navItems.filter(x=>x.group==="create"), universe=CS.navItems.filter(x=>x.group==="universe"), account=CS.navItems.filter(x=>x.group==="account"), quick=CS.navItems.filter(x=>x.group==="quick");
-   const link=(x)=>'<a href="'+x.href+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
-   nav.innerHTML='<div class="nav-cluster nav-core">'+core.map(link).join("")+'</div><div class="nav-cluster nav-connect">'+connect.map(link).join("")+'</div><div class="nav-cluster nav-create">'+create.map(link).join("")+'</div><details class="nav-more"><summary>More</summary><div class="nav-more-menu">'+universe.map(link).join("")+account.map(link).join("")+quick.map(link).join("")+'</div></details>';
-   let toggle=header.querySelector(".nav-toggle"); if(!toggle){toggle=document.createElement("button");toggle.className="nav-toggle";toggle.type="button";toggle.setAttribute("aria-label","Open navigation");toggle.setAttribute("aria-expanded","false");toggle.innerHTML="☰";header.insertBefore(toggle,nav);toggle.addEventListener("click",()=>{const open=nav.classList.toggle("nav-open");toggle.setAttribute("aria-expanded",String(open));toggle.setAttribute("aria-label",open?"Close navigation":"Open navigation");toggle.innerHTML=open?"✕":"☰"})}
+   const groups=[
+     ["Start",CS.navItems.filter(x=>x.group==="core")],
+     ["Connect",CS.navItems.filter(x=>x.group==="connect")],
+     ["Create",CS.navItems.filter(x=>x.group==="create")],
+     ["CrowRules",CS.navItems.filter(x=>x.group==="universe")],
+     ["Account",CS.navItems.filter(x=>x.group==="account")],
+     ["Quick Create",CS.navItems.filter(x=>x.group==="quick")]
+   ];
+   const link=x=>'<a href="'+x.href+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
+   const sections=groups.filter(g=>g[1].length).map(g=>'<section class="crow-nav-section"><h4>'+CS.escape(g[0])+'</h4>'+g[1].map(link).join("")+'</section>').join("");
+   nav.innerHTML='<details class="crow-nav-menu"><summary aria-label="Open CrowSpace navigation"><span>☰ Menu</span><span class="crow-nav-chevron">▼</span></summary><div class="crow-nav-panel">'+sections+'</div></details>';
+   const menu=nav.querySelector(".crow-nav-menu");
+   document.addEventListener("click",e=>{if(menu&&!menu.contains(e.target))menu.removeAttribute("open")},{once:false});
+   nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>menu.removeAttribute("open")));
    CS.installGlobalSearch();
  }
  const el=document.getElementById("account"); if(!el)return;
