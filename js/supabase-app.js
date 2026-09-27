@@ -50,7 +50,23 @@ async function ensureProfile(){
  const r=await sb.from("crowspace_profiles").select("user_id").eq("user_id",user.id).maybeSingle();
  if(!r.data)await sb.from("crowspace_profiles").insert({user_id:user.id,username:(user.email||"member").split("@")[0].replace(/[^a-z0-9_]/gi,""),display_name:user.user_metadata?.display_name||user.user_metadata?.full_name||"CrowSpace Member",profile_visibility:"public"});
 }
-async function signal(action,targetKind,targetId,weight=1,metadata={}){if(!user||!targetId)return;const base={user_id:user.id,target_id:String(targetId),target_kind:targetKind,action,weight,metadata};try{await sb.from("crowspace_discovery_signals").insert({...base,context_key:page(),context_type:"crowspace"})}catch(e){console.warn("discovery signal",e)}try{await sb.from("crowspace_adaptive_feedback").insert({user_id:user.id,target_kind:targetKind,target_id:String(targetId),action,weight})}catch(e){console.warn("adaptive feedback",e)}try{await sb.from("crowspace_affinity_signals").insert({user_id:user.id,target_kind:targetKind,target_id:String(targetId),signal_type:action,raw_value:1,weight,explanation:"CrowSpace community action",metadata})}catch(e){console.warn("affinity signal",e)}try{await sb.from("crowspace_activity").insert({user_id:user.id,actor_id:user.id,type:action,message:"CrowSpace "+action,reference_id:String(targetId),metadata})}catch(e){console.warn("activity log",e)}}
+async function signal(action,targetKind,targetId,weight=1,metadata={}){
+ if(!user||!targetId)return;
+ const base={user_id:user.id,target_id:String(targetId),target_kind:targetKind,action,weight,metadata};
+ try{await sb.from("crowspace_discovery_signals").insert({...base,context_key:page(),context_type:"crowspace"})}catch(e){console.warn("discovery signal",e)}
+ try{await sb.from("crowspace_adaptive_feedback").insert({user_id:user.id,target_kind:targetKind,target_id:String(targetId),action,weight})}catch(e){console.warn("adaptive feedback",e)}
+ try{await sb.from("crowspace_affinity_signals").insert({user_id:user.id,target_kind:targetKind,target_id:String(targetId),signal_type:action,raw_value:1,weight,explanation:"CrowSpace community action",metadata})}catch(e){console.warn("affinity signal",e)}
+ try{await sb.from("crowspace_activity").insert({user_id:user.id,actor_id:user.id,type:action,message:"CrowSpace "+action,reference_id:String(targetId),metadata})}catch(e){console.warn("activity log",e)}
+ try{
+  const kindMap={profile:"person",group:"group",room:"room",event:"event",person:"person"};
+  const entityKind=kindMap[targetKind]||targetKind;
+  const topics=Array.isArray(metadata.topics)?metadata.topics:[];
+  for(const topicId of topics){
+   await sb.from("crowspace_community_topic_signals").insert({user_id:user.id,topic_id:topicId,community_kind:entityKind,community_id:String(targetId),signal_type:action,weight,metadata:{page:page()}});
+  }
+  await sb.from("crowspace_trend_signals").insert({entity_kind:entityKind,entity_id:String(targetId),source_type:action,activity_weight:weight,context_kind:"user",context_id:user.id});
+ }catch(e){console.warn("graph propagation",e)}
+}
 async function safe(table,query,demo=[]){try{const r=await query;if(r.error){console.error(table,r.error);return []}return Array.isArray(r.data)?r.data:[]}catch(e){console.error(table,e);return []}}
 async function profiles(ids){
  if(!ids?.length)return [];
