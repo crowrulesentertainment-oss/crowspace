@@ -821,31 +821,7 @@ body.avatar-modal-open{overflow:hidden}
 .nest-photo-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
 @media(max-width:800px){.inline-comment-form{flex-direction:column}}
 </style>
-<script>(function(){function modernizeProfile(){const p=document.getElementById("modernIdentity");if(p&&typeof prof!=="undefined"&&prof)p.textContent=prof.display_name||("@"+(prof.username||"member"));const s=document.getElementById("modernPresence");if(s&&typeof prof!=="undefined"&&prof)s.textContent=prof.is_online?"● Online now":"● In CrowSpace"}document.addEventListener("DOMContentLoaded",()=>setTimeout(modernizeProfile,1200));})();</script><script>
-(function(){
- async function loadNestOS(){
-  if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
-  const [friends,posts,visits]=await Promise.all([
-   crowSupabase.from("crowspace_friendships").select("id",{count:"exact",head:true}).or("requester_id.eq."+uid+",addressee_id.eq."+uid).eq("status","accepted"),
-   crowSupabase.from("crowspace_posts").select("id,created_at",{count:"exact",head:true}).eq("user_id",uid),
-   crowSupabase.from("crowspace_profile_visits").select("id,created_at",{count:"exact",head:true}).eq("profile_id",uid)
-  ]);
-  if(friends.count!==undefined)document.getElementById("nestMetricFriends").textContent=Math.floor((friends.count||0)/2);
-  if(posts.count!==undefined)document.getElementById("nestMetricPosts").textContent=posts.count||0;
-  if(visits.count!==undefined)document.getElementById("nestMetricVisitors").textContent=visits.count||0;
-  const list=document.getElementById("nestPulseList");
-  const items=[];
-  if(posts.count)items.push(["Wall","Your Nest has "+posts.count+" wall post"+(posts.count===1?"":"s")+"."]);
-  if(friends.count)items.push(["Network","Your social graph is connected."]);
-  if(visits.count)items.push(["Visitors",(visits.count||0)+" profile visit"+(visits.count===1?"":"s")+" recorded."]);
-  list.innerHTML=(items.length?items:[["Universe","Your CrowSpace identity is ready."]]).map(x=>'<div class="pulse-item"><b>'+x[0]+'</b><br>'+x[1]+'</div>').join("");
-  const status=document.getElementById("nestLiveStatus"),detail=document.getElementById("nestLiveDetail");
-  status.textContent="Supabase connected";detail.textContent="Your Nest is synced";
-  if(typeof prof!=="undefined"&&prof)document.getElementById("nestOsTitle").textContent=prof.display_name||("@"+(prof.username||"member"));
- }
- document.addEventListener("DOMContentLoaded",()=>setTimeout(loadNestOS,900));
-})();
-</script><script id="nest-realtime">
+<script id="nest-realtime">
 (function(){
   let channel=null;
   const q=id=>document.getElementById(id);
