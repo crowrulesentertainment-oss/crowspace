@@ -93,6 +93,39 @@ function detectCaptureMode(){
   return mode;
 }
 detectCaptureMode();
+
+async function autoStartDetectedCamera(){
+  if(!navigator.mediaDevices?.getUserMedia){
+    document.getElementById("cameraDiagText").textContent="This browser does not support camera access. Use Upload a Caw instead.";
+    return;
+  }
+  const isMobile=captureMode==="phone";
+  document.getElementById("cameraDiagText").textContent=isMobile
+    ?"Phone camera detected. Requesting camera and microphone access…"
+    :"Webcam detected. Finding the available webcam and requesting camera access…";
+  try{
+    // First request access so browsers reveal real device labels/IDs.
+    const probe=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    probe.getTracks().forEach(t=>t.stop());
+    await listDevices();
+    const cams=[...document.getElementById("cameraDevice").options].filter(o=>o.value);
+    if(cams.length){
+      const preferred=cams.find(o=>/webcam|integrated|facetime|camera|hd/i.test(o.textContent));
+      document.getElementById("cameraDevice").value=(preferred||cams[0]).value;
+    }
+    await enableCamera(captureMode==="phone"?"user":"user");
+    document.getElementById("cameraDiagText").textContent=
+      captureMode==="phone" ? "Phone camera is live. You can switch between front and rear cameras."
+      : "Webcam is live. CrowSpace automatically selected the available webcam.";
+  }catch(e){
+    recordBtn.disabled=true;
+    recStatus.textContent="Camera permission needed";
+    msg.textContent=cameraError(e);
+    await cameraStatus();
+  }
+}
+setTimeout(autoStartDetectedCamera,250);
+
 phoneModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("phone");cameraFacing="user";enableCamera("user");});
 webcamModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("webcam");cameraFacing="user";enableCamera("user");});
 
