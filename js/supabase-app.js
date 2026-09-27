@@ -148,7 +148,7 @@ async function act(a){
 }
 function renderError(msg){app().innerHTML=shell("CrowSpace","Connection status",card('<p>'+esc(msg)+'</p>'))}
 async function render(){
- const map={"index.html":feed,"profile.html":profile,"discover.html":discover,"friends.html":friends,"groups.html":groups,"group.html":group,"spaces.html":spaces,"space.html":space,"rooms.html":rooms,"room.html":room,"events.html":events,"event.html":event,"media.html":media,"photos.html":photos,"videos.html":videos,"messages.html":messages,"crowmail.html":messages,"notifications.html":notifications,"activity.html":activity,"graph.html":graph,"auth.html":auth,"customize.html":customize,"settings.html":settings,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent};
+ const map={"index.html":feed,"profile.html":profile,"discover.html":discover,"friends.html":friends,"circles.html":discover,"groups.html":groups,"group.html":group,"spaces.html":spaces,"space.html":space,"rooms.html":rooms,"room.html":room,"events.html":events,"event.html":event,"media.html":media,"photos.html":photos,"videos.html":videos,"messages.html":messages,"crowmail.html":messages,"notifications.html":notifications,"activity.html":activity,"graph.html":graph,"auth.html":auth,"customize.html":customize,"settings.html":settings,"create-post.html":createPost,"create-group.html":createGroup,"create-space.html":createSpace,"create-event.html":createEvent};
  const fn=map[page()];if(fn)await fn();else await feed();
 }
 document.addEventListener("submit",submit);
