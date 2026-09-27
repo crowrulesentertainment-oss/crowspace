@@ -236,6 +236,10 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 .nest-activity-head{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid var(--cp-line);background:linear-gradient(90deg,rgba(85,230,255,.08),rgba(155,124,255,.07))}
 .nest-activity-head strong{font:700 11px Montserrat,Arial,sans-serif;letter-spacing:.16em}.nest-activity-head span{font:600 10px Montserrat,Arial,sans-serif;color:var(--cp-muted)}
 .nest-activity-list{display:grid}.nest-activity-item{display:grid;grid-template-columns:38px 1fr 24px;gap:11px;align-items:center;padding:12px 15px;border-bottom:1px solid rgba(255,255,255,.055);text-decoration:none;color:var(--cp-text);transition:.18s}.nest-activity-item:hover{background:rgba(85,230,255,.055)}.nest-activity-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(85,230,255,.12),rgba(155,124,255,.13));color:var(--cp-cyan)}.nest-activity-copy b{font-size:13px}.nest-activity-copy small{display:block;color:var(--cp-muted);font-size:10px;margin-top:3px}.nest-activity-arrow{color:#65738c}.nest-activity-empty{padding:22px;color:var(--cp-muted);text-align:center;font-size:12px}
+</style><style id="nest-os-css">
+.nest-os{margin:18px 0;padding:22px;border:1px solid rgba(255,255,255,.09);border-radius:24px;background:linear-gradient(135deg,rgba(10,16,29,.94),rgba(13,10,27,.88));box-shadow:0 22px 70px rgba(0,0,0,.28)}
+.nest-os-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.eyebrow{font:700 10px Montserrat,Arial;letter-spacing:.2em;color:#55e6ff}.nest-os h2{margin:5px 0 3px;font:700 clamp(24px,3vw,38px) Orbitron,Arial;color:#f4f7ff}.nest-os p{margin:0;color:#7f8da6;font-size:12px}.os-live{display:flex;align-items:center;gap:7px;font:700 10px Montserrat;color:#7f8da6}.os-live i{width:8px;height:8px;border-radius:50%;background:#7f8da6;box-shadow:0 0 12px currentColor}.os-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.os-card{min-height:112px;padding:15px;border:1px solid rgba(255,255,255,.08);border-radius:17px;background:rgba(255,255,255,.035);text-decoration:none;color:#f4f7ff;transition:.2s;display:flex;flex-direction:column;justify-content:flex-end}.os-card:hover{transform:translateY(-3px);border-color:rgba(85,230,255,.35);background:rgba(85,230,255,.055)}.os-card b{font:700 28px Orbitron,Arial;color:#55e6ff;margin-bottom:auto}.os-card span{font:700 10px Montserrat;letter-spacing:.15em}.os-card small{font-size:10px;color:#7f8da6;margin-top:4px}
+@media(max-width:900px){.os-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.nest-os{padding:16px}.nest-os-head{display:block}.os-live{margin-top:12px}.os-grid{grid-template-columns:1fr 1fr}.os-card{min-height:100px}}
 </style></head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav aria-label="CrowSpace global navigation"></nav><div id="account"></div></header>
@@ -374,7 +378,15 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 <div class="nest-metrics"><div class="nest-metric"><b id="nestMetricFriends">—</b><span>Friends</span></div><div class="nest-metric"><b id="nestMetricPosts">—</b><span>Wall Posts</span></div><div class="nest-metric"><b id="nestMetricVisitors">—</b><span>Visitors</span></div></div>
 </div>
 <aside class="nest-pulse"><div class="nest-kicker">NEST PULSE</div><h3 style="margin:7px 0">Live from your universe</h3><div class="pulse-list" id="nestPulseList"><div class="pulse-item">Connecting to your CrowSpace data…</div></div></aside>
-</section><section class="nest-activity" id="nestActivity">
+</section><section class="nest-os" id="nestOS">
+<div class="nest-os-head"><div><span class="eyebrow">CROWSPACE NEST OS</span><h2 id="osTitle">Your digital headquarters</h2><p id="osSubtitle">One Nest. One Universe.</p></div><div class="os-live"><i id="osDot"></i><span id="osLiveText">CONNECTING</span></div></div>
+<div class="os-grid">
+<a class="os-card" href="people.html"><b id="osPeople">—</b><span>NETWORK</span><small>People & connections</small></a>
+<a class="os-card" href="caws.html"><b id="osCaws">—</b><span>CAWS</span><small>Your social media</small></a>
+<a class="os-card" href="groups.html"><b id="osGroups">—</b><span>GROUPS</span><small>Communities & activity</small></a>
+<a class="os-card" href="notifications.html"><b id="osNotices">—</b><span>ALERTS</span><small>Unread notifications</small></a>
+<a class="os-card" href="dreamscapes.html"><b>∞</b><span>UNIVERSE</span><small>Dreamscapes & Memorials</small></a>
+</div></section><section class="nest-activity" id="nestActivity">
 <div class="nest-activity-head"><strong>⚡ Nest Activity</strong><span id="nestActivityState">Live · Supabase</span></div>
 <div class="nest-activity-list" id="nestActivityList"><div class="nest-activity-empty">Building your live activity stream…</div></div>
 </section><div class="modern-command-strip"><div class="modern-command"><div class="k">Your digital home</div><div class="v">One Nest. One Universe.</div></div><div class="modern-command"><div class="k">Presence</div><div class="v" id="modernPresence">● Connected</div></div><div class="modern-command"><div class="k">Identity</div><div class="v" id="modernIdentity">CrowSpace Member</div></div><div class="modern-command"><div class="k">Universe</div><div class="v">CrowRules</div></div></div><div class="profile-retro">
@@ -991,6 +1003,46 @@ body.avatar-modal-open{overflow:hidden}
  }
  document.addEventListener("DOMContentLoaded",()=>setTimeout(start,1400));
  window.addEventListener("beforeunload",()=>{if(channel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(channel);});
+})();
+</script><script id="nest-os-runtime">
+(function(){
+let osChannel=null,osPresence=null;
+const q=id=>document.getElementById(id);
+const set=(id,v)=>{if(q(id))q(id).textContent=v};
+async function counts(){
+ if(typeof crowSupabase==="undefined"||typeof uid==="undefined")return;
+ const [friends,caws,groups,notices]=await Promise.all([
+  crowSupabase.from("crowspace_friendships").select("id",{count:"exact",head:true}).or("requester_id.eq."+uid+",addressee_id.eq."+uid).eq("status","accepted"),
+  crowSupabase.from("crowspace_caws").select("id",{count:"exact",head:true}).eq("user_id",uid),
+  crowSupabase.from("crowspace_group_members").select("group_id",{count:"exact",head:true}).eq("user_id",uid),
+  crowSupabase.from("crowspace_notifications").select("id",{count:"exact",head:true}).eq("user_id",uid).is("read_at",null)
+ ]);
+ set("osPeople",friends.count??0);set("osCaws",caws.count??0);set("osGroups",groups.count??0);set("osNotices",notices.count??0);
+}
+function pulse(icon,title,detail,url){
+ const list=q("nestActivityList");if(!list)return;const empty=list.querySelector(".nest-activity-empty");if(empty)empty.remove();
+ const a=document.createElement("a");a.className="nest-activity-item";a.href=url||"notifications.html";
+ a.innerHTML='<div class="nest-activity-icon">'+icon+'</div><div class="nest-activity-copy"><b>'+((window.CS&&CS.escape)?CS.escape(title):title)+'</b><small>'+((window.CS&&CS.escape)?CS.escape(detail):detail)+' · just now</small></div><div class="nest-activity-arrow">›</div>';
+ list.prepend(a);while(list.children.length>10)list.lastElementChild.remove();
+}
+async function startOS(){
+ if(typeof crowSupabase==="undefined"||typeof uid==="undefined"||!uid)return;
+ await counts();
+ osChannel=crowSupabase.channel("nest-os:"+uid,{config:{presence:{key:uid}}})
+ .on("presence",{event:"sync"},()=>{const state=osChannel.presenceState();let n=0;Object.values(state).forEach(x=>n+=x.length);set("osLiveText",n+" ONLINE");})
+ .on("presence",{event:"join"},()=>{const state=osChannel.presenceState();let n=0;Object.values(state).forEach(x=>n+=x.length);set("osLiveText",n+" ONLINE");pulse("●","A member entered the Nest","Live presence","people.html")})
+ .on("presence",{event:"leave"},()=>{const state=osChannel.presenceState();let n=0;Object.values(state).forEach(x=>n+=x.length);set("osLiveText",n+" ONLINE")})
+ .on("broadcast",{event:"nest_event"},p=>{const x=p.payload||{};pulse(x.icon||"⚡",x.title||"Nest activity",x.detail||"Live update",x.url||"notifications.html")})
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},async p=>{const x=p.new||{};pulse("🔔",x.body||"New notification","Notification",x.post_id?"index.html#post-"+x.post_id:"notifications.html");counts()})
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>{counts();pulse("✦","Your Caw is live","New post","caws.html")})
+ .on("postgres_changes",{event:"UPDATE",schema:"public",table:"crowspace_friendships"},p=>{const x=p.new||{};if(x.status==="accepted"&&(x.requester_id===uid||x.addressee_id===uid)){counts();pulse("👥","A connection was accepted","Network","friends.html")}})
+ .subscribe(async status=>{
+   if(status==="SUBSCRIBED"){set("osLiveText","1 ONLINE");if(q("osDot"))q("osDot").style.background="#55e6ff";await osChannel.track({user_id:uid,page:"profile",online_at:new Date().toISOString()});}
+   else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){set("osLiveText","RECONNECTING")}
+ });
+}
+document.addEventListener("DOMContentLoaded",()=>setTimeout(startOS,1200));
+window.addEventListener("beforeunload",()=>{if(osChannel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(osChannel)});
 })();
 </script></body>
 </html>
