@@ -83,7 +83,16 @@ const preview=document.getElementById("preview"), cameraBtn=document.getElementB
 let stream=null, recorder=null, chunks=[], recordedBlob=null, recordedUrl=null, cameraFacing="user", captureMode="phone";
 const phoneModeBtn=document.getElementById("phoneModeBtn"), webcamModeBtn=document.getElementById("webcamModeBtn");
 function setCaptureMode(mode){captureMode=mode;phoneModeBtn.classList.toggle("mode-active",mode==="phone");webcamModeBtn.classList.toggle("mode-active",mode==="webcam");liveBadge.textContent=mode==="phone"?"● PHONE CAMERA READY":"● WEBCAM READY";document.getElementById("cameraDiagText").textContent=(mode==="phone"?"Phone mode selected. Use the front/rear camera on a mobile device.":"Webcam mode selected. Use your desktop/laptop webcam and microphone.")+" Click Enable Camera to start.";}
-setCaptureMode("phone");
+function detectCaptureMode(){
+  const mobile=/Android|iPhone|iPad|iPod|Windows Phone|Mobile/i.test(navigator.userAgent)||window.matchMedia?.("(pointer:coarse)").matches;
+  const mode=mobile?"phone":"webcam";
+  setCaptureMode(mode);
+  const label=mode==="phone"?"📱 Phone detected":"🖥️ Webcam detected";
+  liveBadge.textContent="● "+label.toUpperCase();
+  document.getElementById("cameraDiagText").textContent=(mode==="phone"?"CrowSpace detected a mobile device. Phone camera mode is ready.":"CrowSpace detected a desktop/laptop device. Webcam mode is ready.")+" Click Enable Camera to start.";
+  return mode;
+}
+detectCaptureMode();
 phoneModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("phone");cameraFacing="user";enableCamera("user");});
 webcamModeBtn.addEventListener("click",()=>{if(recorder&&recorder.state!=="inactive"){msg.textContent="Stop the current recording before changing capture mode.";return}setCaptureMode("webcam");cameraFacing="user";enableCamera("user");});
 
