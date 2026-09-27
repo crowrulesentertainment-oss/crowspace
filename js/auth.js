@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded",()=>{const c=window.crowSupabase,msg=document.getElementById("msg");if(!c)return;
 const setMsg=t=>{if(msg)msg.textContent=t};
+const oauthError=()=>{const h=new URLSearchParams(location.hash.replace(/^#/,"")),q=new URLSearchParams(location.search),code=h.get("error_code")||q.get("error_code"),desc=h.get("error_description")||q.get("error_description");if(code||desc){setMsg(decodeURIComponent(desc||code||"Google sign-in failed").replace(/\+/g," "));history.replaceState({},document.title,location.pathname+location.search.replace(/([?&])(error|error_code|error_description)=[^&]*/g,"").replace(/[?&]$/,""));return true}return false};
+oauthError();
 const profileFor=async u=>{if(!u)return null;const m=u.user_metadata||{},email=u.email||"",base=(email.split("@")[0]||"crowmember").toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,30)||"crowmember";const display_name=m.display_name||m.full_name||m.name||email.split("@")[0]||"CrowSpace Member",avatar_url=m.avatar_url||m.picture||"",wanted=(m.username||base).toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,30)||"crowmember";
 const {data:existing}=await c.from("membership_profiles").select("id,display_name,username,bio,avatar_url").eq("id",u.id).maybeSingle();if(existing)return existing;
 let username=wanted;let {data,error}=await c.from("membership_profiles").insert({id:u.id,display_name,username,bio:"",avatar_url,updated_at:new Date().toISOString()}).select().maybeSingle();
