@@ -267,16 +267,29 @@ async function graph(){
   sb.rpc("crowspace_predictive_trends",{p_limit:50})
  ]);
  const rows=edges.data||[];
- const ids=[...new Set(rows.filter(x=>x.source_kind==="person").map(x=>x.source_id).concat(rows.filter(x=>x.target_kind==="person").map(x=>x.target_id)))].filter(x=>x!==user.id);
- const people=await getProfiles(ids),pmap=new Map(people.map(p=>[p.user_id,p]));
- const names={person:id=>pmap.get(id)?.display_name||pmap.get(id)?.username||"Member"};
- const label=(kind,id)=>kind==="person"?names.person(id):kind.replace("_"," ");
- const nodes=new Map(); rows.forEach(x=>{nodes.set(x.source_kind+":"+x.source_id,{kind:x.source_kind,id:x.source_id});nodes.set(x.target_kind+":"+x.target_id,{kind:x.target_kind,id:x.target_id})});
- const html=[...nodes.values()].filter(x=>!(x.kind==="person"&&x.id===user.id)).slice(0,40).map(x=>card('<span class="kicker">GRAPH NODE · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(label(x.kind,x.id))+'</h2><p class="muted">Connected to your CrowSpace graph.</p>')).join("")||card('<p class="muted">Your personal graph is beginning to build. New relationships appear as you follow, connect, post, join communities, enter CrowRooms and RSVP to events.</p>');
+ const nodes=new Map();
+ rows.forEach(x=>{
+  const other=x.source_kind==="person"&&x.source_id===user.id?{kind:x.target_kind,id:x.target_id}:x.target_kind==="person"&&x.target_id===user.id?{kind:x.source_kind,id:x.source_id}:null;
+  if(other&&!(other.kind==="person"&&other.id===user.id)){
+   const key=other.kind+":"+other.id;
+   const prev=nodes.get(key);
+   nodes.set(key,{...other,strength:Math.max(Number(prev?.strength||0),Number(x.strength||0)),count:Math.max(Number(prev?.count||0),Number(x.interaction_count||0)),relationship:x.relationship,last_seen_at:x.last_seen_at});
+  }
+ });
+ const ids=[...nodes.values()].filter(x=>x.kind==="person").map(x=>x.id), people=await getProfiles(ids),pmap=new Map(people.map(p=>[p.user_id,p]));
+ const label=(kind,id)=>kind==="person"?(pmap.get(id)?.display_name||pmap.get(id)?.username||"Member"):kind.replace("_"," ");
+ const items=[...nodes.values()].sort((a,b)=>b.strength-a.strength).slice(0,24);
+ const w=900,h=Math.max(420,Math.min(680,220+items.length*18)),cx=w/2,cy=h/2;
+ const positioned=items.map((x,i)=>{const ang=(Math.PI*2*i/Math.max(1,items.length))-(Math.PI/2),r=Math.min(190,145+items.length*2);return {...x,x:cx+Math.cos(ang)*r,y:cy+Math.sin(ang)*r}});
+ const svg='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Personal CrowSpace social graph" style="width:100%;height:auto;display:block">'+
+  positioned.map(x=>'<line x1="'+cx+'" y1="'+cy+'" x2="'+x.x.toFixed(1)+'" y2="'+x.y.toFixed(1)+'" stroke="currentColor" opacity=".22" />').join("")+
+  '<circle cx="'+cx+'" cy="'+cy+'" r="34" fill="none" stroke="currentColor" stroke-width="2"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" font-size="13" fill="currentColor">'+esc((profile.data?.display_name||"YOU").slice(0,18))+'</text>'+
+  positioned.map(x=>'<g><circle cx="'+x.x.toFixed(1)+'" cy="'+x.y.toFixed(1)+'" r="25" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="'+x.x.toFixed(1)+'" y="'+(x.y+4).toFixed(1)+'" text-anchor="middle" font-size="10" fill="currentColor">'+esc(label(x.kind,x.id).slice(0,12))+'</text></g>').join("")+
+  '</svg>';
+ const cards=items.map(x=>card('<span class="kicker">GRAPH NODE · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(label(x.kind,x.id))+'</h2><p class="muted">'+esc(x.relationship||"connected")+' · Strength '+esc(String(x.strength))+' · Interactions '+esc(String(x.count))+'</p>')).join("")||card('<p class="muted">Your personal graph is beginning to build. New relationships appear as you follow, connect, post, join communities, enter CrowRooms and RSVP to events.</p>');
  const trendHtml=(trends.data||[]).filter(x=>x.direction==="rising").slice(0,6).map(x=>card('<span class="kicker">RISING · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(x.kind)+'</h2><p class="muted">'+esc(x.explanation)+'</p><p>Momentum: <strong>'+esc(String(x.momentum))+'</strong> · Acceleration: <strong>'+esc(String(x.acceleration))+'</strong></p>')).join("")||card('<p class="muted">No rising graph trends yet.</p>');
- app.innerHTML=shell("My Graph","A live view of your personal CrowSpace universe.",card('<span class="kicker">CROWSPACE 4.24</span><h2>Personal Social Graph</h2><p class="muted">'+esc(profile.data?.display_name||"Your")+" graph connects people, topics, content, communities, CrowRooms and events.</p><div class="filter-row"><button class="btn" data-act="graph:refresh">Refresh Graph</button><a class="btn" href="discover.html">Discover</a></div>')+'<h2>🌎 Your Connections</h2><div class="grid">'+html+'</div><h2>🔥 Rising Around Your Universe</h2><div class="grid">'+trendHtml+'</div>');
-}
-async function customize(){
+ app.innerHTML=shell("My Graph","A live view of your personal CrowSpace universe.",card('<span class="kicker">CROWSPACE 4.26</span><h2>Interactive Personal Graph</h2><p class="muted">'+esc(profile.data?.display_name||"Your")+" graph visualizes the real relationships currently captured by CrowSpace intelligence.</p><div class="filter-row"><button class="btn" data-act="graph:refresh">Refresh Graph</button><a class="btn" href="discover.html">Discover</a></div>')+'<section class="card" style="overflow:hidden;margin-bottom:24px">'+svg+'</section><h2>🔗 Graph Connections</h2><div class="grid">'+cards+'</div><h2>🔥 Rising Around Your Universe</h2><div class="grid">'+trendHtml+'</div>');
+}async function customize(){
  if(!user){app.innerHTML=shell("Customize My Space","Persistent profile studio.",gate());return}
  const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single()).data;
  app.innerHTML=shell("Customize My Space","Changes are stored in Supabase.",card(`<form id="crProfile"><label>Display name</label><input class="search" name="display_name" value="${esc(u?.display_name||"")}"><label>Username</label><input class="search" name="username" value="${esc(u?.username||"")}"><label>Bio</label><textarea class="search" name="bio" rows="5">${esc(u?.bio||"")}</textarea><label>Location</label><input class="search" name="location" value="${esc(u?.location||"")}"><label>Avatar URL</label><input class="search" name="avatar_url" value="${esc(u?.avatar_url||"")}"><label>Banner URL</label><input class="search" name="banner_url" value="${esc(u?.banner_url||"")}"><label>Interests</label><input class="search" name="interests" value="${esc(u?.interests||"")}"><label>Music URL</label><input class="search" name="music_url" value="${esc(u?.music_url||"")}"><button class="btn">Save My Space</button></form>`));
