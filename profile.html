@@ -759,7 +759,7 @@ text("tagline",nestSettings.tagline||"Welcome to my CrowSpace Nest.");text("stat
       err("profile visit",ve);
     }
     const d={};
-    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]); renderClassicDetails(); renderClassicMusic(); await renderClassicTop8(); await renderClassicTestimonials(); setupClassicThemes(); text("shareUrl",classicUrl());
+    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]); text("shareUrl",classicUrl());
     const map={top8Section:"show_top_friends",interestsSection:"show_interests",musicSection:"show_music",photosSection:"show_photos",cawsSection:"show_caws",groupsSection:"show_groups",eventsSection:"show_events",guestbookSection:"show_guestbook"};
     Object.keys(map).forEach(id=>{const el=$(id);if(el&&nestSettings[map[id]]===false)el.style.display="none"});
     $("guestForm").style.display=viewer?.id===uid?"none":"grid";
