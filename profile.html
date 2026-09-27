@@ -902,7 +902,7 @@ body.avatar-modal-open{overflow:hidden}
 </script><script id="social-links-runtime">
 (function(){
 const social=document.getElementById("socialLinksList");
-function safeUrl(v){try{const u=new URL(v);return ["http:","https:"].includes(u.protocol)?u.href:""}catch(e){return""}}
+function safeUrl(v){try{let s=String(v||"").trim();if(/^discord\\.gg\\//i.test(s))s="https://"+s;const u=new URL(s);return ["http:","https:"].includes(u.protocol)?u.href:""}catch(e){return""}}
 function socialName(url){
  const h=new URL(url).hostname.replace(/^www\./,"");
  if(/instagram/.test(h))return["Instagram","instagram"];
@@ -914,7 +914,7 @@ function socialName(url){
  if(/threads/.test(h))return["Threads","threads"];
  if(/github/.test(h))return["GitHub","github"];
  if(/twitch/.test(h))return["Twitch","twitch"];
- if(/discord/.test(h))return["Discord","discord"];
+ if(h==="discord.gg"||/(^|\\.)discord\.com$/.test(h)||/(^|\\.)discordapp\.com$/.test(h))return["Discord","discord"];
  return[h,"website"];
 }
 function logo(type){
