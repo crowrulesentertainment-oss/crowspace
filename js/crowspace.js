@@ -47,7 +47,7 @@ CS.installGlobalSearch=()=>{
  document.addEventListener("click",e=>{if(!box.contains(e.target))results.hidden=true});
 };
 CS.injectGlobalNavStyles=()=>{if(document.getElementById("crow-global-nav-styles"))return;const s=document.createElement("style");s.id="crow-global-nav-styles";s.textContent=`
-.site-header{gap:10px;position:relative;z-index:100}
+.site-header{gap:10px;position:relative;z-index:100}\n.nav-toggle{display:none!important}
 .site-header>nav{display:flex!important;align-items:center;justify-content:flex-end;gap:5px;min-width:0;flex:1 1 auto;overflow:visible}
 .crow-nav-shell{display:flex;align-items:center;gap:5px;width:100%;min-width:0}
 .crow-nav-home{display:inline-flex;align-items:center;justify-content:center;padding:9px 11px;border-radius:9px;color:var(--text,#222);font-weight:800;font-size:12px;white-space:nowrap}
@@ -100,11 +100,15 @@ CS.refreshHeader=async()=>{
    ];
    const link=x=>'<a href="'+CS.escape(x.href)+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
    nav.innerHTML='<div class="crow-nav-shell"><a class="crow-nav-home'+(path==="index.html"?' active" aria-current="page"':'"')+' href="index.html">⌂ Home</a><div class="crow-nav-groups">'+groups.map((g,i)=>'<div class="crow-nav-group"><button type="button" class="crow-nav-trigger" aria-expanded="false" aria-controls="crow-nav-panel-'+i+'">'+CS.escape(g[0])+' <span class="chevron">▼</span></button><div id="crow-nav-panel-'+i+'" class="crow-nav-panel" role="menu" aria-hidden="true"><div class="crow-nav-panel-title">'+CS.escape(g[0])+'</div>'+g[1].map(link).join("")+'</div></div>').join("")+'</div></div>';
-   const closeAll=()=>nav.querySelectorAll(".crow-nav-trigger").forEach(b=>{b.classList.remove("is-open");b.setAttribute("aria-expanded","false");const p=nav.querySelector("#"+CSS.escape(b.getAttribute("aria-controls")));if(p){p.classList.remove("is-open");p.setAttribute("aria-hidden","true")}});
-   nav.querySelectorAll(".crow-nav-trigger").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();const panel=nav.querySelector("#"+CSS.escape(btn.getAttribute("aria-controls")));const open=!btn.classList.contains("is-open");closeAll();if(open){btn.classList.add("is-open");btn.setAttribute("aria-expanded","true");panel?.classList.add("is-open");panel?.setAttribute("aria-hidden","false")}}));
+   const closeAll=()=>nav.querySelectorAll(".crow-nav-trigger").forEach(b=>{b.classList.remove("is-open");b.setAttribute("aria-expanded","false");const p=b.nextElementSibling;if(p){p.classList.remove("is-open");p.setAttribute("aria-hidden","true")}});
+   nav.querySelectorAll(".crow-nav-trigger").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();const panel=btn.nextElementSibling;const open=!btn.classList.contains("is-open");closeAll();if(open){btn.classList.add("is-open");btn.setAttribute("aria-expanded","true");panel?.classList.add("is-open");panel?.setAttribute("aria-hidden","false")}}));
    nav.querySelectorAll(".crow-nav-panel a").forEach(a=>a.addEventListener("click",closeAll));
-   document.addEventListener("click",e=>{if(!nav.contains(e.target))closeAll()});
-   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeAll()});
+   if(CS._navOutsideClick)document.removeEventListener("click",CS._navOutsideClick);
+   if(CS._navEscape)document.removeEventListener("keydown",CS._navEscape);
+   CS._navOutsideClick=e=>{if(!nav.contains(e.target))closeAll()};
+   CS._navEscape=e=>{if(e.key==="Escape")closeAll()};
+   document.addEventListener("click",CS._navOutsideClick);
+   document.addEventListener("keydown",CS._navEscape);
    CS.installGlobalSearch();
  }
  const el=document.getElementById("account"); if(!el)return;
