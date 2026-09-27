@@ -1,1 +1,0 @@
-// CrowSpace 5.0: page rendering is handled by js/supabase-app.js. Kept as a compatibility stub for older cached pages.\n
