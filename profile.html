@@ -551,7 +551,8 @@ async function renderActions(){
     if(action==="remove"){await CS.unfriend(uid)}
     else {await friendAction(action)}
   });
-  a.querySelector("[data-follow-action]")?.addEventListener("click",followAction);\n  a.querySelector("[data-avatar-open]")?.addEventListener("click",openAvatarModal);
+  a.querySelector("[data-follow-action]")?.addEventListener("click",followAction);
+  a.querySelector("[data-avatar-open]")?.addEventListener("click",openAvatarModal);
 }
 
 async function friendAction(action){
@@ -775,7 +776,8 @@ $("guestForm").addEventListener("submit",async e=>{
   if(error)alert(error.message);else{$("guestBody").value="";text("guestCount","0 / 1000");await load()}
 });
 
-document.addEventListener("click",async e=>{if(e.target.id!=="copyProfileUrl")return;try{await navigator.clipboard.writeText($("shareUrl").value);text("copyStatus","Profile URL copied.");}catch(_){$("shareUrl").select();document.execCommand("copy");text("copyStatus","Profile URL copied.");}});\ndocument.addEventListener("DOMContentLoaded",async()=>{
+document.addEventListener("click",async e=>{if(e.target.id!=="copyProfileUrl")return;try{await navigator.clipboard.writeText($("shareUrl").value);text("copyStatus","Profile URL copied.");}catch(_){$("shareUrl").select();document.execCommand("copy");text("copyStatus","Profile URL copied.");}});
+document.addEventListener("DOMContentLoaded",async()=>{
   viewer=await CS.user();
   uid=qs.get("id")||viewer?.id;
   if(!uid){location.href="login.html";return}
