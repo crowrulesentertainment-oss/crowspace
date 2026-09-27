@@ -1,56 +1,429 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Nest | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav><a href="index.html">Home</a><a class="active" href="profile.html">My Nest</a><a href="people.html">People</a><a href="friends.html">Friends</a><a href="caws.html">Caws</a><a href="albums.html">Photos</a><a href="groups.html">Groups</a><a href="events.html">Events</a><a href="notifications.html">Messages</a></nav><div id="account"></div></header><main class="nest-shell"><section class="nest-cover"><div class="nest-avatar" id="avatar">C</div><div><p class="eyebrow" id="eyebrow">MY NEST</p><h1 class="nest-name" id="name">Loading…</h1><div class="nest-handle" id="handle"></div><p id="tagline" class="lead"></p><p id="statusText" class="nest-status-text"></p><p id="about" class="muted"></p><div class="nest-stats"><span class="nest-stat" id="friendStat">0 Friends</span><span class="nest-stat" id="followerStat">0 Followers</span><span class="nest-stat" id="postStat">0 Posts</span><span class="nest-stat" id="onlineStat"></span></div><div id="socialSnapshot" class="social-stats"></div><div class="nest-actions" id="actions"></div></div></section>
-<div id="worldLinks" class="activity-links"></div><div id="mutualPeople"></div><div class="nest-layout"><div>
-<section class="nest-box"><div class="nest-section-title"><h2>Bulletin Board</h2><a href="index.html">Back to Feed →</a></div><form id="wallForm" class="nest-wall-form"><textarea id="wallBody" maxlength="2000" placeholder="What's on your mind?"></textarea><button class="btn primary">Post to My Wall</button></form><div id="posts"></div></section>
-<section class="nest-box" style="margin-top:18px"><div class="nest-section-title"><h2>About Me</h2><a href="customize.html">Customize →</a></div><p id="aboutLong" class="muted"></p><div id="interests"></div></section>
-<section class="nest-box" style="margin-top:18px"><div class="nest-section-title"><h2>Your Nest Timeline</h2><span class="event-tag">LIVE NEST</span></div><div id="friendActivity"><p class="muted">Loading your Nest timeline…</p></div></section><section class="nest-box" id="guestbookSection" style="margin-top:18px"><h2>Guestbook</h2><form id="guestForm"><textarea id="guestBody" maxlength="1000" placeholder="Leave a message on this Nest…"></textarea><button class="btn primary">Sign Guestbook</button></form><div id="guestbook"></div></section>
-</div><aside class="nest-sidebar">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Nest | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header>
+
+<main class="nest-shell">
+<section class="nest-cover" id="nestCover">
+  <div class="nest-avatar" id="avatar">C</div>
+  <div class="nest-cover-copy">
+    <p class="eyebrow" id="eyebrow">MY NEST</p>
+    <h1 class="nest-name" id="name">Loading…</h1>
+    <div class="nest-handle" id="handle"></div>
+    <p id="tagline" class="lead"></p>
+    <p id="statusText" class="nest-status-text"></p>
+    <p id="about" class="muted"></p>
+    <div class="nest-stats">
+      <span class="nest-stat" id="friendStat">0 Friends</span>
+      <span class="nest-stat" id="followerStat">0 Followers</span>
+      <span class="nest-stat" id="postStat">0 Posts</span>
+      <span class="nest-stat" id="onlineStat"></span>
+    </div>
+    <div id="socialSnapshot" class="social-stats"></div>
+    <div class="nest-actions" id="actions"></div>
+  </div>
+</section>
+
+<section class="nest-box universal-nest-panel" id="nestMembership">
+  <div class="nest-section-title"><div><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h2>Universal CrowRules Membership</h2></div><a href="membership.html">Membership Center →</a></div>
+  <div id="nestMembershipBody"><p class="muted">Loading membership…</p></div>
+</section>
+
+<div id="worldLinks" class="activity-links"></div>
+<div id="mutualPeople"></div>
+
+<div class="nest-layout">
+<div>
+<section class="nest-box">
+  <div class="nest-section-title"><h2>Bulletin Board</h2><a href="index.html">Back to Feed →</a></div>
+  <form id="wallForm" class="nest-wall-form">
+    <textarea id="wallBody" maxlength="2000" placeholder="What's on your mind?"></textarea>
+    <div class="form-actions"><small id="wallCount" class="muted">0 / 2000</small><button class="btn primary" type="submit">Post to My Wall</button></div>
+  </form>
+  <div id="posts"><p class="muted">Loading posts…</p></div>
+</section>
+
+<section class="nest-box" style="margin-top:18px">
+  <div class="nest-section-title"><h2>About Me</h2><a href="customize.html">Customize →</a></div>
+  <p id="aboutLong" class="muted"></p>
+  <div id="interests"></div>
+</section>
+
+<section class="nest-box" style="margin-top:18px">
+  <div class="nest-section-title"><h2>Nest Timeline</h2><span class="event-tag">LIVE NEST</span></div>
+  <div id="friendActivity"><p class="muted">Loading your Nest timeline…</p></div>
+</section>
+
+<section class="nest-box" id="guestbookSection" style="margin-top:18px">
+  <div class="nest-section-title"><h2>Guestbook</h2><span class="muted">Leave a message</span></div>
+  <form id="guestForm"><textarea id="guestBody" maxlength="1000" placeholder="Leave a message on this Nest…"></textarea><div class="form-actions"><small id="guestCount" class="muted">0 / 1000</small><button class="btn primary" type="submit">Sign Guestbook</button></div></form>
+  <div id="guestbook"></div>
+</section>
+</div>
+
+<aside class="nest-sidebar">
 <section class="nest-box" id="top8Section"><div class="nest-section-title"><h2>My Top 8</h2><a class="btn" href="customize.html#top8">Edit Top 8</a></div><div id="topFriends"></div><a class="btn" href="friends.html">View All Friends</a></section>
 <section class="nest-box" id="interestsSection"><h2>Interests</h2><div id="interestList"></div></section>
 <section class="nest-box" id="musicSection"><h2>Music</h2><p id="music" class="muted">No favorite music added.</p><div id="musicPlayer"></div></section>
 <section class="nest-box"><h2>Movies & Shows</h2><p id="favorites" class="muted">No favorites added.</p></section>
-<section class="nest-box" id="photosSection"><div class="nest-section-title"><h2>Photos</h2><a href="albums.html">All Photos →</a></div><div id="photoGallery" class="nest-photo-grid"></div><div id="photoComments" class="photo-comments"></div></section>
+<section class="nest-box" id="photosSection"><div class="nest-section-title"><h2>Photos</h2><a href="albums.html">All Photos →</a></div><div id="photoGallery" class="nest-photo-grid"></div></section>
 <section class="nest-box" id="cawsSection"><h2>Caws</h2><div id="cawsList"></div><a class="btn" href="caws.html">View Caws →</a></section>
 <section class="nest-box" id="groupsSection"><h2>Groups</h2><div id="groupsList"></div><a class="btn" href="groups.html">Explore Groups →</a></section>
-<section class="nest-box" id="visitorsSection"><h2>Profile Visitors</h2><div id="visitors"><p class="muted">Your recent visitors will appear here.</p></div></section><section class="nest-box" id="onlineSection"><h2>Who's Online</h2><div id="online"><p class="muted">Checking presence…</p></div></section><section class="nest-box" id="eventsSection"><h2>Events</h2><div id="community"></div><a class="btn" href="events.html">View Events →</a></section>
-</aside></div></main><footer><span>CrowSpace · One Account. One Universe.</span><span>MySpace-inspired social experience</span></footer><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>
-let uid,viewer,prof;const esc=CS.escape,qs=new URLSearchParams(location.search);
-const publicNav='<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav><a href="index.html">Home</a><a class="active" href="profile.html">My Nest</a><a href="people.html">People</a><a href="friends.html">Friends</a><a href="caws.html">Caws</a><a href="albums.html">Photos</a><a href="groups.html">Groups</a><a href="events.html">Events</a><a href="notifications.html">Messages</a></nav><div id="account"></div></header>';
-document.querySelector(".site-header").outerHTML=publicNav;
-async function people(ids){if(!ids?.length)return{};const {data}=await crowSupabase.rpc("crowspace_public_profiles_by_ids",{ids});return Object.fromEntries((data||[]).map(x=>[x.id,x]))}
-async function relationshipButtons(){if(!viewer)return '<a class="btn primary" href="login.html">Sign In to Connect</a>';if(viewer.id===uid)return '<a class="btn primary" href="customize.html">Customize My Nest</a><a class="btn" href="friends.html">Friends</a>';const {data:f}=await crowSupabase.from("crowspace_friendships").select("requester_id,addressee_id,status").or("requester_id.eq."+viewer.id+",addressee_id.eq."+viewer.id);const rel=(f||[]).find(x=>x.requester_id===uid||x.addressee_id===uid);let h=rel?.status==="accepted"?'<button class="btn primary">✓ Friends</button>':rel?.status==="pending"?(rel.requester_id===viewer.id?'<button class="btn" disabled>Request Sent</button>':'<button class="btn primary" onclick="friendAction(\'accept\')">Accept Friend</button><button class="btn" onclick="friendAction(\'decline\')">Decline</button>'):'<button class="btn primary" onclick="friendAction(\'add\')">Add Friend</button>';const {data:fl}=await crowSupabase.from("crowspace_follows").select("follower_id").eq("follower_id",viewer.id).eq("followed_user_id",uid).maybeSingle();h+=fl?'<button class="btn" onclick="followAction()">Following</button>':'<button class="btn" onclick="followAction()">Follow</button>';const {data:mf}=await crowSupabase.rpc("crowspace_mutual_friends",{target:uid});if(mf?.length)h+='<span class="event-tag">🤝 '+mf.length+' mutual friend'+(mf.length===1?'':'s')+'</span>';return h}
-function applyNestStyle(s){if(!s)return;const root=document.documentElement;if(s.accent){root.style.setProperty("--blue",s.accent);root.style.setProperty("--blue2",s.accent+"18")}if(s.background_url){document.body.style.backgroundImage="url(\""+s.background_url.replace(/"/g,"\\\"")+"\")";document.body.style.backgroundSize="cover";document.body.style.backgroundAttachment="fixed";}}\nasync function load(){const {data}=await crowSupabase.rpc("crowspace_profile_public",{target:uid});prof=Array.isArray(data)?data[0]:data;if(!prof){document.getElementById("profile")?.remove();document.querySelector(".nest-shell").innerHTML='<section class="nest-box"><h1>Nest not found</h1><a class="btn" href="index.html">Back Home</a></section>';return}const {data:s}=await crowSupabase.from("crowspace_nest_settings").select("*").eq("user_id",uid).maybeSingle();applyNestStyle(s);const n=prof.display_name||prof.username||"CrowSpace Member";document.title=n+" | CrowSpace";document.getElementById("name").textContent=n;document.getElementById("handle").textContent="@"+(prof.username||"member");document.getElementById("avatar").textContent=n.slice(0,1).toUpperCase();document.getElementById("tagline").textContent=s?.tagline||"Welcome to my CrowSpace Nest.";document.getElementById("statusText").textContent=s?.status_text||"";document.getElementById("about").textContent=s?.about_me||prof.bio||"";document.getElementById("aboutLong").textContent=s?.about_me||prof.bio||"This member hasn't added an About Me yet.";document.getElementById("eyebrow").textContent=viewer?.id===uid?"MY NEST":"CROWSPACE NEST";document.getElementById("actions").innerHTML=await relationshipButtons();
-if(viewer){await crowSupabase.from("crowspace_presence").upsert({user_id:viewer.id,last_seen_at:new Date().toISOString()},{onConflict:"user_id"});if(viewer.id!==uid)await crowSupabase.from("crowspace_profile_visits").insert({profile_id:uid,visitor_id:viewer.id});}
-const {data:n31,error:n31Error}=await crowSupabase.rpc("crowspace_nest_3_1",{target:uid});const d=n31||{};let timeline=[];const graph=await CS.socialGraph(250);const related=[uid,...graph.filter(x=>x.relationship==="friend").map(x=>x.id)];const {data:recentPosts}=await crowSupabase.from("crowspace_posts").select("id,user_id,body,created_at").in("user_id",related).order("created_at",{ascending:false}).limit(20);timeline=(recentPosts||[]).map(x=>({id:x.id,actor_id:x.user_id,kind:"post",body:x.body,created_at:x.created_at,target_url:"profile.html?id="+x.user_id}));const tp=await people([...new Set(timeline.map(x=>x.actor_id).filter(Boolean))]);friendActivity.innerHTML=timeline.length?timeline.map(x=>{const a=tp[x.actor_id]||{};const labels={post:"📰 Post",caw:"🐦 Caw",photo:"📸 Photo",photo_comment:"💬 Photo Comment",guestbook:"✍️ Guestbook",friendship:"👥 Friendship",like:"❤️ Like",comment:"💬 Comment",follow:"👋 Follow",friend_request:"🤝 Friend Request",friend_accept:"🤝 Friendship Accepted"};return `<article class="nest-wall-post"><div class="post-head"><a class="avatar sm" href="profile.html?id=${encodeURIComponent(x.actor_id||uid)}">${esc((a.display_name||a.username||"C").slice(0,1).toUpperCase())}</a><div><strong><a href="profile.html?id=${encodeURIComponent(x.actor_id||uid)}">${esc(a.display_name||"CrowSpace Member")}</a></strong><small>${labels[x.kind]||"✨ Activity"} · ${new Date(x.created_at).toLocaleString()}</small></div></div><p>${esc(x.body||"")}</p><a class="btn" href="${esc(x.target_url||"profile.html?id="+uid)}">Open →</a></article>`}).join(""):"<p class=\"muted\">No recent activity yet.</p>";const vd=d.visitors||[];visitors.innerHTML=vd.length?vd.map(v=>'<div class="nest-profile-row"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(v.id)+'">'+esc((v.display_name||v.username||"C").slice(0,1).toUpperCase())+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(v.id)+'">'+esc(v.display_name||"Member")+'</a></strong><br><small class="muted">'+new Date(v.visited_at).toLocaleString()+'</small></div></div>').join(""):'<p class="muted">No visitors yet.</p>';
-const act=timeline.length?timeline:(d.activity||[]);const ap=await people([...new Set(act.map(x=>x.actor_id).filter(Boolean))]);friendActivity.innerHTML=act.length?act.map(x=>{const a=ap[x.actor_id]||{};const label=x.kind==="caw"?"🐦 Caw":x.kind==="photo"?"📸 Photo":"📰 Post";return '<article class="nest-wall-post"><div class="post-head"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.actor_id)+'">'+esc((a.display_name||a.username||"C").slice(0,1).toUpperCase())+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(x.actor_id)+'">'+esc(a.display_name||"Member")+'</a></strong><small>'+label+' · '+new Date(x.created_at).toLocaleString()+'</small></div></div><p>'+esc(x.body||"")+'</p></article>'}).join(""):'<p class="muted">No recent friend activity yet.</p>';
-const {data:presence}=await crowSupabase.from("crowspace_presence").select("user_id,last_seen_at").gte("last_seen_at",new Date(Date.now()-300000).toISOString()).limit(20);const op=await people((presence||[]).map(x=>x.user_id));online.innerHTML=(presence||[]).length?presence.map(x=>{const a=op[x.user_id]||{};return '<div class="nest-profile-row"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc((a.display_name||a.username||"C").slice(0,1).toUpperCase())+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(a.display_name||"Member")+'</a></strong><br><span class="online-dot">● Online</span></div></div>'}).join(""):'<p class="muted">No one is online right now.</p>';
-const {data:fr}=await crowSupabase.rpc("crowspace_connection_people");const friends=(fr||[]).filter(x=>x.relation==="friend"), followers=(fr||[]).filter(x=>x.relation==="follower");friendStat.textContent=friends.length+" Friends";followerStat.textContent=followers.length+" Followers";
-const targetGraph=(await CS.socialGraph(250)).find(x=>x.id===uid);
-if(targetGraph){
-  onlineStat.innerHTML=targetGraph.is_online?'<span class="online-dot">● Online now</span>':'<span class="muted">Offline</span>';
-  socialSnapshot.innerHTML=[["Friends",targetGraph.friend_count],["Followers",targetGraph.follower_count],["Following",targetGraph.following_count],["Mutual",targetGraph.mutual_friends_count],["Caws",targetGraph.caw_count],["Photos",targetGraph.photo_count],["Groups",targetGraph.group_count],["Events",targetGraph.event_count]].map(x=>'<div class="social-stat"><strong>'+Number(x[1]||0)+'</strong>'+esc(x[0])+'</div>').join("");
-  worldLinks.innerHTML=CS.activityLinks(targetGraph);
-  const mutual=(await CS.socialGraph(250)).filter(x=>x.id!==uid&&x.mutual_friends_count>0).sort((a,b)=>b.mutual_friends_count-a.mutual_friends_count).slice(0,4);
-  mutualPeople.innerHTML=mutual.length?'<h3>People you may know</h3>'+mutual.map(x=>CS.personCard(x)).join(""):"";
-}else{
-  worldLinks.innerHTML='<a href="caws.html?user='+encodeURIComponent(uid)+'">Caws</a><a href="albums.html?user='+encodeURIComponent(uid)+'">Photos</a><a href="groups.html?user='+encodeURIComponent(uid)+'">Groups</a><a href="events.html?user='+encodeURIComponent(uid)+'">Events</a>';
-}
-const ids=friends.slice(0,8).map(x=>x.id),fm=Object.fromEntries(friends.map(x=>[x.id,x]));topFriends.innerHTML=friends.slice(0,8).map(x=>'<div class="nest-profile-row"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.id)+'">'+esc((x.display_name||x.username||"C").slice(0,1).toUpperCase())+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(x.id)+'">'+esc(x.display_name||"Member")+'</a></strong><br><small class="muted">@'+esc(x.username||"member")+'</small></div></div>').join("")||'<p class="muted">No friends yet.</p>';
-const {data:i}=await crowSupabase.from("crowspace_interests").select("category,interest").eq("user_id",uid);const ints=i||[];interestList.innerHTML=ints.map(x=>'<span class="event-tag" style="margin:3px">'+esc(x.interest)+'</span>').join("")||'<p class="muted">No interests yet.</p>';interests.innerHTML=interestList.innerHTML;
-music.textContent=s?.favorite_song||s?.favorite_music||"No favorite music added.";const musicPlayer=document.getElementById("musicPlayer");if(musicPlayer)musicPlayer.innerHTML=s?.favorite_song_url?'<audio controls preload="none" src="'+esc(s.favorite_song_url)+'"></audio>':s?.favorite_song?'<strong>♫ '+esc(s.favorite_song)+'</strong><small>Favorite song</small>':'<span class="muted">No favorite song selected.</span>';favorites.textContent=[s?.favorite_movies&&"Movies: "+s.favorite_movies,s?.favorite_shows&&"Shows: "+s.favorite_shows].filter(Boolean).join(" · ")||"No favorites added.";
-const {data:ps}=await crowSupabase.from("crowspace_posts").select("id,body,created_at,like_count,comment_count").eq("user_id",uid).order("created_at",{ascending:false}).limit(10);postStat.textContent=(ps||[]).length+" Posts";posts.innerHTML=(ps||[]).map(x=>'<article class="nest-wall-post"><div class="post-head"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(uid)+'">'+esc(n.slice(0,1).toUpperCase())+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(uid)+'">'+esc(n)+'</a></strong><small>@'+esc(prof.username||"member")+' · '+new Date(x.created_at).toLocaleString()+'</small></div></div><p>'+esc(x.body)+'</p><div class="post-actions"><button class="btn" onclick="likeWall(\''+x.id+'\')">❤️ '+Number(x.like_count||0)+'</button><button class="btn" onclick="toggleComments(\''+x.id+'\')">💬 '+Number(x.comment_count||0)+'</button></div><div id="comments-'+x.id+'" class="inline-comments" hidden></div></article>').join("")||'<p class="muted">No bulletin posts yet.</p>';
-const {data:g}=await crowSupabase.from("crowspace_guestbook").select("body,created_at,author_id").eq("profile_id",uid).order("created_at",{ascending:false}).limit(10);const amap=await people([...new Set((g||[]).map(x=>x.author_id).filter(Boolean))]);guestbook.innerHTML=(g||[]).map(x=>{const a=amap[x.author_id]||{};return '<article class="guestbook-entry"><a href="profile.html?id='+encodeURIComponent(x.author_id)+'"><span class="avatar sm">'+esc((a.display_name||a.username||"C").slice(0,1).toUpperCase())+'</span> <strong>'+esc(a.display_name||a.username||"Member")+'</strong></a><p>'+esc(x.body)+'</p><small class="muted">'+new Date(x.created_at).toLocaleString()+'</small></article>'}).join("")||'<p class="muted">Guestbook is waiting for its first message.</p>';
+<section class="nest-box" id="visitorsSection"><h2>Profile Visitors</h2><div id="visitors"><p class="muted">Your recent visitors will appear here.</p></div></section>
+<section class="nest-box" id="onlineSection"><h2>Who's Online</h2><div id="online"><p class="muted">Checking presence…</p></div></section>
+<section class="nest-box" id="eventsSection"><h2>Events</h2><div id="community"></div><a class="btn" href="events.html">View Events →</a></section>
+</aside>
+</div>
+</main>
 
-const {data:photos}=await crowSupabase.from("crowspace_album_photos").select("id,image_url,caption,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(12);photoGallery.innerHTML=(photos||[]).map(x=>'<figure class="nest-photo-card"><img src="'+esc(x.image_url)+'" alt="'+esc(x.caption||"CrowSpace photo")+'" loading="lazy"><figcaption>'+esc(x.caption||"")+'</figcaption><button class="btn photoCommentBtn" data-photo="'+x.id+'">Comments</button></figure>').join("")||'<p class="muted">No photos yet.</p>';document.querySelectorAll(".photoCommentBtn").forEach(b=>b.onclick=()=>photoComment(b.dataset.photo));
-const {data:cv}=await crowSupabase.from("crowspace_caws").select("id,title,caption").eq("user_id",uid).order("created_at",{ascending:false}).limit(4);cawsList.innerHTML=(cv||[]).map(x=>'<p><strong>'+esc(x.title||"Untitled Caw")+'</strong><br><small class="muted">'+esc(x.caption||"")+'</small></p>').join("")||'<p class="muted">No Caws yet.</p>';
-const {data:gm}=await crowSupabase.from("crowspace_group_members").select("group_id").eq("user_id",uid);const gids=(gm||[]).map(x=>x.group_id);let gr=[];if(gids.length){const z=await crowSupabase.from("crowspace_groups").select("id,name,description").in("id",gids);gr=z.data||[]}groupsList.innerHTML=gr.map(x=>'<p><strong>'+esc(x.name)+'</strong><br><small class="muted">'+esc(x.description||"")+'</small></p>').join("")||'<p class="muted">No groups yet.</p>';
-const {data:ev}=await crowSupabase.from("crowspace_events").select("title,starts_at,event_type").eq("created_by",uid).order("starts_at",{ascending:true}).limit(5);community.innerHTML=(ev||[]).map(x=>'<p><span class="event-tag">'+esc(x.event_type||"EVENT")+'</span> <strong>'+esc(x.title)+'</strong><br><small class="muted">'+new Date(x.starts_at).toLocaleString()+'</small></p>').join("")||'<p class="muted">No upcoming events.</p>';["top8Section","interestsSection","musicSection","photosSection","cawsSection","groupsSection","eventsSection","guestbookSection"].forEach(id=>{const map={top8Section:"show_top_friends",interestsSection:"show_interests",musicSection:"show_music",photosSection:"show_photos",cawsSection:"show_caws",groupsSection:"show_groups",eventsSection:"show_events",guestbookSection:"show_guestbook"};const el=document.getElementById(id);if(el&&s&&s[map[id]]===false)el.style.display="none"});guestForm.style.display=viewer?.id===uid?"none":"grid";wallForm.style.display=viewer?.id===uid?"grid":"none";const statusBar=document.getElementById("statusBar");if(statusBar)statusBar.textContent=viewer?.id===uid?"● Online":"● Nest Active"}
-async function photoComment(photoId){if(!viewer){location.href="login.html";return}const body=prompt("Write a photo comment");if(!body?.trim())return;const {error}=await crowSupabase.from("crowspace_photo_comments").insert({photo_id:photoId,author_id:viewer.id,body:body.trim()});if(error)alert(error.message);else alert("Photo comment posted.");}\nasync function heartbeat(){if(!viewer)return;await crowSupabase.from("crowspace_presence").upsert({user_id:viewer.id,last_seen_at:new Date().toISOString()},{onConflict:"user_id"});}
-async function likeWall(id){if(!viewer){location.href="login.html";return}const {error}=await crowSupabase.rpc("crowspace_toggle_like",{target_post_id:id});if(error)alert(error.message);else load()}
-async function toggleComments(id){const box=document.getElementById("comments-"+id);if(!box)return;if(!box.hidden){box.hidden=true;return}const {data}=await crowSupabase.from("crowspace_comments").select("id,body,user_id,created_at").eq("post_id",id).order("created_at",{ascending:true}).limit(30);const map=await people((data||[]).map(x=>x.user_id));box.innerHTML=(data||[]).map(x=>{const a=map[x.user_id]||{};return '<div class="inline-comment"><a href="profile.html?id='+encodeURIComponent(x.user_id)+'"><strong>'+esc(a.display_name||"Member")+'</strong></a> <span>'+esc(x.body)+'</span><small class="muted"> · '+new Date(x.created_at).toLocaleString()+'</small></div>'}).join("")||'<p class="muted">No comments yet.</p>';box.hidden=false}
-async function commentWall(id){if(!viewer){location.href="login.html";return}const body=prompt("Write a comment");if(!body?.trim())return;const {error}=await crowSupabase.from("crowspace_comments").insert({post_id:id,user_id:viewer.id,body:body.trim()});if(error)alert(error.message);else{const owner=await crowSupabase.from("crowspace_posts").select("user_id").eq("id",id).maybeSingle();if(owner.data?.user_id)load()}}
-wallForm.onsubmit=async e=>{e.preventDefault();if(!viewer)return;const body=wallBody.value.trim();if(!body)return;const {error}=await crowSupabase.from("crowspace_posts").insert({user_id:uid,body});if(error)alert(error.message);else{wallBody.value="";load()}}
-async function friendAction(action){if(action==="add"){const {error}=await crowSupabase.from("crowspace_friendships").insert({requester_id:viewer.id,addressee_id:uid,status:"pending"});}else if(action==="accept"){const {error}=await crowSupabase.from("crowspace_friendships").update({status:"accepted"}).eq("requester_id",uid).eq("addressee_id",viewer.id);}else if(action==="decline")await crowSupabase.from("crowspace_friendships").update({status:"declined"}).eq("requester_id",uid).eq("addressee_id",viewer.id);load()}
-async function followAction(){const {data}=await crowSupabase.from("crowspace_follows").select("follower_id").eq("follower_id",viewer.id).eq("followed_user_id",uid).maybeSingle();if(data)await crowSupabase.from("crowspace_follows").delete().eq("follower_id",viewer.id).eq("followed_user_id",uid);else {await crowSupabase.from("crowspace_follows").insert({follower_id:viewer.id,followed_user_id:uid});}load()}
-guestForm.onsubmit=async e=>{e.preventDefault();if(!viewer)return;const body=guestBody.value.trim();if(!body)return;const {error}=await crowSupabase.from("crowspace_guestbook").insert({profile_id:uid,author_id:viewer.id,body});if(error)alert(error.message);else{guestBody.value="";load()}}
-document.addEventListener("DOMContentLoaded",async()=>{viewer=await CS.user();uid=qs.get("id")||viewer?.id;if(!uid){location.href="login.html";return}await CS.refreshHeader();CS.startNotificationBadge();await load();await heartbeat();setInterval(heartbeat,60000)});
-</script></body></html>
+<footer><span>CrowSpace · One Account. One Universe.</span><span>MySpace-inspired social experience</span></footer>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=CS.escape;
+const qs=new URLSearchParams(location.search);
+let uid=null,viewer=null,prof=null,nestSettings=null,loading=false;
+
+function text(id,value){const el=$(id);if(el)el.textContent=value==null?"":String(value)}
+function html(id,value){const el=$(id);if(el)el.innerHTML=value}
+function err(label,error){if(error)console.warn("CrowSpace "+label+":",error.message||error)}
+function initials(name){return (name||"C").trim().slice(0,1).toUpperCase()||"C"}
+function fmt(date){const d=new Date(date);return Number.isNaN(d.getTime())?"":d.toLocaleString()}
+function countLabel(n,label){return Number(n||0).toLocaleString()+" "+label+(Number(n||0)===1?"":"s")}
+
+async function people(ids){
+  const clean=[...new Set((ids||[]).filter(Boolean))];
+  if(!clean.length)return {};
+  const {data,error}=await crowSupabase.rpc("crowspace_public_profiles_by_ids",{ids:clean});
+  if(error){err("people",error);return {}}
+  return Object.fromEntries((data||[]).map(x=>[x.id,x]));
+}
+
+function applyNestStyle(s){
+  if(!s)return;
+  const root=document.documentElement;
+  if(s.accent){
+    root.style.setProperty("--blue",s.accent);
+    root.style.setProperty("--blue2",s.accent+"18");
+  }
+  if(s.background_url){
+    document.body.style.backgroundImage="url("+JSON.stringify(s.background_url)+")";
+    document.body.style.backgroundSize="cover";
+    document.body.style.backgroundAttachment="fixed";
+    document.body.style.backgroundPosition="center";
+  }
+}
+
+async function loadMembership(){
+  const box=$("nestMembershipBody");
+  if(!box)return;
+  if(!viewer){
+    box.innerHTML='<div class="universal-stat-grid"><div class="universal-stat"><small>ACCOUNT</small><strong>Signed Out</strong></div><div class="universal-stat"><small>ACCESS</small><strong>Public Nest</strong></div><div class="universal-stat"><small>JOIN</small><strong>Free</strong></div></div><p class="muted" style="margin-top:10px">Sign in to connect your CrowRules identity, membership, CrowPoints and activity.</p><a class="btn primary" href="login.html">Sign In →</a>';
+    return;
+  }
+  const m=await CS.membership();
+  const {data:p,error}=await crowSupabase.from("membership_profiles").select("points,watch_hours").eq("id",viewer.id).maybeSingle();
+  err("membership profile",error);
+  const isOwner=viewer.id===uid;
+  const renewal=m?.subscription?.current_period_end?new Date(m.subscription.current_period_end).toLocaleDateString():"—";
+  const values=[
+    ["Membership",m?.plan?.name||"CROW · Free"],
+    ["Status",m?.status||"free"],
+    ["CrowPoints",Number(p?.points||0).toLocaleString()],
+    ["Watch Hours",Number(p?.watch_hours||0).toFixed(1)]
+  ];
+  if(isOwner)values.push(["Renewal",renewal],["Multiplier",(Number(m?.plan?.crowpoints_multiplier||1))+"×"]);
+  box.innerHTML='<div class="universal-stat-grid">'+values.map(x=>'<div class="universal-stat"><small>'+esc(x[0])+'</small><strong>'+esc(x[1])+'</strong></div>').join("")+'</div><div class="form-actions" style="margin-top:12px"><span class="muted">'+(isOwner?"Your universal account powers CrowSpace and the wider CrowRules universe.":"This member is part of the CrowRules universe.")+'</span><a class="btn" href="membership.html">Manage Membership →</a></div>';
+}
+
+async function relationshipButtons(){
+  if(!viewer)return '<a class="btn primary" href="login.html">Sign In to Connect</a>';
+  if(viewer.id===uid)return '<a class="btn primary" href="customize.html">Customize My Nest</a><a class="btn" href="friends.html">Friends</a>';
+  let htmlOut="";
+  const {data:f,error}=await crowSupabase.from("crowspace_friendships").select("requester_id,addressee_id,status").or("requester_id.eq."+viewer.id+",addressee_id.eq."+viewer.id);
+  err("friendship lookup",error);
+  const rel=(f||[]).find(x=>x.requester_id===uid||x.addressee_id===uid);
+  if(rel?.status==="accepted")htmlOut+='<button class="btn primary" type="button" data-friend-action="remove">✓ Friends</button>';
+  else if(rel?.status==="pending"){
+    htmlOut+=rel.requester_id===viewer.id?'<button class="btn" type="button" disabled>Request Sent</button>':'<button class="btn primary" type="button" data-friend-action="accept">Accept Friend</button><button class="btn" type="button" data-friend-action="decline">Decline</button>';
+  }else htmlOut+='<button class="btn primary" type="button" data-friend-action="add">Add Friend</button>';
+  const {data:fl,error:fe}=await crowSupabase.from("crowspace_follows").select("follower_id").eq("follower_id",viewer.id).eq("followed_user_id",uid).maybeSingle();
+  err("follow lookup",fe);
+  htmlOut+=fl?'<button class="btn" type="button" data-follow-action>Following</button>':'<button class="btn" type="button" data-follow-action>Follow</button>';
+  const {data:mf,error:me}=await crowSupabase.rpc("crowspace_mutual_friends",{target:uid});
+  err("mutual friends",me);
+  if(Array.isArray(mf)&&mf.length)htmlOut+='<span class="event-tag">🤝 '+mf.length+' mutual friend'+(mf.length===1?"":"s")+'</span>';
+  return htmlOut;
+}
+
+async function renderActions(){
+  html("actions",await relationshipButtons());
+  const a=$("actions");
+  if(!a)return;
+  a.querySelector("[data-friend-action]")?.addEventListener("click",async e=>{
+    const action=e.currentTarget.dataset.friendAction;
+    if(action==="remove"){await CS.unfriend(uid)}
+    else {await friendAction(action)}
+  });
+  a.querySelector("[data-follow-action]")?.addEventListener("click",followAction);
+}
+
+async function friendAction(action){
+  if(!viewer||viewer.id===uid)return;
+  let result;
+  if(action==="add")result=await crowSupabase.from("crowspace_friendships").insert({requester_id:viewer.id,addressee_id:uid,status:"pending"});
+  if(action==="accept")result=await crowSupabase.from("crowspace_friendships").update({status:"accepted"}).eq("requester_id",uid).eq("addressee_id",viewer.id);
+  if(action==="decline")result=await crowSupabase.from("crowspace_friendships").update({status:"declined"}).eq("requester_id",uid).eq("addressee_id",viewer.id);
+  err("friend action",result?.error);
+  if(result?.error)alert(result.error.message);else await load();
+}
+
+async function followAction(){
+  if(!viewer){location.href="login.html";return}
+  const {data,error}=await crowSupabase.from("crowspace_follows").select("follower_id").eq("follower_id",viewer.id).eq("followed_user_id",uid).maybeSingle();
+  if(error){alert(error.message);return}
+  const result=data?await crowSupabase.from("crowspace_follows").delete().eq("follower_id",viewer.id).eq("followed_user_id",uid):await crowSupabase.from("crowspace_follows").insert({follower_id:viewer.id,followed_user_id:uid});
+  if(result.error)alert(result.error.message);else await load();
+}
+
+function renderPost(x,ownerName,ownerUsername){
+  const media=x.media_url?'<a class="btn" href="'+esc(x.media_url)+'" target="_blank" rel="noopener">Open Media →</a>':"";
+  return '<article class="nest-wall-post" data-post-id="'+esc(x.id)+'"><div class="post-head"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(uid)+'">'+esc(initials(ownerName))+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(uid)+'">'+esc(ownerName)+'</a></strong><small>@'+esc(ownerUsername||"member")+' · '+esc(fmt(x.created_at))+'</small></div></div><p>'+esc(x.body||"")+'</p>'+media+'<div class="post-actions"><button class="btn likeBtn" type="button" data-post="'+esc(x.id)+'">❤️ '+Number(x.like_count||0)+'</button><button class="btn commentBtn" type="button" data-post="'+esc(x.id)+'">💬 '+Number(x.comment_count||0)+'</button></div><div class="inline-comments" id="comments-'+esc(x.id)+'" hidden></div></article>';
+}
+
+async function toggleComments(id){
+  const box=$("comments-"+id);
+  if(!box)return;
+  if(!box.hidden){box.hidden=true;return}
+  box.innerHTML='<p class="muted">Loading comments…</p>';box.hidden=false;
+  const {data,error}=await crowSupabase.from("crowspace_comments").select("id,body,user_id,created_at").eq("post_id",id).order("created_at",{ascending:true}).limit(50);
+  if(error){box.innerHTML='<p class="muted">'+esc(error.message)+'</p>';return}
+  const map=await people((data||[]).map(x=>x.user_id));
+  box.innerHTML=(data||[]).map(x=>{
+    const a=map[x.user_id]||{};
+    return '<div class="inline-comment"><a href="profile.html?id='+encodeURIComponent(x.user_id)+'"><strong>'+esc(a.display_name||"Member")+'</strong></a> <span>'+esc(x.body)+'</span><small class="muted"> · '+esc(fmt(x.created_at))+'</small></div>';
+  }).join("")||'<p class="muted">No comments yet.</p>';
+  if(viewer)box.innerHTML+='<form class="inline-comment-form" data-comment-form="'+esc(id)+'"><input maxlength="1000" placeholder="Write a comment…"><button class="btn primary">Post</button></form>';
+  box.querySelector("[data-comment-form]")?.addEventListener("submit",async e=>{
+    e.preventDefault();const input=e.currentTarget.querySelector("input"),body=input.value.trim();if(!body)return;
+    const {error}=await crowSupabase.from("crowspace_comments").insert({post_id:id,user_id:viewer.id,body});
+    if(error)alert(error.message);else toggleComments(id);
+  });
+}
+
+async function renderPosts(n){
+  const {data,error}=await crowSupabase.from("crowspace_posts").select("id,body,media_url,created_at,like_count,comment_count").eq("user_id",uid).order("created_at",{ascending:false}).limit(20);
+  if(error){html("posts",'<p class="muted">'+esc(error.message)+'</p>');return}
+  text("postStat",countLabel((data||[]).length,"Post"));
+  html("posts",(data||[]).map(x=>renderPost(x,n,prof.username)).join("")||'<p class="muted">No bulletin posts yet.</p>');
+  $("posts").querySelectorAll(".commentBtn").forEach(b=>b.addEventListener("click",()=>toggleComments(b.dataset.post)));
+  $("posts").querySelectorAll(".likeBtn").forEach(b=>b.addEventListener("click",()=>likeWall(b.dataset.post)));
+}
+
+async function likeWall(id){
+  if(!viewer){location.href="login.html";return}
+  const {error}=await crowSupabase.rpc("crowspace_toggle_like",{target_post_id:id});
+  if(error)alert(error.message);else await load();
+}
+
+async function renderTimeline(){
+  if(!viewer){html("friendActivity",'<p class="muted">Sign in to see your personalized Nest timeline.</p>');return}
+  const graph=await CS.socialGraph(250);
+  const friendIds=graph.filter(x=>x.relationship==="friend").map(x=>x.id);
+  const related=[uid,...friendIds];
+  const {data,error}=await crowSupabase.from("crowspace_posts").select("id,user_id,body,created_at").in("user_id",related).order("created_at",{ascending:false}).limit(20);
+  if(error){html("friendActivity",'<p class="muted">'+esc(error.message)+'</p>');return}
+  const map=await people((data||[]).map(x=>x.user_id));
+  html("friendActivity",(data||[]).map(x=>{
+    const a=map[x.user_id]||{};
+    return '<article class="nest-wall-post"><div class="post-head"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(initials(a.display_name||a.username))+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(a.display_name||"Member")+'</a></strong><small>📰 Post · '+esc(fmt(x.created_at))+'</small></div></div><p>'+esc(x.body||"")+'</p><a class="btn" href="profile.html?id='+encodeURIComponent(x.user_id)+'">Open Nest →</a></article>';
+  }).join("")||'<p class="muted">No recent friend activity yet.</p>');
+}
+
+async function renderOnline(){
+  if(!viewer){html("online",'<p class="muted">Sign in to see live CrowSpace presence.</p>');return}
+  const {data,error}=await crowSupabase.from("crowspace_presence").select("user_id,last_seen_at").gte("last_seen_at",new Date(Date.now()-300000).toISOString()).order("last_seen_at",{ascending:false}).limit(20);
+  if(error){html("online",'<p class="muted">Presence is unavailable.</p>');return}
+  const map=await people((data||[]).map(x=>x.user_id));
+  html("online",(data||[]).map(x=>{const a=map[x.user_id]||{};return '<div class="nest-profile-row"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(initials(a.display_name||a.username))+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+esc(a.display_name||"Member")+'</a></strong><br><span class="online-dot">● Online</span></div></div>'}).join("")||'<p class="muted">No one is online right now.</p>');
+}
+
+async function renderSocial(){
+  let graph=[];
+  if(viewer)graph=await CS.socialGraph(250);
+  const target=graph.find(x=>x.id===uid);
+  if(target){
+    text("friendStat",countLabel(target.friend_count,"Friend"));
+    text("followerStat",countLabel(target.follower_count,"Follower"));
+    html("onlineStat",target.is_online?'<span class="online-dot">● Online now</span>':'<span class="muted">Offline</span>');
+    html("socialSnapshot",[["Friends",target.friend_count],["Followers",target.follower_count],["Following",target.following_count],["Mutual",target.mutual_friends_count],["Caws",target.caw_count],["Photos",target.photo_count],["Groups",target.group_count],["Events",target.event_count]].map(x=>'<div class="social-stat"><strong>'+Number(x[1]||0)+'</strong>'+esc(x[0])+'</div>').join(""));
+    html("worldLinks",CS.activityLinks(target));
+    const mutual=graph.filter(x=>x.id!==uid&&x.mutual_friends_count>0).sort((a,b)=>Number(b.mutual_friends_count)-Number(a.mutual_friends_count)).slice(0,4);
+    html("mutualPeople",mutual.length?'<h3>People you may know</h3>'+mutual.map(x=>CS.personCard(x)).join(""):"");
+  }else{
+    const {count:followers}=await crowSupabase.from("crowspace_follows").select("*",{count:"exact",head:true}).eq("followed_user_id",uid);
+    text("followerStat",countLabel(followers,"Follower"));
+    html("worldLinks",'<a href="profile.html?id='+encodeURIComponent(uid)+'">Nest</a><a href="caws.html?user='+encodeURIComponent(uid)+'">Caws</a><a href="albums.html?user='+encodeURIComponent(uid)+'">Photos</a><a href="groups.html?user='+encodeURIComponent(uid)+'">Groups</a><a href="events.html?user='+encodeURIComponent(uid)+'">Events</a>');
+    html("mutualPeople","");
+  }
+}
+
+async function renderFriends(){
+  if(!viewer){html("topFriends",'<p class="muted">Sign in to see your friends.</p>');return}
+  const graph=await CS.socialGraph(250);
+  const friends=graph.filter(x=>x.relationship==="friend");
+  html("topFriends",friends.slice(0,8).map(x=>'<div class="nest-profile-row"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.id)+'">'+esc(initials(x.display_name||x.username))+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(x.id)+'">'+esc(x.display_name||"Member")+'</a></strong><br><small class="muted">@'+esc(x.username||"member")+'</small></div></div>').join("")||'<p class="muted">No friends yet.</p>');
+}
+
+async function renderInterests(){
+  const {data,error}=await crowSupabase.from("crowspace_interests").select("category,interest").eq("user_id",uid);
+  err("interests",error);
+  const items=data||[];
+  const markup=items.map(x=>'<span class="event-tag" style="margin:3px">'+esc(x.interest)+'</span>').join("")||'<p class="muted">No interests yet.</p>';
+  html("interestList",markup);html("interests",markup);
+}
+
+async function renderMedia(){
+  text("music",nestSettings?.favorite_song||nestSettings?.favorite_music||"No favorite music added.");
+  const player=$("musicPlayer");
+  if(player)player.innerHTML=nestSettings?.favorite_song_url?'<audio controls preload="none" src="'+esc(nestSettings.favorite_song_url)+'"></audio>':nestSettings?.favorite_song?'<strong>♫ '+esc(nestSettings.favorite_song)+'</strong><small>Favorite song</small>':'<span class="muted">No favorite song selected.</span>';
+  text("favorites",[nestSettings?.favorite_movies&&"Movies: "+nestSettings.favorite_movies,nestSettings?.favorite_shows&&"Shows: "+nestSettings.favorite_shows].filter(Boolean).join(" · ")||"No favorites added.");
+  const {data:photos,error:pe}=await crowSupabase.from("crowspace_album_photos").select("id,image_url,caption,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(12);
+  err("photos",pe);
+  html("photoGallery",(photos||[]).map(x=>'<figure class="nest-photo-card"><img src="'+esc(x.image_url)+'" alt="'+esc(x.caption||"CrowSpace photo")+'" loading="lazy"><figcaption>'+esc(x.caption||"")+'</figcaption><button class="btn photoCommentBtn" type="button" data-photo="'+esc(x.id)+'">Comments</button><div class="photo-inline" id="photo-comments-'+esc(x.id)+'" hidden></div></figure>').join("")||'<p class="muted">No photos yet.</p>');
+  $("photoGallery").querySelectorAll(".photoCommentBtn").forEach(b=>b.addEventListener("click",()=>photoComment(b.dataset.photo)));
+  const {data:caws,error:ce}=await crowSupabase.from("crowspace_caws").select("id,title,caption,video_url,thumbnail_url,views,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(4);
+  err("caws",ce);
+  html("cawsList",(caws||[]).map(x=>'<article class="mini-card">'+(x.thumbnail_url?'<img src="'+esc(x.thumbnail_url)+'" alt="" loading="lazy">':"")+'<strong>'+esc(x.title||"Untitled Caw")+'</strong><small class="muted">'+esc(x.caption||"")+'</small>'+(x.views!=null?'<small class="muted">👁 '+Number(x.views||0).toLocaleString()+' views</small>':"")+(x.video_url?'<a class="btn" href="'+esc(x.video_url)+'" target="_blank" rel="noopener">Watch Caw →</a>':"")+'</article>').join("")||'<p class="muted">No Caws yet.</p>');
+  const {data:gm,error:ge}=await crowSupabase.from("crowspace_group_members").select("group_id").eq("user_id",uid);
+  err("groups",ge);
+  const gids=(gm||[]).map(x=>x.group_id);let groups=[];
+  if(gids.length){const z=await crowSupabase.from("crowspace_groups").select("id,name,description,image_url").in("id",gids).limit(8);err("group details",z.error);groups=z.data||[]}
+  html("groupsList",groups.map(x=>'<article class="mini-card">'+(x.image_url?'<img src="'+esc(x.image_url)+'" alt="" loading="lazy">':"")+'<strong>'+esc(x.name)+'</strong><small class="muted">'+esc(x.description||"")+'</small></article>').join("")||'<p class="muted">No groups yet.</p>');
+  const {data:ev,error:ee}=await crowSupabase.from("crowspace_events").select("id,title,starts_at,event_type,location,is_online,link_url").eq("created_by",uid).gte("starts_at",new Date().toISOString()).order("starts_at",{ascending:true}).limit(5);
+  err("events",ee);
+  html("community",(ev||[]).map(x=>'<p><span class="event-tag">'+esc(x.event_type||"EVENT")+'</span> <strong>'+esc(x.title||"Event")+'</strong><br><small class="muted">'+esc(new Date(x.starts_at).toLocaleString())+(x.is_online?" · Online":"")+(x.location?" · "+esc(x.location):"")+'</small>'+(x.link_url?'<br><a class="btn" href="'+esc(x.link_url)+'" target="_blank" rel="noopener">Open Event →</a>':"")+'</p>').join("")||'<p class="muted">No upcoming events created by this member.</p>');
+}
+
+async function photoComment(photoId){
+  const box=$("photo-comments-"+photoId);if(!box)return;
+  if(!box.hidden){box.hidden=true;return}
+  box.hidden=false;box.innerHTML='<p class="muted">Loading comments…</p>';
+  const {data,error}=await crowSupabase.from("crowspace_photo_comments").select("id,body,author_id,created_at").eq("photo_id",photoId).order("created_at",{ascending:true}).limit(30);
+  if(error){box.innerHTML='<p class="muted">'+esc(error.message)+'</p>';return}
+  const map=await people((data||[]).map(x=>x.author_id));
+  box.innerHTML=(data||[]).map(x=>{const a=map[x.author_id]||{};return '<div class="inline-comment"><a href="profile.html?id='+encodeURIComponent(x.author_id)+'"><strong>'+esc(a.display_name||"Member")+'</strong></a> '+esc(x.body)+'<small class="muted"> · '+esc(fmt(x.created_at))+'</small></div>'}).join("")||'<p class="muted">No photo comments yet.</p>';
+  if(viewer)box.innerHTML+='<form class="inline-comment-form" id="photo-form-'+esc(photoId)+'"><input maxlength="1000" placeholder="Add a photo comment…"><button class="btn primary">Post</button></form>';
+  $("photo-form-"+photoId)?.addEventListener("submit",async e=>{
+    e.preventDefault();const input=e.currentTarget.querySelector("input"),body=input.value.trim();if(!body)return;
+    const {error}=await crowSupabase.from("crowspace_photo_comments").insert({photo_id:photoId,author_id:viewer.id,body});
+    if(error)alert(error.message);else photoComment(photoId);
+  });
+}
+
+async function renderGuestbook(){
+  const {data,error}=await crowSupabase.from("crowspace_guestbook").select("body,created_at,author_id").eq("profile_id",uid).order("created_at",{ascending:false}).limit(20);
+  if(error){html("guestbook",'<p class="muted">'+esc(error.message)+'</p>');return}
+  const map=await people((data||[]).map(x=>x.author_id));
+  html("guestbook",(data||[]).map(x=>{const a=map[x.author_id]||{};return '<article class="guestbook-entry"><a href="profile.html?id='+encodeURIComponent(x.author_id)+'"><span class="avatar sm">'+esc(initials(a.display_name||a.username))+'</span> <strong>'+esc(a.display_name||a.username||"Member")+'</strong></a><p>'+esc(x.body)+'</p><small class="muted">'+esc(fmt(x.created_at))+'</small></article>'}).join("")||'<p class="muted">Guestbook is waiting for its first message.</p>');
+}
+
+async function renderVisitors(dashboard){
+  const visitors=dashboard?.visitors||[];
+  if(visitors.length){
+    html("visitors",visitors.map(v=>'<div class="nest-profile-row"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(v.id)+'">'+esc(initials(v.display_name||v.username))+'</a><div><strong><a href="profile.html?id='+encodeURIComponent(v.id)+'">'+esc(v.display_name||"Member")+'</a></strong><br><small class="muted">'+esc(fmt(v.visited_at))+'</small></div></div>').join(""));
+  }else html("visitors",viewer?.id===uid?'<p class="muted">No visitors yet.</p>':'<p class="muted">Visitor details are private to the Nest owner.</p>');
+}
+
+async function load(){
+  if(loading)return;loading=true;
+  try{
+    const {data,error}=await crowSupabase.rpc("crowspace_profile_public",{target:uid});
+    if(error){err("profile",error);throw error}
+    prof=Array.isArray(data)?data[0]:data;
+    if(!prof){$("nestCover").outerHTML='<section class="nest-box"><h1>Nest not found</h1><p class="muted">This CrowSpace profile does not exist or is unavailable.</p><a class="btn" href="index.html">Back Home</a></section>';return}
+    const {data:s,error:se}=await crowSupabase.from("crowspace_nest_settings").select("*").eq("user_id",uid).maybeSingle();
+    err("Nest settings",se);nestSettings=s||{};applyNestStyle(nestSettings);
+    const n=prof.display_name||prof.username||"CrowSpace Member";
+    document.title=n+" | CrowSpace";
+    text("name",n);text("handle","@"+(prof.username||"member"));text("tagline",nestSettings.tagline||"Welcome to my CrowSpace Nest.");text("statusText",nestSettings.status_text||"");text("about",nestSettings.about_me||prof.bio||"");text("aboutLong",nestSettings.about_me||prof.bio||"This member hasn't added an About Me yet.");text("eyebrow",viewer?.id===uid?"MY NEST":"CROWSPACE NEST");
+    const av=$("avatar");if(prof.avatar_url){av.innerHTML='<img src="'+esc(prof.avatar_url)+'" alt="'+esc(n)+'" loading="eager">'}else text("avatar",initials(n));
+    await renderActions();
+    await loadMembership();
+    if(viewer&&viewer.id!==uid){
+      const {error:ve}=await crowSupabase.from("crowspace_profile_visits").insert({profile_id:uid,visitor_id:viewer.id});
+      err("profile visit",ve);
+    }
+    const {data:n31,error:n31Error}=await crowSupabase.rpc("crowspace_nest_3_1",{target:uid});
+    err("Nest dashboard",n31Error);
+    const d=n31||{};
+    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]);
+    const map={top8Section:"show_top_friends",interestsSection:"show_interests",musicSection:"show_music",photosSection:"show_photos",cawsSection:"show_caws",groupsSection:"show_groups",eventsSection:"show_events",guestbookSection:"show_guestbook"};
+    Object.keys(map).forEach(id=>{const el=$(id);if(el&&nestSettings[map[id]]===false)el.style.display="none"});
+    $("guestForm").style.display=viewer?.id===uid?"none":"grid";
+    $("wallForm").style.display=viewer?.id===uid?"grid":"none";
+  }catch(e){
+    console.error(e);
+    if($("posts"))html("posts",'<div class="card"><h3>Unable to load this Nest</h3><p>'+esc(e.message||"Please try again.")+'</p><button class="btn primary" type="button" onclick="location.reload()">Reload Nest</button></div>');
+  }finally{loading=false}
+}
+
+async function heartbeat(){if(!viewer)return;const {error}=await crowSupabase.from("crowspace_presence").upsert({user_id:viewer.id,last_seen_at:new Date().toISOString()},{onConflict:"user_id"});err("heartbeat",error)}
+
+$("wallBody").addEventListener("input",e=>text("wallCount",e.target.value.length+" / 2000"));
+$("guestBody").addEventListener("input",e=>text("guestCount",e.target.value.length+" / 1000"));
+$("wallForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!viewer||viewer.id!==uid)return;
+  const body=$("wallBody").value.trim();if(!body)return;
+  const {error}=await crowSupabase.from("crowspace_posts").insert({user_id:uid,body});
+  if(error)alert(error.message);else{$("wallBody").value="";text("wallCount","0 / 2000");await load()}
+});
+$("guestForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!viewer||viewer.id===uid)return;
+  const body=$("guestBody").value.trim();if(!body)return;
+  const {error}=await crowSupabase.from("crowspace_guestbook").insert({profile_id:uid,author_id:viewer.id,body});
+  if(error)alert(error.message);else{$("guestBody").value="";text("guestCount","0 / 1000");await load()}
+});
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  viewer=await CS.user();
+  uid=qs.get("id")||viewer?.id;
+  if(!uid){location.href="login.html";return}
+  await CS.refreshHeader();
+  CS.startNotificationBadge();
+  await load();
+  await heartbeat();
+  setInterval(heartbeat,60000);
+});
+})();
+</script>
+<style>
+.nest-cover{position:relative;overflow:hidden}
+.nest-cover-copy{min-width:0}
+.nest-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.universal-nest-panel{margin:18px 0}
+.form-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.inline-comment-form{display:flex;gap:8px;margin-top:10px}
+.inline-comment-form input{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px}
+.photo-inline{margin-top:8px}
+.mini-card{display:flex;flex-direction:column;gap:5px;padding:10px 0;border-bottom:1px solid var(--line)}
+.mini-card:last-child{border-bottom:0}
+.mini-card img{width:100%;max-height:150px;object-fit:cover;border-radius:8px}
+.nest-photo-card{margin:0}
+.nest-photo-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
+@media(max-width:800px){.inline-comment-form{flex-direction:column}}
+</style>
+</body>
+</html>
