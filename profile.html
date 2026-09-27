@@ -938,19 +938,24 @@ function renderSocialLinksValue(value){
  if(!social)return;
  let links=Array.isArray(value)?value:Object.entries(value||{}).map(([name,url])=>({name,url}));
  links=links.map(x=>({name:String(x.name||"").trim(),url:safeUrl(x.url||x.href||"")})).filter(x=>x.url);
- social.innerHTML=links.length?links.slice(0,12).map(x=>{const n=socialName(x.url);return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+CS.escape(x.name||n[0])+'"><span class="social-link-logo">'+logo(n[1])+'</span><span class="social-link-name">'+CS.escape(x.name||n[0])+'</span></a>'}).join(""):'<div class="social-link-empty">No social links added yet.</div>';
+ if(!links.length){social.innerHTML='<div class="social-link-empty">No social links added yet.</div>';return}
+ social.innerHTML=links.slice(0,20).map(x=>{
+   const n=socialName(x.url);
+   return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+CS.escape(x.name||n[0])+'" title="'+CS.escape(x.name||n[0])+'"><span class="social-link-logo">'+logo(n[1])+'</span></a>';
+ }).join("");
 }
 async function loadSocialLinks(){
  if(!social||typeof crowSupabase==="undefined"||!window.CROW_PROFILE_UID)return;
- if(window.CROW_NEST_SETTINGS&&Object.prototype.hasOwnProperty.call(window.CROW_NEST_SETTINGS,"social_links")){
-   renderSocialLinksValue(window.CROW_NEST_SETTINGS.social_links);
-   return;
+ social.innerHTML='<div class="social-link-empty">Loading social links…</div>';
+ try{
+   const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
+   if(error)throw error;
+   renderSocialLinksValue(data?.social_links||[]);
+ }catch(error){
+   console.error("CrowSpace social links:",error);
+   social.innerHTML='<div class="social-link-empty">Unable to load social links.</div>';
  }
- const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
- if(error){social.innerHTML='<div class="social-link-empty">Social links are temporarily unavailable.</div>';return}
- renderSocialLinksValue(data?.social_links||[]);
 }
-window.addEventListener("DOMContentLoaded",()=>setTimeout(loadSocialLinks,300));
-})();
+window.addEventListener("DOMContentLoaded",()=>setTimeout(loadSocialLinks,300));})();
 </script></body>
 </html>
