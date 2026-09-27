@@ -28,20 +28,21 @@ CS.installGlobalSearch=()=>{
  const box=document.createElement("div"); box.id="crowGlobalSearch"; box.className="crow-global-search";
  box.innerHTML='<button type="button" class="crow-search-button" aria-label="Search CrowSpace">⌕</button><input id="crowSearchInput" type="search" autocomplete="off" placeholder="Search CrowSpace…"><div id="crowSearchResults" class="crow-search-results" hidden></div>';
  const nav=header.querySelector("nav"); if(nav)header.insertBefore(box,nav); else header.appendChild(box);
- const input=box.querySelector("#crowSearchInput"), results=box.querySelector("#crowSearchResults");
+ const input=box.querySelector("#crowSearchInput"),results=box.querySelector("#crowSearchResults");
  const render=async()=>{
-   const q=input.value.trim().toLowerCase();
+   const q=input.value.trim();
    if(q.length<2){results.hidden=true;results.innerHTML="";return}
-   const users=await CS.socialGraph(250);
-   const people=(users||[]).filter(p=>(p.display_name||"").toLowerCase().includes(q)||(p.username||"").toLowerCase().includes(q)).slice(0,6);
-   const links=CS.navItems.filter(x=>x.label.toLowerCase().includes(q)).slice(0,4);
-   const html=links.map(x=>'<a class="crow-search-item" href="'+x.href+'"><strong>'+CS.escape(x.label)+'</strong><small>Open section</small></a>').join("")+
-     people.map(p=>'<a class="crow-search-item" href="profile.html?id='+encodeURIComponent(p.id)+'"><strong>'+CS.escape(p.display_name||"CrowSpace Member")+'</strong><small>@'+CS.escape(p.username||"member")+'</small></a>').join("");
-   results.innerHTML=html||'<div class="crow-search-empty">No matching CrowSpace people or sections.</div>';
+   const {data,error}=await CS.client.rpc("crowspace_global_search",{search_text:q,result_limit:8,result_type_filter:null});
+   if(error){results.innerHTML='<div class="crow-search-empty">Search unavailable.</div>';results.hidden=false;return}
+   const rows=data||[];
+   results.innerHTML=rows.map(r=>'<a class="crow-search-item" href="'+CS.escape(r.target_url||"#")+'"><strong>'+CS.escape(r.title||"Untitled")+'</strong><small>'+CS.escape((r.result_type||"result").toUpperCase())+' · '+CS.escape(r.subtitle||"")+'</small></a>').join("")+
+     '<a class="crow-search-item crow-search-all" href="command-center.html?q='+encodeURIComponent(q)+'"><strong>Open Universal Command Center →</strong><small>View all People, Posts, Caws, Groups, Events, Dreamscapes and Memorials</small></a>';
+   if(!rows.length)results.innerHTML='<div class="crow-search-empty">No quick matches.</div>'+results.innerHTML;
    results.hidden=false;
  };
+ input.addEventListener("keydown",e=>{if(e.key==="Enter"&&input.value.trim().length>=2){e.preventDefault();location.href="command-center.html?q="+encodeURIComponent(input.value.trim())}});
  input.addEventListener("input",()=>{clearTimeout(box._timer);box._timer=setTimeout(render,180)});
- box.querySelector(".crow-search-button").addEventListener("click",()=>{input.focus();input.select()});
+ box.querySelector(".crow-search-button").addEventListener("click",()=>{if(input.value.trim().length>=2)location.href="command-center.html?q="+encodeURIComponent(input.value.trim());else input.focus()});
  document.addEventListener("click",e=>{if(!box.contains(e.target))results.hidden=true});
 };
 CS.refreshHeader=async()=>{
