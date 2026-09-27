@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Caw Feed | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#03050a;--panel:#0a0d16;--line:#ffffff18;--cyan:#59e7ff;--pink:#ff65c7;--muted:#9aa7bb}
+body{margin:0;background:#03050a;color:#fff;overflow:hidden}
+.site-header{position:fixed;z-index:30;top:0;left:0;right:0;background:linear-gradient(180deg,#03050af2,#03050ac9 70%,transparent);border-bottom:1px solid #ffffff0d}
+.caw-feed-shell{height:100svh;position:relative}
+.feed-top{position:fixed;z-index:20;top:72px;left:50%;transform:translateX(-50%);width:min(100% - 28px,980px);display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.feed-top>*{pointer-events:auto}
+.feed-title{font:800 14px Orbitron;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 2px 15px #000}
+.feed-title span{color:var(--cyan)}
+.feed-help{font-size:11px;color:#dbe4ef;background:#03050ab8;border:1px solid var(--line);padding:8px 11px;border-radius:999px}
+.caw-feed{height:100svh;overflow-y:auto;scroll-snap-type:y mandatory;scroll-behavior:smooth;overscroll-behavior-y:contain;scrollbar-width:none}
+.caw-feed::-webkit-scrollbar{display:none}
+.caw-slide{min-height:100svh;scroll-snap-align:start;scroll-snap-stop:always;display:grid;place-items:center;padding:80px 14px 22px;box-sizing:border-box}
+.caw-frame{position:relative;width:min(430px,100%);height:min(78svh,760px);min-height:520px;border-radius:24px;overflow:hidden;background:#080b13;border:1px solid #ffffff20;box-shadow:0 30px 90px #000b}
+.caw-video{width:100%;height:100%;display:block;object-fit:cover;background:#010207}
+.caw-shade{position:absolute;inset:0;background:linear-gradient(180deg,#0008 0%,transparent 25%,transparent 54%,#000d 100%);pointer-events:none}
+.caw-info{position:absolute;left:18px;right:72px;bottom:18px;z-index:3;text-shadow:0 2px 12px #000}
+.creator{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.creator-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#59e7ff44,#a878ff55);border:1px solid #ffffff35;font:800 14px Orbitron;overflow:hidden}
+.creator-avatar img{width:100%;height:100%;object-fit:cover}
+.creator-name{font-weight:900;font-size:13px}.creator-user{font-size:10px;color:#c1ccda;margin-top:2px}
+.caw-info h2{font:800 21px Orbitron;margin:0 0 7px;line-height:1.15}
+.caw-info p{margin:0;color:#e3e8f1;font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.caw-date{display:block;color:#aeb8c8;font-size:9px;margin-top:8px}
+.actions{position:absolute;right:12px;bottom:18px;z-index:5;display:grid;gap:9px}
+.feed-action{width:44px;height:44px;border-radius:50%;border:1px solid #ffffff28;background:#03050ab8;color:#fff;display:grid;place-items:center;text-decoration:none;font-size:18px;backdrop-filter:blur(8px)}
+.feed-action:hover{border-color:#59e7ff88;transform:translateY(-2px)}
+.swipe-hint{position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:5;display:grid;gap:5px;text-align:center;color:#c9d4e3;font-size:9px;letter-spacing:.08em;opacity:.75}
+.swipe-arrow{font-size:21px;animation:up 1.5s infinite}
+@keyframes up{50%{transform:translateY(5px);opacity:.45}}
+.feed-status{position:fixed;z-index:25;bottom:14px;left:50%;transform:translateX(-50%);font-size:10px;color:#aeb8c8;background:#03050ac7;border:1px solid var(--line);border-radius:999px;padding:7px 12px;backdrop-filter:blur(8px)}
+.empty-feed{min-height:100svh;display:grid;place-items:center;padding:30px;text-align:center}
+.empty-feed .card{max-width:520px;padding:30px}
+@media(max-width:620px){
+ .site-header{padding-top:env(safe-area-inset-top)}
+ .feed-top{top:calc(62px + env(safe-area-inset-top));width:calc(100% - 20px)}
+ .feed-help{display:none}
+ .caw-slide{padding:calc(76px + env(safe-area-inset-top)) 0 0}
+ .caw-frame{width:100%;height:calc(100svh - 76px);min-height:0;border-radius:0;border-left:0;border-right:0}
+ .caw-info{left:16px;right:65px;bottom:22px}
+ .actions{right:10px;bottom:22px}
+ .feed-status{bottom:calc(10px + env(safe-area-inset-bottom))}
+}
+@media(prefers-reduced-motion:reduce){.caw-feed{scroll-behavior:auto}.swipe-arrow{animation:none}}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header>
+<div class="caw-feed-shell">
+<div class="feed-top"><div class="feed-title">CAW <span>FEED</span></div><div class="feed-help">Swipe / scroll to watch</div></div>
+<main id="feed" class="caw-feed" aria-label="CrowSpace Caw Feed"></main>
+<div id="status" class="feed-status">Loading Caws…</div>
+</div>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+const feed=document.getElementById("feed"),status=document.getElementById("status");
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const db=()=>window.crowSupabase||window.CS?.client;
+function avatar(p){
+ const name=(p?.display_name||p?.username||"C").trim();
+ return p?.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':esc(name.slice(0,1).toUpperCase());
+}
+function slide(x,p,i){
+ const title=esc(x.title||"Untitled Caw"),caption=esc(x.caption||"");
+ return '<section class="caw-slide" data-index="'+i+'"><article class="caw-frame">'+
+ '<video class="caw-video" playsinline preload="'+(i<2?"auto":"metadata")+'" loop muted controlslist="nodownload noplaybackrate" src="'+esc(x.video_url||"")+'"></video>'+
+ '<div class="caw-shade"></div>'+
+ '<div class="caw-info"><div class="creator"><a class="creator-avatar" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+avatar(p)+'</a><div><div class="creator-name">'+esc(p?.display_name||p?.username||"CrowSpace Member")+'</div><div class="creator-user">'+(p?.username?"@"+esc(p.username):"")+'</div></div></div>'+
+ '<h2>'+title+'</h2>'+(caption?'<p>'+caption+'</p>':'')+'<small class="caw-date">'+new Date(x.created_at).toLocaleDateString()+" · "+Number(x.views||0).toLocaleString()+" views</small></div>"+
+ '<div class="actions"><a class="feed-action" href="profile.html?id='+encodeURIComponent(x.user_id)+'" aria-label="Creator profile" title="Creator profile">◉</a><a class="feed-action" href="caws.html" aria-label="All Caws" title="All Caws">C</a></div>'+
+ (i===0?'<div class="swipe-hint"><span>SWIPE</span><span class="swipe-arrow">↓</span></div>':'')+
+ '</article></section>';
+}
+async function load(){
+ const c=db(); if(!c){status.textContent="CrowSpace database client unavailable.";return}
+ try{await CS.refreshHeader()}catch(e){}
+ const {data,error}=await c.from("crowspace_caws").select("id,user_id,title,caption,video_url,created_at,views").not("video_url","is",null).neq("video_url","").order("created_at",{ascending:false}).limit(100);
+ if(error){console.error(error);feed.innerHTML='<div class="empty-feed"><div class="card"><h2>Caw Feed unavailable</h2><p>'+esc(error.message)+'</p><a class="btn" href="caws.html">Open Caw Studio</a></div></div>';status.textContent="Unable to load Caws";return}
+ const rows=data||[];
+ if(!rows.length){feed.innerHTML='<div class="empty-feed"><div class="card"><p class="eyebrow">CAW FEED</p><h2>No Caws yet.</h2><p>Be the first creator to publish a Caw.</p><a class="btn primary" href="caws.html">Create a Caw</a></div></div>';status.textContent="No Caws published yet";return}
+ const ids=[...new Set(rows.map(x=>x.user_id).filter(Boolean))];
+ let people={};
+ try{
+   const {data:profiles}=await c.from("membership_profiles").select("id,display_name,username,avatar_url").in("id",ids);
+   (profiles||[]).forEach(p=>people[p.id]=p);
+ }catch(e){console.warn("Caw creator profiles unavailable",e)}
+ feed.innerHTML=rows.map((x,i)=>slide(x,people[x.user_id]||{},i)).join("");
+ status.textContent=rows.length+" Caw"+(rows.length===1?"":"s")+" · Swipe to continue";
+ const videos=[...feed.querySelectorAll(".caw-video")];
+ const observer=new IntersectionObserver(entries=>{
+   entries.forEach(entry=>{
+     const v=entry.target;
+     if(entry.isIntersecting&&entry.intersectionRatio>.7){
+       videos.forEach(other=>{if(other!==v){other.pause();other.currentTime=other.currentTime}});
+       v.play().catch(()=>{});
+     }else v.pause();
+   });
+ },{threshold:[.2,.7,.9]});
+ videos.forEach(v=>observer.observe(v));
+ feed.addEventListener("scroll",()=>{clearTimeout(window.__cawScroll);window.__cawScroll=setTimeout(()=>{const index=Math.round(feed.scrollTop/window.innerHeight);status.textContent=Math.min(index+1,rows.length)+" / "+rows.length+" Caws · Swipe to continue"},120)},{passive:true});
+}
+document.addEventListener("DOMContentLoaded",load);
+</script>
+</body>
+</html>
