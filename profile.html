@@ -136,7 +136,9 @@ body{
   .myspace-profile-nav a{flex:1 1 33%;text-align:center;padding:9px 5px}
   .myspace-snapshot-grid{grid-template-columns:1fr}
 }
-</style><style>
+<style>
+.social-links-list{display:grid;gap:10px}.social-link{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 15px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025);text-decoration:none;color:inherit;transition:.2s}.social-link:hover{border-color:rgba(90,220,255,.45);transform:translateY(-1px)}.social-link-main{display:flex;align-items:center;gap:12px;min-width:0}.social-link-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(90,220,255,.16),rgba(174,91,255,.18));font-family:Orbitron,sans-serif;font-weight:800}.social-link-name{font-weight:800}.social-link-url{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px}.social-link-arrow{font-size:20px;color:var(--cyan,#55e6ff)}.social-link-empty{padding:16px;border:1px dashed var(--line);border-radius:13px;color:var(--muted)}
+</style></style><style>
 /* MySpace 2.0 profile details */
 .profile-retro{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
 .retro-box{border:1px solid #8bb9dd;background:#f5faff;color:#17304a;border-radius:3px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.22)}
@@ -284,7 +286,10 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 
 <aside class="side-column">
 <section class="panel compact"><div class="panel-head"><h3>Live Presence</h3><span class="live-dot"></span></div><div id="online" class="content-block"><p class="empty">Checking…</p></div></section>
-<section class="panel compact"><div class="panel-head"><h3>Profile Signal</h3></div><div class="signal-grid"><div><span>STATUS</span><b id="statusSnapshot">—</b></div><div><span>MEMBER SINCE</span><b id="memberSinceSnapshot">—</b></div><div><span>MOOD</span><b id="moodSnapshot">—</b></div><div><span>UNIVERSE</span><b>CrowRules</b></div></div></section><section class="panel compact membership-panel"><div class="panel-head"><div><h3>Universal Membership</h3><span>ONE ACCOUNT</span></div></div><div id="nestMembershipBody"><p class="empty">Loading membership…</p></div></section>
+<section class="panel compact"><div class="panel-head"><h3>Profile Signal</h3></div><div class="signal-grid"><div><span>STATUS</span><b id="statusSnapshot">—</b></div><div><span>MEMBER SINCE</span><b id="memberSinceSnapshot">—</b></div><div><span>MOOD</span><b id="moodSnapshot">—</b></div><div><span>UNIVERSE</span><b>CrowRules</b></div></div></section><section class="panel compact social-links-panel" id="socialLinksPanel">
+<div class="section-head"><div><p class="eyebrow">CONNECT BEYOND CROWSPACE</p><h2>Social Links</h2><p class="muted">Add links to your other social media accounts so people can find you across the web.</p></div></div>
+<div id="socialLinksList" class="social-links-list"><div class="social-link-empty">No social links added yet.</div></div>
+</section>
 <section class="panel compact"><div class="panel-head"><h3>Profile Link</h3></div><div class="copy-row"><input id="shareUrl" readonly><button id="copyProfileUrl" type="button">Copy</button></div><small id="copyStatus"></small></section>
 <section class="panel compact"><div class="panel-head"><h3>Audio & Favorites</h3></div><p id="music" class="empty">No favorite music added.</p><div id="musicPlayer"></div><div id="classicPlaylist"></div><p id="favorites" class="empty"></p></section>
 <section class="panel compact"><div class="panel-head"><h3>Featured Connections</h3></div><div id="top8ClassicGrid" class="connection-grid"></div></section>
@@ -886,6 +891,21 @@ body.avatar-modal-open{overflow:hidden}
   }
   document.addEventListener("DOMContentLoaded",()=>setTimeout(start,250));
   window.addEventListener("beforeunload",()=>{if(channel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(channel)});
+})();
+</script><script id="social-links-runtime">
+(function(){
+const social=document.getElementById("socialLinksList");
+function safeUrl(v){try{const u=new URL(v);return ["http:","https:"].includes(u.protocol)?u.href:""}catch(e){return""}}
+function socialName(url){const h=new URL(url).hostname.replace(/^www\./,"");if(/instagram/.test(h))return["Instagram","IG"];if(/facebook/.test(h))return["Facebook","FB"];if(/youtube/.test(h))return["YouTube","YT"];if(/x\.com|twitter/.test(h))return["X","X"];if(/tiktok/.test(h))return["TikTok","TT"];if(/linkedin/.test(h))return["LinkedIn","IN"];if(/threads/.test(h))return["Threads","TH"];if(/github/.test(h))return["GitHub","GH"];if(/twitch/.test(h))return["Twitch","TW"];if(/discord/.test(h))return["Discord","DS"];return[h,"↗"]}
+async function loadSocialLinks(){
+ if(!social||typeof crowSupabase==="undefined"||!window.CROW_PROFILE_UID)return;
+ const {data,error}=await crowSupabase.from("membership_profiles").select("social_links").eq("id",window.CROW_PROFILE_UID).maybeSingle();
+ if(error||!data?.social_links){social.innerHTML='<div class="social-link-empty">No social links added yet.</div>';return}
+ let links=data.social_links;if(!Array.isArray(links))links=Object.entries(links).map(([name,url])=>({name,url}));
+ links=links.map(x=>({name:x.name||"",url:safeUrl(x.url||x.href||"")})).filter(x=>x.url);
+ social.innerHTML=links.length?links.slice(0,12).map(x=>{const n=socialName(x.url);return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer"><span class="social-link-main"><span class="social-link-icon">'+CS.escape(n[1])+'</span><span><span class="social-link-name">'+CS.escape(x.name||n[0])+'</span><span class="social-link-url">'+CS.escape(x.url)+'</span></span></span><span class="social-link-arrow">↗</span></a>'}).join(""):'<div class="social-link-empty">No social links added yet.</div>';
+}
+window.addEventListener("DOMContentLoaded",()=>setTimeout(loadSocialLinks,300));
 })();
 </script></body>
 </html>
