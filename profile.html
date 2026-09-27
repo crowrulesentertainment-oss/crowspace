@@ -648,6 +648,17 @@ async function renderSocial(){
     const mutual=graph.filter(x=>x.id!==uid&&x.mutual_friends_count>0).sort((a,b)=>Number(b.mutual_friends_count)-Number(a.mutual_friends_count)).slice(0,4);
     html("mutualPeople",mutual.length?'<h3>People you may know</h3>'+mutual.map(x=>CS.personCard(x)).join(""):"");
   }else{
+    const [friendsQ,followersQ,followingQ]=await Promise.all([
+      crowSupabase.from("crowspace_friendships").select("id",{count:"exact",head:true}).eq("status","accepted").or("requester_id.eq."+uid+",addressee_id.eq."+uid),
+      crowSupabase.from("crowspace_follows").select("id",{count:"exact",head:true}).eq("followed_user_id",uid),
+      crowSupabase.from("crowspace_follows").select("id",{count:"exact",head:true}).eq("follower_id",uid)
+    ]);
+    if(friendsQ.error)err("profile connection count",friendsQ.error);
+    if(followersQ.error)err("profile follower count",followersQ.error);
+    if(followingQ.error)err("profile following count",followingQ.error);
+    text("friendStat",countLabel(friendsQ.count,"Friend"));
+    text("followerStat",countLabel(followersQ.count,"Follower"));
+    html("socialSnapshot",[["Friends",friendsQ.count],["Followers",followersQ.count],["Following",followingQ.count]].map(x=>'<div class="social-stat"><strong>'+Number(x[1]||0)+'</strong>'+esc(x[0])+'</div>').join(""));
     const {count:followers}=await crowSupabase.from("crowspace_follows").select("*",{count:"exact",head:true}).eq("followed_user_id",uid);
     text("followerStat",countLabel(followers,"Follower"));
     html("worldLinks",'<a href="profile.html?id='+encodeURIComponent(uid)+'">Nest</a><a href="caws.html?user='+encodeURIComponent(uid)+'">Caws</a><a href="albums.html?user='+encodeURIComponent(uid)+'">Photos</a><a href="groups.html?user='+encodeURIComponent(uid)+'">Groups</a><a href="events.html?user='+encodeURIComponent(uid)+'">Events</a>');
