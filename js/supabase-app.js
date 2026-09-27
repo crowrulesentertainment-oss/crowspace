@@ -77,18 +77,31 @@ async function profile(){
 }
 async function discover(){
  const people=await safe('crowspace_profiles',sb.from('crowspace_profiles').select('*').eq('profile_visibility','public').limit(100)),groups=await safe('crowspace_groups',sb.from('crowspace_groups').select('*').eq('visibility','public').limit(100)),rooms=await safe('crowspace_rooms',sb.from('crowspace_rooms').select('*').eq('visibility','public').limit(100)),term=(q("q")||"").toLowerCase();
- let signalRows=[];
- if(user) signalRows=await safe('crowspace_discovery_signals',sb.from('crowspace_discovery_signals').select('target_id,target_kind,action,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(500),[]);
- const score={};
- for(const s of signalRows){const k=s.target_kind+":"+s.target_id;score[k]=(score[k]||0)+Number(s.weight||1);}
- const rank=(arr,kind,idKey)=>arr.slice().sort((a,b)=>(score[kind+":"+b[idKey]]||0)-(score[kind+":"+a[idKey]]||0));
+ let signals=[],prefs=[];
+ if(user){
+  signals=await safe('crowspace_discovery_signals',sb.from('crowspace_discovery_signals').select('target_id,target_kind,action,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(1000),[]);
+  prefs=await safe('crowspace_discovery_preferences',sb.from('crowspace_discovery_preferences').select('target_id,action,updated_at').eq('user_id',user.id).limit(500),[]);
+ }
+ const now=Date.now(),score={};
+ const positive={follow:3,friend:5,join_group:5,rsvp:4,react:2,message:2,engagement:2,post:3,comment:3};
+ const negative={dismiss:-7,not_interested:-12};
+ for(const s of signals){
+  const age=Math.max(0,(now-new Date(s.created_at||now).getTime())/86400000),decay=Math.max(.15,Math.exp(-age/21)),base=positive[s.action]??negative[s.action]??Number(s.weight||1);
+  const k=s.target_kind+":"+s.target_id; score[k]=(score[k]||0)+base*decay;
+ }
+ for(const p of prefs){
+  const k="profile:"+p.target_id; if(p.action==="not_interested")score[k]=-9999;
+  if(p.action==="dismiss")score[k]=Math.min(score[k]||0,-5);
+ }
+ const rank=(arr,kind,idKey)=>arr.slice().map(x=>({...x,_score:score[kind+":"+x[idKey]]||0})).sort((a,b)=>b._score-a._score);
  const rankedPeople=rank(people,'profile','user_id'),rankedGroups=rank(groups,'group','id'),rankedRooms=rank(rooms,'room','id');
- const ps=people.filter(x=>(x.display_name+" "+x.username+" "+x.bio+" "+x.interests).toLowerCase().includes(term));
+ const ps=rankedPeople.filter(x=>(x.display_name+" "+x.username+" "+x.bio+" "+x.interests).toLowerCase().includes(term)&&x._score>-9990);
  let html='<div class="community-tabs"><a href="discover.html">ALL</a><a href="discover.html?q=film">FILM</a><a href="discover.html?q=music">MUSIC</a><a href="discover.html?q=tacoma">TACOMA</a><a href="discover.html?q=creator">CREATORS</a></div>';
- html+=rankedPeople.filter(x=>ps.includes(x)).map(x=>card(avatar(x.display_name,x.avatar_url)+'<span class="kicker">PERSON</span><h2>'+esc(x.display_name)+'</h2><p>'+esc(x.bio)+'</p><p class="muted">'+esc(x.interests)+'</p><a class="btn" href="profile.html?id='+x.user_id+'">VIEW PROFILE</a>')).join("");
- html+=rankedGroups.filter(x=>!term||((x.name+" "+x.description).toLowerCase().includes(term))).map(x=>card('<span class="kicker">GROUP</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.description)+'</p><p class="muted">'+x.members.toLocaleString()+' members</p><a class="btn" href="group.html?id='+x.slug+'">OPEN GROUP</a>')).join("");
- html+=rankedRooms.filter(x=>!term||((x.name+" "+x.topic).toLowerCase().includes(term))).map(x=>card('<span class="kicker">CROWROOM</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.topic)+'</p><a class="btn" href="room.html?id='+x.slug+'">ENTER ROOM</a>')).join("");
- app().innerHTML=shell("Discover","Recommendation-ready discovery for people, groups and live conversations.",html);
+ html+=card('<span class="kicker">ADAPTIVE DISCOVERY</span><h2>Built from your CrowSpace activity</h2><p class="muted">Recent interactions carry more weight, while dismissals and “not interested” feedback reduce repeat recommendations.</p>');
+ html+=ps.map(x=>card(avatar(x.display_name,x.avatar_url)+'<span class="kicker">PERSON</span><h2>'+esc(x.display_name)+'</h2><p>'+esc(x.bio)+'</p><p class="muted">'+esc(x.interests)+'</p><div class="signal">'+btn("NOT INTERESTED","feedback:profile:"+x.user_id+":not_interested")+btn("DISMISS","feedback:profile:"+x.user_id+":dismiss")+'</div><a class="btn" href="profile.html?id='+x.user_id+'">VIEW PROFILE</a>')).join("");
+ html+=rankedGroups.filter(x=>x._score>-9990&&(!term||((x.name+" "+x.description).toLowerCase().includes(term)))).map(x=>card('<span class="kicker">GROUP</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.description)+'</p><p class="muted">'+Number(x.members||x.member_count||0).toLocaleString()+' members</p><div class="signal">'+btn("NOT INTERESTED","feedback:group:"+x.id+":not_interested")+btn("DISMISS","feedback:group:"+x.id+":dismiss")+'</div><a class="btn" href="group.html?id='+esc(x.slug)+'">OPEN GROUP</a>')).join("");
+ html+=rankedRooms.filter(x=>x._score>-9990&&(!term||((x.name+" "+x.topic).toLowerCase().includes(term)))).map(x=>card('<span class="kicker">CROWROOM</span><h2>'+esc(x.name)+'</h2><p>'+esc(x.topic)+'</p><div class="signal">'+btn("NOT INTERESTED","feedback:room:"+x.id+":not_interested")+btn("DISMISS","feedback:room:"+x.id+":dismiss")+'</div><a class="btn" href="room.html?id='+x.slug+'">ENTER ROOM</a>')).join("");
+ app().innerHTML=shell("Discover","Your CrowSpace recommendations adapt to recent activity and feedback.",html);
 }
 async function groups(){let rows=await safe('crowspace_groups',sb.from('crowspace_groups').select('*').eq('visibility','public').order('created_at',{ascending:false}),[]);app().innerHTML=shell("Groups","Find communities built around shared interests.",'<div class="grid">'+rows.map(g=>card('<span class="kicker">GROUP</span><h2>'+esc(g.name)+'</h2><p>'+esc(g.description||"")+'</p><div class="community-counts"><span>'+Number(g.member_count||g.members||0).toLocaleString()+' members</span><span>Public</span></div><a class="btn" href="group.html?id='+esc(g.slug)+'">OPEN GROUP</a>'+(user?" "+btn("JOIN","join:"+g.id):""))).join("")+'</div>'+card('<a class="btn" href="create-group.html">CREATE A GROUP</a> <a class="btn" href="create-space.html">CREATE A CROWSPACE</a>'))}
 async function group(){const slug=q("id")||"tacoma-creatives";let g=DEMO.groups.find(x=>x.slug===slug);try{g=(await sb.from("crowspace_groups").select("*").eq("slug",slug).maybeSingle()).data||g}catch(_){}if(!g){app().innerHTML=shell("Group","Not found.",card("<p>That group could not be found.</p>"));return}let threads=[];try{threads=(await sb.from("crowspace_group_threads").select("*").eq("group_id",g.id).order("created_at",{ascending:false}).limit(30)).data||[]}catch(_){}let html=user?card('<span class="kicker">START A DISCUSSION</span><form id="crThread"><input class="search" name="title" placeholder="Discussion title" required><textarea class="search" name="body" rows="3" placeholder="Start the conversation…" required></textarea><button class="btn">CREATE DISCUSSION</button></form>'):"";html+=card('<span class="kicker">COMMUNITY</span><p>'+esc(g.description||"")+'</p><p class="muted">Community rules: Be constructive. Credit creators. Build each other up.</p>');if(threads.length)for(const t of threads)html+=card('<span class="kicker">THREAD</span><h3>'+esc(t.title)+'</h3><p>'+esc(t.body)+'</p><small class="muted">'+when(t.created_at)+'</small>');else html+=card('<span class="kicker">DISCUSSION STARTERS</span><h3>What are you building?</h3><p>Share a project, ask for collaborators, or start a conversation.</p>');app().innerHTML=shell(g.name,"A persistent CrowSpace community.",html)}
@@ -127,7 +140,8 @@ async function submit(e){
 async function act(a){
  if(a==="signout"){await sb.auth.signOut();location.href="auth.html";return}
  if(a.startsWith("goto:")){location.href=a.slice(5);return}
- if(a.startsWith("message:")){if(user)await signal("message","profile",a.slice(8),2);location.href="messages.html?user="+a.slice(8);return}
+ if(a.startsWith("feedback:")){const p=a.split(":");if(user){const kind=p[1],id=p[2],action=p[3];await sb.from("crowspace_discovery_preferences").upsert({user_id:user.id,target_id:id,action},{onConflict:"user_id,target_id"});await signal(action,kind,id,action==="not_interested"?-12:-7);discover()}return}
+if(a.startsWith("message:")){if(user)await signal("message","profile",a.slice(8),2);location.href="messages.html?user="+a.slice(8);return}
  if(a.startsWith("friend:")){if(!user){location.href="auth.html";return}const r=await sb.from("crowspace_friends").insert({requester_id:user.id,recipient_id:a.slice(7),status:"pending"});if(r.error&&r.error.code!=="23505")alert(r.error.message);else {if(!r.error)await signal("friend","profile",a.slice(7),5);profile()}return}
  if(a.startsWith("follow:")){if(!user){location.href="auth.html";return}const id=a.slice(7),x=(await sb.from("crowspace_follows").select("*").eq("follower_id",user.id).eq("following_id",id).maybeSingle()).data;if(x)await sb.from("crowspace_follows").delete().eq("follower_id",user.id).eq("following_id",id);else {await sb.from("crowspace_follows").insert({follower_id:user.id,following_id:id});await signal("follow","profile",id,3)}profile();return}
  if(a.startsWith("join:")){if(!user){location.href="auth.html";return}const id=a.slice(5);const r=await sb.from("crowspace_group_members").upsert({group_id:id,user_id:user.id,role:"member",status:"active"},{onConflict:"group_id,user_id"});if(r.error)alert(r.error.message);else {await signal("engagement","group",g.id,2);group()}return}
