@@ -1,1 +1,192 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace | CrowRules Entertainment</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html"><span>●</span> CROWSPACE</a><nav aria-label="CrowSpace global navigation"></nav><div id="account"><a href="login.html">Sign In</a></div></header><main><section class="hero"><div><p class="eyebrow">CROWRULES ENTERTAINMENT</p><h1>Welcome to <span>CrowSpace</span></h1><p class="lead">One social universe for the people, stories, communities and creations behind CrowRules.</p><div class="actions"><a class="btn primary" href="signup.html">Join CrowSpace</a><a class="btn" href="profile.html">Enter your Nest</a></div></div><div class="hero-orbit">◉</div></section><section class="section"><div class="section-head"><div><p class="eyebrow">SOCIAL FEED</p><h2>The Nest</h2></div><a href="profile.html">Create a post →</a></div><div id="feed" class="feed"></div></section><section class="section"><div class="section-head"><div><p class="eyebrow">DISCOVER</p><h2>People You May Know</h2></div><a href="people.html">Find People →</a></div><div id="discover" class="grid three"></div></section><section class="section dark" id="caws"><div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h2>Caws</h2></div><a href="caws.html">View all →</a></div><div class="caw-preview"><div class="caw-screen"><div class="play">▶</div><div><strong>Short-form video for CrowSpace</strong><small>Creators • community • CrowRules</small></div></div><div class="caw-copy"><p>Create and discover vertical video from the CrowRules community.</p><a class="btn primary" href="create-caw.html">Create a Caw</a></div></div></section><section class="section"><div class="section-head"><div><p class="eyebrow">COMMUNITIES</p><h2>Groups</h2></div><a href="groups.html">Explore groups →</a></div><div class="grid three"><article class="card"><h3>Dreamscapes Creators</h3><p>Stories and worlds being developed through CrowRules Dreamscapes.</p></article><article class="card"><h3>Tacoma Community</h3><p>Connect with the Tacoma CrowRules community.</p></article><article class="card"><h3>CrowRules Community</h3><p>Discuss the growing CrowRules universe.</p></article></div></section><section class="section integrations"><div><p class="eyebrow">CONNECTED UNIVERSE</p><h2>Dreamscapes</h2><p>Discover dreams, stories and ideas from the CrowRules Dreamscapes project.</p><a class="btn" href="dreamscapes.html">Open Dreamscapes →</a></div><div class="integration-card"><strong>Dream → CrowSpace</strong><span>Explore • Discuss • Connect</span></div></section><section class="section integrations"><div><p class="eyebrow">REMEMBER</p><h2>Memorials</h2><p>Explore the CrowRules Memorials universe and share stories that matter.</p><a class="btn" href="memorials.html">Open Memorials →</a></div><div class="integration-card memorial"><strong>Lives & Legacies</strong><span>Remember • Learn • Share</span></div></section><section class="section podcasting"><div><p class="eyebrow">CONNECTED UNIVERSE</p><h2>Podcasting</h2><p>Enter the CrowRules Podcasting universe — voices, stories, conversations and original shows from the CrowRules community.</p><div class="actions"><a class="btn primary" href="podcasting.html">Explore Podcasting →</a><a class="btn" href="https://crowrulesentertainment-oss.github.io/podcasting/">Open CrowRules Podcasting →</a></div></div><div class="integration-card"><strong>Every Voice. Every Story.</strong><span>One Universe • Podcasting</span></div></section><section class="section membership"><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h2>Universal CrowRules Membership</h2><p>Your CrowSpace identity connects to the existing CrowRules membership system in Supabase.</p><a class="btn primary" href="signup.html">Create your account</a></section></main><footer><strong>CrowRules Entertainment</strong><span>© 2026 CrowSpace • One company. One universe.</span></footer><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>document.addEventListener("DOMContentLoaded",()=>{CS.homeFeed().catch(console.warn);CS.discovery().catch(console.warn)});</script><script src="js/global-nav.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CrowSpace | CrowRules Entertainment</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.home-command{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-top:22px}
+.command-panel,.pulse-panel,.launch-card,.universe-node,.roadmap-card{background:linear-gradient(145deg,rgba(8,11,20,.96),rgba(12,16,30,.88));border:1px solid rgba(89,231,255,.18);box-shadow:0 16px 45px rgba(0,0,0,.22)}
+.command-panel{padding:24px;border-radius:18px;position:relative;overflow:hidden}
+.command-panel:after{content:"";position:absolute;inset:auto -20% -70% 20%;height:180px;background:radial-gradient(circle,rgba(168,121,255,.16),transparent 65%);pointer-events:none}
+.command-kicker{font-size:11px;letter-spacing:2px;font-weight:900;color:var(--cp-cyan,#59e7ff)}
+.command-panel h2{font-size:clamp(28px,4vw,48px);margin:8px 0}
+.command-panel p{max-width:720px}
+.command-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+.pulse-panel{border-radius:18px;padding:20px}
+.pulse-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pulse-stat{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)}
+.pulse-stat small{display:block;opacity:.65;text-transform:uppercase;letter-spacing:1px;font-size:9px}
+.pulse-stat strong{display:block;margin-top:5px;font-size:20px}
+.launch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.launch-card{padding:19px;border-radius:15px;transition:transform .18s ease,border-color .18s ease}
+.launch-card:hover{transform:translateY(-3px);border-color:rgba(89,231,255,.5)}
+.launch-icon{font-size:25px}
+.launch-card h3{margin:10px 0 6px}
+.launch-card p{font-size:13px;opacity:.75;min-height:38px}
+.launch-card a{font-weight:900}
+.universe-map{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.universe-node{padding:20px;border-radius:16px;min-height:150px}
+.universe-node .node-line{font-size:10px;letter-spacing:1.5px;color:var(--cp-cyan,#59e7ff);font-weight:900}
+.universe-node h3{margin:8px 0}
+.universe-node p{font-size:13px;opacity:.75}
+.roadmap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.roadmap-card{padding:18px;border-radius:14px}
+.roadmap-card strong{font-size:22px}
+.roadmap-card span{display:block;color:var(--cp-cyan,#59e7ff);font-size:11px;font-weight:900;margin:6px 0}
+.home-status{margin-top:12px;font-size:12px;opacity:.7}
+@media(max-width:900px){.home-command{grid-template-columns:1fr}.launch-grid,.roadmap-grid{grid-template-columns:1fr 1fr}.universe-map{grid-template-columns:1fr}}
+@media(max-width:520px){.launch-grid,.roadmap-grid{grid-template-columns:1fr}.command-panel{padding:18px}.pulse-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header class="site-header">
+<a class="brand" href="index.html"><span>●</span> CROWSPACE</a>
+<nav aria-label="CrowSpace global navigation"></nav>
+<div id="account"><a href="login.html">Sign In</a></div>
+</header>
+
+<main>
+<section class="hero">
+<div>
+<p class="eyebrow">CROWRULES ENTERTAINMENT · CROWSPACE</p>
+<h1>Your social universe is <span>coming alive.</span></h1>
+<p class="lead">CrowSpace brings people, posts, Caws, photos, groups, events and the wider CrowRules universe into one connected community.</p>
+<div class="actions">
+<a class="btn primary" href="signup.html">Join CrowSpace</a>
+<a class="btn" href="profile.html">Enter your Nest</a>
+</div>
+<div class="home-status" id="homeStatus">Connecting to the CrowSpace universe…</div>
+</div>
+<div class="hero-orbit">◉</div>
+</section>
+
+<section class="section">
+<div class="home-command">
+<div class="command-panel">
+<div class="command-kicker">CROWSPACE COMMAND DECK</div>
+<h2 id="welcomeTitle">One Account. One Universe.</h2>
+<p id="welcomeCopy">Build your identity, find your people and move between every part of CrowSpace without leaving your Nest.</p>
+<div class="command-actions">
+<a class="btn primary" href="profile.html">Open My Nest →</a>
+<a class="btn" href="people.html">Discover People</a>
+<a class="btn" href="notifications.html">View Notifications</a>
+<a class="btn" href="command-center.html">Command Center</a>
+</div>
+</div>
+<div class="pulse-panel">
+<p class="eyebrow">ACTIVITY PULSE</p>
+<h3>At a glance</h3>
+<div class="pulse-grid">
+<div class="pulse-stat"><small>Identity</small><strong id="statIdentity">—</strong></div>
+<div class="pulse-stat"><small>Membership</small><strong id="statMembership">—</strong></div>
+<div class="pulse-stat"><small>CrowPoints</small><strong id="statPoints">—</strong></div>
+<div class="pulse-stat"><small>Connection</small><strong id="statConnection">—</strong></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">QUICK LAUNCH</p><h2>Make something happen</h2></div><a href="command-center.html">Open Command Center →</a></div>
+<div class="launch-grid">
+<article class="launch-card"><div class="launch-icon">🎬</div><h3>Create a Caw</h3><p>Record or upload short-form video.</p><a href="create-caw.html">Start creating →</a></article>
+<article class="launch-card"><div class="launch-icon">📸</div><h3>Build an Album</h3><p>Upload photos and create a visual collection.</p><a href="create-album.html">Create album →</a></article>
+<article class="launch-card"><div class="launch-icon">👥</div><h3>Start a Group</h3><p>Bring people together around an idea.</p><a href="create-group.html">Create group →</a></article>
+<article class="launch-card"><div class="launch-icon">📅</div><h3>Create an Event</h3><p>Plan a meetup, livestream or community event.</p><a href="create-event.html">Create event →</a></article>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">SOCIAL FEED</p><h2>The Nest</h2></div><a href="profile.html">Create a post →</a></div>
+<div id="feed" class="feed"></div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">DISCOVER</p><h2>People You May Know</h2></div><a href="people.html">Find People →</a></div>
+<div id="discover" class="grid three"></div>
+</section>
+
+<section class="section dark" id="caws">
+<div class="section-head"><div><p class="eyebrow">SHORT FORM</p><h2>Caws</h2></div><a href="caws.html">View all →</a></div>
+<div class="caw-preview"><div class="caw-screen"><div class="play">▶</div><div><strong>Short-form video for CrowSpace</strong><small>Creators • community • CrowRules</small></div></div><div class="caw-copy"><p>Create and discover vertical video from the CrowRules community.</p><a class="btn primary" href="create-caw.html">Create a Caw</a></div></div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">CONNECTED UNIVERSE</p><h2>Explore the CrowRules worlds</h2></div><a href="command-center.html">Universal Command Center →</a></div>
+<div class="universe-map">
+<article class="universe-node"><div class="node-line">DREAM · CREATE</div><h3>Dreamscapes</h3><p>Discover dreams, stories and ideas being developed through collaboration.</p><a href="dreamscapes.html">Enter Dreamscapes →</a></article>
+<article class="universe-node"><div class="node-line">REMEMBER · HONOR</div><h3>Memorials</h3><p>Explore the CrowRules Memorials universe and preserve stories that matter.</p><a href="memorials.html">Open Memorials →</a></article>
+<article class="universe-node"><div class="node-line">LISTEN · CONNECT</div><h3>Podcasting</h3><p>Find voices, conversations, original shows and community storytelling.</p><a href="podcasting.html">Explore Podcasting →</a></article>
+<article class="universe-node"><div class="node-line">CONNECT · COMMUNITY</div><h3>Groups</h3><p>Join communities or build your own space around shared interests.</p><a href="groups.html">Explore Groups →</a></article>
+<article class="universe-node"><div class="node-line">PLAN · GATHER</div><h3>Events</h3><p>Discover what's happening and create events for your community.</p><a href="events.html">Explore Events →</a></article>
+<article class="universe-node"><div class="node-line">YOU · YOUR NEST</div><h3>Profile</h3><p>Your identity, posts, photos, connections and creative home base.</p><a href="profile.html">Open My Nest →</a></article>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">COMMUNITY</p><h2>Groups worth exploring</h2></div><a href="groups.html">Explore all groups →</a></div>
+<div class="grid three">
+<article class="card"><h3>Dreamscapes Creators</h3><p>Stories and worlds being developed through CrowRules Dreamscapes.</p></article>
+<article class="card"><h3>Tacoma Community</h3><p>Connect with the Tacoma CrowRules community.</p></article>
+<article class="card"><h3>CrowRules Community</h3><p>Discuss the growing CrowRules universe.</p></article>
+</div>
+</section>
+
+<section class="section membership">
+<p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
+<h2>Universal CrowRules Membership</h2>
+<p>Your CrowSpace identity connects to the shared CrowRules membership system. One identity can move across the growing universe.</p>
+<div class="actions">
+<a class="btn primary" href="membership.html">Explore Membership →</a>
+<a class="btn" href="signup.html">Create your account</a>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">THE ROAD AHEAD</p><h2>CrowSpace is still being built.</h2></div></div>
+<div class="roadmap-grid">
+<div class="roadmap-card"><strong>01</strong><span>NOW</span><p>Profiles, social connections, Caws, photos, groups and events.</p></div>
+<div class="roadmap-card"><strong>02</strong><span>CONNECT</span><p>Notifications, discovery, richer feeds and deeper community tools.</p></div>
+<div class="roadmap-card"><strong>03</strong><span>CREATE</span><p>More creator tools, live experiences and connected CrowRules projects.</p></div>
+<div class="roadmap-card"><strong>∞</strong><span>ONE UNIVERSE</span><p>One account connecting the worlds built by CrowRules and its community.</p></div>
+</div>
+</section>
+</main>
+
+<footer><strong>CrowRules Entertainment</strong><span>© 2026 CrowSpace • One company. One universe.</span></footer>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",async()=>{
+  try{await CS.refreshHeader()}catch(e){console.warn(e)}
+  try{await CS.homeFeed()}catch(e){console.warn(e)}
+  try{await CS.discovery()}catch(e){console.warn(e)}
+  const status=document.getElementById("homeStatus");
+  const user=await CS.user().catch(()=>null);
+  if(!user){
+    status.textContent="Explore publicly, then sign in to unlock your personalized CrowSpace.";
+    return;
+  }
+  status.textContent="Your CrowSpace identity is connected.";
+  document.getElementById("welcomeTitle").textContent="Welcome back to your universe.";
+  document.getElementById("welcomeCopy").textContent="Your Nest is the home base for your people, creations, conversations and CrowRules connections.";
+  document.getElementById("statIdentity").textContent="Connected";
+  document.getElementById("statConnection").textContent="Active";
+  try{
+    const m=await CS.membership();
+    document.getElementById("statMembership").textContent=m?.plan?.name||"CROW · Free";
+  }catch{document.getElementById("statMembership").textContent="CROW · Free"}
+  try{
+    const {data:p}=await CS.client.from("membership_profiles").select("points").eq("id",user.id).maybeSingle();
+    document.getElementById("statPoints").textContent=Number(p?.points||0).toLocaleString();
+  }catch{document.getElementById("statPoints").textContent="0"}
+});
+</script>
+<script src="js/global-nav.js"></script>
+</body>
+</html>
