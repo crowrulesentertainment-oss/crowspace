@@ -1,1 +1,232 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace | Global Community</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>:root{--bg:#060810;--panel:#0b0f1c;--line:#ffffff18;--cyan:#59e7ff;--green:#63ffae;--pink:#ff65c7;--muted:#93a0b5}body{background:radial-gradient(circle at 15% 0%,#12304455,transparent 32%),radial-gradient(circle at 90% 5%,#552b7650,transparent 32%),var(--bg);color:#fff}.wrap{max-width:1400px;margin:auto;padding:18px}.hero{min-height:470px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:25px;padding:45px;border:1px solid var(--line);border-radius:30px;background:linear-gradient(135deg,#081626,#1e0b2f);overflow:hidden}.k{font:800 10px Orbitron,Arial;letter-spacing:.2em;color:var(--cyan)}h1{font:800 clamp(42px,6vw,76px) Orbitron,Arial;line-height:1;margin:10px 0}h1 span{color:var(--cyan)}p{color:#bac4d3;line-height:1.7}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.state{font-size:11px;color:var(--muted);margin-top:12px}.globe{width:min(360px,80vw);aspect-ratio:1;border-radius:50%;margin:auto;position:relative;background:radial-gradient(circle at 35% 28%,#59e7ff30,#10253bd9 48%,#060810 74%);border:1px solid #59e7ff55;box-shadow:inset -35px -20px 90px #000b,0 0 90px #59e7ff20}.globe:before{content:"";position:absolute;inset:9%;border:1px solid #59e7ff2c;border-radius:50%}.orbit{position:absolute;inset:13% -6%;border:1px solid #a878ff55;border-radius:50%;transform:rotate(-22deg)}.land{position:absolute;background:linear-gradient(135deg,#59e7ff55,#a878ff30);border-radius:50% 55% 43% 57%}.a{width:105px;height:78px;left:20%;top:30%}.b{width:85px;height:115px;left:42%;top:48%}.c{width:105px;height:66px;right:13%;top:28%}.d{width:75px;height:48px;right:23%;bottom:18%}.hot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 6px #ff65c71c,0 0 24px var(--pink);animation:p 2s infinite}.h1{left:28%;top:39%}.h2{left:49%;top:57%}.h3{right:27%;top:34%}.h4{right:32%;bottom:24%}@keyframes p{50%{transform:scale(1.6);opacity:.6}}.label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 13px;border-radius:99px;background:#060810e8;border:1px solid var(--line);font:800 9px Orbitron;color:#dce6f4}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:15px 0}.metric,.panel,.card{border:1px solid var(--line);background:var(--panel);border-radius:19px}.metric{padding:17px}.metric small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}.metric strong{display:block;margin-top:6px;font:800 25px Orbitron}.online strong{color:var(--green)}.top{display:grid;grid-template-columns:1.5fr .8fr;gap:15px}.panel{padding:21px}.panel h2,.card h2{font:800 22px Orbitron;margin:7px 0 14px}.sub{font-size:12px}.map{height:320px;position:relative;margin-top:15px;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse,#59e7ff0d,transparent 60%),linear-gradient(#59e7ff09 1px,transparent 1px),linear-gradient(90deg,#59e7ff09 1px,transparent 1px);background-size:auto,30px 30px,30px 30px;border:1px solid #59e7ff1c}.land2{position:absolute;background:#59e7ff20;border:1px solid #59e7ff20}.na{width:24%;height:28%;left:9%;top:17%;border-radius:55% 45% 58% 40%}.sa{width:12%;height:31%;left:29%;top:51%;border-radius:52% 44% 65% 48%}.eu{width:14%;height:12%;left:48%;top:29%;border-radius:50%}.af{width:14%;height:30%;left:49%;top:42%;border-radius:44% 55% 52% 43%}.as{width:27%;height:25%;left:59%;top:27%;border-radius:45% 53% 48% 58%}.au{width:11%;height:13%;right:8%;bottom:19%;border-radius:50%}.online-dot{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px #63ffae18,0 0 25px var(--green);z-index:4;animation:p 2.2s infinite}.region{position:absolute;z-index:5;color:#dce6f4;font:800 8px Orbitron;background:#060810cc;padding:4px 6px;border:1px solid #ffffff12;border-radius:8px}.r1{left:17%;top:25%}.r2{left:29%;top:68%}.r3{left:48%;top:24%}.r4{left:50%;top:64%}.r5{left:69%;top:28%}.r6{right:8%;bottom:15%}.foot{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:9px}.pulse{display:grid;gap:8px}.pulseitem{padding:11px;border-radius:12px;background:#ffffff08}.pulseitem strong{display:block;font-size:12px}.pulseitem small{display:block;color:var(--muted);margin-top:4px}.section{margin-top:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.card{padding:18px}.list{display:grid;gap:7px}.row{display:flex;gap:9px;align-items:center;padding:9px;border-radius:11px;background:#ffffff06;border:1px solid #ffffff0b;text-decoration:none;color:#fff}.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#182238;display:grid;place-items:center;flex:0 0 38px}.copy{min-width:0;flex:1}.copy strong,.copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy small{font-size:9px;color:var(--muted);margin-top:3px}.empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:11px}.link{display:block;color:var(--cyan);font-size:11px;font-weight:900;text-decoration:none;margin-top:12px}@media(max-width:950px){.hero{grid-template-columns:1fr;padding:32px 24px}.top{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:620px){.wrap{padding:10px}.hero{padding:25px 18px}.metrics{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.map{height:240px}}</style></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header><main class="wrap"><section class="hero"><div><div class="k">CROWRULES ENTERTAINMENT · CROWSPACE</div><h1>The world is <span>online.</span></h1><p>See the CrowSpace community as it happens. Live members appear on the global heatmap by broad region, while Supabase Realtime Presence keeps the online counter synchronized.</p><div class="actions"><a class="btn primary" href="people.html">Explore Community →</a><a class="btn" href="rankings.html">Community Rankings</a><a class="btn" href="profile.html">Open My Nest</a></div><div class="actions"><a class="btn" href="dreamscapes.html">Dreamscapes ✦</a><a class="btn" href="memorials.html">Memorials ♡</a><a class="btn" href="podcasting.html">Podcasting ▶</a></div><div id="state" class="state">Connecting to CrowSpace…</div></div><div><div class="globe"><div class="orbit"></div><div class="land a"></div><div class="land b"></div><div class="land c"></div><div class="land d"></div><span class="hot h1"></span><span class="hot h2"></span><span class="hot h3"></span><span class="hot h4"></span><div class="label">GLOBAL LIVE PRESENCE</div></div></div></section><section class="metrics"><div class="metric online"><small>Online Now</small><strong id="online">—</strong></div><div class="metric"><small>Members</small><strong id="members">—</strong></div><div class="metric"><small>Connections</small><strong id="connections">—</strong></div><div class="metric"><small>Caws</small><strong id="caws">—</strong></div><div class="metric"><small>Posts</small><strong id="posts">—</strong></div></section><section class="top"><article class="panel"><div class="k">CROWSPACE HEATMAP · LIVE WORLD</div><h2>Where people are online</h2><p class="sub">Only broad regions are shown. No exact addresses or precise locations are published.</p><div class="map" id="map"><div class="land2 na"></div><div class="land2 sa"></div><div class="land2 eu"></div><div class="land2 af"></div><div class="land2 as"></div><div class="land2 au"></div><div class="region r1">NORTH AMERICA</div><div class="region r2">SOUTH AMERICA</div><div class="region r3">EUROPE</div><div class="region r4">AFRICA</div><div class="region r5">ASIA</div><div class="region r6">OCEANIA</div></div><div class="foot"><span id="regions">Waiting for presence…</span><span>LIVE · REALTIME</span></div></article><article class="panel"><div class="k">CROWSPACE PULSE</div><h2>What's moving now</h2><div id="pulse" class="pulse"><div class="empty">Loading…</div></div></article></section><section class="section"><div class="k">COMMUNITY SIGNAL</div><h2>What's happening across CrowSpace</h2><div class="grid"><article class="card"><div class="k">PEOPLE</div><h2>Newest Members</h2><div id="newest" class="list"><div class="empty">Loading…</div></div><a class="link" href="people.html">View People →</a></article><article class="card"><div class="k">PEOPLE</div><h2>Most Active</h2><div id="active" class="list"><div class="empty">Loading…</div></div><a class="link" href="rankings.html">Discover Activity →</a></article><article class="card"><div class="k">NETWORK</div><h2>Most Connections</h2><div id="connectionList" class="list"><div class="empty">Loading…</div></div><a class="link" href="people.html">Grow Your Network →</a></article><article class="card"><div class="k">GROUPS</div><h2>Group Activity</h2><div id="groups" class="list"><div class="empty">Loading…</div></div><a class="link" href="groups.html">Explore Groups →</a></article><article class="card"><div class="k">EVENTS</div><h2>Upcoming Events</h2><div id="events" class="list"><div class="empty">Loading…</div></div><a class="link" href="events.html">View Events →</a></article><article class="card"><div class="k">MEDIA</div><h2>Latest Caws</h2><div id="cawList" class="list"><div class="empty">Loading…</div></div><a class="link" href="caw-feed.html">Watch Caw Feed →</a><a class="link" href="caws.html">Caw Studio →</a></article></div></section></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const db=()=>window.crowSupabase||window.CS?.client;const set=(id,h,e)=>{const el=$(id);if(el)el.innerHTML=h||'<div class="empty">'+esc(e||'Nothing here yet.')+'</div>'};const safe=async f=>{try{const r=await f();return{data:r?.data||[],error:r?.error||null,count:r?.count??null}}catch(error){return{data:[],error,count:null}}};function region(t){if(/^America\/(New_York|Detroit|Chicago|Denver|Phoenix|Los_Angeles|Anchorage|Adak|Toronto|Vancouver|Winnipeg|Edmonton|Halifax)/.test(t))return'North America';if(/^America\//.test(t))return'South America';if(/^Europe\//.test(t)||/^Atlantic\//.test(t))return'Europe';if(/^Africa\//.test(t))return'Africa';if(/^Asia\//.test(t))return'Asia';if(/^Australia\//.test(t)||/^Pacific\//.test(t))return'Oceania';return'Other'}function paint(state){const all=Object.values(state||{}).flat(),counts={};all.forEach(p=>{const r=p.region||'Other';counts[r]=(counts[r]||0)+1});$('online').textContent=all.length;$('regions').textContent=Object.entries(counts).filter(([r])=>r!=='Other').map(([r,n])=>r+': '+n).join(' · ')||'No regional presence yet';document.querySelectorAll('.online-dot').forEach(x=>x.remove());const pos={'North America':[22,32],'South America':[31,65],'Europe':[51,31],'Africa':[53,56],'Asia':[71,34],'Oceania':[84,69]};Object.entries(counts).forEach(([r,n])=>{if(!pos[r])return;const d=document.createElement('span');d.className='online-dot';d.title=r+': '+n+' online';d.style.left=pos[r][0]+'%';d.style.top=pos[r][1]+'%';d.style.transform='scale('+(1+Math.min(n,20)/15)+')';$('map').appendChild(d)})}async function presence(c){const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',key=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random();const ch=c.channel('crowspace-global-presence',{config:{presence:{key}}});['sync','join','leave'].forEach(ev=>ch.on('presence',{event:ev},()=>paint(ch.presenceState())));return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done)reject(new Error('Presence subscription timeout'))},8000);ch.subscribe(async status=>{if(status==='SUBSCRIBED'){try{await ch.track({region:region(tz),timezone:tz,online_at:new Date().toISOString()});done=true;clearTimeout(timer);paint(ch.presenceState());$('state').textContent='Live · CrowSpace Presence synchronized';resolve(ch)}catch(e){done=true;clearTimeout(timer);reject(e)}}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){done=true;clearTimeout(timer);reject(new Error('Presence channel '+status))}})})}async function load(){const c=db();if(!c){$('state').textContent='CrowSpace database client unavailable.';return}try{await c.auth.getUser()}catch(e){}try{await presence(c)}catch(e){console.warn('CrowSpace presence:',e);$('state').textContent='Community data connected · live presence unavailable'}const [mem,posts,caws,groups,events,friend]=await Promise.all([safe(()=>c.from('membership_profiles').select('id,display_name,username,avatar_url,created_at',{count:'exact'}).order('created_at',{ascending:false}).limit(100)),safe(()=>c.from('crowspace_posts').select('user_id,created_at',{count:'exact'}).order('created_at',{ascending:false}).limit(1000)),safe(()=>c.from('crowspace_caws').select('id,user_id,title,created_at',{count:'exact'}).order('created_at',{ascending:false}).limit(5)),safe(()=>c.from('crowspace_groups').select('id,name,created_at').order('created_at',{ascending:false}).limit(5)),safe(()=>c.from('crowspace_events').select('id,title,starts_at').gte('starts_at',new Date().toISOString()).order('starts_at').limit(5)),safe(()=>c.from('crowspace_friendships').select('requester_id,addressee_id').eq('status','accepted').limit(2000))]);$('members').textContent=mem.count??mem.data.length;$('posts').textContent=posts.count??posts.data.length;$('caws').textContent=caws.count??caws.data.length;$('connections').textContent=friend.data.length;const person=r=>'<a class="row" href="profile.html?id='+encodeURIComponent(r.id)+'">'+(r.avatar_url?'<img class="avatar" src="'+esc(r.avatar_url)+'" alt="">':'<div class="avatar">'+esc((r.display_name||r.username||'C')[0])+'</div>')+'<span class="copy"><strong>'+esc(r.display_name||r.username||'CrowSpace Member')+'</strong><small>@'+esc(r.username||'member')+'</small></span></a>';set('newest',mem.data.slice(0,5).map(person).join(''),'No members yet.');const act={};posts.data.forEach(x=>x.user_id&&(act[x.user_id]=(act[x.user_id]||0)+1));caws.data.forEach(x=>x.user_id&&(act[x.user_id]=(act[x.user_id]||0)+1));set('active',mem.data.map(r=>({...r,n:act[r.id]||0})).filter(r=>r.n).sort((a,b)=>b.n-a.n).slice(0,5).map(person).join(''),'No activity yet.');const fm={};friend.data.forEach(x=>{fm[x.requester_id]=(fm[x.requester_id]||0)+1;fm[x.addressee_id]=(fm[x.addressee_id]||0)+1});set('connectionList',mem.data.map(r=>({...r,n:fm[r.id]||0})).filter(r=>r.n).sort((a,b)=>b.n-a.n).slice(0,5).map(person).join(''),'No accepted connections yet.');set('groups',groups.data.map(r=>'<a class="row" href="group.html?id='+encodeURIComponent(r.id)+'"><div class="avatar">G</div><span class="copy"><strong>'+esc(r.name)+'</strong><small>Group</small></span></a>').join(''),'No groups yet.');set('events',events.data.map(r=>'<a class="row" href="events.html"><div class="avatar">E</div><span class="copy"><strong>'+esc(r.title)+'</strong><small>'+new Date(r.starts_at).toLocaleString()+'</small></span></a>').join(''),'No upcoming events.');set('cawList',caws.data.map(r=>'<a class="row" href="caws.html"><div class="avatar">C</div><span class="copy"><strong>'+esc(r.title||'Untitled Caw')+'</strong><small>'+new Date(r.created_at).toLocaleDateString()+'</small></span></a>').join(''),'No Caws yet.');const pulse=[...posts.data.slice(0,4).map(x=>({t:'New community post',d:x.created_at})),...caws.data.map(x=>({t:'New Caw · '+(x.title||'Untitled'),d:x.created_at}))].sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,6);set('pulse',pulse.map(x=>'<div class="pulseitem"><strong>'+esc(x.t)+'</strong><small>'+new Date(x.d).toLocaleString()+'</small></div>').join(''),'The community is quiet right now.')}document.addEventListener('DOMContentLoaded',load);</script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace | Global Community</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>:root{--bg:#060810;--panel:#0b0f1c;--line:#ffffff18;--cyan:#59e7ff;--green:#63ffae;--pink:#ff65c7;--muted:#93a0b5}body{background:radial-gradient(circle at 15% 0%,#12304455,transparent 32%),radial-gradient(circle at 90% 5%,#552b7650,transparent 32%),var(--bg);color:#fff}.wrap{max-width:1400px;margin:auto;padding:18px}.hero{min-height:470px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:25px;padding:45px;border:1px solid var(--line);border-radius:30px;background:linear-gradient(135deg,#081626,#1e0b2f);overflow:hidden}.k{font:800 10px Orbitron,Arial;letter-spacing:.2em;color:var(--cyan)}h1{font:800 clamp(42px,6vw,76px) Orbitron,Arial;line-height:1;margin:10px 0}h1 span{color:var(--cyan)}p{color:#bac4d3;line-height:1.7}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.state{font-size:11px;color:var(--muted);margin-top:12px}.globe{width:min(360px,80vw);aspect-ratio:1;border-radius:50%;margin:auto;position:relative;background:radial-gradient(circle at 35% 28%,#59e7ff30,#10253bd9 48%,#060810 74%);border:1px solid #59e7ff55;box-shadow:inset -35px -20px 90px #000b,0 0 90px #59e7ff20}.globe:before{content:"";position:absolute;inset:9%;border:1px solid #59e7ff2c;border-radius:50%}.orbit{position:absolute;inset:13% -6%;border:1px solid #a878ff55;border-radius:50%;transform:rotate(-22deg)}.land{position:absolute;background:linear-gradient(135deg,#59e7ff55,#a878ff30);border-radius:50% 55% 43% 57%}.a{width:105px;height:78px;left:20%;top:30%}.b{width:85px;height:115px;left:42%;top:48%}.c{width:105px;height:66px;right:13%;top:28%}.d{width:75px;height:48px;right:23%;bottom:18%}.hot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 6px #ff65c71c,0 0 24px var(--pink);animation:p 2s infinite}.h1{left:28%;top:39%}.h2{left:49%;top:57%}.h3{right:27%;top:34%}.h4{right:32%;bottom:24%}@keyframes p{50%{transform:scale(1.6);opacity:.6}}.label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 13px;border-radius:99px;background:#060810e8;border:1px solid var(--line);font:800 9px Orbitron;color:#dce6f4}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:15px 0}.metric,.panel,.card{border:1px solid var(--line);background:var(--panel);border-radius:19px}.metric{padding:17px}.metric small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}.metric strong{display:block;margin-top:6px;font:800 25px Orbitron}.online strong{color:var(--green)}.top{display:grid;grid-template-columns:1.5fr .8fr;gap:15px}.panel{padding:21px}.panel h2,.card h2{font:800 22px Orbitron;margin:7px 0 14px}.sub{font-size:12px}.map{height:320px;position:relative;margin-top:15px;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse,#59e7ff0d,transparent 60%),linear-gradient(#59e7ff09 1px,transparent 1px),linear-gradient(90deg,#59e7ff09 1px,transparent 1px);background-size:auto,30px 30px,30px 30px;border:1px solid #59e7ff1c}.land2{position:absolute;background:#59e7ff20;border:1px solid #59e7ff20}.na{width:24%;height:28%;left:9%;top:17%;border-radius:55% 45% 58% 40%}.sa{width:12%;height:31%;left:29%;top:51%;border-radius:52% 44% 65% 48%}.eu{width:14%;height:12%;left:48%;top:29%;border-radius:50%}.af{width:14%;height:30%;left:49%;top:42%;border-radius:44% 55% 52% 43%}.as{width:27%;height:25%;left:59%;top:27%;border-radius:45% 53% 48% 58%}.au{width:11%;height:13%;right:8%;bottom:19%;border-radius:50%}.online-dot{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px #63ffae18,0 0 25px var(--green);z-index:4;animation:p 2.2s infinite}.region{position:absolute;z-index:5;color:#dce6f4;font:800 8px Orbitron;background:#060810cc;padding:4px 6px;border:1px solid #ffffff12;border-radius:8px}.r1{left:17%;top:25%}.r2{left:29%;top:68%}.r3{left:48%;top:24%}.r4{left:50%;top:64%}.r5{left:69%;top:28%}.r6{right:8%;bottom:15%}.foot{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:9px}.pulse{display:grid;gap:8px}.pulseitem{padding:11px;border-radius:12px;background:#ffffff08}.pulseitem strong{display:block;font-size:12px}.pulseitem small{display:block;color:var(--muted);margin-top:4px}.section{margin-top:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.card{padding:18px}.list{display:grid;gap:7px}.row{display:flex;gap:9px;align-items:center;padding:9px;border-radius:11px;background:#ffffff06;border:1px solid #ffffff0b;text-decoration:none;color:#fff}.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#182238;display:grid;place-items:center;flex:0 0 38px}.copy{min-width:0;flex:1}.copy strong,.copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.copy small{font-size:9px;color:var(--muted);margin-top:3px}.empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:11px}.link{display:block;color:var(--cyan);font-size:11px;font-weight:900;text-decoration:none;margin-top:12px}@media(max-width:950px){.hero{grid-template-columns:1fr;padding:32px 24px}.top{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:620px){.wrap{padding:10px}.hero{padding:25px 18px}.metrics{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.map{height:240px}}</style>
+<style id="community-feed-upgrade">
+.community-feed{margin-top:18px}
+.community-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,.7fr);gap:15px}
+.community-composer,.community-feed-panel,.community-side-card{border:1px solid rgba(112,132,180,.22);background:linear-gradient(145deg,#090c15,#05070d);border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.community-composer{padding:18px;margin-bottom:14px}
+.community-title{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:13px}
+.community-title h2{margin:5px 0 0;font:800 22px Orbitron,Montserrat,sans-serif;text-transform:uppercase}
+.community-title p{margin:5px 0 0;color:#93a0b5;font-size:11px}
+.community-composer textarea{width:100%;min-height:100px;resize:vertical;background:#04060b;color:#fff;border:1px solid rgba(112,132,180,.25);border-radius:4px;padding:13px;outline:none;font:500 13px Montserrat,Arial;line-height:1.6}
+.community-composer textarea:focus{border-color:rgba(89,231,255,.5);box-shadow:0 0 22px rgba(89,231,255,.06)}
+.community-composer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.community-hint{font-size:10px;color:#68758b}
+.community-submit{appearance:none;border:1px solid rgba(89,231,255,.38);background:linear-gradient(135deg,rgba(89,231,255,.13),rgba(168,121,255,.16));color:#fff;border-radius:3px;padding:10px 15px;font-weight:800;cursor:pointer}
+.community-submit:disabled{opacity:.55;cursor:wait}
+.community-feed-panel{padding:18px}
+.community-feed-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.community-feed-head h3{margin:0;font:800 14px Orbitron,Montserrat,sans-serif;letter-spacing:.04em}
+.community-refresh{border:1px solid rgba(112,132,180,.25);background:#080b13;color:#b9c4d6;border-radius:3px;padding:8px 10px;cursor:pointer;font-size:11px}
+.community-items{display:grid;gap:11px}
+.community-post{border:1px solid rgba(112,132,180,.18);background:rgba(255,255,255,.018);padding:15px;border-radius:4px}
+.community-post-head{display:flex;align-items:center;gap:10px}
+.community-post-avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 40px;background:linear-gradient(135deg,#101827,#17102a);border:1px solid rgba(89,231,255,.3);overflow:hidden;font:800 14px Orbitron;color:#fff}
+.community-post-avatar img{width:100%;height:100%;object-fit:cover}
+.community-post-author{min-width:0;flex:1}
+.community-post-author strong,.community-post-author small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.community-post-author strong{font-size:12px}
+.community-post-author small{color:#78859a;font-size:9px;margin-top:3px}
+.community-post-label{font:800 8px Orbitron;color:#59e7ff;letter-spacing:1.5px;margin:12px 0 5px}
+.community-post h4{margin:0 0 7px;font-size:14px}
+.community-post p{margin:0;color:#c1cad8;font-size:12px;line-height:1.7;white-space:pre-wrap}
+.community-post video{width:100%;max-height:420px;margin-top:11px;border-radius:3px;background:#000}
+.community-post-actions{display:flex;gap:7px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(112,132,180,.14)}
+.community-post-actions button,.community-post-actions a{border:1px solid rgba(112,132,180,.2);background:#080b13;color:#b9c4d6;border-radius:3px;padding:7px 10px;font-size:10px;font-weight:800;cursor:pointer;text-decoration:none}
+.community-post-actions button:hover,.community-post-actions a:hover{border-color:rgba(89,231,255,.4);color:#fff}
+.community-side{display:grid;gap:14px;align-content:start}
+.community-side-card{padding:17px}
+.community-side-card h3{margin:0 0 10px;font:800 13px Orbitron,Montserrat,sans-serif}
+.community-side-card p{font-size:11px;margin:0}
+.community-quick{display:grid;gap:7px}
+.community-quick a{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid rgba(112,132,180,.16);background:rgba(255,255,255,.02);border-radius:3px;font-size:11px;font-weight:800}
+.community-quick a span{color:#59e7ff}
+.community-loading,.community-empty,.community-error{padding:18px;border:1px dashed rgba(112,132,180,.2);border-radius:3px;color:#77859a;font-size:11px;text-align:center}
+.community-error{color:#ff8da8}
+@media(max-width:900px){.community-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.community-composer,.community-feed-panel,.community-side-card{padding:14px}.community-composer-row{align-items:stretch;flex-direction:column}.community-submit{width:100%}.community-post-actions{flex-wrap:wrap}.community-post-actions button,.community-post-actions a{flex:1 1 30%}}
+</style>
+</head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header><main class="wrap"><section class="hero"><div><div class="k">CROWRULES ENTERTAINMENT · CROWSPACE</div><h1>The world is <span>online.</span></h1><p>See the CrowSpace community as it happens. Live members appear on the global heatmap by broad region, while Supabase Realtime Presence keeps the online counter synchronized.</p><div class="actions"><a class="btn primary" href="people.html">Explore Community →</a><a class="btn" href="rankings.html">Community Rankings</a><a class="btn" href="profile.html">Open My Nest</a></div><div class="actions"><a class="btn" href="dreamscapes.html">Dreamscapes ✦</a><a class="btn" href="memorials.html">Memorials ♡</a><a class="btn" href="podcasting.html">Podcasting ▶</a></div><div id="state" class="state">Connecting to CrowSpace…</div></div><div><div class="globe"><div class="orbit"></div><div class="land a"></div><div class="land b"></div><div class="land c"></div><div class="land d"></div><span class="hot h1"></span><span class="hot h2"></span><span class="hot h3"></span><span class="hot h4"></span><div class="label">GLOBAL LIVE PRESENCE</div></div></div></section><section class="metrics"><div class="metric online"><small>Online Now</small><strong id="online">—</strong></div><div class="metric"><small>Members</small><strong id="members">—</strong></div><div class="metric"><small>Connections</small><strong id="connections">—</strong></div><div class="metric"><small>Caws</small><strong id="caws">—</strong></div><div class="metric"><small>Posts</small><strong id="posts">—</strong></div></section><section class="top"><article class="panel"><div class="k">CROWSPACE HEATMAP · LIVE WORLD</div><h2>Where people are online</h2><p class="sub">Only broad regions are shown. No exact addresses or precise locations are published.</p><div class="map" id="map"><div class="land2 na"></div><div class="land2 sa"></div><div class="land2 eu"></div><div class="land2 af"></div><div class="land2 as"></div><div class="land2 au"></div><div class="region r1">NORTH AMERICA</div><div class="region r2">SOUTH AMERICA</div><div class="region r3">EUROPE</div><div class="region r4">AFRICA</div><div class="region r5">ASIA</div><div class="region r6">OCEANIA</div></div><div class="foot"><span id="regions">Waiting for presence…</span><span>LIVE · REALTIME</span></div></article><article class="panel"><div class="k">CROWSPACE PULSE</div><h2>What's moving now</h2><div id="pulse" class="pulse"><div class="empty">Loading…</div></div></article></section>
+<section class="section community-feed" id="communityFeed">
+  <div class="k">CROWSPACE COMMUNITY</div>
+  <div class="community-title">
+    <div>
+      <h2>Community Feed</h2>
+      <p>Share what's happening across the CrowSpace universe.</p>
+    </div>
+    <a class="btn" href="caw-feed.html">Open Caws →</a>
+  </div>
+
+  <div class="community-layout">
+    <div>
+      <div class="community-composer">
+        <div class="community-title">
+          <div>
+            <div class="k">YOUR VOICE</div>
+            <p id="composerStatus">Sign in to publish to the community.</p>
+          </div>
+        </div>
+        <textarea id="communityPostBody" maxlength="5000" placeholder="What's happening in your CrowSpace?"></textarea>
+        <div class="community-composer-row">
+          <span class="community-hint">Posts appear in the shared CrowSpace activity feed.</span>
+          <button class="community-submit" id="communityPostButton" type="button">Post to CrowSpace</button>
+        </div>
+      </div>
+
+      <div class="community-feed-panel">
+        <div class="community-feed-head">
+          <h3>LATEST COMMUNITY ACTIVITY</h3>
+          <button class="community-refresh" id="communityRefresh" type="button">↻ Refresh</button>
+        </div>
+        <div id="feed" class="community-items">
+          <div class="community-loading">Loading community activity…</div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="community-side">
+      <div class="community-side-card">
+        <h3>BUILD THE COMMUNITY</h3>
+        <p>Connect with people, follow creators, join groups and turn conversations into part of the CrowRules universe.</p>
+      </div>
+      <div class="community-side-card">
+        <h3>QUICK ACCESS</h3>
+        <div class="community-quick">
+          <a href="people.html">People <span>→</span></a>
+          <a href="friends.html">Friends <span>→</span></a>
+          <a href="groups.html">Groups <span>→</span></a>
+          <a href="events.html">Events <span>→</span></a>
+          <a href="caws.html">Caw Studio <span>→</span></a>
+          <a href="create-caw.html">Create a Caw <span>→</span></a>
+        </div>
+      </div>
+      <div class="community-side-card">
+        <h3>ONE ACCOUNT. ONE UNIVERSE.</h3>
+        <p>Use your Universal CrowRules account across CrowSpace and the wider CrowRules ecosystem.</p>
+        <a class="link" href="membership.html">Open Membership →</a>
+      </div>
+    </aside>
+  </div>
+</section>
+<section class="section"><div class="k">COMMUNITY SIGNAL</div><h2>What's happening across CrowSpace</h2><div class="grid"><article class="card"><div class="k">PEOPLE</div><h2>Newest Members</h2><div id="newest" class="list"><div class="empty">Loading…</div></div><a class="link" href="people.html">View People →</a></article><article class="card"><div class="k">PEOPLE</div><h2>Most Active</h2><div id="active" class="list"><div class="empty">Loading…</div></div><a class="link" href="rankings.html">Discover Activity →</a></article><article class="card"><div class="k">NETWORK</div><h2>Most Connections</h2><div id="connectionList" class="list"><div class="empty">Loading…</div></div><a class="link" href="people.html">Grow Your Network →</a></article><article class="card"><div class="k">GROUPS</div><h2>Group Activity</h2><div id="groups" class="list"><div class="empty">Loading…</div></div><a class="link" href="groups.html">Explore Groups →</a></article><article class="card"><div class="k">EVENTS</div><h2>Upcoming Events</h2><div id="events" class="list"><div class="empty">Loading…</div></div><a class="link" href="events.html">View Events →</a></article><article class="card"><div class="k">MEDIA</div><h2>Latest Caws</h2><div id="cawList" class="list"><div class="empty">Loading…</div></div><a class="link" href="caw-feed.html">Watch Caw Feed →</a><a class="link" href="caws.html">Caw Studio →</a></article></div></section></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script>const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const db=()=>window.crowSupabase||window.CS?.client;const set=(id,h,e)=>{const el=$(id);if(el)el.innerHTML=h||'<div class="empty">'+esc(e||'Nothing here yet.')+'</div>'};const safe=async f=>{try{const r=await f();return{data:r?.data||[],error:r?.error||null,count:r?.count??null}}catch(error){return{data:[],error,count:null}}};function region(t){if(/^America\/(New_York|Detroit|Chicago|Denver|Phoenix|Los_Angeles|Anchorage|Adak|Toronto|Vancouver|Winnipeg|Edmonton|Halifax)/.test(t))return'North America';if(/^America\//.test(t))return'South America';if(/^Europe\//.test(t)||/^Atlantic\//.test(t))return'Europe';if(/^Africa\//.test(t))return'Africa';if(/^Asia\//.test(t))return'Asia';if(/^Australia\//.test(t)||/^Pacific\//.test(t))return'Oceania';return'Other'}function paint(state){const all=Object.values(state||{}).flat(),counts={};all.forEach(p=>{const r=p.region||'Other';counts[r]=(counts[r]||0)+1});$('online').textContent=all.length;$('regions').textContent=Object.entries(counts).filter(([r])=>r!=='Other').map(([r,n])=>r+': '+n).join(' · ')||'No regional presence yet';document.querySelectorAll('.online-dot').forEach(x=>x.remove());const pos={'North America':[22,32],'South America':[31,65],'Europe':[51,31],'Africa':[53,56],'Asia':[71,34],'Oceania':[84,69]};Object.entries(counts).forEach(([r,n])=>{if(!pos[r])return;const d=document.createElement('span');d.className='online-dot';d.title=r+': '+n+' online';d.style.left=pos[r][0]+'%';d.style.top=pos[r][1]+'%';d.style.transform='scale('+(1+Math.min(n,20)/15)+')';$('map').appendChild(d)})}async function presence(c){const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',key=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random();const ch=c.channel('crowspace-global-presence',{config:{presence:{key}}});['sync','join','leave'].forEach(ev=>ch.on('presence',{event:ev},()=>paint(ch.presenceState())));return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done)reject(new Error('Presence subscription timeout'))},8000);ch.subscribe(async status=>{if(status==='SUBSCRIBED'){try{await ch.track({region:region(tz),timezone:tz,online_at:new Date().toISOString()});done=true;clearTimeout(timer);paint(ch.presenceState());$('state').textContent='Live · CrowSpace Presence synchronized';resolve(ch)}catch(e){done=true;clearTimeout(timer);reject(e)}}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){done=true;clearTimeout(timer);reject(new Error('Presence channel '+status))}})})}async function load(){const c=db();if(!c){$('state').textContent='CrowSpace database client unavailable.';return}try{await c.auth.getUser()}catch(e){}try{await presence(c)}catch(e){console.warn('CrowSpace presence:',e);$('state').textContent='Community data connected · live presence unavailable'}const [mem,posts,caws,groups,events,friend]=await Promise.all([safe(()=>c.from('membership_profiles').select('id,display_name,username,avatar_url,created_at',{count:'exact'}).order('created_at',{ascending:false}).limit(100)),safe(()=>c.from('crowspace_posts').select('user_id,created_at',{count:'exact'}).order('created_at',{ascending:false}).limit(1000)),safe(()=>c.from('crowspace_caws').select('id,user_id,title,created_at',{count:'exact'}).order('created_at',{ascending:false}).limit(5)),safe(()=>c.from('crowspace_groups').select('id,name,created_at').order('created_at',{ascending:false}).limit(5)),safe(()=>c.from('crowspace_events').select('id,title,starts_at').gte('starts_at',new Date().toISOString()).order('starts_at').limit(5)),safe(()=>c.from('crowspace_friendships').select('requester_id,addressee_id').eq('status','accepted').limit(2000))]);$('members').textContent=mem.count??mem.data.length;$('posts').textContent=posts.count??posts.data.length;$('caws').textContent=caws.count??caws.data.length;$('connections').textContent=friend.data.length;const person=r=>'<a class="row" href="profile.html?id='+encodeURIComponent(r.id)+'">'+(r.avatar_url?'<img class="avatar" src="'+esc(r.avatar_url)+'" alt="">':'<div class="avatar">'+esc((r.display_name||r.username||'C')[0])+'</div>')+'<span class="copy"><strong>'+esc(r.display_name||r.username||'CrowSpace Member')+'</strong><small>@'+esc(r.username||'member')+'</small></span></a>';set('newest',mem.data.slice(0,5).map(person).join(''),'No members yet.');const act={};posts.data.forEach(x=>x.user_id&&(act[x.user_id]=(act[x.user_id]||0)+1));caws.data.forEach(x=>x.user_id&&(act[x.user_id]=(act[x.user_id]||0)+1));set('active',mem.data.map(r=>({...r,n:act[r.id]||0})).filter(r=>r.n).sort((a,b)=>b.n-a.n).slice(0,5).map(person).join(''),'No activity yet.');const fm={};friend.data.forEach(x=>{fm[x.requester_id]=(fm[x.requester_id]||0)+1;fm[x.addressee_id]=(fm[x.addressee_id]||0)+1});set('connectionList',mem.data.map(r=>({...r,n:fm[r.id]||0})).filter(r=>r.n).sort((a,b)=>b.n-a.n).slice(0,5).map(person).join(''),'No accepted connections yet.');set('groups',groups.data.map(r=>'<a class="row" href="group.html?id='+encodeURIComponent(r.id)+'"><div class="avatar">G</div><span class="copy"><strong>'+esc(r.name)+'</strong><small>Group</small></span></a>').join(''),'No groups yet.');set('events',events.data.map(r=>'<a class="row" href="events.html"><div class="avatar">E</div><span class="copy"><strong>'+esc(r.title)+'</strong><small>'+new Date(r.starts_at).toLocaleString()+'</small></span></a>').join(''),'No upcoming events.');set('cawList',caws.data.map(r=>'<a class="row" href="caws.html"><div class="avatar">C</div><span class="copy"><strong>'+esc(r.title||'Untitled Caw')+'</strong><small>'+new Date(r.created_at).toLocaleDateString()+'</small></span></a>').join(''),'No Caws yet.');const pulse=[...posts.data.slice(0,4).map(x=>({t:'New community post',d:x.created_at})),...caws.data.map(x=>({t:'New Caw · '+(x.title||'Untitled'),d:x.created_at}))].sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,6);set('pulse',pulse.map(x=>'<div class="pulseitem"><strong>'+esc(x.t)+'</strong><small>'+new Date(x.d).toLocaleString()+'</small></div>').join(''),'The community is quiet right now.')}document.addEventListener('DOMContentLoaded',load);</script>
+<script id="community-feed-controller">
+(function(){
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  const db=()=>window.CS?.client||window.crowSupabase||null;
+
+  async function user(){
+    try{return await window.CS.user()}catch{return null}
+  }
+
+  function initials(name){
+    return esc((name||"C").trim().slice(0,1).toUpperCase());
+  }
+
+  function time(value){
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime())) return "";
+    const diff=Date.now()-d.getTime();
+    if(diff<60000)return "just now";
+    if(diff<3600000)return Math.floor(diff/60000)+"m";
+    if(diff<86400000)return Math.floor(diff/3600000)+"h";
+    if(diff<604800000)return Math.floor(diff/86400000)+"d";
+    return d.toLocaleDateString();
+  }
+
+  function render(items){
+    const box=$("feed");
+    if(!box)return;
+    if(!items.length){
+      box.innerHTML='<div class="community-empty"><strong style="display:block;color:#fff;margin-bottom:5px">The community feed is quiet.</strong>Be the first to share something with CrowSpace.</div>';
+      return;
+    }
+    box.innerHTML=items.map(x=>{
+      const label=x.activity_type==="caw"?"CAW":x.activity_type==="event"?"EVENT":"POST";
+      const link=x.activity_type==="post"?"profile.html?id="+encodeURIComponent(x.actor_id):(x.target_url||"caws.html");
+      const avatar=x.actor_avatar_url||x.avatar_url||"";
+      const media=x.media_url&&x.activity_type==="caw"?'<video controls playsinline preload="metadata" src="'+esc(x.media_url)+'"></video>':"";
+      const actions=x.activity_type==="post"
+        ?'<div class="community-post-actions"><button type="button" data-like="'+esc(x.target_id)+'">♡ Like</button><button type="button" data-comment="'+esc(x.target_id)+'">💬 Comment</button><a href="'+esc(link)+'">Open →</a></div>'
+        :'<div class="community-post-actions"><a href="'+esc(link)+'">Open '+label+' →</a></div>';
+      return '<article class="community-post"><div class="community-post-head"><a class="community-post-avatar" href="profile.html?id='+encodeURIComponent(x.actor_id||"")+'">'+(avatar?'<img src="'+esc(avatar)+'" alt="">':initials(x.actor_name))+'</a><div class="community-post-author"><strong>'+esc(x.actor_name||"CrowSpace Member")+'</strong><small>@'+esc(x.actor_username||"member")+' · '+esc(time(x.created_at))+'</small></div></div><div class="community-post-label">'+label+'</div>'+(x.title?'<h4>'+esc(x.title)+'</h4>':"")+(x.body?'<p>'+esc(x.body)+'</p>':"")+media+actions+'</article>';
+    }).join("");
+    box.querySelectorAll("[data-like]").forEach(b=>b.onclick=()=>like(b.dataset.like));
+    box.querySelectorAll("[data-comment]").forEach(b=>b.onclick=()=>comment(b.dataset.comment));
+  }
+
+  async function loadFeed(){
+    const box=$("feed"), c=db();
+    if(!box)return;
+    if(!c){
+      box.innerHTML='<div class="community-error">CrowSpace database client unavailable.</div>';
+      return;
+    }
+    box.innerHTML='<div class="community-loading">Loading community activity…</div>';
+    try{
+      const u=await user();
+      if(!u){
+        box.innerHTML='<div class="community-empty"><strong style="display:block;color:#fff;margin-bottom:5px">Join the conversation.</strong>Sign in to see your personalized CrowSpace activity feed.<br><br><a class="btn primary" href="login.html">Sign In →</a></div>';
+        return;
+      }
+      const {data,error}=await c.rpc("crowspace_home_activity",{p_limit:40});
+      if(error)throw error;
+      render(data||[]);
+    }catch(e){
+      console.error("CrowSpace community feed:",e);
+      box.innerHTML='<div class="community-error"><strong style="display:block;margin-bottom:5px">Community Feed unavailable</strong>'+esc(e.message||"Unable to load the feed.")+'<br><br><button class="community-refresh" type="button" onclick="window.CrowCommunityFeed&&window.CrowCommunityFeed.load()">Try Again</button></div>';
+    }
+  }
+
+  async function publish(){
+    const c=db(), body=$("communityPostBody")?.value.trim(), btn=$("communityPostButton");
+    if(!c||!btn)return;
+    const u=await user();
+    if(!u){location.href="login.html";return}
+    if(!body){$("communityPostBody").focus();return}
+    btn.disabled=true;btn.textContent="Publishing…";
+    try{
+      const payload={user_id:u.id,title:"",body:body};
+      const {error}=await c.from("crowspace_posts").insert(payload);
+      if(error)throw error;
+      $("communityPostBody").value="";
+      await loadFeed();
+    }catch(e){
+      console.error("CrowSpace post:",e);
+      alert("Unable to publish the post. "+(e.message||""));
+    }finally{
+      btn.disabled=false;btn.textContent="Post to CrowSpace";
+    }
+  }
+
+  async function like(id){
+    if(window.CS?.react){await window.CS.react(id);return}
+    const c=db(),u=await user();
+    if(!c||!u){location.href="login.html";return}
+    const {error}=await c.from("crowspace_reactions").upsert({post_id:id,user_id:u.id,reaction:"like"});
+    if(error)alert(error.message);else await loadFeed();
+  }
+
+  async function comment(id){
+    if(window.CS?.commentPrompt){await window.CS.commentPrompt(id);return}
+    const c=db(),u=await user();
+    if(!c||!u){location.href="login.html";return}
+    const body=prompt("Comment");
+    if(body?.trim()){
+      const {error}=await c.from("crowspace_comments").insert({post_id:id,user_id:u.id,body:body.trim()});
+      if(error)alert(error.message);
+    }
+  }
+
+  window.CrowCommunityFeed={load:loadFeed};
+
+  document.addEventListener("DOMContentLoaded",async()=>{
+    const u=await user();
+    const status=$("composerStatus");
+    if(u&&status)status.textContent="You're signed in. Share something with CrowSpace.";
+    if($("communityPostButton"))$("communityPostButton").onclick=publish;
+    if($("communityRefresh"))$("communityRefresh").onclick=loadFeed;
+    await loadFeed();
+  });
+})();
+</script>
+</body></html>
