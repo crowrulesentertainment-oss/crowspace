@@ -319,6 +319,7 @@ async function startRealtime(){
  for(const ch of liveChannels){try{await sb.removeChannel(ch)}catch(e){}}
  liveChannels=[];
  const refresh=()=>{clearTimeout(window.__crowspaceRT);window.__crowspaceRT=setTimeout(()=>render(),180)};
+ const graph=sb.channel("crowspace:graph",{config:{private:true}}); graph.on("broadcast",{event:"INSERT"},refresh).on("broadcast",{event:"UPDATE"},refresh).on("broadcast",{event:"DELETE"},refresh).subscribe(); liveChannels.push(graph);
  const feed=sb.channel("crowspace:feed",{config:{private:true}});
  feed.on("broadcast",{event:"INSERT"},refresh).on("broadcast",{event:"UPDATE"},refresh).on("broadcast",{event:"DELETE"},refresh).subscribe();
  liveChannels.push(feed);
