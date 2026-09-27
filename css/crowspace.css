@@ -30,3 +30,7 @@ body[data-theme="midnight"]{--cyan:#9aa8ff;--violet:#59627d;--pink:#b9c0d4}body[
 @keyframes crGraphPulse{0%,100%{opacity:1}50%{opacity:.65}}
 @keyframes crGraphLine{from{opacity:0;stroke-width:1}to{opacity:.9;stroke-width:3}}
 .cr-graph-line{transition:opacity .25s ease,stroke-width .25s ease}
+
+/* CrowSpace 4.34 — true network route */
+.cr-route-edge{stroke-dasharray:8 6;animation:crRouteFlow 1.1s linear infinite}
+@keyframes crRouteFlow{to{stroke-dashoffset:-28}}
