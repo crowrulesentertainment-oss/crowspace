@@ -88,7 +88,10 @@ menu.querySelectorAll("[data-menu=profile]").forEach(b=>b.onclick=()=>{const x=c
 menu.querySelectorAll("[data-menu=report]").forEach(b=>b.onclick=()=>{showToast("Reporting tools can be connected next.");menu.classList.remove("open")});
 document.addEventListener("click",e=>{if(!menu.contains(e.target)&&!e.target.closest("[data-action=more]"))menu.classList.remove("open")});
 async function load(filter="latest"){
- currentFilter=filter;status.textContent="Loading Caws…";
+ currentFilter=filter;status.textContent="Checking member access…";
+ const member=window.CS&&typeof window.CS.user==="function"?await window.CS.user():null;
+ if(!member){location.href="login.html?next="+encodeURIComponent(location.href);return}
+ status.textContent="Loading Caws…";
  for(let i=0;i<40&&!db();i++)await new Promise(r=>setTimeout(r,50));
  const c=db();
  if(!c){status.textContent="CrowSpace database could not connect";return}
