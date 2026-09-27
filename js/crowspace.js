@@ -14,6 +14,7 @@ CS.navItems=[
  {label:"Events",href:"events.html",group:"connect"},
  {label:"Dreamscapes",href:"dreamscapes.html",group:"universe"},
  {label:"Memorials",href:"memorials.html",group:"universe"},
+ {label:"Command Center",href:"command-center.html",group:"universe"},
  {label:"Notifications",href:"notifications.html",group:"account"},
  {label:"Membership",href:"membership.html",group:"account"},
  {label:"Create Caw",href:"create-caw.html",group:"quick"},
