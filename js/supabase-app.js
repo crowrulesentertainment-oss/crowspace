@@ -224,8 +224,8 @@ async function friends(){
 }
 async async async async function discover(){
  if(!user){app.innerHTML=shell("Discover","Find people and communities across CrowSpace.",gate());return}
- const [topics,affinity,cross,rec,groups,rooms,events,prefs]=await Promise.all([
-  sb.rpc("crowspace_topic_recommendations",{p_user:user.id,p_limit:20}), sb.rpc("crowspace_affinity_score",{p_user:user.id,p_limit:100}),
+ const [topics,affinity,adaptive,cross,rec,groups,rooms,events,prefs]=await Promise.all([
+  sb.rpc("crowspace_topic_recommendations",{p_user:user.id,p_limit:20}), sb.rpc("crowspace_affinity_score",{p_user:user.id,p_limit:100}), sb.rpc("crowspace_adaptive_recommendations",{p_user:user.id,p_limit:100}),
   sb.rpc("crowspace_cross_universe_discovery",{p_user:user.id,p_limit:120}),
   sb.rpc("crowspace_discovery_contextual_score",{p_user:user.id,p_limit:100}),
   sb.from("crowspace_groups").select("*").eq("visibility","public").eq("status","active").limit(100),
@@ -234,7 +234,7 @@ async async async async function discover(){
   sb.from("crowspace_discovery_preferences").select("target_id,action").eq("user_id",user.id)
  ]);
  const hidden=new Set((prefs.data||[]).filter(x=>x.action==="dismiss"||x.action==="not_interested").map(x=>String(x.target_id)));
- const affinityRows=(affinity.data||[]).map(x=>({...x,kind:x.kind,target_id:x.target_id,source:"affinity",score:x.affinity,reason:x.explanation})); const merged=[...affinityRows,...(cross.data||[]).map(x=>({...x,source:"cross"})),...(rec.data||[]).map(x=>({...x,source:"context"}))];
+ const adaptiveRows=(adaptive.data||[]).map(x=>({...x,source:"adaptive"})); const affinityRows=[...(affinity.data||[]),...adaptiveRows].map(x=>({...x,kind:x.kind,target_id:x.target_id,source:x.source||"affinity",score:x.score??x.affinity,reason:x.reason||x.explanation})); const merged=[...affinityRows,...(cross.data||[]).map(x=>({...x,source:"cross"})),...(rec.data||[]).map(x=>({...x,source:"context"}))];
  const byKey=new Map(); merged.forEach(x=>{const k=x.kind+":"+x.target_id;if(!hidden.has(String(x.target_id))&&(!byKey.has(k)||Number(x.score)>Number(byKey.get(k).score)))byKey.set(k,x)});
  const rows=[...byKey.values()].sort((a,b)=>Number(b.score)-Number(a.score));
  const ids=[...new Set(rows.filter(x=>x.kind==="person").map(x=>x.target_id))],people=await getProfiles(ids),pmap=new Map(people.map(p=>[p.user_id,p])),name=id=>pmap.get(id)?.display_name||pmap.get(id)?.username||"Member";
@@ -242,7 +242,7 @@ async async async async function discover(){
  const gb=new Map((groups.data||[]).map(x=>[String(x.id),x])),rb=new Map((rooms.data||[]).map(x=>[String(x.id),x])),eb=new Map((events.data||[]).map(x=>[String(x.id),x]));
  const crossHtml=rows.filter(x=>x.kind!=="person").slice(0,10).map(x=>{const o=x.kind==="group"?gb.get(String(x.target_id)):x.kind==="room"?rb.get(String(x.target_id)):eb.get(String(x.target_id));if(!o)return "";const href=x.kind==="group"?"group.html?id="+encodeURIComponent(o.slug):x.kind==="room"?"room.html?id="+encodeURIComponent(o.slug):"event.html?id="+encodeURIComponent(o.id);return card('<span class="kicker">TOPIC-AWARE · '+esc(x.kind.toUpperCase())+'</span><h2>'+esc(o.name||o.title)+'</h2><p>'+esc(o.description||o.topic||"")+'</p><p class="muted">'+esc(x.reason)+' · score '+x.score+'</p><a class="btn" href="'+href+'">Open</a> <button class="btn" data-act="discover:dismiss:'+x.kind+':'+x.target_id+'">Not now</button>')}).join("")||card('<p class="muted">Cross-universe recommendations are still learning.</p>');
  const topicHtml=(topics.data||[]).slice(0,10).map(t=>'<span class="filter-chip active">'+esc(t.name)+' · '+t.entity_count+' connections</span>').join(" ")||'<span class="muted">Topics will appear after members create and engage with content.</span>';
- app.innerHTML=shell("Discover","Topic-aware discovery connecting people, content and communities.",card('<span class="kicker">CROWSPACE 4.16</span><h2>Community Affinity Engine</h2><p class="muted">Recurring subjects can now become discovery bridges across the CrowSpace universe.</p><div class="filter-row"><button class="btn" data-act="discover:refresh">Refresh Recommendations</button><a class="btn" href="activity.html">Activity</a></div>')+'<h2>Your Topics</h2>'+card('<div class="filter-row">'+topicHtml+'</div>')+'<h2>Semantic Communities</h2><div class="grid"><p class="muted">Community relevance is built from shared topics, participation and recent activity.</p></div><h2>People For You</h2><div class="grid">'+peopleHtml+'</div><h2>Across Your Universe</h2><div class="grid">'+crossHtml+'</div>');
+ app.innerHTML=shell("Discover","Topic-aware discovery connecting people, content and communities.",card('<span class="kicker">CROWSPACE 4.17</span><h2>Adaptive Community Intelligence</h2><p class="muted">Recurring subjects can now become discovery bridges across the CrowSpace universe.</p><div class="filter-row"><button class="btn" data-act="discover:refresh">Refresh Recommendations</button><a class="btn" href="activity.html">Activity</a></div>')+'<h2>Your Topics</h2>'+card('<div class="filter-row">'+topicHtml+'</div>')+'<h2>Semantic Communities</h2><div class="grid"><p class="muted">Community relevance is built from shared topics, participation and recent activity.</p></div><h2>People For You</h2><div class="grid">'+peopleHtml+'</div><h2>Across Your Universe</h2><div class="grid">'+crossHtml+'</div>');
 }async function customize(){
  if(!user){app.innerHTML=shell("Customize My Space","Persistent profile studio.",gate());return}
  const u=(await sb.from("crowspace_profiles").select("*").eq("user_id",user.id).single()).data;
