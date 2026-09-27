@@ -31,6 +31,25 @@
   </div>
 </section>
 
+<section class="nest-box avatar-editor" id="avatarEditor" style="display:none">
+  <div class="nest-section-title">
+    <div><p class="eyebrow">YOUR IDENTITY</p><h2>Profile Avatar</h2></div>
+    <span class="muted">JPG, PNG, WEBP or GIF · Max 5 MB</span>
+  </div>
+  <div class="avatar-editor-grid">
+    <div class="avatar-preview" id="avatarPreview"></div>
+    <div class="avatar-editor-controls">
+      <input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+      <small id="avatarFileName" class="muted">Choose a new profile image.</small>
+      <div class="form-actions">
+        <button class="btn primary" id="uploadAvatarBtn" type="button">Upload Avatar</button>
+        <button class="btn" id="removeAvatarBtn" type="button">Remove Avatar</button>
+      </div>
+      <p id="avatarUploadStatus" class="muted" role="status"></p>
+    </div>
+  </div>
+</section>
+
 <section class="nest-box universal-nest-panel" id="nestMembership">
   <div class="nest-section-title"><div><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h2>Universal CrowRules Membership</h2></div><a href="membership.html">Membership Center →</a></div>
   <div id="nestMembershipBody"><p class="muted">Loading membership…</p></div>
@@ -109,6 +128,118 @@ async function people(ids){
   const {data,error}=await crowSupabase.rpc("crowspace_public_profiles_by_ids",{ids:clean});
   if(error){err("people",error);return {}}
   return Object.fromEntries((data||[]).map(x=>[x.id,x]));
+}
+
+async function uploadAvatar(){
+  if(!viewer || viewer.id!==uid)return;
+  const input=$("avatarFile"),file=input?.files?.[0];
+  if(!file)return alert("Choose an image first.");
+  if(!file.type.startsWith("image/"))return alert("Please choose an image file.");
+  if(file.size>5*1024*1024)return alert("Avatar images must be 5 MB or smaller.");
+
+  const status=$("avatarUploadStatus");
+  const btn=$("uploadAvatarBtn");
+  btn.disabled=true;
+  text("avatarFileName",file.name);
+  text("avatarUploadStatus","Uploading avatar…");
+  try{
+    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+    const path=viewer.id+"/avatar-"+Date.now()+"."+ext;
+    const {error:uploadError}=await crowSupabase.storage.from("crowspace-media").upload(path,file,{
+      cacheControl:"3600",
+      contentType:file.type,
+      upsert:false
+    });
+    if(uploadError)throw uploadError;
+
+    const {data:urlData}=crowSupabase.storage.from("crowspace-media").getPublicUrl(path);
+    const avatarUrl=urlData?.publicUrl;
+    if(!avatarUrl)throw new Error("Unable to create the avatar URL.");
+
+    const {data:old,error:oldError}=await crowSupabase.from("public_member_profiles").select("avatar_url").eq("id",viewer.id).maybeSingle();
+    err("old avatar lookup",oldError);
+
+    const {error:updateError}=await crowSupabase.from("public_member_profiles").update({avatar_url:avatarUrl}).eq("id",viewer.id);
+    if(updateError){
+      await crowSupabase.storage.from("crowspace-media").remove([path]);
+      throw updateError;
+    }
+
+    text("avatarUploadStatus","Avatar updated successfully.");
+    const img=$("avatar");
+    if(img)img.innerHTML='<img src="'+esc(avatarUrl)+'" alt="'+esc(prof?.display_name||prof?.username||"CrowSpace Member")+'">';
+    const preview=$("avatarPreview");
+    if(preview)preview.innerHTML='<img src="'+esc(avatarUrl)+'" alt="New avatar preview">';
+    if(old?.avatar_url && old.avatar_url!==avatarUrl){
+      const marker="/storage/v1/object/public/crowspace-media/";
+      const idx=old.avatar_url.indexOf(marker);
+      if(idx>=0){
+        const oldPath=decodeURIComponent(old.avatar_url.slice(idx+marker.length));
+        if(oldPath && oldPath.startsWith(viewer.id+"/"))await crowSupabase.storage.from("crowspace-media").remove([oldPath]);
+      }
+    }
+    prof.avatar_url=avatarUrl;
+  }catch(e){
+    console.error(e);
+    text("avatarUploadStatus","Upload failed: "+(e.message||"Please try again."));
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+async function removeAvatar(){
+  if(!viewer || viewer.id!==uid)return;
+  if(!confirm("Remove your current CrowSpace avatar?"))return;
+  const status=$("avatarUploadStatus");
+  text("avatarUploadStatus","Removing avatar…");
+  try{
+    const {data:old,error:oldError}=await crowSupabase.from("public_member_profiles").select("avatar_url").eq("id",viewer.id).maybeSingle();
+    if(oldError)throw oldError;
+    const {error:updateError}=await crowSupabase.from("public_member_profiles").update({avatar_url:null}).eq("id",viewer.id);
+    if(updateError)throw updateError;
+    if(old?.avatar_url){
+      const marker="/storage/v1/object/public/crowspace-media/";
+      const idx=old.avatar_url.indexOf(marker);
+      if(idx>=0){
+        const oldPath=decodeURIComponent(old.avatar_url.slice(idx+marker.length));
+        if(oldPath && oldPath.startsWith(viewer.id+"/"))await crowSupabase.storage.from("crowspace-media").remove([oldPath]);
+      }
+    }
+    prof.avatar_url=null;
+    const n=prof.display_name||prof.username||"CrowSpace Member";
+    text("avatar",initials(n));
+    const preview=$("avatarPreview");
+    if(preview)preview.innerHTML='<div class="avatar-placeholder">'+esc(initials(n))+'</div>';
+    text("avatarUploadStatus","Avatar removed.");
+    if($("avatarFile"))$("avatarFile").value="";
+    text("avatarFileName","Choose a new profile image.");
+  }catch(e){
+    console.error(e);
+    text("avatarUploadStatus","Remove failed: "+(e.message||"Please try again."));
+  }
+}
+
+function setupAvatarEditor(){
+  const editor=$("avatarEditor");
+  if(!editor || !viewer || viewer.id!==uid)return;
+  editor.style.display="block";
+  const preview=$("avatarPreview");
+  if(preview){
+    preview.innerHTML=prof?.avatar_url
+      ? '<img src="'+esc(prof.avatar_url)+'" alt="Current avatar">'
+      : '<div class="avatar-placeholder">'+esc(initials(prof?.display_name||prof?.username||"C"))+'</div>';
+  }
+  $("avatarFile")?.addEventListener("change",e=>{
+    const file=e.target.files?.[0];
+    text("avatarFileName",file?file.name:"Choose a new profile image.");
+    if(file && file.type.startsWith("image/") && file.size<=5*1024*1024){
+      const reader=new FileReader();
+      reader.onload=()=>{if(preview)preview.innerHTML='<img src="'+esc(reader.result)+'" alt="Avatar preview">';};
+      reader.readAsDataURL(file);
+    }
+  });
+  $("uploadAvatarBtn")?.addEventListener("click",uploadAvatar);
+  $("removeAvatarBtn")?.addEventListener("click",removeAvatar);
 }
 
 function applyNestStyle(s){
@@ -361,6 +492,7 @@ async function load(){
     text("name",n);text("handle","@"+(prof.username||"member"));text("tagline",nestSettings.tagline||"Welcome to my CrowSpace Nest.");text("statusText",nestSettings.status_text||"");text("about",nestSettings.about_me||prof.bio||"");text("aboutLong",nestSettings.about_me||prof.bio||"This member hasn't added an About Me yet.");text("eyebrow",viewer?.id===uid?"MY NEST":"CROWSPACE NEST");
     const av=$("avatar");if(prof.avatar_url){av.innerHTML='<img src="'+esc(prof.avatar_url)+'" alt="'+esc(n)+'" loading="eager">'}else text("avatar",initials(n));
     await renderActions();
+    setupAvatarEditor();
     await loadMembership();
     if(viewer&&viewer.id!==uid){
       const {error:ve}=await crowSupabase.from("crowspace_profile_visits").insert({profile_id:uid,visitor_id:viewer.id});
@@ -410,6 +542,15 @@ document.addEventListener("DOMContentLoaded",async()=>{
 })();
 </script>
 <style>
+.nest-cover{position:relative;overflow:hidden}
+.avatar-editor-grid{display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
+.avatar-preview{width:150px;height:150px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--blue2);display:grid;place-items:center}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-placeholder{font-size:3rem;font-weight:800}
+.avatar-editor-controls{display:grid;gap:10px}
+.avatar-editor-controls input[type=file]{max-width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03)}
+.avatar-editor-controls .form-actions{justify-content:flex-start}
+@media(max-width:600px){.avatar-editor-grid{grid-template-columns:1fr}.avatar-preview{width:120px;height:120px}}
 .nest-cover{position:relative;overflow:hidden}
 .nest-cover-copy{min-width:0}
 .nest-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
