@@ -9,42 +9,20 @@
 <link rel="stylesheet" href="css/crowspace.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-.signup-shell{width:min(560px,100%);margin:auto}
-.signup-card{position:relative;overflow:hidden}
-.signup-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 100% 0,rgba(89,231,255,.10),transparent 18rem),radial-gradient(circle at 0 100%,rgba(168,121,255,.08),transparent 18rem)}
-.signup-card>*{position:relative}
-.signup-intro{color:var(--muted);margin:8px 0 24px}
-.signup-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.field{display:grid;gap:6px}
-.field.full{grid-column:1/-1}
-.field label{font-size:12px;font-weight:800;color:#dbe5f5}
-.field input{margin:0}
-.field-help{font-size:11px;color:var(--muted);line-height:1.45}
-.password-wrap{position:relative}
-.password-wrap input{padding-right:82px}
-.password-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:1px solid var(--line);background:rgba(255,255,255,.04);color:#cbd6e8;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:800;cursor:pointer}
-.password-toggle:hover{border-color:rgba(89,231,255,.4);color:#fff}
-.password-rules{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
-.password-rule{font-size:11px;color:#7f8ca3}
-.password-rule.ok{color:#63e6a5}
-.password-rule:before{content:"○";display:inline-block;width:18px}
-.password-rule.ok:before{content:"✓"}
-.auth-consent{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5;font-weight:600;color:#b8c4d7}
-.auth-consent input{width:auto;flex:0 0 auto;margin:2px 0 0}
-.signup-status{min-height:24px;margin:12px 0 0;font-size:13px;line-height:1.5}
-.signup-status.error{color:#ff9eae}
-.signup-status.success{color:#70e6ac}
-.signup-status.info{color:#9bd8ff}
-.auth-note{margin-top:16px;padding:15px;border:1px solid rgba(89,231,255,.2);border-radius:10px;background:rgba(89,231,255,.05)}
-.auth-note p{margin:6px 0 12px;color:var(--muted);font-size:12px}
-.signup-divider{display:flex;align-items:center;gap:10px;margin:18px 0 8px;color:#68758b;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
-.signup-divider:before,.signup-divider:after{content:"";height:1px;flex:1;background:var(--line)}
-.signup-foot{margin-top:20px;color:var(--muted);font-size:12px;text-align:center}
-.signup-foot a{font-weight:800}
-.signup-security{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
-.signup-security span{padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.025);font-size:10px;color:#9aa8be;font-weight:800}
-.btn[disabled]{opacity:.58;cursor:not-allowed;transform:none!important}
-@media(max-width:560px){.signup-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.password-rules{grid-template-columns:1fr}.signup-card{padding:22px}}
+:root{--signup-glow:rgba(89,231,255,.13)}
+.signup-page{min-height:calc(100vh - 74px);display:grid;place-items:center;padding:32px 18px}
+.signup-layout{width:min(1060px,100%);display:grid;grid-template-columns:1fr 1.15fr;gap:0;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:rgba(5,8,16,.88);box-shadow:0 30px 90px rgba(0,0,0,.35)}
+.signup-hero{padding:48px 42px;background:radial-gradient(circle at 15% 10%,rgba(89,231,255,.18),transparent 24rem),radial-gradient(circle at 85% 90%,rgba(168,121,255,.14),transparent 22rem);border-right:1px solid var(--line)}
+.signup-hero .brand{font-size:18px}
+.signup-hero h1{font-size:clamp(34px,4vw,54px);line-height:1.02;margin:18px 0 14px}
+.signup-hero p{color:var(--muted);line-height:1.7}
+.signup-points{display:grid;gap:12px;margin:28px 0}
+.signup-point{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}
+.signup-point b{display:block;margin-bottom:3px}.signup-point span{font-size:12px;color:var(--muted)}
+.signup-form-panel{padding:40px}
+.signup-form-panel h2{margin:0 0 6px}.signup-intro{color:var(--muted);margin:0 0 24px}.signup-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:800;color:#dbe5f5}.field input{margin:0}.field-help{font-size:11px;color:var(--muted);line-height:1.45}.password-wrap{position:relative}.password-wrap input{padding-right:82px}.password-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:1px solid var(--line);background:rgba(255,255,255,.04);color:#cbd6e8;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:800;cursor:pointer}.password-rules{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}.password-rule{font-size:11px;color:#7f8ca3}.password-rule.ok{color:#63e6a5}.password-rule:before{content:"○";display:inline-block;width:18px}.password-rule.ok:before{content:"✓"}.auth-consent{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5;font-weight:600;color:#b8c4d7}.auth-consent input{width:auto;flex:0 0 auto;margin:2px 0 0}.signup-status{min-height:24px;margin:12px 0 0;font-size:13px;line-height:1.5}.signup-status.error{color:#ff9eae}.signup-status.success{color:#70e6ac}.signup-status.info{color:#9bd8ff}.auth-note{margin-top:16px;padding:15px;border:1px solid rgba(89,231,255,.2);border-radius:10px;background:rgba(89,231,255,.05)}.auth-note p{margin:6px 0 12px;color:var(--muted);font-size:12px}.signup-divider{display:flex;align-items:center;gap:10px;margin:18px 0 8px;color:#68758b;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.signup-divider:before,.signup-divider:after{content:"";height:1px;flex:1;background:var(--line)}.signup-foot{margin-top:20px;color:var(--muted);font-size:12px;text-align:center}.signup-foot a{font-weight:800}.signup-security{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}.signup-security span{padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.025);font-size:10px;color:#9aa8be;font-weight:800}.btn[disabled]{opacity:.58;cursor:not-allowed;transform:none!important}
+@media(max-width:820px){.signup-layout{grid-template-columns:1fr}.signup-hero{border-right:0;border-bottom:1px solid var(--line);padding:30px}.signup-form-panel{padding:30px}}
+@media(max-width:560px){.signup-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.password-rules{grid-template-columns:1fr}.signup-page{padding:16px 10px}.signup-hero,.signup-form-panel{padding:22px}}
 </style>
 </head>
 <body class="crow-cinematic">
@@ -54,97 +32,46 @@
   <div id="account"><a href="login.html">Sign In</a></div>
 </header>
 
-<main class="auth crow-main">
-  <div class="auth-card signup-card signup-shell">
-    <a class="brand" href="index.html" aria-label="CrowSpace">◉ CROWSPACE</a>
-    <p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
-    <h1>Join CrowSpace</h1>
-    <p class="signup-intro">Create one CrowRules account for your profile, Caws, Circles, communities, media and the growing CrowRules universe.</p>
-
-    <form id="signupForm" novalidate>
-      <div class="signup-grid">
-        <div class="field">
-          <label for="first_name">First name <span class="muted">(optional)</span></label>
-          <input id="first_name" name="first_name" type="text" maxlength="60" autocomplete="given-name" placeholder="First name">
-        </div>
-        <div class="field">
-          <label for="last_name">Last name <span class="muted">(optional)</span></label>
-          <input id="last_name" name="last_name" type="text" maxlength="60" autocomplete="family-name" placeholder="Last name">
-        </div>
-
-        <div class="field full">
-          <label for="display_name">Display name</label>
-          <input id="display_name" name="display_name" type="text" maxlength="80" autocomplete="nickname" placeholder="How people will see you" required>
-          <span class="field-help">You can change your public display name later.</span>
-        </div>
-
-        <div class="field full">
-          <label for="username">Username</label>
-          <input id="username" name="username" type="text" minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username" required>
-          <span class="field-help">3–30 characters. Letters, numbers and underscores only.</span>
-        </div>
-
-        <div class="field full">
-          <label for="email">Email address</label>
-          <input id="email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-          <span class="field-help">You'll need access to this inbox to verify your CrowSpace account.</span>
-        </div>
-
-        <div class="field full">
-          <label for="password">Password</label>
-          <div class="password-wrap">
-            <input id="password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a secure password" required aria-describedby="passwordHelp">
-            <button type="button" class="password-toggle" id="togglePassword" aria-controls="password" aria-pressed="false">Show</button>
-          </div>
-          <div id="passwordStrength" class="field-help" aria-live="polite">Use 8+ characters with a mix of letters and numbers.</div>
-          <div class="password-rules" id="passwordRules" aria-label="Password requirements">
-            <span class="password-rule" data-rule="length">8+ characters</span>
-            <span class="password-rule" data-rule="letter">A letter</span>
-            <span class="password-rule" data-rule="number">A number</span>
-            <span class="password-rule" data-rule="variety">Uppercase or symbol</span>
-          </div>
-        </div>
-
-        <div class="field full">
-          <label for="password_confirm">Confirm password</label>
-          <input id="password_confirm" name="password_confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Enter the password again">
-          <span id="passwordMatch" class="field-help" aria-live="polite"></span>
-        </div>
-
-        <label class="auth-consent full">
-          <input id="terms" name="terms" type="checkbox" required>
-          <span>I agree to the CrowSpace Terms and Community Rules and understand that I must verify my email before signing in.</span>
-        </label>
-      </div>
-
-      <button id="signupSubmit" class="btn primary wide" type="submit">Create Universal Account</button>
-      <div id="msg" class="signup-status" role="status" aria-live="polite"></div>
-    </form>
-
-    <div id="verifyBox" class="auth-note" hidden>
-      <strong>Check your email</strong>
-      <p>We created your account. A verification link was sent to <span id="verifyEmail"></span>. Check spam/junk if it doesn't appear shortly.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="resendVerification" class="btn">Resend verification email</button><a class="btn" href="login.html">I verified — Sign In</a></div><p id="resendHint" class="field-help" style="margin:9px 0 0"></p>
-    </div>
-
-    <div class="signup-divider">or</div>
-    <button id="google" class="btn wide" type="button">Continue with Google</button>
-
-    <div class="signup-security" aria-label="Account features">
-      <span>UNIVERSAL ACCOUNT</span>
-      <span>EMAIL VERIFIED</span>
-      <span>CROWSPACE PROFILE</span>
-    </div>
-
-    <p class="signup-foot"><a href="membership.html">Universal Membership</a> · <a href="login.html">Already have an account? Sign in</a></p>
-  </div>
-</main>
+<main class="signup-page">
+<div class="signup-layout">
+<section class="signup-hero">
+<a class="brand" href="index.html">◉ CROWSPACE</a>
+<p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
+<h1>Join the universe.</h1>
+<p>Create one CrowRules account and use it across CrowSpace, Caws, Circles, communities, media and the growing CrowRules universe.</p>
+<div class="signup-points">
+<div class="signup-point"><b>◉ Universal Profile</b><span>One identity for your CrowSpace presence.</span></div>
+<div class="signup-point"><b>◉ Email Verified</b><span>Your inbox confirms ownership before full account access.</span></div>
+<div class="signup-point"><b>◉ Built for CrowSpace</b><span>Create, connect, follow communities and build your Nest.</span></div>
+</div>
+<div class="signup-security"><span>SECURE AUTH</span><span>EMAIL CONFIRMATION</span><span>UNIVERSAL ACCOUNT</span></div>
+</section>
+<section class="signup-form-panel">
+<h2>Create your account</h2>
+<p class="signup-intro">Start with the basics. You can build out your Nest later.</p>
+<form id="signupForm" novalidate>
+<div class="signup-grid">
+<div class="field"><label for="first_name">First name <span class="muted">(optional)</span></label><input id="first_name" name="first_name" type="text" maxlength="60" autocomplete="given-name" placeholder="First name"></div>
+<div class="field"><label for="last_name">Last name <span class="muted">(optional)</span></label><input id="last_name" name="last_name" type="text" maxlength="60" autocomplete="family-name" placeholder="Last name"></div>
+<div class="field full"><label for="display_name">Display name</label><input id="display_name" name="display_name" type="text" maxlength="80" autocomplete="nickname" placeholder="How people will see you" required></div>
+<div class="field full"><label for="username">Username</label><input id="username" name="username" type="text" minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username" required><span class="field-help">3–30 characters · letters, numbers and underscores.</span></div>
+<div class="field full"><label for="email">Email address</label><input id="email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" placeholder="you@example.com" required><span class="field-help">We'll send your verification link here.</span></div>
+<div class="field full"><label for="password">Password</label><div class="password-wrap"><input id="password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a secure password" required><button type="button" class="password-toggle" id="togglePassword" aria-controls="password" aria-pressed="false">Show</button></div><div id="passwordStrength" class="field-help" aria-live="polite">Use 8+ characters with a mix of letters and numbers.</div><div class="password-rules" id="passwordRules"><span class="password-rule" data-rule="length">8+ characters</span><span class="password-rule" data-rule="letter">A letter</span><span class="password-rule" data-rule="number">A number</span><span class="password-rule" data-rule="variety">Uppercase or symbol</span></div></div>
+<div class="field full"><label for="password_confirm">Confirm password</label><input id="password_confirm" name="password_confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Enter the password again"><span id="passwordMatch" class="field-help" aria-live="polite"></span></div>
+<label class="auth-consent full"><input id="terms" name="terms" type="checkbox" required><span>I agree to the CrowSpace Terms and Community Rules and understand that I must verify my email before signing in.</span></label>
+</div>
+<button id="signupSubmit" class="btn primary wide" type="submit">Create Universal Account</button><div id="msg" class="signup-status" role="status" aria-live="polite"></div>
+</form>
+<div id="verifyBox" class="auth-note" hidden><strong>Account created — check your email</strong><p>A verification link was sent to <span id="verifyEmail"></span>. Check spam/junk if needed.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="resendVerification" class="btn">Resend verification email</button><a class="btn" href="login.html">I verified — Sign In</a></div><p id="resendHint" class="field-help" style="margin:9px 0 0"></p></div>
+<div class="signup-divider">or</div><button id="google" class="btn wide" type="button">Continue with Google</button>
+<p class="signup-foot"><a href="membership.html">Universal Membership</a> · <a href="login.html">Already have an account? Sign in</a></p>
+</section></div></main>
 
 <script src="js/config.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/crowspace.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/global-nav.js?v=20260927-6"></script>
+<script src="js/global-nav.js?v=20260927-8"></script>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
   const password=document.getElementById("password");
