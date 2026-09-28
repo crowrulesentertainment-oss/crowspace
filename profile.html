@@ -6,147 +6,47 @@
 <title>Nest | CrowSpace</title>
 <link rel="stylesheet" href="css/crowspace.css">
 <style>
-:root{--nest-cyan:#57e9ff;--nest-violet:#9a70ff;--nest-pink:#ff62d8;--nest-ink:#05060b;--nest-card:#0a0d16;--nest-line:rgba(255,255,255,.1)}
-.nest-page{max-width:1280px;margin:auto;padding:18px 18px 70px}
-.nest-top{display:grid;grid-template-columns:270px minmax(0,1fr);gap:0;min-height:510px;border:1px solid var(--nest-line);background:#080a11;box-shadow:0 30px 90px #0008;overflow:hidden}
-.nest-rail{padding:26px 22px;background:linear-gradient(180deg,#0d101a,#080910);border-right:1px solid var(--nest-line);position:relative}
-.nest-rail:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 38px,rgba(87,233,255,.025) 39px 40px);pointer-events:none}
-.nest-photo{position:relative;width:100%;aspect-ratio:1;border:1px solid rgba(87,233,255,.35);background:linear-gradient(145deg,#10252b,#211333);overflow:hidden;box-shadow:0 0 45px rgba(87,233,255,.08)}
-.nest-photo img{width:100%;height:100%;object-fit:cover}
-.nest-initials{height:100%;display:grid;place-items:center;font:800 74px Orbitron;color:var(--nest-cyan);text-shadow:0 0 28px rgba(87,233,255,.35)}
-.nest-online{position:absolute;right:10px;bottom:10px;padding:5px 8px;background:#07110d;border:1px solid #36d78b66;color:#5ee6a0;font:800 9px Orbitron;letter-spacing:1px}
-.nest-rail h1{font:800 27px Orbitron;margin:20px 0 3px;line-height:1.1;text-transform:uppercase}
-.nest-handle{color:#8f9aaa;font:12px monospace}
-.nest-bio{font-size:12px;color:#c4cbd7;line-height:1.65;margin:15px 0}
-.nest-rail-actions{display:grid;gap:8px}
-.nest-btn{display:flex;justify-content:center;align-items:center;min-height:42px;padding:9px 12px;border:1px solid var(--nest-line);background:#ffffff05;color:#fff;font-weight:800;text-decoration:none;cursor:pointer}
-.nest-btn:hover{border-color:#57e9ff66;background:#57e9ff0d;color:#fff}
-.nest-btn.hot{background:linear-gradient(100deg,#087d94,#6543aa);border-color:#57e9ff55}
-.nest-links{margin-top:20px;border-top:1px solid var(--nest-line);padding-top:15px;display:grid;gap:3px}
-.nest-links a{padding:8px 0;color:#aab5c7;font-size:11px;font-weight:800}
-.nest-links a:hover{color:var(--nest-cyan)}
-.nest-stage{position:relative;padding:34px;background:
-radial-gradient(circle at 75% 20%,rgba(154,112,255,.2),transparent 25%),
-radial-gradient(circle at 45% 65%,rgba(87,233,255,.08),transparent 28%),
-linear-gradient(145deg,#0c101b,#070910)}
-.nest-stage:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 0 35%,rgba(255,255,255,.025) 35.1% 35.2%,transparent 35.3%);pointer-events:none}
-.nest-stage-head{position:relative;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
-.nest-kicker{font:800 9px Orbitron;letter-spacing:2.8px;color:var(--nest-cyan)}
-.nest-stage h2{font:800 clamp(34px,6vw,76px) Orbitron;line-height:.95;margin:9px 0 14px;letter-spacing:-2px;text-transform:uppercase}
-.nest-stage h2 span{color:var(--nest-violet)}
-.nest-manifesto{max-width:680px;color:#aeb8c8;line-height:1.7;font-size:14px}
-.nest-id{font:800 9px monospace;color:#647083;border:1px solid var(--nest-line);padding:9px 10px;white-space:nowrap}
-.nest-stats{position:absolute;left:34px;right:34px;bottom:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--nest-line);border:1px solid var(--nest-line)}
-.nest-stat{background:#080b12;padding:15px;text-align:center}
-.nest-stat strong{display:block;font:800 24px Orbitron}
-.nest-stat span{font-size:9px;color:#778398;text-transform:uppercase;letter-spacing:1.3px}
-.nest-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;margin-top:18px}
-.nest-card{background:linear-gradient(145deg,#0a0d16,#070910);border:1px solid var(--nest-line);box-shadow:0 18px 55px #0006}
-.nest-card-head{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:15px 17px;border-bottom:1px solid var(--nest-line)}
-.nest-card-head h3{margin:0;font:800 12px Orbitron;letter-spacing:1.5px}
-.nest-card-head small{color:#657084;font-size:9px}
-.nest-card-body{padding:17px}
-.nest-wall{display:grid;gap:12px}
-.nest-caw{display:grid;grid-template-columns:150px 1fr;gap:14px;padding:12px;border:1px solid #ffffff0d;background:#ffffff03}
-.nest-caw-media{aspect-ratio:16/10;background:#111522;overflow:hidden}
-.nest-caw-media img{width:100%;height:100%;object-fit:cover}
-.nest-caw-copy strong{display:block;font-size:14px}
-.nest-caw-copy p{color:#8995a7;font-size:12px;margin:6px 0 10px}
-.nest-date{font:10px monospace;color:#5f6b7c}
-.nest-archive{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.nest-archive img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ffffff0d}
-.nest-empty{padding:22px 5px;color:#748094;font-size:12px;text-align:center}
-.nest-about{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.nest-field{padding:11px;border:1px solid #ffffff0b;background:#ffffff03}
-.nest-field small{display:block;color:#687487;font-size:8px;text-transform:uppercase;letter-spacing:1px}
-.nest-field strong{display:block;margin-top:4px;font-size:11px;overflow-wrap:anywhere}
-.nest-friends{display:grid;gap:4px}
-.nest-person{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #ffffff0b}
-.nest-person:last-child{border:0}
-.nest-mini{width:38px;height:38px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#10202a,#21132d);border:1px solid #57e9ff44;color:var(--nest-cyan);font-weight:900;overflow:hidden}
-.nest-mini img{width:100%;height:100%;object-fit:cover}
-.nest-person a{color:#f5f7fb;font-size:11px;font-weight:800}
-.nest-person small{display:block;color:#687487;font:9px monospace;margin-top:2px}
-.nest-status{padding:12px;border:1px solid #57e9ff1f;background:linear-gradient(100deg,#57e9ff08,#9a70ff08);color:#b9c4d5;font-size:11px;line-height:1.6}
-.nest-status b{color:var(--nest-cyan)}
-@media(max-width:900px){.nest-top{grid-template-columns:1fr}.nest-rail{border-right:0;border-bottom:1px solid var(--nest-line);display:grid;grid-template-columns:120px 1fr;gap:16px}.nest-photo{grid-row:span 4}.nest-rail h1{margin:4px 0 0}.nest-links{grid-column:1/-1}.nest-stage{min-height:390px}.nest-grid{grid-template-columns:1fr}}
-@media(max-width:620px){.nest-page{padding:10px 10px 50px}.nest-rail{display:block;padding:18px}.nest-photo{width:145px;margin:auto}.nest-rail h1{text-align:center;font-size:23px}.nest-handle{text-align:center;display:block}.nest-bio{text-align:center}.nest-stage{padding:22px;min-height:430px}.nest-stage-head{display:block}.nest-id{display:inline-block;margin-top:12px}.nest-stage h2{font-size:42px}.nest-stats{left:22px;right:22px;bottom:22px;grid-template-columns:1fr 1fr}.nest-stat{padding:12px}.nest-stat strong{font-size:19px}.nest-caw{grid-template-columns:1fr}.nest-caw-media{aspect-ratio:16/8}.nest-about{grid-template-columns:1fr}.nest-archive{grid-template-columns:1fr 1fr}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+:root{--nest-cyan:#57e9ff;--nest-violet:#9a70ff;--nest-pink:#ff62d8;--nest-line:rgba(255,255,255,.1)}
+.nest-page{max-width:1280px;margin:auto;padding:18px 18px 70px}.nest-top{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:510px;border:1px solid var(--nest-line);background:#080a11;box-shadow:0 30px 90px #0008;overflow:hidden}.nest-rail{padding:26px 22px;background:linear-gradient(180deg,#0d101a,#080910);border-right:1px solid var(--nest-line)}.nest-photo{position:relative;width:100%;aspect-ratio:1;border:1px solid #57e9ff55;background:linear-gradient(145deg,#10252b,#211333);overflow:hidden;box-shadow:0 0 45px #57e9ff14}.nest-photo img{width:100%;height:100%;object-fit:cover}.nest-initials{height:100%;display:grid;place-items:center;font:800 74px Orbitron;color:var(--nest-cyan);text-shadow:0 0 28px #57e9ff55}.nest-online{position:absolute;right:10px;bottom:10px;padding:5px 8px;background:#07110d;border:1px solid #36d78b66;color:#5ee6a0;font:800 9px Orbitron;letter-spacing:1px}.nest-rail h1{font:800 27px Orbitron;margin:20px 0 3px;line-height:1.1;text-transform:uppercase}.nest-handle{color:#8f9aaa;font:12px monospace}.nest-bio{font-size:12px;color:#c4cbd7;line-height:1.65;margin:15px 0}.nest-rail-actions{display:grid;gap:8px}.nest-btn{display:flex;justify-content:center;align-items:center;min-height:42px;padding:9px 12px;border:1px solid var(--nest-line);background:#ffffff05;color:#fff;font-weight:800;text-decoration:none;cursor:pointer}.nest-btn:hover{border-color:#57e9ff66;background:#57e9ff0d;color:#fff}.nest-btn.hot{background:linear-gradient(100deg,#087d94,#6543aa);border-color:#57e9ff55}.nest-links{margin-top:20px;border-top:1px solid var(--nest-line);padding-top:15px;display:grid;gap:3px}.nest-links a{padding:8px 0;color:#aab5c7;font-size:11px;font-weight:800}.nest-links a:hover{color:var(--nest-cyan)}
+.nest-stage{position:relative;padding:34px;background:radial-gradient(circle at 75% 20%,#9a70ff33,transparent 25%),radial-gradient(circle at 45% 65%,#57e9ff14,transparent 28%),linear-gradient(145deg,#0c101b,#070910)}.nest-stage h2{font:800 clamp(34px,6vw,76px) Orbitron;line-height:.95;margin:9px 0 14px;letter-spacing:-2px;text-transform:uppercase}.nest-stage h2 span{color:var(--nest-violet)}.nest-kicker{font:800 9px Orbitron;letter-spacing:2.8px;color:var(--nest-cyan)}.nest-manifesto{max-width:680px;color:#aeb8c8;line-height:1.7;font-size:14px}.nest-id{font:800 9px monospace;color:#647083;border:1px solid var(--nest-line);padding:9px 10px;white-space:nowrap}.nest-stage-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.nest-stats{position:absolute;left:34px;right:34px;bottom:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--nest-line);border:1px solid var(--nest-line)}.nest-stat{background:#080b12;padding:15px;text-align:center}.nest-stat strong{display:block;font:800 24px Orbitron}.nest-stat span{font-size:9px;color:#778398;text-transform:uppercase;letter-spacing:1.3px}
+.nest-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;margin-top:18px}.nest-card{background:linear-gradient(145deg,#0a0d16,#070910);border:1px solid var(--nest-line);box-shadow:0 18px 55px #0006}.nest-card-head{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:15px 17px;border-bottom:1px solid var(--nest-line)}.nest-card-head h3{margin:0;font:800 12px Orbitron;letter-spacing:1.5px}.nest-card-head a{font-size:10px;font-weight:800}.nest-card-head small{color:#657084;font-size:9px}.nest-card-body{padding:17px}.nest-wall{display:grid;gap:12px}.nest-caw{display:grid;grid-template-columns:180px 1fr;gap:14px;padding:12px;border:1px solid #ffffff0d;background:#ffffff03}.nest-caw-media{aspect-ratio:16/10;background:#111522;overflow:hidden;position:relative}.nest-caw-media img,.nest-caw-media video{width:100%;height:100%;object-fit:cover;display:block}.nest-caw-media video{background:#000}.nest-caw-copy strong{display:block;font-size:14px}.nest-caw-copy p{color:#8995a7;font-size:12px;margin:6px 0 10px}.nest-date{font:10px monospace;color:#5f6b7c}.nest-caw-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.nest-caw-actions .nest-btn{min-height:34px;padding:6px 10px;font-size:10px}.nest-archive{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.nest-archive img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border:1px solid #ffffff0d}.nest-empty{padding:22px 5px;color:#748094;font-size:12px;text-align:center}.nest-about{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nest-field{padding:11px;border:1px solid #ffffff0b;background:#ffffff03}.nest-field small{display:block;color:#687487;font-size:8px;text-transform:uppercase;letter-spacing:1px}.nest-field strong{display:block;margin-top:4px;font-size:11px;overflow-wrap:anywhere}.nest-friends{display:grid;gap:4px}.nest-person{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #ffffff0b}.nest-person:last-child{border:0}.nest-mini{width:38px;height:38px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#10202a,#21132d);border:1px solid #57e9ff44;color:var(--nest-cyan);font-weight:900;overflow:hidden}.nest-mini img{width:100%;height:100%;object-fit:cover}.nest-person a{color:#f5f7fb;font-size:11px;font-weight:800}.nest-person small{display:block;color:#687487;font:9px monospace;margin-top:2px}.nest-status{padding:12px;border:1px solid #57e9ff1f;background:linear-gradient(100deg,#57e9ff08,#9a70ff08);color:#b9c4d5;font-size:11px;line-height:1.6}.nest-status b{color:var(--nest-cyan)}
+@media(max-width:900px){.nest-top{grid-template-columns:1fr}.nest-rail{border-right:0;border-bottom:1px solid var(--nest-line);display:grid;grid-template-columns:120px 1fr;gap:16px}.nest-photo{grid-row:span 4}.nest-rail h1{margin:4px 0 0}.nest-links{grid-column:1/-1}.nest-stage{min-height:390px}.nest-grid{grid-template-columns:1fr}}@media(max-width:620px){.nest-page{padding:10px}.nest-rail{display:block;padding:18px}.nest-photo{width:145px;margin:auto}.nest-rail h1{text-align:center;font-size:23px}.nest-handle{text-align:center;display:block}.nest-bio{text-align:center}.nest-stage{padding:22px;min-height:430px}.nest-stage-head{display:block}.nest-id{display:inline-block;margin-top:12px}.nest-stage h2{font-size:42px}.nest-stats{left:22px;right:22px;bottom:22px;grid-template-columns:1fr 1fr}.nest-stat{padding:12px}.nest-stat strong{font-size:19px}.nest-caw{grid-template-columns:1fr}.nest-caw-media{aspect-ratio:16/8}.nest-about{grid-template-columns:1fr}.nest-archive{grid-template-columns:1fr 1fr}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/supabase.js"></script>
 </head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header>
-
 <main class="nest-page" id="app"><section class="nest-card"><div class="nest-card-body">Loading Nest…</div></section></main>
 <footer>CrowSpace · One Account. One Universe.</footer>
-
 <script>
 (()=>{"use strict";
-const $=id=>document.getElementById(id),db=window.crowSupabase,params=new URLSearchParams(location.search);
-let uid=params.get("id"),viewer=null,profile=null;
-const esc=s=>window.CS?.escape?CS.escape(s):String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-const safe=u=>{try{const x=new URL(u,location.href);return /^https?:$/.test(x.protocol)?x.href:""}catch{return""}};
-const initials=s=>String(s||"CS").trim().split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()||"CS";
-const fmt=d=>d?new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"—";
+const $=id=>document.getElementById(id),db=window.crowSupabase,params=new URLSearchParams(location.search);let uid=params.get("id"),viewer=null,profile=null;
+const esc=s=>window.CS?.escape?CS.escape(s):String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));const safe=u=>{try{const x=new URL(u,location.href);return /^https?:$/.test(x.protocol)?x.href:""}catch{return""}};const initials=s=>String(s||"CS").trim().split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()||"CS";const fmt=d=>d?new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"—";
 async function count(table,field){try{const r=await db.from(table).select("*",{count:"exact",head:true}).eq(field,uid);return r.error?0:(r.count||0)}catch{return 0}}
 function avatar(url,name,cls="nest-mini"){const u=safe(url);return u?'<span class="'+cls+'"><img src="'+esc(u)+'" alt=""></span>':'<span class="'+cls+'">'+esc(initials(name))+'</span>'}
 async function load(){
  try{
   if(!db)throw Error("CrowSpace database connection is unavailable.");
-  viewer=(await db.auth.getUser()).data?.user||null;if(!uid)uid=viewer?.id;
-  if(!uid){show("Your Nest is waiting.","Sign in to enter your CrowSpace profile.","login.html","Sign In");return}
-  const pr=await db.from("membership_profiles").select("id,display_name,username,bio,avatar_url,website,location,created_at").eq("id",uid).maybeSingle();
-  if(pr.error)throw pr.error;if(!pr.data)throw Error("This Nest could not be found.");profile=pr.data;
-  const [followers,following,caws,groups,events]=await Promise.all([
-   count("crowspace_follows","followed_user_id"),count("crowspace_follows","follower_id"),
-   count("crowspace_caws","user_id"),count("crowspace_group_members","user_id"),count("crowspace_events","created_by")
-  ]);
-  const av=safe(profile.avatar_url),mine=viewer?.id===uid;
-  document.title=(profile.display_name||"Nest")+" | CrowSpace";
-  $("app").innerHTML=
-  '<section class="nest-top">'+
-   '<aside class="nest-rail"><div class="nest-photo">'+(av?'<img src="'+esc(av)+'" alt="'+esc(profile.display_name||"CrowSpace member")+'">':'<div class="nest-initials">'+esc(initials(profile.display_name||profile.username))+'</div>')+'<span class="nest-online">CROWSPACE</span></div>'+
-   '<div><h1>'+esc(profile.display_name||"CrowSpace Member")+'</h1><span class="nest-handle">@'+esc(profile.username||"member")+'</span><p class="nest-bio">'+esc(profile.bio||"Welcome to my corner of the CrowSpace universe.")+'</p><div class="nest-rail-actions">'+(mine?'<a class="nest-btn hot" href="customize.html">✦ Customize My Nest</a>':'<button class="nest-btn hot" id="follow">Follow</button><a class="nest-btn" href="messenger.html?user='+encodeURIComponent(uid)+'">Message</a>')+'</div></div>'+
-   '<div class="nest-links"><a href="index.html">← CrowSpace Home</a><a href="caws.html?user='+encodeURIComponent(uid)+'">Caws</a><a href="albums.html?user='+encodeURIComponent(uid)+'">Visual Archive</a>'+(safe(profile.website)?'<a href="'+esc(safe(profile.website))+'" target="_blank" rel="noopener noreferrer">Website ↗</a>':"")+'</div>'+
-  '</aside>'+
-  '<section class="nest-stage"><div class="nest-stage-head"><div><div class="nest-kicker">CROWSPACE // PERSONAL SPACE</div><h2>THIS IS<br><span>MY NEST.</span></h2><p class="nest-manifesto">'+esc(profile.bio||"A personal space for stories, people, creations, conversations and everything that makes this corner of CrowSpace mine.")+'</p></div><div class="nest-id">NEST ID / '+esc(String(uid).slice(0,8).toUpperCase())+'</div></div>'+
-  '<div class="nest-stats"><div class="nest-stat"><strong>'+followers+'</strong><span>Followers</span></div><div class="nest-stat"><strong>'+following+'</strong><span>Following</span></div><div class="nest-stat"><strong>'+caws+'</strong><span>Caws</span></div><div class="nest-stat"><strong>'+groups+'</strong><span>Groups</span></div></div></section>'+
-  '</section>'+
-  '<div class="nest-grid"><div><section class="nest-card"><div class="nest-card-head"><h3>MY WALL // RECENT CAWS</h3><a href="caws.html?user='+encodeURIComponent(uid)+'">VIEW ALL →</a></div><div class="nest-card-body" id="caws"><div class="nest-empty">Loading wall…</div></div></section>'+
-  '<section class="nest-card" style="margin-top:18px"><div class="nest-card-head"><h3>VISUAL ARCHIVE</h3><small>MY SPACE / MY MOMENTS</small></div><div class="nest-card-body" id="photos"><div class="nest-empty">Loading archive…</div></div></section></div>'+
-  '<aside><section class="nest-card"><div class="nest-card-head"><h3>IDENTITY</h3><small>PROFILE FILE</small></div><div class="nest-card-body"><div class="nest-about"><div class="nest-field"><small>Username</small><strong>@'+esc(profile.username||"member")+'</strong></div><div class="nest-field"><small>Location</small><strong>'+esc(profile.location||"Not added")+'</strong></div><div class="nest-field"><small>Joined</small><strong>'+fmt(profile.created_at)+'</strong></div><div class="nest-field"><small>Events</small><strong>'+events+'</strong></div></div></div></section>'+
-  '<section class="nest-card" style="margin-top:18px"><div class="nest-card-head"><h3>MY CIRCLE</h3><small>FRIENDS</small></div><div class="nest-card-body" id="friends"><div class="nest-empty">Loading…</div></div></section>'+
-  '<section class="nest-card" style="margin-top:18px"><div class="nest-card-head"><h3>NEST STATUS</h3></div><div class="nest-card-body"><div class="nest-status"><b>● ACTIVE NEST</b><br>One Account. One Universe. This is a living part of CrowSpace.</div></div></section></aside></div>';
+  viewer=(await db.auth.getUser()).data?.user||null;if(!uid)uid=viewer?.id;if(!uid){show("Your Nest is waiting.","Sign in to enter your CrowSpace profile.","login.html","Sign In");return}
+  const pr=await db.from("membership_profiles").select("id,display_name,username,bio,avatar_url,website,location,created_at").eq("id",uid).maybeSingle();if(pr.error)throw pr.error;if(!pr.data)throw Error("This Nest could not be found.");profile=pr.data;
+  const [followers,following,caws,groups,events]=await Promise.all([count("crowspace_follows","followed_user_id"),count("crowspace_follows","follower_id"),count("crowspace_caws","user_id"),count("crowspace_group_members","user_id"),count("crowspace_events","created_by")]);
+  const av=safe(profile.avatar_url),mine=viewer?.id===uid;document.title=(profile.display_name||"Nest")+" | CrowSpace";
+  $("app").innerHTML='<section class="nest-top"><aside class="nest-rail"><div class="nest-photo">'+(av?'<img src="'+esc(av)+'" alt="'+esc(profile.display_name||"CrowSpace member")+'">':'<div class="nest-initials">'+esc(initials(profile.display_name||profile.username))+'</div>')+'<span class="nest-online">CROWSPACE</span></div><div><h1>'+esc(profile.display_name||"CrowSpace Member")+'</h1><span class="nest-handle">@'+esc(profile.username||"member")+'</span><p class="nest-bio">'+esc(profile.bio||"Welcome to my corner of the CrowSpace universe.")+'</p><div class="nest-rail-actions">'+(mine?'<a class="nest-btn hot" href="customize.html">✦ Customize My Nest</a>':'<button class="nest-btn hot" id="follow">Follow</button><a class="nest-btn" href="messenger.html?user='+encodeURIComponent(uid)+'">Message</a>')+'</div></div><div class="nest-links"><a href="index.html">← CrowSpace Home</a><a href="caws.html?user='+encodeURIComponent(uid)+'">Caws</a><a href="caw-feed.html">Caw Feed</a><a href="albums.html?user='+encodeURIComponent(uid)+'">Visual Archive</a>'+(safe(profile.website)?'<a href="'+esc(safe(profile.website))+'" target="_blank" rel="noopener noreferrer">Website ↗</a>':"")+'</div></aside><section class="nest-stage"><div class="nest-stage-head"><div><div class="nest-kicker">CROWSPACE // PERSONAL SPACE</div><h2>THIS IS<br><span>MY NEST.</span></h2><p class="nest-manifesto">'+esc(profile.bio||"A personal space for stories, people, creations, conversations and everything that makes this corner of CrowSpace mine.")+'</p></div><div class="nest-id">NEST ID / '+esc(String(uid).slice(0,8).toUpperCase())+'</div></div><div class="nest-stats"><div class="nest-stat"><strong>'+followers+'</strong><span>Followers</span></div><div class="nest-stat"><strong>'+following+'</strong><span>Following</span></div><div class="nest-stat"><strong>'+caws+'</strong><span>Caws</span></div><div class="nest-stat"><strong>'+groups+'</strong><span>Groups</span></div></div></section></section><div class="nest-grid"><div><section class="nest-card"><div class="nest-card-head"><h3>MY WALL // RECENT CAWS</h3><a href="caws.html?user='+encodeURIComponent(uid)+'">VIEW ALL CAWS →</a></div><div class="nest-card-body" id="caws"><div class="nest-empty">Loading wall…</div></div></section><section class="nest-card" style="margin-top:18px"><div class="nest-card-head"><h3>VISUAL ARCHIVE</h3><small>MY SPACE / MY MOMENTS</small></div><div class="nest-card-body" id="photos"><div class="nest-empty">Loading archive…</div></div></section></div><aside><section class="nest-card"><div class="nest-card-head"><h3>IDENTITY</h3><small>PROFILE FILE</small></div><div class="nest-card-body"><div class="nest-about"><div class="nest-field"><small>Username</small><strong>@'+esc(profile.username||"member")+'</strong></div><div class="nest-field"><small>Location</small><strong>'+esc(profile.location||"Not added")+'</strong></div><div class="nest-field"><small>Joined</small><strong>'+fmt(profile.created_at)+'</strong></div><div class="nest-field"><small>Events</small><strong>'+events+'</strong></div></div></div></section><section class="nest-card" style="margin-top:18px"><div class="nest-card-head"><h3>MY CIRCLE</h3><small>FRIENDS</small></div><div class="nest-card-body" id="friends"><div class="nest-empty">Loading…</div></div></section><section class="nest-card" style="margin-top:18px"><div class="nest-card-head"><h3>NEST STATUS</h3></div><div class="nest-card-body"><div class="nest-status"><b>● ACTIVE NEST</b><br>One Account. One Universe. This is a living part of CrowSpace.</div></div></section></aside></div>';
   await content();if(!mine)setupFollow();
  }catch(e){console.error(e);$("app").innerHTML='<section class="nest-card"><div class="nest-card-body nest-empty"><h2>Nest Offline</h2><p>'+esc(e.message||"Unable to load this profile.")+'</p><button class="nest-btn" onclick="location.reload()">Retry</button></div></section>'}
 }
 function show(title,text,href,label){$("app").innerHTML='<section class="nest-card"><div class="nest-card-body nest-empty"><h2>'+esc(title)+'</h2><p>'+esc(text)+'</p><a class="nest-btn hot" href="'+esc(href)+'">'+esc(label)+' →</a></div></section>'}
 async function content(){
- const q=await db.from("crowspace_caws").select("id,title,caption,thumbnail_url,video_url,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(6);
- $("caws").innerHTML='<div class="nest-wall">'+(q.data||[]).map(x=>'<article class="nest-caw"><div class="nest-caw-media">'+(safe(x.thumbnail_url)?'<img loading="lazy" src="'+esc(safe(x.thumbnail_url))+'" alt="">':'')+'</div><div class="nest-caw-copy"><strong>'+esc(x.title||"Untitled Caw")+'</strong><p>'+esc(x.caption||"")+'</p><span class="nest-date">'+fmt(x.created_at)+'</span>'+(safe(x.video_url)?'<p><a class="nest-btn" href="'+esc(safe(x.video_url))+'" target="_blank" rel="noopener">WATCH CAW →</a></p>':"")+'</div></article>').join("")+'</div>';
- if(!(q.data||[]).length)$("caws").innerHTML='<div class="nest-empty">No Caws here yet. The wall is waiting.</div>';
- const p=await db.from("crowspace_album_photos").select("id,image_url,caption").eq("user_id",uid).order("created_at",{ascending:false}).limit(9);
- const pics=(p.data||[]).filter(x=>safe(x.image_url));
- $("photos").innerHTML=pics.length?'<div class="nest-archive">'+pics.map(x=>'<img loading="lazy" src="'+esc(safe(x.image_url))+'" alt="'+esc(x.caption||"CrowSpace moment")+'">').join("")+'</div>':'<div class="nest-empty">No visual archive yet.</div>';
- const f=await db.from("crowspace_friendships").select("requester_id,addressee_id").eq("status","accepted").or("requester_id.eq."+uid+",addressee_id.eq."+uid).limit(8);
- const ids=(f.data||[]).map(x=>x.requester_id===uid?x.addressee_id:x.requester_id);
- if(!ids.length){$("friends").innerHTML='<div class="nest-empty">Your circle is still forming.</div>';return}
- const m=await db.from("membership_profiles").select("id,display_name,username,avatar_url").in("id",ids);
- $("friends").innerHTML='<div class="nest-friends">'+(m.data||[]).map(x=>'<div class="nest-person">'+avatar(x.avatar_url,x.display_name||x.username)+'<div><a href="profile.html?id='+encodeURIComponent(x.id)+'">'+esc(x.display_name||"Member")+'</a><small>@'+esc(x.username||"member")+'</small></div></div>').join("")+'</div>';
+ let q=await db.from("crowspace_caws").select("id,title,caption,thumbnail_url,video_url,created_at,views").eq("user_id",uid).order("created_at",{ascending:false}).limit(6);
+ if(q.error){q=await db.from("crowspace_caws").select("id,title,caption,video_url,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(6)}
+ const rows=q.data||[];
+ $("caws").innerHTML=rows.length?'<div class="nest-wall">'+rows.map(x=>{const thumb=safe(x.thumbnail_url),vid=safe(x.video_url);return '<article class="nest-caw"><div class="nest-caw-media">'+(vid?'<video controls playsinline preload="metadata"'+(thumb?' poster="'+esc(thumb)+'"':"")+' src="'+esc(vid)+'"></video>':thumb?'<img loading="lazy" src="'+esc(thumb)+'" alt="">':'<span class="nest-empty">CAW</span>')+'</div><div class="nest-caw-copy"><strong>'+esc(x.title||"Untitled Caw")+'</strong><p>'+esc(x.caption||"")+'</p><span class="nest-date">'+fmt(x.created_at)+(Number.isFinite(Number(x.views))?" · "+Number(x.views).toLocaleString()+" views":"")+'</span><div class="nest-caw-actions"><a class="nest-btn" href="caw-feed.html">WATCH IN CAW FEED →</a><a class="nest-btn" href="caws.html?user='+encodeURIComponent(uid)+'">OPEN CAWS →</a></div></div></article>'}).join("")+'</div>':'<div class="nest-empty">No Caws here yet. The wall is waiting.</div>';
+ const p=await db.from("crowspace_album_photos").select("id,image_url,caption").eq("user_id",uid).order("created_at",{ascending:false}).limit(9);const pics=(p.data||[]).filter(x=>safe(x.image_url));$("photos").innerHTML=pics.length?'<div class="nest-archive">'+pics.map(x=>'<img loading="lazy" src="'+esc(safe(x.image_url))+'" alt="'+esc(x.caption||"CrowSpace moment")+'">').join("")+'</div>':'<div class="nest-empty">No visual archive yet.</div>';
+ const f=await db.from("crowspace_friendships").select("requester_id,addressee_id").eq("status","accepted").or("requester_id.eq."+uid+",addressee_id.eq."+uid).limit(8);const ids=(f.data||[]).map(x=>x.requester_id===uid?x.addressee_id:x.requester_id);if(!ids.length){$("friends").innerHTML='<div class="nest-empty">Your circle is still forming.</div>';return}const m=await db.from("membership_profiles").select("id,display_name,username,avatar_url").in("id",ids);$("friends").innerHTML='<div class="nest-friends">'+(m.data||[]).map(x=>'<div class="nest-person">'+avatar(x.avatar_url,x.display_name||x.username)+'<div><a href="profile.html?id='+encodeURIComponent(x.id)+'">'+esc(x.display_name||"Member")+'</a><small>@'+esc(x.username||"member")+'</small></div></div>').join("")+'</div>';
 }
-async function setupFollow(){
- const b=$("follow");if(!b)return;if(!viewer){b.textContent="Sign in to follow";b.onclick=()=>location.href="login.html";return}
- let q=await db.from("crowspace_follows").select("id").eq("follower_id",viewer.id).eq("followed_user_id",uid).maybeSingle();
- b.textContent=q.data?"Following":"Follow";
- b.onclick=async()=>{b.disabled=true;const r=q.data?await db.from("crowspace_follows").delete().eq("id",q.data.id):await db.from("crowspace_follows").insert({follower_id:viewer.id,followed_user_id:uid});if(!r.error){q.data=q.data?null:{id:"new"};b.textContent=q.data?"Following":"Follow"}else alert(r.error.message);b.disabled=false};
-}
-document.addEventListener("DOMContentLoaded",()=>load(),{once:true});
+async function setupFollow(){const b=$("follow");if(!b)return;if(!viewer){b.textContent="Sign in to follow";b.onclick=()=>location.href="login.html";return}let q=await db.from("crowspace_follows").select("id").eq("follower_id",viewer.id).eq("followed_user_id",uid).maybeSingle();b.textContent=q.data?"Following":"Follow";b.onclick=async()=>{b.disabled=true;const r=q.data?await db.from("crowspace_follows").delete().eq("id",q.data.id):await db.from("crowspace_follows").insert({follower_id:viewer.id,followed_user_id:uid});if(!r.error){q.data=q.data?null:{id:"new"};b.textContent=q.data?"Following":"Follow"}else alert(r.error.message);b.disabled=false}}
+document.addEventListener("DOMContentLoaded",load,{once:true});
 })();
 </script>
-<script src="js/crowspace.js"></script>
-<script src="js/global-nav.js?v=20260928-5" defer></script>
-</body>
-</html>
+<script src="js/crowspace.js"></script><script src="js/global-nav.js?v=20260928-6" defer></script>
+</body></html>
