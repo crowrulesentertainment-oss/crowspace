@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded",async()=>{
   if(!window.CROW_CONFIG?.supabaseUrl||!window.CROW_CONFIG?.supabaseKey)return;
   const sb=supabase.createClient(CROW_CONFIG.supabaseUrl,CROW_CONFIG.supabaseKey);
-  const feed=document.getElementById("feed"),status=document.getElementById("cawStatus"),body=document.getElementById("cawBody");
+  const feed=document.getElementById("feed"),status=document.getElementById("cawStatus"),body=document.getElementById("cawBody"),media=document.getElementById("cawMedia"),mediaName=document.getElementById("mediaName");
   let refreshTimer=null;
   let loading=false;
   const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -31,7 +31,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
       const avatar=p.avatar_url?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<div class="avatar">'+esc(initials(name))+'</div>';
       const profileHref=p.username?'profile.html?username='+encodeURIComponent(p.username):'profile.html?user='+encodeURIComponent(x.user_id);
       const btn=(type,label,activeLabel)=>{const k=x.id+"|"+type;return '<button data-action="'+type+'" data-target-type="post" data-target-id="'+x.id+'" class="'+(mine.has(k)?"active":"")+'">'+(mine.has(k)?activeLabel:label)+' <span class="muted">'+(counts.get(k)||0)+'</span></button>'};
-      return '<article class="feed-card panel"><div class="user-row"><a href="'+profileHref+'" aria-label="View '+esc(name)+' profile">'+avatar+'</a><div><a href="'+profileHref+'"><b>'+esc(name)+'</b></a><div class="muted"><a href="'+profileHref+'">@'+esc(p.username||"member")+'</a></div></div><span class="muted">'+(x.created_at?new Date(x.created_at).toLocaleString():"")+'</span></div><p>'+esc(x.body||"")+'</p><div class="reaction-bar">'+btn("like","♡ Like","♥ Liked")+btn("repost","↗ Repost","↗ Reposted")+btn("save","🔖 Save","🔖 Saved")+'<button>💬 Comment</button></div></article>';
+      const mediaHtml=x.media_url ? (/(mp4|webm|quicktime|mov|m4v)(\?|$)/i.test(x.media_url) ? '<video class="caw-media" controls preload="metadata" src="'+esc(x.media_url)+'"></video>' : '<img class="caw-media" loading="lazy" src="'+esc(x.media_url)+'" alt="Caw media">') : ''; 
+      return '<article class="feed-card panel"><div class="user-row"><a href="'+profileHref+'" aria-label="View '+esc(name)+' profile">'+avatar+'</a><div><a href="'+profileHref+'"><b>'+esc(name)+'</b></a><div class="muted"><a href="'+profileHref+'">@'+esc(p.username||"member")+'</a></div></div><span class="muted">'+(x.created_at?new Date(x.created_at).toLocaleString():"")+'</span></div>'+mediaHtml+'<p>'+esc(x.body||"")+'</p><div class="reaction-bar">'+btn("like","♡ Like","♥ Liked")+btn("repost","↗ Repost","↗ Reposted")+btn("save","🔖 Save","🔖 Saved")+'<button>💬 Comment</button></div></article>';
     }).join("");
     loading=false;
   }
@@ -65,6 +66,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
       }
     }
   });
+  document.getElementById("addMedia")?.addEventListener("click",()=>media?.click());
+  media?.addEventListener("change",()=>{if(mediaName)mediaName.textContent=media.files?.[0]?.name||""});
   document.getElementById("postCaw")?.addEventListener("click",async()=>{
     const {data:{user}}=await sb.auth.getUser();
     if(!user){status.textContent="Sign in to post a Caw.";return}
@@ -72,9 +75,19 @@ document.addEventListener("DOMContentLoaded",async()=>{
     if(!text){status.textContent="Write something first.";return}
     if(text.length>5000){status.textContent="Caws must be 5,000 characters or less.";return}
     status.textContent="Posting…";
-    const {error}=await sb.from("crowspace_posts").insert({user_id:user.id,body:text});
+    let mediaUrl=null;
+    const file=media?.files?.[0];
+    if(file){
+      if(file.size>50*1024*1024){status.textContent="Media must be 50 MB or smaller.";return}
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=user.id+"/"+Date.now()+"-"+safe;
+      const {error:uploadError}=await sb.storage.from("crowspace-media").upload(path,file,{upsert:false,contentType:file.type});
+      if(uploadError){status.textContent="Media upload failed: "+uploadError.message;return}
+      mediaUrl=sb.storage.from("crowspace-media").getPublicUrl(path).data.publicUrl;
+    }
+    const {error}=await sb.from("crowspace_posts").insert({user_id:user.id,body:text,media_url:mediaUrl});
     if(error){status.textContent=error.message;return}
-    body.value="";status.textContent="Caw posted ✓";await load();
+    body.value="";if(media)media.value="";if(mediaName)mediaName.textContent="";status.textContent="Caw posted ✓";await load();
   });
   await load();
 });
