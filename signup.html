@@ -1,1 +1,199 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Join CrowSpace | CrowRules</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header><main class="auth"><div class="auth-card"><a class="brand" href="index.html">◉ CROWSPACE</a><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h1>Join CrowSpace</h1><form id="signupForm"><input id="display_name" placeholder="Display name" required><input id="username" placeholder="Username" minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" autocomplete="username" required><input id="email" type="email" placeholder="Email" required><input id="password" type="password" minlength="8" autocomplete="new-password" placeholder="Password (8+ characters)" required><div id="passwordStrength" class="muted">Use 8+ characters with a mix of letters and numbers.</div><label class="auth-consent"><input id="terms" type="checkbox" required> I agree to the CrowSpace Terms and Community Rules.</label><button id="signupSubmit" class="btn primary">Create Universal Account</button></form><button id="google" class="btn wide">Sign up with Google</button><p id="msg" class="muted"></p><div id="verifyBox" class="auth-note" hidden><strong>Verify your email</strong><p>We sent a confirmation link to <span id="verifyEmail"></span>.</p><button type="button" id="resendVerification" class="btn">Resend verification email</button></div><p><a href="membership.html">Universal Membership</a> · <a href="login.html">Already have an account? Sign in</a></p></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script src="js/auth.js"></script><script src="js/global-nav.js?v=20260927-4"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Create your universal CrowSpace account and connect across the CrowRules universe.">
+<meta name="theme-color" content="#03040a">
+<title>Join CrowSpace | CrowRules</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.signup-shell{width:min(560px,100%);margin:auto}
+.signup-card{position:relative;overflow:hidden}
+.signup-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 100% 0,rgba(89,231,255,.10),transparent 18rem),radial-gradient(circle at 0 100%,rgba(168,121,255,.08),transparent 18rem)}
+.signup-card>*{position:relative}
+.signup-intro{color:var(--muted);margin:8px 0 24px}
+.signup-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{display:grid;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:800;color:#dbe5f5}
+.field input{margin:0}
+.field-help{font-size:11px;color:var(--muted);line-height:1.45}
+.password-wrap{position:relative}
+.password-wrap input{padding-right:82px}
+.password-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:1px solid var(--line);background:rgba(255,255,255,.04);color:#cbd6e8;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:800;cursor:pointer}
+.password-toggle:hover{border-color:rgba(89,231,255,.4);color:#fff}
+.password-rules{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
+.password-rule{font-size:11px;color:#7f8ca3}
+.password-rule.ok{color:#63e6a5}
+.password-rule:before{content:"○";display:inline-block;width:18px}
+.password-rule.ok:before{content:"✓"}
+.auth-consent{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5;font-weight:600;color:#b8c4d7}
+.auth-consent input{width:auto;flex:0 0 auto;margin:2px 0 0}
+.signup-status{min-height:24px;margin:12px 0 0;font-size:13px;line-height:1.5}
+.signup-status.error{color:#ff9eae}
+.signup-status.success{color:#70e6ac}
+.signup-status.info{color:#9bd8ff}
+.auth-note{margin-top:16px;padding:15px;border:1px solid rgba(89,231,255,.2);border-radius:10px;background:rgba(89,231,255,.05)}
+.auth-note p{margin:6px 0 12px;color:var(--muted);font-size:12px}
+.signup-divider{display:flex;align-items:center;gap:10px;margin:18px 0 8px;color:#68758b;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.signup-divider:before,.signup-divider:after{content:"";height:1px;flex:1;background:var(--line)}
+.signup-foot{margin-top:20px;color:var(--muted);font-size:12px;text-align:center}
+.signup-foot a{font-weight:800}
+.signup-security{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
+.signup-security span{padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.025);font-size:10px;color:#9aa8be;font-weight:800}
+.btn[disabled]{opacity:.58;cursor:not-allowed;transform:none!important}
+@media(max-width:560px){.signup-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.password-rules{grid-template-columns:1fr}.signup-card{padding:22px}}
+</style>
+</head>
+<body class="crow-cinematic">
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="CrowSpace home">● CROWSPACE</a>
+  <nav aria-label="Primary navigation"></nav>
+  <div id="account"><a href="login.html">Sign In</a></div>
+</header>
+
+<main class="auth crow-main">
+  <div class="auth-card signup-card signup-shell">
+    <a class="brand" href="index.html" aria-label="CrowSpace">◉ CROWSPACE</a>
+    <p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
+    <h1>Join CrowSpace</h1>
+    <p class="signup-intro">Create one CrowRules account for your profile, Caws, Circles, communities, media and the growing CrowRules universe.</p>
+
+    <form id="signupForm" novalidate>
+      <div class="signup-grid">
+        <div class="field">
+          <label for="first_name">First name <span class="muted">(optional)</span></label>
+          <input id="first_name" name="first_name" type="text" maxlength="60" autocomplete="given-name" placeholder="First name">
+        </div>
+        <div class="field">
+          <label for="last_name">Last name <span class="muted">(optional)</span></label>
+          <input id="last_name" name="last_name" type="text" maxlength="60" autocomplete="family-name" placeholder="Last name">
+        </div>
+
+        <div class="field full">
+          <label for="display_name">Display name</label>
+          <input id="display_name" name="display_name" type="text" maxlength="80" autocomplete="nickname" placeholder="How people will see you" required>
+          <span class="field-help">You can change your public display name later.</span>
+        </div>
+
+        <div class="field full">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username" required>
+          <span class="field-help">3–30 characters. Letters, numbers and underscores only.</span>
+        </div>
+
+        <div class="field full">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+          <span class="field-help">You'll need access to this inbox to verify your CrowSpace account.</span>
+        </div>
+
+        <div class="field full">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a secure password" required aria-describedby="passwordHelp">
+            <button type="button" class="password-toggle" id="togglePassword" aria-controls="password" aria-pressed="false">Show</button>
+          </div>
+          <div id="passwordStrength" class="field-help" aria-live="polite">Use 8+ characters with a mix of letters and numbers.</div>
+          <div class="password-rules" id="passwordRules" aria-label="Password requirements">
+            <span class="password-rule" data-rule="length">8+ characters</span>
+            <span class="password-rule" data-rule="letter">A letter</span>
+            <span class="password-rule" data-rule="number">A number</span>
+            <span class="password-rule" data-rule="variety">Uppercase or symbol</span>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label for="password_confirm">Confirm password</label>
+          <input id="password_confirm" name="password_confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Enter the password again">
+          <span id="passwordMatch" class="field-help" aria-live="polite"></span>
+        </div>
+
+        <label class="auth-consent full">
+          <input id="terms" name="terms" type="checkbox" required>
+          <span>I agree to the CrowSpace Terms and Community Rules and understand that I must verify my email before signing in.</span>
+        </label>
+      </div>
+
+      <button id="signupSubmit" class="btn primary wide" type="submit">Create Universal Account</button>
+      <div id="msg" class="signup-status" role="status" aria-live="polite"></div>
+    </form>
+
+    <div id="verifyBox" class="auth-note" hidden>
+      <strong>Check your email</strong>
+      <p>We created your account. A verification link was sent to <span id="verifyEmail"></span>. Check spam/junk if it doesn't appear shortly.</p>
+      <button type="button" id="resendVerification" class="btn">Resend verification email</button>
+    </div>
+
+    <div class="signup-divider">or</div>
+    <button id="google" class="btn wide" type="button">Continue with Google</button>
+
+    <div class="signup-security" aria-label="Account features">
+      <span>UNIVERSAL ACCOUNT</span>
+      <span>EMAIL VERIFIED</span>
+      <span>CROWSPACE PROFILE</span>
+    </div>
+
+    <p class="signup-foot"><a href="membership.html">Universal Membership</a> · <a href="login.html">Already have an account? Sign in</a></p>
+  </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/crowspace.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/global-nav.js?v=20260927-6"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const password=document.getElementById("password");
+  const confirm=document.getElementById("password_confirm");
+  const strength=document.getElementById("passwordStrength");
+  const match=document.getElementById("passwordMatch");
+  const toggle=document.getElementById("togglePassword");
+  const rules=[...document.querySelectorAll(".password-rule")];
+
+  const updatePasswordUI=()=>{
+    const v=password?.value||"";
+    const checks={
+      length:v.length>=8,
+      letter:/[A-Za-z]/.test(v),
+      number:/\d/.test(v),
+      variety:/[A-Z]/.test(v)||/[^A-Za-z0-9]/.test(v)
+    };
+    rules.forEach(el=>el.classList.toggle("ok",!!checks[el.dataset.rule]));
+    const score=Object.values(checks).filter(Boolean).length;
+    if(strength){
+      strength.textContent=!v?"Use 8+ characters with a mix of letters and numbers."
+        :score===4?"Strong password."
+        :score>=2?"Good password — add more variety for extra strength."
+        :"Password needs more variety.";
+      strength.className="field-help";
+    }
+    if(match){
+      if(!confirm?.value) match.textContent="";
+      else if(v===confirm.value){match.textContent="Passwords match.";match.className="field-help";match.style.color="#63e6a5"}
+      else{match.textContent="Passwords do not match.";match.className="field-help";match.style.color="#ff9eae"}
+    }
+  };
+  password?.addEventListener("input",updatePasswordUI);
+  confirm?.addEventListener("input",updatePasswordUI);
+  toggle?.addEventListener("click",()=>{
+    const show=password.type==="password";
+    password.type=show?"text":"password";
+    confirm.type=show?"text":"password";
+    toggle.textContent=show?"Hide":"Show";
+    toggle.setAttribute("aria-pressed",String(show));
+  });
+  document.getElementById("username")?.addEventListener("input",e=>{
+    e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,30);
+  });
+  document.getElementById("email")?.addEventListener("blur",e=>{
+    e.target.value=e.target.value.trim().toLowerCase();
+  });
+  updatePasswordUI();
+});
+</script>
+</body>
+</html>
