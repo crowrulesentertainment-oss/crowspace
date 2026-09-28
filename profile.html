@@ -33,6 +33,7 @@
 .profile-social-feed .social-actions a,.profile-social-feed .social-actions button{display:inline-flex;align-items:center;gap:4px;text-decoration:none}
 .profile-social-feed .social-actions button.active{color:var(--cyan);background:rgba(98,245,255,.06)}
 .profile-social-feed .social-stat{color:#69768b;font:8px monospace;margin-left:auto}
+.profile-social-feed .social-comments{display:none;margin-top:10px;padding:10px;border-top:1px solid rgba(115,140,190,.12);background:#04060c}.profile-social-feed .social-comments.open{display:block}.profile-social-feed .comment-item{padding:8px 0;border-bottom:1px solid rgba(115,140,190,.1)}.profile-social-feed .comment-item:last-child{border:0}.profile-social-feed .comment-item strong{font-size:9px;color:#d9e2ef}.profile-social-feed .comment-item small{color:#59677b;font:8px monospace;margin-left:6px}.profile-social-feed .comment-item p{margin:4px 0 0;color:#8d9aae;font-size:10px;line-height:1.5}.profile-comment-box{display:flex;gap:7px;margin-top:8px}.profile-comment-box input{flex:1;min-width:0;background:#070a12;border:1px solid var(--line);color:#fff;padding:8px;font:10px Montserrat}.profile-comment-box button{border:1px solid rgba(98,245,255,.3);background:#09101a;color:#fff;padding:8px 10px;font:800 8px Orbitron;cursor:pointer}
 </style>
 </head>
 <body>
@@ -71,9 +72,26 @@ function renderProfileFeed(){
   const p=x.profile||{},name=p.display_name||p.username||"CrowSpace Member",s=x.stats||{like:0,repost:0,save:0,mine:{}};
   const avatar=safe(p.avatar_url)?'<img src="'+esc(safe(p.avatar_url))+'" alt="">':esc(initials(name));
   const media=x.media_url?(x.kind==="caw"?'<video class="social-media" controls playsinline preload="metadata"'+(safe(x.thumbnail_url)?' poster="'+esc(safe(x.thumbnail_url))+'"':"")+' src="'+esc(safe(x.media_url))+'"></video>':'<img class="social-media" loading="lazy" src="'+esc(safe(x.media_url))+'" alt="">'):"";
-  return '<article class="social-card" data-profile-target="'+x.kind+':'+esc(x.id)+'"><header class="social-head"><a class="social-avatar" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+avatar+'</a><div><strong>'+esc(name)+'</strong><small>@'+esc(p.username||"member")+' · '+esc(fmt(x.created_at))+'</small></div><span class="social-kind">'+x.kind.toUpperCase()+'</span></header>'+(x.title?'<h3>'+esc(x.title)+'</h3>':"")+(x.body?'<p>'+esc(x.body)+'</p>':"")+media+'<div class="social-actions"><button data-profile-act="like" class="'+(s.mine?.like?"active":"")+'">♥ <b>'+s.like+'</b></button><button data-profile-act="comment">💬 Reply</button><button data-profile-act="repost">↻ <b>'+s.repost+'</b></button><button data-profile-act="save" class="'+(s.mine?.save?"active":"")+'">🔖 <b>'+s.save+'</b></button><button data-profile-act="react">☺ React</button><button data-profile-act="quote">↻+ Quote</button><a href="'+(x.kind==="caw"?"caw-feed.html?caw=":"caws.html?user=")+(x.kind==="caw"?encodeURIComponent(x.id):encodeURIComponent(x.user_id))+'">OPEN →</a><span class="social-stat">'+(x.kind==="caw"?(Number(x.views||0).toLocaleString()+" views"):"")+'</span></div></article>'
+  return '<article class="social-card" data-profile-target="'+x.kind+':'+esc(x.id)+'"><header class="social-head"><a class="social-avatar" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+avatar+'</a><div><strong>'+esc(name)+'</strong><small>@'+esc(p.username||"member")+' · '+esc(fmt(x.created_at))+'</small></div><span class="social-kind">'+x.kind.toUpperCase()+'</span></header>'+(x.title?'<h3>'+esc(x.title)+'</h3>':"")+(x.body?'<p>'+esc(x.body)+'</p>':"")+media+'<div class="social-actions"><button data-profile-act="like" class="'+(s.mine?.like?"active":"")+'">♥ <b>'+s.like+'</b></button><button data-profile-act="comment">💬 Reply</button><button data-profile-act="repost">↻ <b>'+s.repost+'</b></button><button data-profile-act="save" class="'+(s.mine?.save?"active":"")+'">🔖 <b>'+s.save+'</b></button><button data-profile-act="react">☺ React</button><button data-profile-act="quote">↻+ Quote</button><span class="social-stat">'+(x.comment_count||0)+' replies'+(x.kind==="caw"?" · "+Number(x.views||0).toLocaleString()+" views":"")+'</span></div><div class="social-comments" id="comments-'+esc(x.kind+"-"+x.id)+'"><div class="comment-list"><div class="profile-feed-loading">LOADING REPLIES…</div></div><div class="profile-comment-box"><input maxlength="1000" placeholder="Write a reply…"><button data-comment-send>SEND</button></div></div></article>'
  }).join("");
  box.querySelectorAll(".social-card").forEach(card=>card.querySelectorAll("[data-profile-act]").forEach(btn=>btn.onclick=()=>profileSocialAction(card,btn.dataset.profileAct)));
+ box.querySelectorAll(".social-card").forEach(card=>card.querySelector("[data-profile-act=comment]")?.addEventListener("click",()=>toggleComments(card)));
+ box.querySelectorAll("[data-comment-send]").forEach(btn=>btn.onclick=()=>sendInlineComment(btn.closest(".social-card")));
+}
+async function loadComments(card){
+ const [kind,id]=card.dataset.profileTarget.split(":"),panel=card.querySelector(".social-comments"),list=card.querySelector(".comment-list"); if(!panel||!list)return;
+ const r=await db.from("crowspace_comments").select("id,user_id,body,created_at").eq(kind==="caw"?"caw_id":"post_id",id).order("created_at",{ascending:false}).limit(20);
+ if(r.error){list.innerHTML='<div class="profile-feed-empty">'+esc(r.error.message)+'</div>';return}
+ const ids=[...new Set((r.data||[]).map(x=>x.user_id))],people=ids.length?await db.from("membership_profiles").select("id,display_name,username").in("id",ids):({data:[]});
+ const pm=Object.fromEntries((people.data||[]).map(x=>[x.id,x]));
+ list.innerHTML=(r.data||[]).map(x=>{const p=pm[x.user_id]||{},n=p.display_name||p.username||"Member";return '<div class="comment-item"><strong>'+esc(n)+'</strong><small>'+esc(fmt(x.created_at))+'</small><p>'+esc(x.body)+'</p></div>'}).join("")||'<div class="profile-feed-empty" style="padding:8px">No replies yet. Start the conversation.</div>';
+}
+function toggleComments(card){const panel=card.querySelector(".social-comments");if(!panel)return;panel.classList.toggle("open");if(panel.classList.contains("open"))loadComments(card)}
+async function sendInlineComment(card){
+ if(!viewer){location.href="login.html";return}
+ const [kind,id]=card.dataset.profileTarget.split(":"),input=card.querySelector("input");const body=input?.value.trim();if(!body)return;
+ const payload={user_id:viewer.id,body};payload[kind==="caw"?"caw_id":"post_id"]=id;
+ const r=await db.from("crowspace_comments").insert(payload);if(r.error){note(r.error.message);return}input.value="";await loadComments(card);note("REPLY PUBLISHED");
 }
 async function loadSocialFeed(){
  const box=document.getElementById("profileSocialFeed");if(!box)return;
@@ -84,6 +102,10 @@ async function loadSocialFeed(){
   ]);
   if(pr.error)throw pr.error;if(cr.error)throw cr.error;
   const items=[...(pr.data||[]).map(x=>({...x,kind:"post",body:x.body||"",media_url:x.media_url||""})),...(cr.data||[]).map(x=>({...x,kind:"caw",body:x.caption||"",media_url:x.video_url||""}))].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,25);
+  if(items.length){
+   const ids=items.map(x=>x.id),com=await db.from("crowspace_comments").select("id,user_id,post_id,caw_id,created_at").or("post_id.in.("+ids.join(",") +"),caw_id.in.("+ids.join(",")+")");
+   const cc={};(com.data||[]).forEach(x=>{const id=x.post_id||x.caw_id;cc[id]=(cc[id]||0)+1});items.forEach(x=>x.comment_count=cc[x.id]||0);
+  }
   profileFeedItems=items;
   const people=await db.from("membership_profiles").select("id,display_name,username,avatar_url").in("id",[...new Set(items.map(x=>x.user_id))]);
   const pm=Object.fromEntries((people.data||[]).map(x=>[x.id,x]));
@@ -112,10 +134,16 @@ async function profileSocialAction(card,type){
  const r=q.data?await c.from("crowspace_social_interactions").delete().eq("id",q.data.id):await c.from("crowspace_social_interactions").insert({target_type:kind,target_id:id,user_id:viewer.id,interaction_type:type});
  if(r.error)note(r.error.message);else{note(type==="like"?"LIKE UPDATED":type==="save"?"SAVE UPDATED":"REPOST UPDATED");await loadSocialFeed()}
 }
+function profileRealtime(){
+ if(!db)return;
+ const channel=db.channel("crowspace-profile-"+uid);
+ ["crowspace_posts","crowspace_caws","crowspace_social_interactions","crowspace_comments"].forEach(table=>channel.on("postgres_changes",{event:"*",schema:"public",table,filter:table==="crowspace_comments"?"":"user_id=eq."+uid},()=>loadSocialFeed()));
+ channel.subscribe();
+}
 function bindProfileSocial(){
  const composer=document.getElementById("profileComposer"),ta=document.getElementById("profileComposerText"),count=document.getElementById("profileComposerCount"),btn=document.getElementById("profileComposerBtn"),status=document.getElementById("profileComposerStatus");
  if(composer&&viewer?.id===uid){composer.style.display="block";ta.oninput=()=>count.textContent=ta.value.length+" / 5000";btn.onclick=async()=>{const body=ta.value.trim();if(!body)return;btn.disabled=true;status.style.display="block";status.textContent="Publishing…";const r=await db.from("crowspace_posts").insert({user_id:viewer.id,title:"",body});if(r.error){status.textContent=r.error.message}else{ta.value="";count.textContent="0 / 5000";status.textContent="Published to your timeline.";await loadSocialFeed()}btn.disabled=false}}
- document.querySelectorAll("[data-profile-filter]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-profile-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");profileFeedFilter=b.dataset.profileFilter==="newest"?"all":b.dataset.profileFilter;renderProfileFeed()});
+ profileRealtime();document.querySelectorAll("[data-profile-filter]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-profile-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");profileFeedFilter=b.dataset.profileFilter==="newest"?"all":b.dataset.profileFilter;renderProfileFeed()});
 }
 async function start(){try{if(!db)throw Error("Supabase connection is unavailable.");viewer=(await db.auth.getUser()).data?.user||null;if(!uid)uid=viewer?.id;if(!uid){app.innerHTML='<section class="p-shell"><div class="p-body empty"><h2>PROFILE NODE UNASSIGNED</h2><p>Sign in to open your CrowSpace profile.</p><a class="p-btn primary" href="login.html">SIGN IN →</a></div></section>';return}[profile,universal]=await Promise.all([getProfile(),getUniversal()]);await render()}catch(e){console.error(e);app.innerHTML='<section class="p-shell"><div class="error"><h2>PROFILE NODE OFFLINE</h2><p>'+esc(e.message||"Unable to load profile.")+'</p><button class="p-btn" onclick="location.reload()">RECONNECT</button></div></section>'}}
 document.addEventListener("DOMContentLoaded",start,{once:true});
