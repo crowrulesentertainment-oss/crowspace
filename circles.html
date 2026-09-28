@@ -32,7 +32,7 @@ body.circle-modal-open{overflow:hidden}
 .circle-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(135deg,rgba(85,184,255,.15),rgba(155,108,255,.2));font-size:32px;border:1px solid var(--line)}
 .circle-card .circle-meta{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}
 .circle-pill{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:800}
-.circle-featured{position:absolute;right:15px;top:15px;color:var(--blue);font:800 9px Orbitron}
+.circle-featured{position:absolute;right:15px;top:15px;color:var(--blue);font:800 9px Orbitron}.circle-reward-featured{border-color:rgba(255,194,74,.55)!important;box-shadow:0 0 0 1px rgba(255,194,74,.08),0 20px 55px rgba(255,194,74,.08)}.circle-reward-label{color:#ffd36a!important}
 .circle-empty{text-align:center;padding:35px}
 .circle-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:850px){.circle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
  }
 
  const rows=circles||[], ms=members||[], counts={}, joined={};
+ rows.forEach(x=>{x.reward_featured_until=x.reward_featured_until||null;x.rewardFeatured=!!(x.reward_featured_until&&new Date(x.reward_featured_until)>new Date())});
  ms.forEach(m=>{counts[m.circle_id]=(counts[m.circle_id]||0)+1;if(m.user_id===u.id)joined[m.circle_id]=true;});
 
  const modal=document.getElementById('createCircleModal');
@@ -231,31 +232,31 @@ document.addEventListener('DOMContentLoaded',async()=>{
 async function loadCircleInbox(){const box=document.getElementById('circleInbox');try{const [iq,nq]=await Promise.all([crowSupabase.from('crowspace_circle_invites').select('id,circle_id,inviter_id,created_at,status').eq('invitee_id',u.id).eq('status','pending').order('created_at',{ascending:false}),crowSupabase.from('crowspace_circle_notifications').select('id,circle_id,type,title,body,is_read,created_at').eq('user_id',u.id).eq('is_read',false).order('created_at',{ascending:false}).limit(10)]);if(iq.error&&nq.error)return;const invites=iq.data||[],notes=nq.data||[];if(!invites.length&&!notes.length){box.style.display='none';return;}box.style.display='block';box.innerHTML='<div class="section-head"><div><p class="eyebrow">YOUR CIRCLE INBOX</p><h2>Invitations & Notifications</h2></div></div>'+invites.map(i=>{const cc=rows.find(x=>x.id===i.circle_id);return '<div class="member-row"><span>✉️</span><span><strong>Invitation to '+esc(cc?.name||'a Circle')+'</strong><br><small class="muted">'+new Date(i.created_at).toLocaleString()+'</small></span><button class="btn primary circle-accept" data-invite="'+esc(i.id)+'" data-circle="'+esc(i.circle_id)+'">Accept</button><button class="btn circle-decline" data-invite="'+esc(i.id)+'">Decline</button></div>';}).join('')+notes.map(n=>'<div class="member-row"><span>🔔</span><span><strong>'+esc(n.title)+'</strong><br><small class="muted">'+esc(n.body)+'</small></span><button class="btn circle-note-read" data-note="'+esc(n.id)+'">Mark read</button></div>').join('');box.querySelectorAll('.circle-accept').forEach(b=>b.onclick=async()=>{b.disabled=true;const a=await crowSupabase.from('crowspace_circle_members').insert({circle_id:b.dataset.circle,user_id:u.id,role:'member'});if(a.error&&a.error.code!=='23505'){alert(a.error.message);b.disabled=false;return;}await crowSupabase.from('crowspace_circle_invites').update({status:'accepted',responded_at:new Date().toISOString()}).eq('id',b.dataset.invite);loadCircleInbox();render();});box.querySelectorAll('.circle-decline').forEach(b=>b.onclick=async()=>{await crowSupabase.from('crowspace_circle_invites').update({status:'declined',responded_at:new Date().toISOString()}).eq('id',b.dataset.invite);loadCircleInbox();});box.querySelectorAll('.circle-note-read').forEach(b=>b.onclick=async()=>{await crowSupabase.from('crowspace_circle_notifications').update({is_read:true}).eq('id',b.dataset.note);loadCircleInbox();});}catch(e){console.warn('Circle inbox unavailable:',e);}}
  function renderStats(){
   const totalMembers=ms.length;
-  const featured=rows.filter(x=>x.is_featured).length;
+  const featured=rows.filter(x=>x.is_featured||x.rewardFeatured).length;
   const joinedCount=Object.keys(joined).length;
   document.getElementById('stats').innerHTML='<div class="circle-stat-card"><strong>'+rows.length+'</strong><span>Circles</span></div><div class="circle-stat-card"><strong>'+totalMembers+'</strong><span>Memberships</span></div><div class="circle-stat-card"><strong>'+featured+'</strong><span>Featured</span></div><div class="circle-stat-card"><strong>'+joinedCount+'</strong><span>My Circles</span></div>';
  }
  function renderSpotlight(){
   const spotlight=document.getElementById('spotlight');
-  const featured=rows.filter(x=>x.is_featured).sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0)).slice(0,3);
+  const featured=rows.filter(x=>x.is_featured||x.rewardFeatured).sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0)).slice(0,3);
   spotlight.innerHTML=featured.map(x=>'<a class="circle-feature-card" href="circle.html?slug='+encodeURIComponent(x.slug)+'"><div class="circle-icon">'+esc(x.emoji||'🐦')+'</div><div><h3>'+esc(x.name)+'</h3><p>'+Number(counts[x.id]||0)+' members · Featured community</p></div></a>').join('');
   spotlight.style.display=featured.length?'grid':'none';
  }
  function render(){
   let data=rows.slice();
-  if(state.mode==='featured')data=data.filter(x=>x.is_featured);
+  if(state.mode==='featured')data=data.filter(x=>x.is_featured||x.rewardFeatured);
   if(state.mode==='joined')data=data.filter(x=>joined[x.id]);
   if(state.q)data=data.filter(x=>(x.name+' '+(x.description||'')).toLowerCase().includes(state.q));
   if(state.category!=='all')data=data.filter(x=>categoryFor(x)===state.category);
   if(state.sort==='az')data.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
   else if(state.sort==='newest')data.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
-  else if(state.sort==='featured')data.sort((a,b)=>Number(b.is_featured)-Number(a.is_featured)||(counts[b.id]||0)-(counts[a.id]||0));
+  else if(state.sort==='featured')data.sort((a,b)=>Number(b.rewardFeatured)-Number(a.rewardFeatured)||Number(b.is_featured)-Number(a.is_featured)||(counts[b.id]||0)-(counts[a.id]||0));
   else if(state.sort==='trending')data.sort((a,b)=>((counts[b.id]||0)*3+(new Date(b.created_at||0).getTime()/86400000))*1-((counts[a.id]||0)*3+(new Date(a.created_at||0).getTime()/86400000))*1);
   else data.sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0)||String(a.name).localeCompare(String(b.name)));
   document.getElementById('resultTitle').textContent=modeNames[state.mode];
   document.getElementById('resultCount').textContent=data.length+' result'+(data.length===1?'':'s');
   if(!data.length){grid.innerHTML='<div class="card circle-empty"><h3>No Circles found.</h3><p class="muted">Try another search or create a new Circle.</p><button class="btn primary" type="button" onclick="document.getElementById(\'createCircleBtn\').click()">＋ Create Circle</button></div>';return;}
-  grid.innerHTML=data.map(c=>'<article class="card circle-card">'+(c.is_featured?'<span class="circle-featured">FEATURED</span>':'')+(c.image_url?'<div class="circle-card-image"><img src="'+esc(c.image_url)+'" alt="'+esc(c.name)+' cover" loading="lazy" onerror="this.parentElement.classList.add(\'empty-image\');this.remove()"></div>':'<div class="circle-card-image empty-image">'+esc(c.emoji||'🐦')+'</div>')+'<div class="circle-card-top"><span class="circle-visibility">'+(c.visibility==='private'?'🔒 Private':c.visibility==='invite_only'?'✉ Invite only':'🌐 Public')+'</span>'+(joined[c.id]?'<span class="circle-status">● MEMBER</span>':'')+'</div><h3>'+esc(c.name)+'</h3><p class="circle-description">'+esc(c.description||'No description yet.')+'</p><div class="circle-meta"><span class="circle-pill">'+Number(counts[c.id]||0)+' members</span><span class="circle-pill">'+(c.is_featured?'Featured':'Community')+'</span></div><div class="circle-card-footer"><span class="circle-date">'+(c.created_at?'Created '+new Date(c.created_at).toLocaleDateString():'')+'</span><div class="actions"><a class="btn primary" href="circle.html?slug='+encodeURIComponent(c.slug)+'">Open Circle</a>'+(joined[c.id]?'':'<button class="btn join" data-id="'+esc(c.id)+'">Join</button>')+'</div></div></article>').join('');
+  grid.innerHTML=data.map(c=>'<article class="card circle-card '+(c.rewardFeatured?'circle-reward-featured':'')+'">'+(c.is_featured||c.rewardFeatured?'<span class="circle-featured '+(c.rewardFeatured?'circle-reward-label':'')+'">'+(c.rewardFeatured?'⭐ FEATURED':'FEATURED')+'</span>':'')+(c.image_url?'<div class="circle-card-image"><img src="'+esc(c.image_url)+'" alt="'+esc(c.name)+' cover" loading="lazy" onerror="this.parentElement.classList.add(\'empty-image\');this.remove()"></div>':'<div class="circle-card-image empty-image">'+esc(c.emoji||'🐦')+'</div>')+'<div class="circle-card-top"><span class="circle-visibility">'+(c.visibility==='private'?'🔒 Private':c.visibility==='invite_only'?'✉ Invite only':'🌐 Public')+'</span>'+(joined[c.id]?'<span class="circle-status">● MEMBER</span>':'')+'</div><h3>'+esc(c.name)+'</h3><p class="circle-description">'+esc(c.description||'No description yet.')+'</p><div class="circle-meta"><span class="circle-pill">'+Number(counts[c.id]||0)+' members</span><span class="circle-pill">'+(c.is_featured?'Featured':'Community')+'</span></div><div class="circle-card-footer"><span class="circle-date">'+(c.created_at?'Created '+new Date(c.created_at).toLocaleDateString():'')+'</span><div class="actions"><a class="btn primary" href="circle.html?slug='+encodeURIComponent(c.slug)+'">Open Circle</a>'+(joined[c.id]?'':'<button class="btn join" data-id="'+esc(c.id)+'">Join</button>')+'</div></div></article>').join('');
   grid.querySelectorAll('.join').forEach(b=>b.onclick=async()=>{b.disabled=true;b.textContent='Joining…';const {error}=await crowSupabase.from('crowspace_circle_members').insert({circle_id:b.dataset.id,user_id:u.id,role:'member'});if(error){if(error.code==='23505'){joined[b.dataset.id]=true;counts[b.dataset.id]=Number(counts[b.dataset.id]||0)+1;render();}else{alert(error.message);b.disabled=false;b.textContent='Join';}}else{joined[b.dataset.id]=true;counts[b.dataset.id]=(counts[b.dataset.id]||0)+1;render();}});
  }
  renderCategoryChips();renderStats();renderSpotlight();loadCircleInbox();acceptLinkInvite();
