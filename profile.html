@@ -3,13 +3,13 @@ document.addEventListener("DOMContentLoaded",async()=>{
  if(!window.CROW_CONFIG?.supabaseUrl)return;
  const sb=supabase.createClient(CROW_CONFIG.supabaseUrl,CROW_CONFIG.supabaseKey);
  const {data:{user}}=await sb.auth.getUser();
- if(!user){document.getElementById("profileName").textContent="Sign in to view your profile";document.getElementById("profileHandle").textContent="";document.getElementById("profileBio").textContent="Your CrowSpace profile will appear here after you sign in.";return}
+ const requested=new URLSearchParams(location.search).get("user");\n const targetId=requested||user?.id;\n if(!targetId){document.getElementById("profileName").textContent="Sign in to view your profile";document.getElementById("profileHandle").textContent="";document.getElementById("profileBio").textContent="Your CrowSpace profile will appear here after you sign in.";return}
  const [{data:p},{count:caws},{count:followers},{count:following},{data:posts}]=await Promise.all([
-   sb.from("crowspace_profiles").select("display_name,username,bio,avatar_url").eq("user_id",user.id).maybeSingle(),
-   sb.from("crowspace_posts").select("id",{count:"exact",head:true}).eq("user_id",user.id),
-   sb.from("crowspace_follows").select("follower_id",{count:"exact",head:true}).eq("followed_user_id",user.id),
-   sb.from("crowspace_follows").select("followed_user_id",{count:"exact",head:true}).eq("follower_id",user.id),
-   sb.from("crowspace_posts").select("id,body,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(12)
+   sb.from("crowspace_profiles").select("display_name,username,bio,avatar_url").eq("user_id",targetId).maybeSingle(),
+   sb.from("crowspace_posts").select("id",{count:"exact",head:true}).eq("user_id",targetId),
+   sb.from("crowspace_follows").select("follower_id",{count:"exact",head:true}).eq("followed_user_id",targetId),
+   sb.from("crowspace_follows").select("followed_user_id",{count:"exact",head:true}).eq("follower_id",targetId),
+   sb.from("crowspace_posts").select("id,body,created_at").eq("user_id",targetId).order("created_at",{ascending:false}).limit(12)
  ]);
  const name=p?.display_name||user.user_metadata?.display_name||"CrowSpace Member", username=p?.username||user.user_metadata?.username||"member";
  document.getElementById("profileName").textContent=name;
