@@ -47,9 +47,11 @@ document.addEventListener("DOMContentLoaded",async()=>{
   await openConversation(c.id);
  });
  document.getElementById("sendMessage")?.addEventListener("click",async()=>{
-  const body=input.value.trim();if(!body||!active)return;
+  const body=input.value.trim();if(!body&&!mediaInput?.files?.length||!active)return;
   let mediaUrl=null;if(mediaInput?.files?.[0])mediaUrl=await uploadMessengerMedia(mediaInput.files[0]);if(mediaInput?.files?.length&&!mediaUrl)return;const finalBody=body||(mediaUrl?"📎 Shared media":"");const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body:finalBody});if(error){status.textContent=error.message;return}input.value="";if(mediaInput)mediaInput.value="";status.textContent="";await openConversation(active);
  });
+ document.getElementById("attachMedia")?.addEventListener("click",()=>mediaInput?.click());
+ mediaInput?.addEventListener("change",()=>{const f=mediaInput.files?.[0];if(f){status.textContent=f.name+" ready to send.";input.focus()}});
  input?.addEventListener("input",()=>{setTyping(true);clearTimeout(typingTimer);typingTimer=setTimeout(()=>setTyping(false),1200)});
  input?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("sendMessage").click()}});
  if("Notification" in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});
