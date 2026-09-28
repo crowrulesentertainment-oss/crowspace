@@ -270,6 +270,11 @@ async function loadCircleInbox(){const box=document.getElementById('circleInbox'
    .subscribe();
  }catch(e){console.warn('Circle realtime unavailable:',e);}
 
+} catch (err) {
+  console.error('CrowSpace Circles initialization failed:', err);
+  const message = err?.message || 'Unable to load Circles.';
+  grid.innerHTML = '<div class="card circle-empty"><h3>Circles could not load.</h3><p class="muted">'+esc(message)+'</p><button class="btn primary" type="button" onclick="location.reload()">Retry</button></div>';
+}
 });
 </script>
 <script src="js/global-nav.js?v=20260927-4"></script>
