@@ -93,6 +93,8 @@ body.circle-modal-open{overflow:hidden}
 <label>Circle name<input id="circleName" maxlength="80" required placeholder="e.g. Filmmakers"></label>
 <label>Emoji<input id="circleEmoji" maxlength="8" value="🐦" placeholder="🎬"></label>
 <label>Description<textarea id="circleDescription" maxlength="500" required placeholder="What is this Circle about?"></textarea></label>
+<label>Community access<select id="circleVisibility"><option value="public">Public — anyone can discover and join</option><option value="invite_only">Invite only — members join by invitation</option><option value="private">Private — hidden from discovery</option></select></label>
+<label>Community rules <span class="muted">(optional)</span><textarea id="circleRules" maxlength="1200" placeholder="Be respectful. Keep posts on topic."></textarea></label>
 <label>Image URL <span class="muted">(optional)</span><input id="circleImage" type="url" maxlength="1000" placeholder="https://..."></label>
 <div class="actions"><button type="button" class="btn" id="cancelCircleBottom">Cancel</button><button type="submit" class="btn primary" id="submitCircle">Create Circle</button></div>
 <p id="createCircleStatus" class="muted"></p>
@@ -171,6 +173,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const description=document.getElementById('circleDescription').value.trim();
   const emoji=document.getElementById('circleEmoji').value.trim()||'🐦';
   const image_url=document.getElementById('circleImage').value.trim()||null;
+  const visibility=document.getElementById('circleVisibility').value||'public';
+  const rules=document.getElementById('circleRules').value.trim();
   const base=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70);
   if(!base){status.textContent='Enter a valid Circle name.';return;}
   submitBtn.disabled=true;submitBtn.textContent='Creating…';status.textContent='';
@@ -178,7 +182,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   let created=null,err=null;
   for(let i=0;i<5;i++){
    const slug=i?base+'-'+i:base;
-   const r=await crowSupabase.from('crowspace_circles').insert({name,slug,emoji,description,image_url,created_by:u.id}).select('*').single();
+   const r=await crowSupabase.from('crowspace_circles').insert({name,slug,emoji,description,image_url,visibility,rules,created_by:u.id}).select('*').single();
    if(!r.error){created=r.data;break;}
    err=r.error;
    if(!/duplicate|unique/i.test(r.error.message||''))break;
