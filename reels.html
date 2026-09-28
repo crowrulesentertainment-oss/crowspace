@@ -2,7 +2,7 @@
 const feed=document.getElementById("reels");
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const liveChannels={};
-const following=new Set();
+const following=new Set();const viewed=new Set();
 let session=null;
 
 async function getRows(){
@@ -13,7 +13,7 @@ async function getFollowing(){
   const {data:{session:s}}=await db.auth.getSession(); session=s;
   if(!session)return;
   const {data}=await db.from("crowspace_follows").select("followed_user_id").eq("follower_id",session.user.id);
-  (data||[]).forEach(x=>following.add(x.followed_user_id));
+  (data||[]).forEach(x=>following.add(x.followed_user_id));const {data:views}=await db.from("crowspace_reel_views").select("reel_id").eq("user_id",session.user.id);(views||[]).forEach(x=>viewed.add(x.reel_id));
 }
 function render(rows,profiles){
   const sorted=[...rows].sort((a,b)=>{
@@ -23,10 +23,10 @@ function render(rows,profiles){
   });
   feed.innerHTML=sorted.map(x=>'<article class="reel" data-id="'+x.id+'" data-user="'+x.user_id+'"><video src="'+esc(x.media_url)+'" muted loop playsinline preload="metadata"></video><div class="actions"><button data-act="like">♥ <span>0</span></button><button data-act="comment">💬 <span>0</span></button><button data-act="repost">↗ <span>0</span></button><button data-act="save">🔖 <span>0</span></button></div><a class="creator" href="profile.html?u='+x.user_id+'">'+(profiles[x.user_id]?.avatar_url?'<img src="'+esc(profiles[x.user_id].avatar_url)+'" alt="">':'<span>CR</span>')+'<span><b>'+esc(profiles[x.user_id]?.display_name||profiles[x.user_id]?.username||"CREATOR")+'</b><small class="creatorMeta" data-meta="'+x.user_id+'"> · loading…</small></span></a><button class="follow" data-follow="'+x.user_id+'">'+(following.has(x.user_id)?"FOLLOWING":"FOLLOW")+'</button><section class="comments"><div class="commentsList">Loading…</div><form class="commentForm"><input maxlength="500" placeholder="Add a comment…"><button>SEND</button></form></section><div class="caption">'+esc(x.body||"Video Caw")+(following.has(x.user_id)?'<br><small style="color:var(--cyan)">FROM YOUR NETWORK</small>':"")+'</div></article>').join("");
   feed.querySelectorAll(".reel").forEach(card=>{refresh(card);loadCreatorMeta(card);subscribeLive(card)});
-  const ob=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(e.isIntersecting)v.play().catch(()=>{});else v.pause()}),{threshold:.7});
+  const ob=new IntersectionObserver(es=>es.forEach(e=>{const card=e.target,v=card.querySelector("video");if(e.isIntersecting){v.play().catch(()=>{});recordView(card)}else v.pause()}),{threshold:.7});
   feed.querySelectorAll(".reel").forEach(x=>ob.observe(x));
 }
-async function refresh(card){for(const t of ["like","comment","repost","save"]){const {count}=await db.from("crowspace_social_interactions").select("id",{count:"exact",head:true}).eq("target_type","post").eq("target_id",card.dataset.id).eq("interaction_type",t);const s=card.querySelector('[data-act="'+t+'"] span');if(s)s.textContent=count||0}}
+async function recordView(card){if(!session||viewed.has(card.dataset.id))return;viewed.add(card.dataset.id);await db.from("crowspace_reel_views").insert({reel_id:card.dataset.id,user_id:session.user.id,watched_seconds:0})}async function refresh(card){for(const t of ["like","comment","repost","save"]){const {count}=await db.from("crowspace_social_interactions").select("id",{count:"exact",head:true}).eq("target_type","post").eq("target_id",card.dataset.id).eq("interaction_type",t);const s=card.querySelector('[data-act="'+t+'"] span');if(s)s.textContent=count||0}}
 async function loadCreatorMeta(card){const uid=card.dataset.user;const [{count:followers},{count:reels},membership]=await Promise.all([db.from("crowspace_follows").select("follower_id",{count:"exact",head:true}).eq("followed_user_id",uid),db.from("crowspace_posts").select("id",{count:"exact",head:true}).eq("user_id",uid).not("media_url","is",null),db.from("crowspace_memberships").select("*",{count:"exact",head:true}).eq("user_id",uid).limit(1)]);const el=card.querySelector(".creatorMeta");if(el)el.innerHTML=" · "+(followers||0)+" followers · "+(reels||0)+" reels"+(membership.count?' <span class="memberBadge">MEMBER</span>':"")}
 async function loadComments(card){const list=card.querySelector(".commentsList");const {data}=await db.from("crowspace_comments").select("user_id,body,created_at").eq("post_id",card.dataset.id).order("created_at",{ascending:true}).limit(50);list.innerHTML=(data||[]).map(x=>"<div class=\"comment\"><strong>Crow</strong> "+esc(x.body)+"<br><small>"+new Date(x.created_at).toLocaleString()+"</small></div>").join("")||"<small>No comments yet.</small>"}
 async function subscribeLive(card){const id=card.dataset.id;if(liveChannels[id])return;liveChannels[id]=db.channel("reel-live-"+id).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_comments",filter:"post_id=eq."+id},()=>loadComments(card)).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_social_interactions",filter:"target_id=eq."+id},()=>refresh(card)).on("postgres_changes",{event:"DELETE",schema:"public",table:"crowspace_social_interactions",filter:"target_id=eq."+id},()=>refresh(card)).subscribe()}
