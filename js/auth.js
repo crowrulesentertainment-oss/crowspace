@@ -112,7 +112,7 @@ signupForm?.addEventListener("submit",async e=>{
     console.error("CrowSpace signup exception:",error);
     setMsg(friendlyAuthError(error),"error");
   }finally{
-    if(submit){submit.disabled=false;submit.textContent="Create Universal Account"}
+    if(submit){submit.disabled=false;submit.textContent="Create CROW Membership Account"}
   }
 });
 
