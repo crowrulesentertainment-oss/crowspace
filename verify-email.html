@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Confirm your CrowSpace email and activate your CrowRules universal account.">
 <meta name="theme-color" content="#03040a">
+<meta name="robots" content="noindex,nofollow">
 <title>Verify Email | CrowSpace</title>
 <link rel="stylesheet" href="css/crowspace.css">
 <style>
@@ -14,7 +15,7 @@
 <body class="crow-cinematic">
 <header class="site-header"><a class="brand" href="index.html" aria-label="CrowSpace home">● CROWSPACE</a><nav aria-label="Primary navigation"></nav><div id="account"><a href="login.html">Sign In</a></div></header>
 <main class="verify-page"><div class="verify-layout"><section class="verify-hero"><div class="verify-icon" aria-hidden="true">✓</div><p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p><h1 id="title">Verify your email.</h1><p>One quick confirmation activates your CrowSpace account and connects you to the CrowRules universe.</p><div class="verify-security"><span>SECURE AUTH</span><span>EMAIL CONFIRMATION</span><span>UNIVERSAL ACCOUNT</span></div></section><section class="verify-content"><h2>Account confirmation</h2><p class="field-help">We're checking your verification link now.</p><div id="status" class="auth-note verify-status-info" role="status" aria-live="polite"><strong>Checking your verification…</strong><p>We're securely completing your CrowSpace email confirmation.</p></div><div id="actions" class="verify-actions" hidden><a class="btn primary" href="login.html">Continue to Sign In</a><a class="btn" href="signup.html">Back to Sign Up</a></div><div class="verify-note"><strong>Didn't get the email?</strong><p>Check your spam or junk folder. If you still can't find it, return to Sign Up and use the resend verification option.</p></div><p><a href="index.html">Return to CrowSpace</a> · <a href="login.html">Sign In</a></p></section></div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script src="js/global-nav.js?v=20260927-9"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script src="js/global-nav.js?v=20260927-11"></script>
 <script>
 document.addEventListener("DOMContentLoaded",async()=>{
  const c=window.crowSupabase,status=document.getElementById("status"),actions=document.getElementById("actions"),title=document.getElementById("title"),pending=localStorage.getItem("crowspace_pending_verification_email")||"";
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const hash=new URLSearchParams(location.hash.replace(/^#/,"")),query=new URLSearchParams(location.search);
   const errorCode=hash.get("error_code")||query.get("error_code"),errorDescription=hash.get("error_description")||query.get("error_description");
   if(errorCode||errorDescription){let detail=errorDescription||errorCode||"The verification link could not be completed.";try{detail=decodeURIComponent(detail)}catch{}show("error","Verification link could not be completed.",safe(detail.replace(/\+/g," "))+"<br><br>Please request a new verification email and try the newest link.");return}
-  const code=query.get("code");
+  const tokenHash=query.get("token_hash"),tokenType=query.get("type"); if(tokenHash&&tokenType){const {error}=await c.auth.verifyOtp({token_hash:tokenHash,type:tokenType});if(error){show("error","Verification link expired or was already used.",safe(error.message||"Please request a new verification email."));return}history.replaceState({},document.title,location.pathname)} const code=query.get("code");
   if(code){const {error}=await c.auth.exchangeCodeForSession(code);if(error){show("error","Verification link expired or was already used.",safe(error.message||"Please request a new verification email."));return}history.replaceState({},document.title,location.pathname)}
   const {data,error:userError}=await c.auth.getUser();if(userError)throw userError;
   const user=data?.user;
