@@ -2,7 +2,7 @@
 const feed=document.getElementById("reels");
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const liveChannels={};
-const following=new Set();const viewed=new Set();
+const following=new Set();const viewed=new Set();const interestScore={};
 let session=null;
 
 async function getRows(){
@@ -15,7 +15,7 @@ async function getFollowing(){
   const {data}=await db.from("crowspace_follows").select("followed_user_id").eq("follower_id",session.user.id);
   (data||[]).forEach(x=>following.add(x.followed_user_id));const {data:views}=await db.from("crowspace_reel_views").select("reel_id").eq("user_id",session.user.id);(views||[]).forEach(x=>viewed.add(x.reel_id));
 }
-function render(rows,profiles){
+async function buildScores(rows){if(!session)return;const [{data:likes},{data:views},{data:saves},{data:reposts}]=await Promise.all([db.from("crowspace_social_interactions").select("target_id").eq("user_id",session.user.id).eq("interaction_type","like").eq("target_type","post"),db.from("crowspace_reel_views").select("reel_id").eq("user_id",session.user.id),db.from("crowspace_social_interactions").select("target_id").eq("user_id",session.user.id).eq("interaction_type","save").eq("target_type","post"),db.from("crowspace_social_interactions").select("target_id").eq("user_id",session.user.id).eq("interaction_type","repost").eq("target_type","post")]);(likes||[]).forEach(x=>interestScore[x.target_id]=(interestScore[x.target_id]||0)+6);(saves||[]).forEach(x=>interestScore[x.target_id]=(interestScore[x.target_id]||0)+5);(reposts||[]).forEach(x=>interestScore[x.target_id]=(interestScore[x.target_id]||0)+4);(views||[]).forEach(x=>interestScore[x.reel_id]=(interestScore[x.reel_id]||0)+1)}function render(rows,profiles){
   const sorted=[...rows].sort((a,b)=>{
     const af=following.has(a.user_id),bf=following.has(b.user_id);
     if(af!==bf)return af?-1:1;
@@ -39,7 +39,7 @@ feed.addEventListener("click",async e=>{
 });
 async function run(){
   await getFollowing();
-  const rows=await getRows();
+  const rows=await getRows();await buildScores(rows);
   const ids=[...new Set(rows.map(x=>x.user_id).filter(Boolean))];
   let profiles={};
   if(ids.length){const {data:p}=await db.from("crowspace_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids);(p||[]).forEach(x=>profiles[x.user_id]=x)}
