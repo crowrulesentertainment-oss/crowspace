@@ -116,7 +116,7 @@ signupForm?.addEventListener("submit",async e=>{
   }
 });
 
-document.getElementById("resendVerification")?.addEventListener("click",async()=>{
+document.getElementById("resendVerification")?.addEventListener("click",async()=>{\n  const last=Number(localStorage.getItem("crowspace_last_verification_resend")||0);\n  const wait=Math.ceil((30000-(Date.now()-last))/1000);\n  if(wait>0){setMsg("Please wait "+wait+" seconds before requesting another verification email.","info");return}
   const email=(document.getElementById("email")?.value||localStorage.getItem("crowspace_pending_verification_email")||"").trim().toLowerCase();
   if(!email){setMsg("Enter your email address first.","error");return}
   const b=document.getElementById("resendVerification");
