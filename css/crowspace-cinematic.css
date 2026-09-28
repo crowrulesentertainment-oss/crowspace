@@ -25,3 +25,17 @@ input:focus,textarea:focus,select:focus{outline:2px solid rgba(89,232,255,.2)!im
 .avatar,.nest-avatar{background:linear-gradient(135deg,#159eb8,#805be8)!important;box-shadow:0 0 0 3px rgba(255,255,255,.05),0 15px 40px rgba(45,170,190,.2)!important}
 footer{border-top-color:rgba(89,232,255,.12)!important}
 @media(prefers-reduced-motion:reduce){body:before,.hero:after,.hero-orbit,.site-header:after{animation:none!important}}
+
+/* CROWRULES / CROWSPACE 2026 — shared cinematic system */
+body.crow-cinematic{background-attachment:fixed!important}
+body.crow-cinematic:global{isolation:isolate}
+body.crow-cinematic .site-header{backdrop-filter:blur(24px) saturate(160%)}
+body.crow-cinematic .section,body.crow-cinematic .card,body.crow-cinematic .hero,body.crow-cinematic .nest-card,body.crow-cinematic .nest-top{position:relative;overflow:hidden}
+body.crow-cinematic .section:before,body.crow-cinematic .card:before,body.crow-cinematic .hero:before,body.crow-cinematic .nest-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 0%,rgba(89,232,255,.035) 45%,transparent 58%),repeating-linear-gradient(0deg,transparent 0 6px,rgba(255,255,255,.012) 7px);mix-blend-mode:screen;opacity:.8}
+body.crow-cinematic .btn,body.crow-cinematic button{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
+body.crow-cinematic .btn:hover,body.crow-cinematic button:hover{box-shadow:0 0 24px rgba(89,232,255,.09)}
+body.crow-cinematic ::-webkit-scrollbar{width:10px;height:10px}body.crow-cinematic ::-webkit-scrollbar-track{background:#030608}body.crow-cinematic ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#159bb5,#7655e8);border-radius:99px;border:2px solid #030608}
+.crow-page-grid{position:relative}
+.crow-main.cinematic-ready{animation:crPageIn .45s ease both}@keyframes crPageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:700px){body.crow-cinematic .hero,body.crow-cinematic .section{border-radius:16px}body.crow-cinematic .site-header{backdrop-filter:blur(18px)}}
+@media(prefers-reduced-motion:reduce){body.crow-cinematic .crow-main{animation:none!important}}
