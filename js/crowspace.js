@@ -113,7 +113,7 @@ CS.homeFeed=async()=>{
  box.innerHTML=items.map(x=>{
    const label=x.activity_type==="post"?"POST":x.activity_type==="caw"?"CAW":"EVENT";
    const link=x.activity_type==="post"?"profile.html?id="+encodeURIComponent(x.actor_id):x.target_url;
-   const media=x.media_url&&x.activity_type==="caw"?'<video controls playsinline preload="metadata" src="'+CS.escape(x.media_url)+'"></video>':"";
+   const media=x.media_url&&x.activity_type==="caw"?'<video data-caw-id="'+CS.escape(x.target_id)+'" controls playsinline preload="metadata" src="'+CS.escape(x.media_url)+'"></video>':"";
    const actions=x.activity_type==="post"?'<div class="post-actions"><button class="btn feed-like" data-post="'+CS.escape(x.target_id)+'">♡ Like</button><button class="btn feed-comment" data-post="'+CS.escape(x.target_id)+'">💬 Comment</button></div>':"";
    return '<article class="post card"><div class="post-head"><a class="avatar sm" href="profile.html?id='+encodeURIComponent(x.actor_id)+'">'+CS.escape((x.actor_name||"C").slice(0,1).toUpperCase())+'</a><div><strong>'+CS.escape(x.actor_name||"CrowSpace Member")+'</strong><small>@'+CS.escape(x.actor_username||"member")+' · '+new Date(x.created_at).toLocaleString()+'</small></div></div><span class="event-tag">'+label+'</span><h3>'+CS.escape(x.title||"")+'</h3><p>'+CS.escape(x.body||"")+'</p>'+media+'<a class="btn" href="'+CS.escape(link||"#")+'">Open →</a>'+actions+'</article>';
  }).join("")||'<div class="card"><h3>Your feed is quiet.</h3><p>Find people, follow creators, join groups and come back as your CrowSpace grows.</p><a class="btn primary" href="people.html">Find People →</a></div>';
