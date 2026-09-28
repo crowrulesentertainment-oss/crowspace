@@ -168,6 +168,10 @@ document.getElementById("password")?.addEventListener("input",e=>{
   el.textContent=s>=4?"Strong password.":s>=2?"Good password — add more variety for extra strength.":"Use 8+ characters with a mix of letters and numbers.";
 });
 
+const oauthSignIn=async(provider,label,buttonId)=>{const b=document.getElementById(buttonId);if(b){b.disabled=true;b.textContent="Connecting to "+label+"…"}setMsg("Connecting to "+label+"…","info");const {error}=await c.auth.signInWithOAuth({provider,options:{redirectTo}});if(error){setMsg(friendlyAuthError(error),"error");if(b){b.disabled=false;b.textContent="Continue with "+label}}};
+document.getElementById("discord")?.addEventListener("click",()=>oauthSignIn("discord","Discord","discord"));
+document.getElementById("twitch")?.addEventListener("click",()=>oauthSignIn("twitch","Twitch","twitch"));
+
 document.getElementById("google")?.addEventListener("click",async()=>{
   const b=document.getElementById("google");
   if(b){b.disabled=true;b.textContent="Connecting to Google…"}
