@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace — Notifications</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><div class="scanlines"></div><div class="ambient"></div><header class="topbar"><a class="brand" href="index.html"><span class="mark">C</span><span>CROW<span>SPACE</span></span></a><nav><a href="index.html">Feed</a><a href="profile.html">Profile</a><a class="active" href="notifications.html">Notifications</a></nav><div class="account"><span id="memberState">CONNECTING…</span><button id="authBtn">Sign In</button></div></header><main class="shell"><section class="card" style="padding:28px;max-width:760px;margin:auto"><div class="eyebrow">CROWRULES SOCIAL</div><h1 style="font:800 32px Orbitron;margin:14px 0">NOTIFICATIONS</h1><div id="status" style="color:var(--muted)">Loading activity…</div><div id="list" style="margin-top:18px"></div></section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script><script>
+const list=document.getElementById("list"),statusEl=document.getElementById("status");
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+async function loadNotifications(){
+ const {data:{session}}=await db.auth.getSession(); if(!session){location.href="login.html";return}
+ const {data,error}=await db.from("crowspace_notifications").select("id,actor_id,type,body,post_id,read_at,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(50);
+ if(error){statusEl.textContent="Notifications unavailable.";return}
+ if(!data?.length){statusEl.textContent="You're all caught up.";return}
+ const ids=[...new Set(data.map(x=>x.actor_id).filter(Boolean))];
+ const {data:profiles}=ids.length?await db.from("crowspace_profiles").select("user_id,username,display_name").in("user_id",ids):{data:[]};
+ const map=Object.fromEntries((profiles||[]).map(p=>[p.user_id,p]));
+ list.innerHTML=data.map(x=>{const p=map[x.actor_id]||{},name=esc(p.display_name||p.username||"Someone"),label=x.type==="like"?"liked your Caw":x.type==="save"?"saved your Caw":x.type==="repost"?"reposted your Caw":x.type==="comment"?"commented on your Caw":"interacted with your Caw";return '<a href="'+(x.post_id?'index.html#caw-'+encodeURIComponent(x.post_id):'#')+'" style="display:block;text-decoration:none;color:inherit"><article class="card" style="padding:16px;margin-bottom:10px;opacity:'+(x.read_at?'0.72':'1')+'"><strong>'+name+'</strong> <span>'+label+'</span><div style="font-size:11px;color:var(--muted);margin-top:5px">'+new Date(x.created_at).toLocaleString()+'</div></article></a>'}).join("");
+ statusEl.textContent=data.filter(x=>!x.read_at).length+" unread notification"+(data.filter(x=>!x.read_at).length===1?"":"s");
+ const unread=data.filter(x=>!x.read_at).map(x=>x.id);
+ if(unread.length){await db.from("crowspace_notifications").update({read_at:new Date().toISOString()}).in("id",unread)}
+}
+loadNotifications();
+</script></body></html>
