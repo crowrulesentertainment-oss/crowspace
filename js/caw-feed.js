@@ -66,7 +66,7 @@ function card(x,p){
  const name=p?.display_name||p?.username||"CrowSpace Member";
  const src=media(x);
  return '<article class="cf-card '+(featured?"cf-featured":"")+'" data-id="'+esc(x.id)+'">'+
- '<div class="cf-media"><video class="cf-video" src="'+esc(src)+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'" ':'')+'playsinline muted loop preload="metadata"></video>'+
+ '<div class="cf-media"><video data-caw-id="'+esc(x.id)+'" class="cf-video" src="'+esc(src)+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'" ':'')+'playsinline muted loop preload="metadata"></video>'+
  '<div class="cf-gradient"></div><div class="cf-creator">'+(p?.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':'<span>'+esc(name[0]||"C")+'</span>')+'<strong>'+esc(name)+'</strong></div>'+
  '<button class="cf-play" type="button">▶</button></div>'+
  '<div class="cf-info">'+(featured?'<div class="cf-feature-label">⭐ FEATURED CAW</div>':'')+'<h2>'+esc(x.title||"Untitled Caw")+'</h2><p>'+esc(x.caption||"")+'</p><small>'+Number(x.views||0).toLocaleString()+' views</small></div>'+
