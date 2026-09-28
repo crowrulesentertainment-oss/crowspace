@@ -12,7 +12,19 @@ const media=x=>{
  if(x.storage_path)return SUPABASE_URL+"/storage/v1/object/public/"+BUCKET+"/"+x.storage_path.split("/").map(encodeURIComponent).join("/");
  return "";
 };
-const setStatus=s=>{if(status)status.textContent=s};
+const setStatus=s=>{if(status)status.textContent=s};\nconst trackView=async cawId=>{
+ if(!cawId||!supabase)return;
+ try{
+  const key="crowspace_caw_viewer_token";
+  let token=localStorage.getItem(key);
+  if(!token){token=(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(36).slice(2));localStorage.setItem(key,token);}
+  const payload={caw_id:cawId,viewer_token:token,viewed_at:new Date().toISOString()};
+  if(user)payload.user_id=user.id;
+  const r=await supabase.from("crowspace_caw_views").insert(payload);
+  if(r.error&&r.error.code!=="23505")console.warn("Caw view:",r.error.message);
+ }catch(e){console.warn("Caw view:",e.message)}
+};
+
 function showError(message){
  feed.innerHTML='<div class="cf-empty"><h2>Caw Feed Error</h2><p>'+esc(message||"Unable to load Caws.")+'</p><button class="cf-retry" type="button">Try Again</button></div>';
  feed.querySelector(".cf-retry")?.addEventListener("click",()=>load(true));
@@ -81,7 +93,7 @@ async function render(items){
 function bindCards(){
  feed.querySelectorAll(".cf-card:not([data-bound])").forEach(c=>{
   c.dataset.bound="1";
-  const v=c.querySelector("video"),play=c.querySelector(".cf-play");
+  const v=c.querySelector("video"),play=c.querySelector(".cf-play");\n  let viewTracked=false;\n  const track=()=>{if(viewTracked)return;viewTracked=true;trackView(c.dataset.id)};\n  v.addEventListener("play",track,{passive:true});\n  v.addEventListener("timeupdate",()=>{if(v.currentTime>=2)track()},{passive:true});
   play.onclick=()=>{if(v.paused){v.play().catch(()=>{});play.textContent="❚❚"}else{v.pause();play.textContent="▶"}};
   c.querySelector(".cf-share").onclick=async()=>{const u=new URL("caw-feed.html",location.href);u.searchParams.set("caw",c.dataset.id);try{await navigator.clipboard.writeText(u.href);setStatus("Caw link copied")}catch{}};
  });
