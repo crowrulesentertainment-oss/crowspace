@@ -1,1 +1,36 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>search — CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"></head><body><header class="topbar"></header><main class="page narrow"><div class="page-title"><span class="eyebrow">DISCOVER THE UNIVERSE</span><h1>Search</h1></div><section class="searchbox panel"><input id="searchInput" autofocus placeholder="Search people, Caws, Groups, Events, Dreamscapes, Podcasts, Memorials, Sports…"><button class="primary">Search</button></section><section class="panel"><h2 id="searchTitle">Start exploring</h2><p class="muted">Universal search will connect CrowSpace with future CrowRules repositories.</p></section></main><footer><b>🐦 CROWSPACE</b><span>One Account. One Universe.</span><span>© 2026 CrowRules Entertainment</span></footer><script src="js/navigation.js"></script><script src="js/crowspace.js"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Discover People — CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"></head><body><header class="topbar"></header><main class="page narrow"><div class="page-title"><span class="eyebrow">CROWSPACE DISCOVERY</span><h1>Find Your People</h1><p class="muted">Search CrowSpace members by name or username.</p></div><section class="searchbox panel"><input id="searchInput" autofocus autocomplete="off" placeholder="Search people or @username…"><button class="primary" id="searchBtn">Search</button></section><section class="panel"><div class="section-head"><div><span class="eyebrow">MEMBER DIRECTORY</span><h2 id="searchTitle">All CrowSpace Members</h2></div><span class="muted" id="searchCount"></span></div><div class="people-list" id="peopleList"><div class="empty">Loading members…</div></div></section></main><footer><b>🐦 CROWSPACE</b><span>One Account. One Universe.</span><span>© 2026 CrowRules Entertainment</span></footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/navigation.js"></script><script src="js/crowspace.js"></script><script>
+document.addEventListener("DOMContentLoaded",async()=>{
+ if(!window.CROW_CONFIG?.supabaseUrl)return;
+ const sb=supabase.createClient(CROW_CONFIG.supabaseUrl,CROW_CONFIG.supabaseKey);
+ const list=document.getElementById("peopleList"),input=document.getElementById("searchInput"),title=document.getElementById("searchTitle"),count=document.getElementById("searchCount");
+ const esc=v=>String(v??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+ const initials=n=>String(n||"CR").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+ async function load(){
+   const term=input.value.trim().replace(/^@/,"");
+   title.textContent=term?"Results for “"+term+"”":"All CrowSpace Members";
+   let query=sb.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url").order("display_name",{ascending:true}).limit(50);
+   if(term) query=query.or("username.ilike.%"+term+"%,display_name.ilike.%"+term+"%");
+   const {data,error}=await query;
+   if(error){list.innerHTML='<div class="empty">Unable to load members right now.</div>';count.textContent="";return}
+   const rows=data||[];count.textContent=rows.length+" member"+(rows.length===1?"":"s");
+   if(!rows.length){list.innerHTML='<div class="empty">No members found.</div>';return}
+   const ids=rows.map(x=>x.user_id);
+   const {data:fs}=await sb.from("crowspace_follows").select("followed_user_id").in("followed_user_id",ids);
+   const followers={};(fs||[]).forEach(x=>followers[x.followed_user_id]=(followers[x.followed_user_id]||0)+1);
+   const {data:{user}}=await sb.auth.getUser();
+   let following=new Set();
+   if(user){const {data:mine}=await sb.from("crowspace_follows").select("followed_user_id").eq("follower_id",user.id).in("followed_user_id",ids);following=new Set((mine||[]).map(x=>x.followed_user_id))}
+   list.innerHTML=rows.map(x=>{
+     const self=user?.id===x.user_id, followed=following.has(x.user_id);
+     const avatar=x.avatar_url?'<img src="'+esc(x.avatar_url)+'" alt="">':esc(initials(x.display_name||x.username));
+     const action=self?'<a class="secondary" href="profile.html">You</a>':'<button class="secondary '+(followed?"active":"")+'" data-action="follow" data-target-id="'+esc(x.user_id)+'" data-followed-user-id="'+esc(x.user_id)+'">'+(followed?"Following":"Follow")+'</button>';
+     return '<article class="person"><div class="avatar">'+avatar+'</div><div><strong>'+esc(x.display_name||"CrowSpace Member")+'</strong><small class="muted">@'+esc(x.username||"member")+' · '+(followers[x.user_id]||0)+' follower'+((followers[x.user_id]||0)===1?"":"s")+'</small><small class="muted">'+esc(x.bio||"On CrowSpace")+'</small></div><a class="secondary" href="profile.html?username='+encodeURIComponent(x.username||"")+'">View</a>'+action+'</article>';
+   }).join("");
+ }
+ document.getElementById("searchBtn").addEventListener("click",load);
+ input.addEventListener("keydown",e=>{if(e.key==="Enter")load()});
+ let timer;input.addEventListener("input",()=>{clearTimeout(timer);timer=setTimeout(load,250)});
+ document.addEventListener("crowspace:social-updated",load);
+ load();
+});
+</script></body></html>
