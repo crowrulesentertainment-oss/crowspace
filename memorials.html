@@ -52,16 +52,17 @@ let rows=[];
 async function load(){
  const grid=document.getElementById('recentGrid');
  try{
-  const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
-  const {data,error}=await client.from('memorials').select('*').eq('published',true).order('passing_date',{ascending:false,nullsFirst:false}).limit(1000);
-  if(error)throw error;rows=data||[];
-  document.getElementById('total').textContent=rows.length.toLocaleString();
-  document.getElementById('deathCount').textContent=rows.filter(x=>x.passing_date).length.toLocaleString();
+  const res=await fetch('https://raw.githubusercontent.com/crowrulesentertainment-oss/memorials/main/data/memorial-feed.json?ts='+Date.now(),{cache:'no-store'});
+  if(!res.ok)throw new Error('GitHub Memorials feed returned HTTP '+res.status);
+  const feed=await res.json();
+  rows=Array.isArray(feed.memorials)?feed.memorials:[];
+  document.getElementById('total').textContent=Number(feed.total??rows.length).toLocaleString();
+  document.getElementById('deathCount').textContent=Number(feed.death_count??rows.filter(x=>x.passing_date).length).toLocaleString();
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
   document.getElementById('recentCount').textContent=rows.filter(x=>x.passing_date&&new Date(x.passing_date+'T00:00:00')>=cutoff).length.toLocaleString();
   document.getElementById('celebrityCount').textContent=rows.filter(x=>x.is_celebrity===true||String(x.memorial_type||'').toLowerCase().includes('celebr')).length.toLocaleString();
   renderRecent();renderArchive();
- }catch(e){console.error(e);grid.innerHTML='<div class="empty">Unable to load the Memorials feed right now. Please refresh.</div>'}
+ }catch(e){console.error(e);grid.innerHTML='<div class="empty">Unable to load the CrowRules Memorials GitHub feed right now. Please refresh.</div>'}
 }
 function card(m){const n=esc(m.full_name||'Unnamed Memorial'),img=m.portrait_url;return `<article class="recent-card"><div class="portrait">${img?`<img src="${esc(img)}" alt="Portrait of ${n}" loading="lazy">`:`<span class="placeholder">${esc(initials(m.full_name))}</span>`}</div><div class="card-body"><h3>${n}</h3><div class="date">${fmt(m.passing_date)}</div>${m.profession?`<div class="muted">${esc(m.profession)}</div>`:''}${m.location?`<div class="muted">${esc(m.location)}</div>`:''}<span class="tag">${m.is_celebrity===true?'Celebrity':'Memorial'}</span><div style="margin-top:14px"><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/memorial.html?slug=${encodeURIComponent(m.slug||m.id)}">View Memorial →</a></div></div></article>`}
 function renderRecent(){const a=rows.filter(x=>x.passing_date).sort((a,b)=>String(b.passing_date).localeCompare(String(a.passing_date))).slice(0,3);document.getElementById('recentGrid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">No passing dates are currently published.</div>'}
