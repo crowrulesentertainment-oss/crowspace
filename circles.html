@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Circles | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.circle-hero{background:radial-gradient(circle at 80% 20%,rgba(89,231,255,.16),transparent 24rem),linear-gradient(145deg,#10182b,#080b15);border:1px solid var(--line);border-radius:24px;padding:34px;box-shadow:var(--shadow)}
+.circle-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin:18px 0}.circle-search{background:#080b14!important}.circle-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.circle-card{position:relative;overflow:hidden}.circle-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(135deg,rgba(85,184,255,.15),rgba(155,108,255,.2));font-size:32px;border:1px solid var(--line)}.circle-card .circle-meta{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}.circle-pill{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:800}.circle-featured{position:absolute;right:15px;top:15px;color:var(--blue);font:800 9px Orbitron}.circle-empty{text-align:center;padding:35px}.circle-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:850px){.circle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.circle-tools{grid-template-columns:1fr}.circle-grid{grid-template-columns:1fr}.circle-hero{padding:24px}}
+</style>
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"></div></header>
+<main class="section">
+<section class="circle-hero">
+<p class="eyebrow">CROWSPACE COMMUNITIES</p><h1>Find your <span>Circle.</span></h1>
+<p class="lead">Join interest communities built around the things people create, watch, discuss and love. Every Circle has its own members, feed, discussions and community activity.</p>
+<div class="actions"><a class="btn primary" href="#circles">Explore Circles</a><a class="btn" href="profile.html">My Nest</a></div>
+</section>
+<section id="circles" class="section dark" style="margin-top:18px">
+<div class="section-head"><div><p class="eyebrow">DISCOVER</p><h2>Circles</h2><p class="muted">Choose a community, join the conversation and build connections around a shared interest.</p></div></div>
+<div class="circle-tools"><input id="search" class="circle-search" type="search" placeholder="Search Circles…"><a class="btn" href="groups.html">Browse Groups</a></div>
+<div class="circle-tabs"><button class="btn tab active" data-mode="all">All</button><button class="btn tab" data-mode="featured">Featured</button><button class="btn tab" data-mode="joined">My Circles</button></div>
+<div id="stats" class="circle-tabs"></div><div id="grid" class="grid circle-grid"><div class="card circle-empty">Loading Circles…</div></div>
+</section>
+</main><footer>CrowSpace · One Account. One Universe.</footer>
+<script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',async()=>{
+ const esc=CS.escape; const u=await CS.user(); if(!u){location.href='login.html';return;} await CS.refreshHeader();
+ const [{data:circles,error},{data:members,error:me}]=await Promise.all([
+  crowSupabase.from('crowspace_circles').select('*').order('is_featured',{ascending:false}).order('name'),
+  crowSupabase.from('crowspace_circle_members').select('circle_id,user_id')
+ ]);
+ const grid=document.getElementById('grid'); if(error||me){grid.innerHTML='<div class="card"><p>'+esc((error||me).message)+'</p></div>';return;}
+ const rows=circles||[], ms=members||[], counts={}; const joined={};
+ ms.forEach(m=>{counts[m.circle_id]=(counts[m.circle_id]||0)+1;if(m.user_id===u.id)joined[m.circle_id]=true;});
+ document.getElementById('stats').innerHTML='<span class="circle-pill">'+rows.length+' Circles</span><span class="circle-pill">'+Object.keys(joined).length+' Joined</span><span class="circle-pill">'+ms.length+' Memberships</span>';
+ const state={q:'',mode:'all'};
+ function render(){let data=rows.slice();if(state.mode==='featured')data=data.filter(x=>x.is_featured);if(state.mode==='joined')data=data.filter(x=>joined[x.id]);if(state.q)data=data.filter(x=>(x.name+' '+x.description).toLowerCase().includes(state.q));
+ if(!data.length){grid.innerHTML='<div class="card circle-empty"><h3>No Circles found.</h3><p class="muted">Try another search or explore all Circles.</p></div>';return;}
+ grid.innerHTML=data.map(c=>'<article class="card circle-card">'+(c.is_featured?'<span class="circle-featured">FEATURED</span>':'')+'<div class="circle-icon">'+esc(c.emoji||'🐦')+'</div><h3>'+esc(c.name)+'</h3><p>'+esc(c.description)+'</p><div class="circle-meta"><span class="circle-pill">'+Number(counts[c.id]||0)+' members</span><span class="circle-pill">'+(joined[c.id]?'Joined':'Open community')+'</span></div><div class="actions"><a class="btn primary" href="circle.html?slug='+encodeURIComponent(c.slug)+'">Open Circle</a>'+(joined[c.id]?'':'<button class="btn join" data-id="'+esc(c.id)+'">Join</button>')+'</div></article>').join('');
+ grid.querySelectorAll('.join').forEach(b=>b.onclick=async()=>{b.disabled=true;b.textContent='Joining…';const {error}=await crowSupabase.from('crowspace_circle_members').insert({circle_id:b.dataset.id,user_id:u.id,role:'member'});if(error){alert(error.message);b.disabled=false;b.textContent='Join';}else{joined[b.dataset.id]=true;counts[b.dataset.id]=(counts[b.dataset.id]||0)+1;render();}});
+ }
+ document.getElementById('search').oninput=e=>{state.q=e.target.value.trim().toLowerCase();render();};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.mode=b.dataset.mode;render();});render();
+});
+</script><script src="js/global-nav.js"></script>
+</body></html>
