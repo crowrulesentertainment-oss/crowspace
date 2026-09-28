@@ -123,6 +123,31 @@ CS.homeFeed=async()=>{
 CS.feed=CS.homeFeed;
 CS.react=async postId=>{const u=await CS.user();if(!u){location.href="login.html";return}await CS.client.from("crowspace_reactions").upsert({post_id:postId,user_id:u.id,reaction:"like"});};
 CS.commentPrompt=async postId=>{const u=await CS.user();if(!u){location.href="login.html";return}const body=prompt("Comment");if(body)await CS.client.from("crowspace_comments").insert({post_id:postId,user_id:u.id,body});};
+CS.trackCawView=async(cawId)=>{
+ if(!cawId||!CS.client)return false;
+ try{
+   const key="crowspace_caw_viewer_token";
+   let token=localStorage.getItem(key);
+   if(!token){token=(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(36).slice(2));localStorage.setItem(key,token);}
+   const u=await CS.user();
+   const payload={caw_id:cawId,viewer_token:u?null:token,viewed_at:new Date().toISOString()};
+   if(u)payload.user_id=u.id;
+   const r=await CS.client.from("crowspace_caw_views").insert(payload);
+   if(r.error&&r.error.code!=="23505")throw r.error;
+   return !r.error||r.error.code==="23505";
+ }catch(e){console.warn("CrowSpace Caw view:",e.message);return false}
+};
+CS.bindCawViewTracking=(root=document)=>{
+ const videos=[...root.querySelectorAll("video[data-caw-id]")];
+ videos.forEach(video=>{
+   if(video.dataset.cawViewBound==="1")return;
+   video.dataset.cawViewBound="1";
+   let tracked=false;
+   const track=async()=>{if(tracked)return;tracked=true;await CS.trackCawView(video.dataset.cawId);};
+   video.addEventListener("play",track,{passive:true});
+   video.addEventListener("timeupdate",()=>{if(video.currentTime>=2)track();},{passive:true});
+ });
+};
 CS.follow=async target=>{const u=await CS.user();if(!u){location.href="login.html";return}if(u.id===target)return;const {data}=await CS.client.from("crowspace_follows").select("*").eq("follower_id",u.id).eq("followed_user_id",target).maybeSingle();if(data)await CS.client.from("crowspace_follows").delete().eq("follower_id",u.id).eq("followed_user_id",target);else{await CS.client.from("crowspace_follows").insert({follower_id:u.id,followed_user_id:target});}};
 
 CS.socialGraph=async(limit=250)=>{const u=await CS.user();if(!u)return [];const {data,error}=await CS.client.rpc("crowspace_social_graph",{p_limit:limit});if(error){console.warn("CrowSpace social graph:",error.message);return []}return data||[]};
