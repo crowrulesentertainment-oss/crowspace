@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  if(!window.CROW_CONFIG?.supabaseUrl)return;
  const sb=supabase.createClient(CROW_CONFIG.supabaseUrl,CROW_CONFIG.supabaseKey);
  const {data:{user}}=await sb.auth.getUser();
- const requested=new URLSearchParams(location.search).get("user");\n const targetId=requested||user?.id;\n if(!targetId){document.getElementById("profileName").textContent="Sign in to view your profile";document.getElementById("profileHandle").textContent="";document.getElementById("profileBio").textContent="Your CrowSpace profile will appear here after you sign in.";return}
+ const params=new URLSearchParams(location.search);\n const requested=params.get("user");\n const requestedUsername=params.get("username");\n let targetId=requested||user?.id;\n if(requestedUsername){ const {data:up}=await sb.from("crowspace_profiles").select("user_id").eq("username",requestedUsername.replace(/^@/,"")).maybeSingle(); targetId=up?.user_id||null; }\n if(!targetId){document.getElementById("profileName").textContent=requestedUsername?"Profile not found":"Sign in to view your profile";document.getElementById("profileHandle").textContent="";document.getElementById("profileBio").textContent=requestedUsername?"That CrowSpace member could not be found.":"Your CrowSpace profile will appear here after you sign in.";return}
  const [{data:p},{count:caws},{count:followers},{count:following},{data:posts}]=await Promise.all([
    sb.from("crowspace_profiles").select("display_name,username,bio,avatar_url").eq("user_id",targetId).maybeSingle(),
    sb.from("crowspace_posts").select("id",{count:"exact",head:true}).eq("user_id",targetId),
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
    sb.from("crowspace_follows").select("followed_user_id",{count:"exact",head:true}).eq("follower_id",targetId),
    sb.from("crowspace_posts").select("id,body,created_at").eq("user_id",targetId).order("created_at",{ascending:false}).limit(12)
  ]);
- const name=p?.display_name||user.user_metadata?.display_name||"CrowSpace Member", username=p?.username||user.user_metadata?.username||"member";
+ const name=p?.display_name||((targetId===user?.id)?user?.user_metadata?.display_name:null)||"CrowSpace Member", username=p?.username||((targetId===user?.id)?user?.user_metadata?.username:null)||"member";
  document.getElementById("profileName").textContent=name;
  document.getElementById("profileHandle").textContent="@"+String(username).replace(/^@/,"");
  document.getElementById("profileBio").textContent=p?.bio||"Welcome to my CrowSpace.";
@@ -19,11 +19,11 @@ document.addEventListener("DOMContentLoaded",async()=>{
  if(p?.avatar_url){document.getElementById("profileAvatar").innerHTML='<img src="'+String(p.avatar_url).replace(/"/g,"&quot;")+'" alt="">'}
  
  const action=document.getElementById("profileAction");
- if(requested&&user&&requested!==user.id){
+ if((requested||requestedUsername)&&user&&targetId!==user.id){
    action.href="#"; action.textContent="Follow"; action.dataset.action="follow"; action.dataset.targetId=targetId; action.dataset.followedUserId=targetId;
    const {data:f}=await sb.from("crowspace_follows").select("follower_id").eq("follower_id",user.id).eq("followed_user_id",targetId).maybeSingle();
    if(f){action.textContent="Following";action.classList.add("active")}
- }else if(requested){action.removeAttribute("href");action.textContent="Public Profile";}
+ }else if((requested||requestedUsername)){action.removeAttribute("href");action.textContent="Public Profile";}
  const grid=document.getElementById("cawGrid");grid.innerHTML=posts?.length?posts.map(x=>'<a class="tile" href="caw.html?id='+encodeURIComponent(x.id)+'">'+String(x.body||"").slice(0,120).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]))+'</a>').join(""):'<div class="tile">No Caws yet</div>';
 });
 </script></body></html>
