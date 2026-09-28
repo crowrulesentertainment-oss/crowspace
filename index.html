@@ -3,7 +3,12 @@ const feed=document.getElementById("feed"),form=document.getElementById("postFor
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 window.crowCurrentUserId=null;
 async function loadFeed(){
- const {data,error}=await db.from("crowspace_posts").select("id,user_id,body,created_at").order("created_at",{ascending:false}).limit(30);
+ const {data:{session}}=await db.auth.getSession();
+ const followed=session?(await db.from("crowspace_follows").select("followed_user_id").eq("follower_id",session.user.id)).data||[]:[];
+ const followingIds=followed.map(x=>x.followed_user_id);
+ let query=db.from("crowspace_posts").select("id,user_id,body,created_at").order("created_at",{ascending:false}).limit(30);
+ if(followingIds.length) query=query.in("user_id",[session.user.id,...followingIds]);
+ const {data,error}=await query;
  if(error){feed.innerHTML='<div class="card" style="padding:25px">Feed unavailable.</div>';return}
  if(!data?.length){feed.innerHTML='<div class="card" style="padding:30px;color:var(--muted)">No caws yet. Be the first signal.</div>';return}
  const ids=[...new Set(data.map(x=>x.user_id))];
