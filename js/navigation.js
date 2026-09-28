@@ -1,3 +1,8 @@
+/* Public Supabase configuration for CrowSpace. Publishable/anon keys are safe for browser use when RLS protects data. */
+window.CROW_CONFIG=window.CROW_CONFIG||{
+  supabaseUrl:"https://cevylpnoexugwgygvtgu.supabase.co",
+  supabaseKey:"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"
+};
 /* CrowSpace shared navigation — UI-only until Supabase is connected. */
 document.addEventListener("DOMContentLoaded",()=>{
   const header=document.querySelector(".topbar");
