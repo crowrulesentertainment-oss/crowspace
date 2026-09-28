@@ -757,6 +757,14 @@ async function renderRewardCollection(){
     if(error)throw error;
     const rewards=data||[];
     if(count)count.textContent=rewards.length+" earned";
+    document.querySelector(".identity-card")?.classList.remove("reward-glow-cyan","reward-glow-purple","reward-glow-gold","reward-frame-neon","reward-frame-cinematic","reward-name-highlight");
+    const slugs=new Set(rewards.map(r=>r.slug));
+    if(slugs.has("profile-glow-cyan"))document.querySelector(".identity-card")?.classList.add("reward-glow-cyan");
+    if(slugs.has("profile-glow-purple"))document.querySelector(".identity-card")?.classList.add("reward-glow-purple");
+    if(slugs.has("profile-glow-gold"))document.querySelector(".identity-card")?.classList.add("reward-glow-gold");
+    if(slugs.has("profile-frame-neon")||slugs.has("crowspace-vip-profile"))document.querySelector(".identity-card")?.classList.add("reward-frame-neon");
+    if(slugs.has("profile-frame-cinematic"))document.querySelector(".identity-card")?.classList.add("reward-frame-cinematic");
+    if(slugs.has("profile-name-highlight"))$("name")?.classList.add("reward-name-highlight");
     if(!rewards.length){
       box.innerHTML='<div class="reward-collection-empty">No CrowPoints rewards earned yet. Visit the Rewards Store to start building your collection.</div>';
       return;
@@ -885,6 +893,16 @@ body.avatar-modal-open{overflow:hidden}
 .nest-photo-card{margin:0}
 .nest-photo-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
 @media(max-width:800px){.inline-comment-form{flex-direction:column}}
+<style id="crowspace-reward-effects">
+.identity-card.reward-glow-cyan{box-shadow:0 30px 100px rgba(85,230,255,.22),0 0 70px rgba(85,230,255,.10)}
+.identity-card.reward-glow-purple{box-shadow:0 30px 100px rgba(155,124,255,.24),0 0 70px rgba(155,124,255,.11)}
+.identity-card.reward-glow-gold{box-shadow:0 30px 100px rgba(255,194,74,.22),0 0 70px rgba(255,194,74,.10)}
+.identity-card.reward-frame-neon{border-color:rgba(85,230,255,.5);box-shadow:0 0 0 1px rgba(85,230,255,.12),0 24px 90px rgba(85,230,255,.12)}
+.identity-card.reward-frame-cinematic{border-color:rgba(155,124,255,.48);background:linear-gradient(135deg,rgba(18,20,38,.96),rgba(22,10,34,.94))}
+.identity-card.reward-frame-neon .avatar-orb{border-color:rgba(85,230,255,.9);box-shadow:0 0 0 3px rgba(85,230,255,.08),0 0 55px rgba(85,230,255,.3)}
+.identity-card.reward-frame-cinematic .avatar-orb{border-color:rgba(155,124,255,.9);box-shadow:0 0 0 3px rgba(155,124,255,.08),0 0 55px rgba(155,124,255,.28)}
+.reward-name-highlight{display:inline-block;padding:.08em .28em;border-radius:.35em;background:linear-gradient(90deg,rgba(85,230,255,.12),rgba(155,124,255,.14));text-shadow:0 0 22px rgba(85,230,255,.25)}
+</style>
 </style>
 <script id="nest-realtime">
 (function(){
