@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded",async()=>{
  const sb=window.CROW_CONFIG?.supabaseUrl?supabase.createClient(CROW_CONFIG.supabaseUrl,CROW_CONFIG.supabaseKey):null;
- const list=document.getElementById("conversationList"),messages=document.getElementById("messages"),title=document.getElementById("chatTitle"),status=document.getElementById("messageStatus"),input=document.getElementById("messageInput");
+ const list=document.getElementById("conversationList"),messages=document.getElementById("messages"),title=document.getElementById("chatTitle"),status=document.getElementById("messageStatus"),input=document.getElementById("messageInput"),mediaInput=document.getElementById("messageMedia");
  if(!sb||!list)return;
  const {data:{user}}=await sb.auth.getUser(); if(!user){list.innerHTML='<div class="empty">Sign in to use Messenger.</div>';return}
  let active=null, channel=null, presenceChannel=null, typingChannel=null, typingTimer=null, unread=0, shareId=new URLSearchParams(location.search).get("share");
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  });
  document.getElementById("sendMessage")?.addEventListener("click",async()=>{
   const body=input.value.trim();if(!body&&!mediaInput?.files?.length||!active)return;
-  let mediaUrl=null;if(mediaInput?.files?.[0])mediaUrl=await uploadMessengerMedia(mediaInput.files[0]);if(mediaInput?.files?.length&&!mediaUrl)return;const finalBody=body||(mediaUrl?"📎 Shared media":"");const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body:finalBody});if(error){status.textContent=error.message;return}input.value="";if(mediaInput)mediaInput.value="";status.textContent="";await openConversation(active);
+  let mediaUrl=null;if(mediaInput?.files?.[0])mediaUrl=await uploadMessengerMedia(mediaInput.files[0]);if(mediaInput?.files?.length&&!mediaUrl)return;const finalBody=body||(mediaUrl?"📎 Shared media":"");const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body:finalBody,media_url:mediaUrl,media_type:mediaInput?.files?.[0]?.type||null});if(error){status.textContent=error.message;return}input.value="";if(mediaInput)mediaInput.value="";status.textContent="";await openConversation(active);
  });
  document.getElementById("attachMedia")?.addEventListener("click",()=>mediaInput?.click());
  mediaInput?.addEventListener("change",()=>{const f=mediaInput.files?.[0];if(f){status.textContent=f.name+" ready to send.";input.focus()}});
