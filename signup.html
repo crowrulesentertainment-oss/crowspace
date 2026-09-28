@@ -39,7 +39,7 @@
 <p class="eyebrow">ONE ACCOUNT. ONE UNIVERSE.</p>
 <h1>Join the universe.</h1>
 <p>Create one CrowRules account and use it across CrowSpace, Caws, Circles, communities, media and the growing CrowRules universe.</p>
-<div class="signup-points">
+<div class="signup-points"><div class="signup-point" style="border-color:rgba(89,231,255,.28);background:rgba(89,231,255,.06)"><b>♣ CROW — Free Universal Membership</b><span>Your account automatically starts with the CROW membership tier. Upgrade later through Universal Membership.</span></div>
 <div class="signup-point"><b>◉ Universal Profile</b><span>One identity for your CrowSpace presence.</span></div>
 <div class="signup-point"><b>◉ Email Verified</b><span>Your inbox confirms ownership before full account access.</span></div>
 <div class="signup-point"><b>◉ Built for CrowSpace</b><span>Create, connect, follow communities and build your Nest.</span></div>
@@ -48,7 +48,7 @@
 </section>
 <section class="signup-form-panel">
 <h2>Create your account</h2>
-<p class="signup-intro">Start with the basics. You can build out your Nest later.</p>
+<p class="signup-intro">Start with the free CROW Universal Membership. You can upgrade your membership later without creating another account.</p>
 <form id="signupForm" novalidate>
 <div class="signup-grid">
 <div class="field"><label for="first_name">First name <span class="muted">(optional)</span></label><input id="first_name" name="first_name" type="text" maxlength="60" autocomplete="given-name" placeholder="First name"></div>
@@ -60,7 +60,7 @@
 <div class="field full"><label for="password_confirm">Confirm password</label><input id="password_confirm" name="password_confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Enter the password again"><span id="passwordMatch" class="field-help" aria-live="polite"></span></div>
 <label class="auth-consent full"><input id="terms" name="terms" type="checkbox" required><span>I agree to the CrowSpace Terms and Community Rules and understand that I must verify my email before signing in.</span></label>
 </div>
-<button id="signupSubmit" class="btn primary wide" type="submit">Create Universal Account</button><div id="msg" class="signup-status" role="status" aria-live="polite"></div>
+<button id="signupSubmit" class="btn primary wide" type="submit">Create CROW Membership Account</button><div id="msg" class="signup-status" role="status" aria-live="polite"></div>
 </form>
 <div id="verifyBox" class="auth-note" hidden><strong>Account created — check your email</strong><p>A verification link was sent to <span id="verifyEmail"></span>. Check spam/junk if needed.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="resendVerification" class="btn">Resend verification email</button><a class="btn" href="login.html">I verified — Sign In</a></div><p id="resendHint" class="field-help" style="margin:9px 0 0"></p></div>
 <div class="signup-divider">or</div><button id="google" class="btn wide" type="button">Continue with Google</button>
@@ -71,7 +71,7 @@
 <script src="js/supabase.js"></script>
 <script src="js/crowspace.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/global-nav.js?v=20260927-8"></script>
+<script src="js/global-nav.js?v=20260927-10"></script>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
   const password=document.getElementById("password");
