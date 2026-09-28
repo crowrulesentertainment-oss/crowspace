@@ -20,3 +20,5 @@
 .invite-funnel{display:flex;align-items:center;gap:7px;margin:12px 0;padding:10px;border:1px solid #ffffff12;border-radius:10px;background:#ffffff05;overflow:auto}.invite-funnel>div{min-width:62px;text-align:center}.invite-funnel b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.invite-funnel span{display:block;font-size:16px;font-weight:800;margin-top:3px}.invite-funnel>i{font-style:normal;opacity:.4}.invite-funnel div:nth-of-type(2) span{color:var(--accent,#8b7cff)}
 
 .invite-funnel small{display:block;margin-top:3px;font-size:9px;opacity:.6;white-space:nowrap}.invite-funnel>div{min-width:74px}.invite-funnel small{color:var(--muted,#9aa0aa)}
+
+.invite-health{margin:10px 0;padding:8px 10px;border:1px solid #ffffff18;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px}.invite-health span{font-weight:700}.invite-health.strong{border-color:#36d39955}.invite-health.attention{border-color:#fbbf2455}.invite-health.low{border-color:#fb718555}.invite-health.neutral{opacity:.7}.invite-health b{font-size:10px;text-transform:uppercase;letter-spacing:.08em}
