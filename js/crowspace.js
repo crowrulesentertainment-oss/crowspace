@@ -20,16 +20,18 @@ CS.user=async()=>{if(!CS.client)return null;try{const {data,error}=await CS.clie
 CS.profile=async id=>{if(!CS.client||!id)return null;try{const {data,error}=await CS.client.rpc("crowspace_profile_public",{target:id});if(error)return null;return Array.isArray(data)?data[0]||null:data||null}catch{return null}};
 CS.ensureProfile=async user=>{if(!user||!CS.client)return null;const meta=user.user_metadata||{},email=user.email||"",base=(email.split("@")[0]||"crowmember").toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,30)||"crowmember";const {data:existing}=await CS.client.from("membership_profiles").select("id,display_name,username,bio,avatar_url").eq("id",user.id).maybeSingle();if(existing)return existing;const display_name=meta.display_name||meta.full_name||meta.name||email.split("@")[0]||"CrowSpace Member",avatar_url=meta.avatar_url||meta.picture||"";let username=(meta.username||base).toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,30)||"crowmember";let {data,error}=await CS.client.from("membership_profiles").insert({id:user.id,display_name,username,bio:"",avatar_url,updated_at:new Date().toISOString()}).select().maybeSingle();if(error?.code==="23505"){username=(username.slice(0,23)||"crowmember")+"_"+user.id.replace(/-/g,"").slice(0,6);const retry=await CS.client.from("membership_profiles").insert({id:user.id,display_name,username,bio:"",avatar_url,updated_at:new Date().toISOString()}).select().maybeSingle();data=retry.data;error=retry.error}if(error){console.warn("CrowSpace profile:",error.message);return null}return data||null};
 CS.navItems=[
- {label:"Home",href:"index.html",group:"core"},
  {label:"My Nest",href:"profile.html",group:"core"},
  {label:"People",href:"people.html",group:"connect"},
  {label:"Friends",href:"friends.html",group:"connect"},
- {label:"Caws",href:"caws.html",group:"create"},
- {label:"Photos",href:"albums.html",group:"create"},
+ {label:"Messenger",href:"messenger.html",group:"connect"},
  {label:"Groups",href:"groups.html",group:"connect"},
  {label:"Events",href:"events.html",group:"connect"},
+ {label:"Caws",href:"caws.html",group:"create"},
+ {label:"Photos",href:"albums.html",group:"create"},
  {label:"Dreamscapes",href:"dreamscapes.html",group:"universe"},
  {label:"Production Pipeline",href:"production-pipeline.html",group:"universe"},
+ {label:"Rooms",href:"rooms.html",group:"universe"},
+ {label:"Live",href:"live.html",group:"universe"},
  {label:"Memorials",href:"memorials.html",group:"universe"},
  {label:"Command Center",href:"command-center.html",group:"universe"},
  {label:"Notifications",href:"notifications.html",group:"account"},
