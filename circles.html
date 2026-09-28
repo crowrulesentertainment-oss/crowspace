@@ -5,7 +5,7 @@
 <title>Circles | CrowSpace</title>
 <link rel="stylesheet" href="css/crowspace.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
+.circle-create{display:none;margin:18px 0}.circle-create.open{display:block}.circle-create form{display:grid;gap:10px}.circle-create textarea{min-height:100px;resize:vertical}.circle-create .actions{justify-content:flex-end}.circle-create input,.circle-create textarea{width:100%}</style><style>
 .circle-hero{background:radial-gradient(circle at 80% 20%,rgba(89,231,255,.16),transparent 24rem),linear-gradient(145deg,#10182b,#080b15);border:1px solid var(--line);border-radius:24px;padding:34px;box-shadow:var(--shadow)}
 .circle-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin:18px 0}.circle-search{background:#080b14!important}.circle-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.circle-card{position:relative;overflow:hidden}.circle-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(135deg,rgba(85,184,255,.15),rgba(155,108,255,.2));font-size:32px;border:1px solid var(--line)}.circle-card .circle-meta{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}.circle-pill{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:800}.circle-featured{position:absolute;right:15px;top:15px;color:var(--blue);font:800 9px Orbitron}.circle-empty{text-align:center;padding:35px}.circle-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:850px){.circle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.circle-tools{grid-template-columns:1fr}.circle-grid{grid-template-columns:1fr}.circle-hero{padding:24px}}
@@ -17,11 +17,11 @@
 <section class="circle-hero">
 <p class="eyebrow">CROWSPACE COMMUNITIES</p><h1>Find your <span>Circle.</span></h1>
 <p class="lead">Join interest communities built around the things people create, watch, discuss and love. Every Circle has its own members, feed, discussions and community activity.</p>
-<div class="actions"><a class="btn primary" href="#circles">Explore Circles</a><a class="btn" href="profile.html">My Nest</a></div>
+<div class="actions"><a class="btn primary" href="#circles">Explore Circles</a><button class="btn" id="createCircleBtn" type="button">＋ Create Circle</button><a class="btn" href="profile.html">My Nest</a></div>
 </section>
 <section id="circles" class="section dark" style="margin-top:18px">
 <div class="section-head"><div><p class="eyebrow">DISCOVER</p><h2>Circles</h2><p class="muted">Choose a community, join the conversation and build connections around a shared interest.</p></div></div>
-<div class="circle-tools"><input id="search" class="circle-search" type="search" placeholder="Search Circles…"><a class="btn" href="groups.html">Browse Groups</a></div>
+<div id="createCirclePanel" class="card circle-create"><h3>Create a Circle</h3><p class="muted">Start an interest community and invite people to join.</p><form id="createCircleForm"><input id="circleName" maxlength="80" required placeholder="Circle name"><input id="circleEmoji" maxlength="8" value="🐦" placeholder="🎬"><textarea id="circleDescription" maxlength="500" required placeholder="Description"></textarea><input id="circleImage" type="url" maxlength="1000" placeholder="Image URL (optional)"><div class="actions"><button type="button" class="btn" id="cancelCircle">Cancel</button><button type="submit" class="btn primary" id="submitCircle">Create Circle</button></div></form><p id="createCircleStatus" class="muted"></p></div><div class="circle-tools"><input id="search" class="circle-search" type="search" placeholder="Search Circles…"><a class="btn" href="groups.html">Browse Groups</a></div>
 <div class="circle-tabs"><button class="btn tab active" data-mode="all">All</button><button class="btn tab" data-mode="featured">Featured</button><button class="btn tab" data-mode="joined">My Circles</button></div>
 <div id="stats" class="circle-tabs"></div><div id="grid" class="grid circle-grid"><div class="card circle-empty">Loading Circles…</div></div>
 </section>
@@ -34,7 +34,21 @@ document.addEventListener('DOMContentLoaded',async()=>{
   crowSupabase.from('crowspace_circles').select('*').order('is_featured',{ascending:false}).order('name'),
   crowSupabase.from('crowspace_circle_members').select('circle_id,user_id')
  ]);
- const grid=document.getElementById('grid'); if(error||me){grid.innerHTML='<div class="card"><p>'+esc((error||me).message)+'</p></div>';return;}
+ const grid=document.getElementById('grid'); if(error||me){
+ const createPanel=document.getElementById('createCirclePanel');
+ document.getElementById('createCircleBtn').onclick=()=>createPanel.classList.toggle('open');
+ document.getElementById('cancelCircle').onclick=()=>createPanel.classList.remove('open');
+ document.getElementById('createCircleForm').onsubmit=async e=>{
+  e.preventDefault();const status=document.getElementById('createCircleStatus'),btn=document.getElementById('submitCircle');
+  const name=document.getElementById('circleName').value.trim(),description=document.getElementById('circleDescription').value.trim(),emoji=document.getElementById('circleEmoji').value.trim()||'🐦',image_url=document.getElementById('circleImage').value.trim()||null;
+  const base=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70);if(!base){status.textContent='Enter a valid Circle name.';return}
+  btn.disabled=true;btn.textContent='Creating…';let created=null,err=null;
+  for(let i=0;i<5;i++){const slug=i?base+'-'+i:base;const r=await crowSupabase.from('crowspace_circles').insert({name,slug,emoji,description,image_url,created_by:u.id}).select('*').single();if(!r.error){created=r.data;break}err=r.error;if(!/duplicate|unique/i.test(r.error.message||''))break}
+  if(!created){status.textContent=err?.message||'Unable to create Circle.';btn.disabled=false;btn.textContent='Create Circle';return}
+  const m=await crowSupabase.from('crowspace_circle_members').insert({circle_id:created.id,user_id:u.id,role:'admin'});
+  if(m.error){status.textContent='Circle created, but owner membership failed: '+m.error.message;btn.disabled=false;btn.textContent='Create Circle';return}
+  rows.unshift(created);joined[created.id]=true;counts[created.id]=1;createPanel.classList.remove('open');document.getElementById('createCircleForm').reset();document.getElementById('circleEmoji').value='🐦';btn.disabled=false;btn.textContent='Create Circle';render();
+ };grid.innerHTML='<div class="card"><p>'+esc((error||me).message)+'</p></div>';return;}
  const rows=circles||[], ms=members||[], counts={}; const joined={};
  ms.forEach(m=>{counts[m.circle_id]=(counts[m.circle_id]||0)+1;if(m.user_id===u.id)joined[m.circle_id]=true;});
  document.getElementById('stats').innerHTML='<span class="circle-pill">'+rows.length+' Circles</span><span class="circle-pill">'+Object.keys(joined).length+' Joined</span><span class="circle-pill">'+ms.length+' Memberships</span>';
