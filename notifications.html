@@ -9,10 +9,11 @@ async function loadNotifications(){
  const ids=[...new Set(data.map(x=>x.actor_id).filter(Boolean))];
  const {data:profiles}=ids.length?await db.from("crowspace_profiles").select("user_id,username,display_name").in("user_id",ids):{data:[]};
  const map=Object.fromEntries((profiles||[]).map(p=>[p.user_id,p]));
- list.innerHTML=data.map(x=>{const p=map[x.actor_id]||{},name=esc(p.display_name||p.username||"Someone"),label=x.type==="like"?"liked your Caw":x.type==="save"?"saved your Caw":x.type==="repost"?"reposted your Caw":x.type==="comment"?"commented on your Caw":"interacted with your Caw";return '<a href="'+(x.post_id?'index.html#caw-'+encodeURIComponent(x.post_id):'#')+'" style="display:block;text-decoration:none;color:inherit"><article class="card" style="padding:16px;margin-bottom:10px;opacity:'+(x.read_at?'0.72':'1')+'"><strong>'+name+'</strong> <span>'+label+'</span><div style="font-size:11px;color:var(--muted);margin-top:5px">'+new Date(x.created_at).toLocaleString()+'</div></article></a>'}).join("");
+ list.innerHTML=data.map(x=>{const p=map[x.actor_id]||{},name=esc(p.display_name||p.username||"Someone"),label=x.type==="follow"?"followed you":x.type==="like"?"liked your Caw":x.type==="save"?"saved your Caw":x.type==="repost"?"reposted your Caw":x.type==="comment"?"commented on your Caw":"interacted with your Caw";return '<a href="'+(x.type==="follow"?'profile.html?u='+encodeURIComponent(x.actor_id):(x.post_id?'index.html#caw-'+encodeURIComponent(x.post_id):'#'))+'" style="display:block;text-decoration:none;color:inherit"><article class="card" style="padding:16px;margin-bottom:10px;opacity:'+(x.read_at?'0.72':'1')+'"><strong>'+name+'</strong> <span>'+label+'</span><div style="font-size:11px;color:var(--muted);margin-top:5px">'+new Date(x.created_at).toLocaleString()+'</div></article></a>'}).join("");
  statusEl.textContent=data.filter(x=>!x.read_at).length+" unread notification"+(data.filter(x=>!x.read_at).length===1?"":"s");
  const unread=data.filter(x=>!x.read_at).map(x=>x.id);
  if(unread.length){await db.from("crowspace_notifications").update({read_at:new Date().toISOString()}).in("id",unread)}
 }
+const notificationChannel=db.channel("crowspace-notifications-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications"},loadNotifications).subscribe();window.addEventListener("beforeunload",()=>db.removeChannel(notificationChannel));
 loadNotifications();
 </script></body></html>
