@@ -39,6 +39,22 @@ document.addEventListener("DOMContentLoaded",async()=>{
  messages.addEventListener("click",async e=>{const rr=e.target.closest("[data-message-reaction]");if(rr){const id=rr.dataset.messageReaction,emoji=rr.dataset.reaction,type="reaction:"+emoji;const {data:mine}=await sb.from("crowspace_social_interactions").select("id").eq("user_id",user.id).eq("target_type","message").eq("target_id",id).eq("interaction_type",type).maybeSingle();if(mine)await sb.from("crowspace_social_interactions").delete().eq("id",mine.id).eq("user_id",user.id);else await sb.from("crowspace_social_interactions").insert({user_id:user.id,target_type:"message",target_id:id,interaction_type:type});await openConversation(active);return;}const eb=e.target.closest("[data-edit]");if(eb){const q=(await sb.from("crowspace_messages").select("body").eq("id",eb.dataset.edit).maybeSingle()).data;if(q){const edited=prompt("Edit message:",q.body);if(edited!==null&&edited.trim()&&edited.trim().length<=5000){const {error}=await sb.from("crowspace_messages").update({body:edited.trim(),edited_at:new Date().toISOString()}).eq("id",eb.dataset.edit).eq("sender_id",user.id);if(error)status.textContent=error.message;else await openConversation(active);}}return;}const rb=e.target.closest("[data-reply]");if(rb){const q=(await sb.from("crowspace_messages").select("body").eq("id",rb.dataset.reply).maybeSingle()).data;if(q){replyTo=rb.dataset.reply;input.value="Replying: "+q.body.slice(0,140);input.focus();status.textContent="Replying to this message.";}}const b=e.target.closest("[data-message]");if(!b)return;if(!confirm("Delete this message?"))return;const {error}=await sb.from("crowspace_messages").delete().eq("id",b.dataset.message).eq("sender_id",user.id);if(error){status.textContent=error.message;return}await openConversation(active)});
  document.getElementById("conversationSearch")?.addEventListener("input",async e=>{const q=e.target.value.toLowerCase().trim();document.querySelectorAll("#conversationList .conversation").forEach(b=>b.hidden=q&&!b.textContent.toLowerCase().includes(q))});
  list.addEventListener("click",e=>{const b=e.target.closest("[data-conversation]");if(b)openConversation(b.dataset.conversation)});
+ document.getElementById("newGroup")?.addEventListener("click",async()=>{
+  const titleName=prompt("Group name:"); if(!titleName?.trim())return;
+  const raw=prompt("Enter CrowSpace usernames, separated by commas:"); if(!raw?.trim())return;
+  const names=[...new Set(raw.split(",").map(v=>v.trim().replace(/^@/, "").toLowerCase()).filter(Boolean))];
+  if(!names.length){status.textContent="Add at least one member.";return}
+  const {data:found,error:pe}=await sb.from("crowspace_profiles").select("user_id,display_name,username").in("username",names);
+  if(pe){status.textContent=pe.message;return}
+  const wanted=(found||[]).filter(p=>p.user_id!==user.id); const missing=names.filter(n=>!wanted.some(p=>(p.username||"").toLowerCase()===n));
+  if(missing.length){status.textContent="Not found: @"+missing.join(", @");return}
+  const {data:c,error}=await sb.from("crowspace_conversations").insert({created_by:user.id,title:titleName.trim().slice(0,120),is_group:true}).select("id").single();
+  if(error){status.textContent=error.message;return}
+  const rows=[user.id,...wanted.map(p=>p.user_id)].map(uid=>({conversation_id:c.id,user_id:uid}));
+  const {error:me}=await sb.from("crowspace_conversation_members").insert(rows);
+  if(me){status.textContent=me.message;return}
+  await openConversation(c.id);
+ });
  document.getElementById("newConversation")?.addEventListener("click",async()=>{
   const username=prompt("Enter the CrowSpace username to message:"); if(!username)return;
   const {data:p}=await sb.from("crowspace_profiles").select("user_id,display_name,username").eq("username",username.replace(/^@/,"")).maybeSingle();
