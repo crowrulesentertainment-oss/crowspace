@@ -88,28 +88,8 @@ CS.refreshHeader=async()=>{
  if(currentUser)await CS.ensureProfile(currentUser);
  const header=document.querySelector(".site-header");
  if(header){
-   CS.injectGlobalNavStyles();
-   let nav=header.querySelector("nav");if(!nav){nav=document.createElement("nav");header.appendChild(nav)}
-   const path=location.pathname.split("/").pop()||"index.html";
-   const groups=[
-     ["Start",CS.navItems.filter(x=>x.group==="core")],
-     ["Social",CS.navItems.filter(x=>x.group==="connect")],
-     ["Create",CS.navItems.filter(x=>x.group==="create")],
-     ["Universe",CS.navItems.filter(x=>x.group==="universe")],
-     ["Account",CS.navItems.filter(x=>x.group==="account")],
-     ["More",CS.navItems.filter(x=>x.group==="quick")]
-   ];
-   const link=x=>'<a href="'+CS.escape(x.href)+'"'+(x.href===path?' class="active" aria-current="page"':"")+'>'+CS.escape(x.label)+'</a>';
-   nav.innerHTML='<div class="crow-nav-shell"><a class="crow-nav-home'+(path==="index.html"?' active" aria-current="page"':'"')+' href="index.html">⌂ Home</a><div class="crow-nav-groups">'+groups.map((g,i)=>'<div class="crow-nav-group"><button type="button" class="crow-nav-trigger" aria-expanded="false" aria-controls="crow-nav-panel-'+i+'">'+CS.escape(g[0])+' <span class="chevron">▼</span></button><div id="crow-nav-panel-'+i+'" class="crow-nav-panel" role="menu" aria-hidden="true"><div class="crow-nav-panel-title">'+CS.escape(g[0])+'</div>'+g[1].map(link).join("")+'</div></div>').join("")+'</div></div>';
-   const closeAll=()=>nav.querySelectorAll(".crow-nav-trigger").forEach(b=>{b.classList.remove("is-open");b.setAttribute("aria-expanded","false");const p=b.nextElementSibling;if(p){p.classList.remove("is-open");p.setAttribute("aria-hidden","true")}});
-   nav.querySelectorAll(".crow-nav-trigger").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();const panel=btn.nextElementSibling;const open=!btn.classList.contains("is-open");closeAll();if(open){btn.classList.add("is-open");btn.setAttribute("aria-expanded","true");panel?.classList.add("is-open");panel?.setAttribute("aria-hidden","false")}}));
-   nav.querySelectorAll(".crow-nav-panel a").forEach(a=>a.addEventListener("click",closeAll));
-   if(CS._navOutsideClick)document.removeEventListener("click",CS._navOutsideClick);
-   if(CS._navEscape)document.removeEventListener("keydown",CS._navEscape);
-   CS._navOutsideClick=e=>{if(!nav.contains(e.target))closeAll()};
-   CS._navEscape=e=>{if(e.key==="Escape")closeAll()};
-   document.addEventListener("click",CS._navOutsideClick);
-   document.addEventListener("keydown",CS._navEscape);
+   // Navigation is owned exclusively by js/global-nav.js.
+   // crowspace.js handles account state and shared search only.
    CS.installGlobalSearch();
  }
  const el=document.getElementById("account"); if(!el)return;
