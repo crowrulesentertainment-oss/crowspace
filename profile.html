@@ -249,7 +249,19 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 .nest-os{margin:18px 0;padding:22px;border:1px solid rgba(255,255,255,.09);border-radius:24px;background:linear-gradient(135deg,rgba(10,16,29,.94),rgba(13,10,27,.88));box-shadow:0 22px 70px rgba(0,0,0,.28)}
 .nest-os-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.eyebrow{font:700 10px Montserrat,Arial;letter-spacing:.2em;color:#55e6ff}.nest-os h2{margin:5px 0 3px;font:700 clamp(24px,3vw,38px) Orbitron,Arial;color:#f4f7ff}.nest-os p{margin:0;color:#7f8da6;font-size:12px}.os-live{display:flex;align-items:center;gap:7px;font:700 10px Montserrat;color:#7f8da6}.os-live i{width:8px;height:8px;border-radius:50%;background:#7f8da6;box-shadow:0 0 12px currentColor}.os-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.os-card{min-height:112px;padding:15px;border:1px solid rgba(255,255,255,.08);border-radius:17px;background:rgba(255,255,255,.035);text-decoration:none;color:#f4f7ff;transition:.2s;display:flex;flex-direction:column;justify-content:flex-end}.os-card:hover{transform:translateY(-3px);border-color:rgba(85,230,255,.35);background:rgba(85,230,255,.055)}.os-card b{font:700 28px Orbitron,Arial;color:#55e6ff;margin-bottom:auto}.os-card span{font:700 10px Montserrat;letter-spacing:.15em}.os-card small{font-size:10px;color:#7f8da6;margin-top:4px}
 @media(max-width:900px){.os-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.nest-os{padding:16px}.nest-os-head{display:block}.os-live{margin-top:12px}.os-grid{grid-template-columns:1fr 1fr}.os-card{min-height:100px}}
-</style></head>
+</style>
+<style id="crowspace-reward-collection">
+.reward-collection{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0}
+.reward-chip{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid rgba(85,230,255,.18);border-radius:13px;background:linear-gradient(135deg,rgba(85,230,255,.07),rgba(155,124,255,.07));min-width:0}
+.reward-chip-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.05);font-size:17px;flex:0 0 30px}
+.reward-chip-copy{min-width:0}
+.reward-chip-copy strong{display:block;font-size:10px;line-height:1.2}
+.reward-chip-copy small{display:block;color:var(--muted);font-size:8px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.reward-collection-empty{padding:12px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:10px;width:100%}
+.reward-category{display:inline-block;margin-top:3px;color:var(--cyan);font-size:7px;text-transform:uppercase;letter-spacing:.12em}
+@media(max-width:520px){.reward-chip{width:100%}.reward-chip-copy small{max-width:220px}}
+</style>
+</head>
 <body>
 <header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header>
 <main class="nest-app">
@@ -296,6 +308,10 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 <section class="panel compact"><div class="panel-head"><h3>Profile Signal</h3></div><div class="signal-grid"><div><span>STATUS</span><b id="statusSnapshot">—</b></div><div><span>MEMBER SINCE</span><b id="memberSinceSnapshot">—</b></div><div><span>MOOD</span><b id="moodSnapshot">—</b></div><div><span>UNIVERSE</span><b>CrowRules</b></div></div></section><section class="panel compact social-links-panel" id="socialLinksPanel">
 <div class="section-head social-links-heading"><div><p class="eyebrow">CONNECT BEYOND CROWSPACE</p><h2>Social Links</h2><p class="muted">Find this member across the web. Social links are managed from the Nest customization page.</p></div><a id="manageSocialLinks" class="btn social-manage-btn" href="customize.html">Manage Links →</a></div>
 <div id="socialLinksList" class="social-links-list"><div class="social-link-empty">Loading social links…</div></div>
+</section>
+<section class="panel compact" id="rewardCollectionPanel">
+<div class="panel-head"><div><h3>My CrowSpace Collection</h3><span id="rewardCollectionCount">0 earned</span></div><a href="rewards-store.html">Rewards Store →</a></div>
+<div id="rewardCollection" class="reward-collection"><p class="empty">Loading earned badges and cosmetics…</p></div>
 </section>
 <section class="panel compact"><div class="panel-head"><h3>Profile Link</h3></div><div class="copy-row"><input id="shareUrl" readonly><button id="copyProfileUrl" type="button">Copy</button></div><small id="copyStatus"></small></section>
 <section class="panel compact"><div class="panel-head"><h3>Audio & Favorites</h3></div><p id="music" class="empty">No favorite music added.</p><div id="musicPlayer"></div><div id="classicPlaylist"></div><p id="favorites" class="empty"></p></section>
@@ -731,6 +747,31 @@ async function photoComment(photoId){
   });
 }
 
+
+async function renderRewardCollection(){
+  const box=$("rewardCollection"),count=$("rewardCollectionCount");
+  if(!box)return;
+  box.innerHTML='<p class="empty">Loading earned badges and cosmetics…</p>';
+  try{
+    const {data,error}=await crowSupabase.rpc("crowspace_public_reward_inventory",{p_user_id:uid});
+    if(error)throw error;
+    const rewards=data||[];
+    if(count)count.textContent=rewards.length+" earned";
+    if(!rewards.length){
+      box.innerHTML='<div class="reward-collection-empty">No CrowPoints rewards earned yet. Visit the Rewards Store to start building your collection.</div>';
+      return;
+    }
+    box.innerHTML=rewards.map(r=>'<div class="reward-chip" title="'+esc(r.description||r.name||"CrowSpace reward")+'">'+
+      '<div class="reward-chip-icon">'+esc(r.icon||"🏅")+'</div>'+
+      '<div class="reward-chip-copy"><strong>'+esc(r.name||"CrowSpace Reward")+'</strong><span class="reward-category">'+esc(r.category||"reward")+'</span><small>Earned '+esc(fmt(r.granted_at))+'</small></div>'+
+      '</div>').join("");
+  }catch(error){
+    console.error("CrowSpace reward collection:",error);
+    if(count)count.textContent="Unavailable";
+    box.innerHTML='<div class="reward-collection-empty">Rewards are temporarily unavailable. Please refresh this Nest.</div>';
+  }
+}
+
 async function renderGuestbook(){
   const {data,error}=await crowSupabase.from("crowspace_guestbook").select("body,created_at,author_id").eq("profile_id",uid).order("created_at",{ascending:false}).limit(20);
   if(error){html("guestbook",'<p class="muted">'+esc(error.message)+'</p>');return}
@@ -771,7 +812,7 @@ text("tagline",nestSettings.tagline||"Welcome to my CrowSpace Nest.");text("stat
       err("profile visit",ve);
     }
     const d={};
-    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]); text("shareUrl",location.href);
+    await Promise.all([renderSocial(),renderFriends(),renderInterests(),renderMedia(),renderRewardCollection(),renderGuestbook(),renderPosts(n),renderTimeline(),renderOnline(),renderVisitors(d)]); text("shareUrl",location.href);
     const map={top8Section:"show_top_friends",interestsSection:"show_interests",musicSection:"show_music",photosSection:"show_photos",cawsSection:"show_caws",groupsSection:"show_groups",eventsSection:"show_events",guestbookSection:"show_guestbook"};
     Object.keys(map).forEach(id=>{const el=$(id);if(el&&nestSettings[map[id]]===false)el.style.display="none"});
     $("guestForm").style.display=viewer?.id===uid?"none":"grid";
