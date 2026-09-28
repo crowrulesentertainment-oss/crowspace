@@ -1,4 +1,21 @@
 /* CrowSpace interaction layer — Supabase-backed social actions. */
+async function crowspaceChooseCollection(sb,userId,targetType,targetId){
+  const {data}=await sb.from("crowspace_saved_collections").select("id,name").eq("user_id",userId).order("created_at",{ascending:true});
+  const collections=data||[];
+  let choice="";
+  if(collections.length){
+    const menu=collections.map((x,i)=>((i+1)+". "+x.name)).join("\n");
+    choice=prompt("Save to a collection (enter number), or Cancel for Saved Library:\n\n"+menu);
+    if(choice===null)return null;
+    const n=parseInt(choice,10);
+    if(n>=1&&n<=collections.length) return collections[n-1].id;
+  }
+  const create=prompt("No collection selected. Enter a new collection name, or leave blank for Saved Library:");
+  if(create===null||!create.trim())return "";
+  const {data:created,error}=await sb.from("crowspace_saved_collections").insert({user_id:userId,name:create.trim()}).select("id").single();
+  if(error){alert(error.message);return null}
+  return created.id;
+}
 document.addEventListener("DOMContentLoaded",()=>{
   const root=document.documentElement;
   const saved=localStorage.getItem("crowspace-theme");
@@ -30,12 +47,21 @@ document.addEventListener("DOMContentLoaded",()=>{
           el.classList.add("active");el.textContent="Following";
         }
       }else{
-        const {data:existing}=await sb.from("crowspace_social_interactions").select("id").eq("user_id",user.id).eq("target_type",el.dataset.targetType||"post").eq("target_id",targetId).eq("interaction_type",action);
+        const targetType=el.dataset.targetType||"post";
+        const {data:existing}=await sb.from("crowspace_social_interactions").select("id").eq("user_id",user.id).eq("target_type",targetType).eq("target_id",targetId).eq("interaction_type",action);
         if(existing?.length){
           await sb.from("crowspace_social_interactions").delete().eq("user_id",user.id).eq("target_type",el.dataset.targetType||"post").eq("target_id",targetId).eq("interaction_type",action);
           el.classList.remove("active");
         }else{
-          const {error}=await sb.from("crowspace_social_interactions").insert({user_id:user.id,target_type:el.dataset.targetType||"post",target_id:targetId,interaction_type:action});
+          const {error}=await sb.from("crowspace_social_interactions").insert({user_id:user.id,target_type:targetType,target_id:targetId,interaction_type:action});
+          if(action==="save"){
+            const collectionId=await crowspaceChooseCollection(sb,user.id,targetType,targetId);
+            if(collectionId===null) return;
+            if(collectionId){
+              const {error:ce}=await sb.from("crowspace_saved_collection_items").insert({collection_id:collectionId,user_id:user.id,target_type:targetType,target_id:targetId});
+              if(ce && ce.code!=="23505") throw ce;
+            }
+          }
           if(error)throw error;
           el.classList.add("active");
         }
