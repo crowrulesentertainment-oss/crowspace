@@ -49,4 +49,4 @@ function renderPosts(ps,g,lb,ml,cb){if(!ps.length)return '<div class="empty">No 
 function renderRanking(ps,g,lb){const scores={};ps.forEach(p=>{scores[p.user_id]=(scores[p.user_id]||0)+1+Number(lb[p.id]||0);});const arr=Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,5);if(!arr.length)return '<div class="empty">Activity appears here as the Circle grows.</div>';return arr.map((r,i)=>{const p=g[r[0]]||{};return '<div class="rank-row"><strong>#'+(i+1)+'</strong><span>'+esc(p.display_name||p.username||'Member')+'</span><strong>'+r[1]+'</strong></div>';}).join('');}
  load();
 });
-</script><script src="js/global-nav.js"></script></body></html>
+</script><script src="js/global-nav.js?v=20260927-3"></script></body></html>
