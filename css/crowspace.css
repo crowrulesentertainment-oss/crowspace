@@ -22,3 +22,5 @@
 .invite-funnel small{display:block;margin-top:3px;font-size:9px;opacity:.6;white-space:nowrap}.invite-funnel>div{min-width:74px}.invite-funnel small{color:var(--muted,#9aa0aa)}
 
 .invite-health{margin:10px 0;padding:8px 10px;border:1px solid #ffffff18;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px}.invite-health span{font-weight:700}.invite-health.strong{border-color:#36d39955}.invite-health.attention{border-color:#fbbf2455}.invite-health.low{border-color:#fb718555}.invite-health.neutral{opacity:.7}.invite-health b{font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+
+.invite-performance{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.invite-performance>div{padding:12px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff05}.invite-performance strong{display:block;margin:4px 0;font-size:15px}.invite-performance small{opacity:.6}@media(max-width:650px){.invite-performance{grid-template-columns:1fr}}
