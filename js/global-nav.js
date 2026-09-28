@@ -30,6 +30,7 @@ async function boot(){
   }
   shell.appendChild(groupsBox);nav.appendChild(shell);
   if(window.CS?.injectGlobalNavStyles)window.CS.injectGlobalNavStyles();
+  if(window.CS?.init&&!window.CS._initialized)await window.CS.init();
   document.addEventListener("click",e=>{if(!nav.contains(e.target))nav.querySelectorAll(".crow-nav-panel.is-open").forEach(p=>p.classList.remove("is-open"))},{passive:true});
  }catch(e){console.warn("CrowSpace global navigation:",e.message)}
 }
