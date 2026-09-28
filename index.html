@@ -163,11 +163,6 @@
     }
     box.innerHTML='<div class="community-loading">Loading community activity…</div>';
     try{
-      const u=await user();
-      if(!u){
-        box.innerHTML='<div class="community-empty"><strong style="display:block;color:#fff;margin-bottom:5px">Join the conversation.</strong>Sign in to see your personalized CrowSpace activity feed.<br><br><a class="btn primary" href="login.html">Sign In →</a></div>';
-        return;
-      }
       const {data,error}=await c.rpc("crowspace_home_activity",{p_limit:40});
       if(error)throw error;
       render(data||[]);
