@@ -312,16 +312,58 @@
     try{
       if(!window.crowSupabase) throw new Error('Supabase client is not configured.');
 
-      var result=await window.crowSupabase
+      // Supabase REST returns a maximum of 1,000 rows by default. Do not use
+      // the returned row length for totals; request exact database counts.
+      var allResult=await window.crowSupabase
         .from('memorials')
         .select('*')
         .eq('published',true)
         .order('passing_date',{ascending:false});
 
-      if(result.error) throw result.error;
+      if(allResult.error) throw allResult.error;
+      rows=Array.isArray(allResult.data)?allResult.data:[];
 
-      rows=Array.isArray(result.data)?result.data:[];
-      updateStats();
+      var totalResult=await window.crowSupabase
+        .from('memorials')
+        .select('id',{count:'exact',head:true})
+        .eq('published',true);
+      if(totalResult.error) throw totalResult.error;
+
+      var deathResult=await window.crowSupabase
+        .from('memorials')
+        .select('id',{count:'exact',head:true})
+        .eq('published',true)
+        .not('passing_date','is',null);
+      if(deathResult.error) throw deathResult.error;
+
+      var celebrityResult=await window.crowSupabase
+        .from('memorials')
+        .select('id',{count:'exact',head:true})
+        .eq('published',true)
+        .eq('is_celebrity',true);
+      if(celebrityResult.error) throw celebrityResult.error;
+
+      var now=new Date();
+      now.setHours(0,0,0,0);
+      var cutoff=new Date(now);
+      cutoff.setDate(cutoff.getDate()-30);
+      var cutoffDate=cutoff.toISOString().slice(0,10);
+      var todayDate=now.toISOString().slice(0,10);
+
+      var recentResult=await window.crowSupabase
+        .from('memorials')
+        .select('id',{count:'exact',head:true})
+        .eq('published',true)
+        .not('passing_date','is',null)
+        .gte('passing_date',cutoffDate)
+        .lte('passing_date',todayDate);
+      if(recentResult.error) throw recentResult.error;
+
+      byId('total').textContent=Number(totalResult.count||0).toLocaleString();
+      byId('deathCount').textContent=Number(deathResult.count||0).toLocaleString();
+      byId('recentCount').textContent=Number(recentResult.count||0).toLocaleString();
+      byId('celebrityCount').textContent=Number(celebrityResult.count||0).toLocaleString();
+
       renderRecent();
       renderArchive();
     }catch(error){
