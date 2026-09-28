@@ -8,3 +8,5 @@
 .invite-use-toast{position:fixed;right:20px;bottom:20px;z-index:1200;padding:12px 16px;border:1px solid var(--accent);background:var(--panel);color:var(--text);border-radius:12px;box-shadow:0 12px 35px #0008;opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s}.invite-use-toast.show{opacity:1;transform:translateY(0)}
 
 .invite-activity-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 14px;color:var(--muted,#9aa0aa);font-size:12px}.invite-activity-tools button{font-size:12px;padding:7px 11px}.invite-activity-head small{display:block;margin-top:4px;color:var(--muted,#9aa0aa);font-size:11px}.invite-timeline-item{animation:inviteActivityIn .22s ease both}@keyframes inviteActivityIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+.invite-activity-tools select{background:var(--panel,#11151c);color:var(--text,#fff);border:1px solid #ffffff22;border-radius:8px;padding:7px 9px;font-size:12px}.invite-activity-tools{flex-wrap:wrap}.invite-activity-tools select:focus{outline:1px solid var(--accent,#7c5cff)}
