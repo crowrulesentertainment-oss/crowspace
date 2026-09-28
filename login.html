@@ -1,1 +1,38 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign In | CrowSpace</title><link rel="stylesheet" href="css/crowspace.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header><main class="auth"><div class="auth-card"><a class="brand" href="index.html">◉ CROWSPACE</a><p class="eyebrow">UNIVERSAL CROWRULES MEMBERSHIP</p><h1>Sign in</h1><form id="loginForm"><input id="email" type="email" placeholder="Email" required><input id="password" type="password" placeholder="Password" required><button class="btn primary">Sign In</button></form><button id="google" class="btn wide">Continue with Google</button><p id="msg" class="muted"></p><p><a href="membership.html">Universal Membership</a> · New to CrowSpace? <a href="signup.html">Create an account</a></p></div></main><script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script src="js/auth.js"></script><script src="js/global-nav.js?v=20260927-4"></script></body></html>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign In | CrowSpace</title>
+<link rel="stylesheet" href="css/crowspace.css">
+<style>
+.auth-social{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.auth-social .btn{margin:0}
+.social-discord{border-color:rgba(88,101,242,.45);background:rgba(88,101,242,.08)}
+.social-twitch{border-color:rgba(145,70,255,.45);background:rgba(145,70,255,.08)}
+.auth-divider{text-align:center;margin:14px 0 8px}
+@media(min-width:620px){
+  .auth-social{grid-template-columns:1fr 1fr}
+  .auth-social #google{grid-column:1/-1}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head><body>
+<header class="site-header"><a class="brand" href="index.html">● CROWSPACE</a><nav></nav><div id="account"><a href="login.html">Sign In</a></div></header>
+<main class="auth"><div class="auth-card">
+<a class="brand" href="index.html">◉ CROWSPACE</a>
+<p class="eyebrow">UNIVERSAL CROWRULES MEMBERSHIP</p>
+<h1>Sign in</h1>
+<form id="loginForm">
+<input id="email" type="email" placeholder="Email" required>
+<input id="password" type="password" placeholder="Password" required>
+<button class="btn primary">Sign In</button>
+</form>
+<div class="auth-divider muted">or continue with</div>
+<div class="auth-social">
+<button id="google" class="btn wide" type="button">Continue with Google</button>
+<button id="discord" class="btn wide social-discord" type="button">Continue with Discord</button>
+<button id="twitch" class="btn wide social-twitch" type="button">Continue with Twitch</button>
+</div>
+<p id="msg" class="muted"></p>
+<p><a href="membership.html">Universal Membership</a> · New to CrowSpace? <a href="signup.html">Create an account</a></p>
+</div></main>
+<script src="js/config.js"></script><script src="js/supabase.js"></script><script src="js/crowspace.js"></script><script src="js/auth.js"></script><script src="js/global-nav.js?v=20260927-4"></script>
+</body></html>
