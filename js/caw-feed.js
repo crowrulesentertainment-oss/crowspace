@@ -69,7 +69,7 @@ async function queryCaws(){
   const from=page*PAGE_SIZE,to=from+PAGE_SIZE-1;
   let q=supabase.from("crowspace_caws")
     .select("id,user_id,title,caption,video_url,thumbnail_url,views,created_at,storage_path,mime_type,reward_featured_until")
-    .order("created_at",{ascending:false}).range(from,to);
+    .range(from,to);
 
   if(mode==="following"){
     const f=await supabase.from("crowspace_follows").select("followed_user_id").eq("follower_id",user.id);
@@ -81,8 +81,17 @@ async function queryCaws(){
 
   const {data,error}=await q;
   if(error)throw error;
+
   let result=(data||[]).filter(x=>media(x));
-  if(mode==="trending")result.sort((a,b)=>Number(b.views||0)-Number(a.views||0));
+  if(mode==="trending"){
+    result.sort((a,b)=>Number(b.views||0)-Number(a.views||0));
+  }else{
+    // Shuffle every fetched batch so refreshes do not always begin with the newest Caws.
+    for(let i=result.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [result[i],result[j]]=[result[j],result[i]];
+    }
+  }
   return result;
 }
 
@@ -145,10 +154,7 @@ function startVideo(v){
   v.autoplay=true;
   v.setAttribute("autoplay","");
   const p=v.play();
-  if(p?.catch)p.catch(()=>{
-    // Browsers may block audible autoplay. Leave the video ready for a user gesture.
-    v.muted=false;
-  });
+  if(p?.catch)p.catch(()=>{v.muted=false});
 }
 
 function activate(index,scroll=false){
@@ -197,12 +203,8 @@ function bindCards(){
       v.autoplay=true;
       v.setAttribute("autoplay","");
       v.setAttribute("playsinline","");
-      v.addEventListener("loadeddata",()=>{
-        if(c.classList.contains("active"))startVideo(v);
-      },{once:true});
-      v.addEventListener("canplay",()=>{
-        if(c.classList.contains("active"))startVideo(v);
-      },{once:true});
+      v.addEventListener("loadeddata",()=>{if(c.classList.contains("active"))startVideo(v)},{once:true});
+      v.addEventListener("canplay",()=>{if(c.classList.contains("active"))startVideo(v)},{once:true});
     }
     let tracked=false;
     const track=()=>{if(!tracked){tracked=true;trackView(c.dataset.id)}};
@@ -237,7 +239,7 @@ async function render(items){
 async function load(reset=false){
   if(busy)return;
   if(reset){
-    page=0;done=false;active=0;feed.innerHTML="";setStatus("Loading Caws…");
+    page=0;done=false;active=0;feed.innerHTML="";setStatus("Randomizing Caws…");
   }
   busy=true;
   try{
