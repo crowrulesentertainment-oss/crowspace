@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  const {data:{user}}=await sb.auth.getUser(); if(!user){list.innerHTML='<div class="empty">Sign in to use Messenger.</div>';return}
  let active=null, channel=null, presenceChannel=null, typingChannel=null, typingTimer=null, unread=0, shareId=new URLSearchParams(location.search).get("share");
  const esc=v=>String(v??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+ async function uploadMessengerMedia(file){if(!file)return null;if(file.size>50*1024*1024){status.textContent="Media must be 50 MB or smaller.";return null}const ok=["image/jpeg","image/png","image/webp","image/gif","video/mp4","video/webm","video/quicktime"].includes(file.type);if(!ok){status.textContent="Unsupported media type.";return null}const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const path=user.id+"/messages/"+Date.now()+"-"+safe;const {error}=await sb.storage.from("crowspace-media").upload(path,file,{contentType:file.type,upsert:false});if(error){status.textContent=error.message;return null}return sb.storage.from("crowspace-media").getPublicUrl(path).data.publicUrl}
  async function profiles(ids){if(!ids.length)return{};const {data}=await sb.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids);return Object.fromEntries((data||[]).map(p=>[p.user_id,p]))}
  async function loadList(){
   const {data:members}=await sb.from("crowspace_conversation_members").select("conversation_id").eq("user_id",user.id);
@@ -47,7 +48,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  });
  document.getElementById("sendMessage")?.addEventListener("click",async()=>{
   const body=input.value.trim();if(!body||!active)return;
-  const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body});if(error){status.textContent=error.message;return}input.value="";status.textContent="";await openConversation(active);
+  let mediaUrl=null;if(mediaInput?.files?.[0])mediaUrl=await uploadMessengerMedia(mediaInput.files[0]);if(mediaInput?.files?.length&&!mediaUrl)return;const finalBody=body||(mediaUrl?"📎 Shared media":"");const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body:finalBody});if(error){status.textContent=error.message;return}input.value="";if(mediaInput)mediaInput.value="";status.textContent="";await openConversation(active);
  });
  input?.addEventListener("input",()=>{setTyping(true);clearTimeout(typingTimer);typingTimer=setTimeout(()=>setTyping(false),1200)});
  input?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("sendMessage").click()}});
