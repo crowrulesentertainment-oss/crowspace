@@ -13,6 +13,7 @@ CS.navItems=[
  {label:"Groups",href:"groups.html",group:"connect"},
  {label:"Events",href:"events.html",group:"connect"},
  {label:"Dreamscapes",href:"dreamscapes.html",group:"universe"},
+ {label:"Production Pipeline",href:"production-pipeline.html",group:"universe"},
  {label:"Memorials",href:"memorials.html",group:"universe"},
  {label:"Command Center",href:"command-center.html",group:"universe"},
  {label:"Notifications",href:"notifications.html",group:"account"},
