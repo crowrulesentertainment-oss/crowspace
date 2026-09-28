@@ -25,8 +25,9 @@ document.addEventListener("DOMContentLoaded",async()=>{
       const p=pm.get(x.user_id)||{};
       const name=p.display_name||p.username||"CrowSpace Member";
       const avatar=p.avatar_url?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<div class="avatar">'+esc(initials(name))+'</div>';
+      const profileHref=p.username?'profile.html?username='+encodeURIComponent(p.username):'profile.html?user='+encodeURIComponent(x.user_id);
       const btn=(type,label,activeLabel)=>{const k=x.id+"|"+type;return '<button data-action="'+type+'" data-target-type="post" data-target-id="'+x.id+'" class="'+(mine.has(k)?"active":"")+'">'+(mine.has(k)?activeLabel:label)+' <span class="muted">'+(counts.get(k)||0)+'</span></button>'};
-      return '<article class="feed-card panel"><div class="user-row">'+avatar+'<div><b>'+esc(name)+'</b><div class="muted">@'+esc(p.username||"member")+'</div></div><span class="muted">'+(x.created_at?new Date(x.created_at).toLocaleString():"")+'</span></div><p>'+esc(x.body||"")+'</p><div class="reaction-bar">'+btn("like","♡ Like","♥ Liked")+btn("repost","↗ Repost","↗ Reposted")+btn("save","🔖 Save","🔖 Saved")+'<button>💬 Comment</button></div></article>';
+      return '<article class="feed-card panel"><div class="user-row"><a href="'+profileHref+'" aria-label="View '+esc(name)+' profile">'+avatar+'</a><div><a href="'+profileHref+'"><b>'+esc(name)+'</b></a><div class="muted"><a href="'+profileHref+'">@'+esc(p.username||"member")+'</a></div></div><span class="muted">'+(x.created_at?new Date(x.created_at).toLocaleString():"")+'</span></div><p>'+esc(x.body||"")+'</p><div class="reaction-bar">'+btn("like","♡ Like","♥ Liked")+btn("repost","↗ Repost","↗ Reposted")+btn("save","🔖 Save","🔖 Saved")+'<button>💬 Comment</button></div></article>';
     }).join("");
   }
   document.getElementById("postCaw")?.addEventListener("click",async()=>{
