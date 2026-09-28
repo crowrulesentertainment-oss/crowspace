@@ -46,6 +46,8 @@ async function toggleInteraction(target_id,interaction_type){
  document.getElementById("following").onclick=async()=>{feedMode="following";document.getElementById("forYou").className="btn ghost";document.getElementById("following").className="btn primary";await loadFeed()};
  document.getElementById("refreshFeed").onclick=loadFeed;
  form.addEventListener("submit",async e=>{e.preventDefault();const {data:{session}}=await db.auth.getSession();if(!session)return;const text=body.value.trim();if(!text)return;const {error}=await db.from("crowspace_posts").insert({user_id:session.user.id,body:text});if(error){alert(error.message);return}body.value="";count.textContent="0 / 500";await loadFeed()});
+ const channel=db.channel("crowspace-feed-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts"},()=>loadFeed()).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_social_interactions",filter:"target_type=eq.post"},()=>loadFeed()).on("postgres_changes",{event:"DELETE",schema:"public",table:"crowspace_social_interactions",filter:"target_type=eq.post"},()=>loadFeed()).subscribe();
+ window.addEventListener("beforeunload",()=>db.removeChannel(channel));
  await loadFeed();
 })();
 </script></body></html>
