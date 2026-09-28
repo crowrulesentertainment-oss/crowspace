@@ -95,3 +95,5 @@ async function loadCounts(){
     if(c.ok){const d=await c.json();document.getElementById("cawCount")?.replaceChildren(document.createTextNode(d.length))}
   }catch(e){console.warn("CrowSpace live counts unavailable",e)}
 }
+// Collection discovery telemetry
+window.crowspaceTrackCollectionEvent=async function(sb,collectionId,eventType,userId=null){if(!sb||!collectionId)return;try{await sb.from("crowspace_collection_events").insert({collection_id:collectionId,event_type:eventType,user_id:userId||null})}catch(e){}};
