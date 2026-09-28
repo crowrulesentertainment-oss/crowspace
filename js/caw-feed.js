@@ -1,7 +1,8 @@
 (()=>{"use strict";
 
-const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
-const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const SUPABASE_URL=window.CROW_CONFIG?.supabaseUrl||"https://cevylpnoexugwgygvtgu.supabase.co";
+const SUPABASE_KEY=window.CROW_CONFIG?.supabaseKey||"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const requestedCaw=new URLSearchParams(location.search).get("caw");
 const BUCKET="crowspace-caws";
 const PAGE_SIZE=12;
 
@@ -66,6 +67,7 @@ async function trackView(id){
 }
 
 async function queryCaws(){
+  if(requestedCaw){const one=await supabase.from("crowspace_caws").select("id,user_id,title,caption,video_url,thumbnail_url,views,created_at,storage_path,mime_type,reward_featured_until").eq("id",requestedCaw).maybeSingle();if(one.error)throw one.error;return one.data&&media(one.data)?[one.data]:[]}
   const from=page*PAGE_SIZE,to=from+PAGE_SIZE-1;
   let q=supabase.from("crowspace_caws")
     .select("id,user_id,title,caption,video_url,thumbnail_url,views,created_at,storage_path,mime_type,reward_featured_until")
@@ -250,7 +252,7 @@ async function load(reset=false){
     cards=[...feed.querySelectorAll(".cf-card")];
     setStatus(cards.length?("Caw "+(active+1)+" of "+cards.length):"No Caws yet");
     if(loadMore)loadMore.style.display=done?"none":"block";
-    if(!cards.length)feed.innerHTML='<div class="cf-empty"><h2>No Caws Yet</h2><p>Be the first to share something with CrowSpace.</p><a href="create-caw.html">Create a Caw</a></div>';
+    if(!cards.length&&!requestedCaw)feed.innerHTML='<div class="cf-empty"><h2>No Caws Yet</h2><p>Be the first to share something with CrowSpace.</p><a href="create-caw.html">Create a Caw</a></div>';
     else activate(Math.min(active,cards.length-1),false);
   }catch(e){
     console.error("Caw Feed:",e);
