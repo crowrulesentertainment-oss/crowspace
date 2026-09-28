@@ -104,7 +104,7 @@ function card(x,p){
 
   return '<article class="cf-card '+(featured?"cf-featured":"")+'" data-id="'+esc(x.id)+'">'+
     '<div class="cf-media">'+
-      '<video class="cf-video" src="'+esc(src)+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'" ':"")+'playsinline muted loop preload="metadata"></video>'+
+      '<video class="cf-video" src="'+esc(src)+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'" ':"")+'autoplay playsinline muted loop preload="auto"></video>'+
       '<div class="cf-media-shade"></div>'+
       '<div class="cf-topbar"><div class="cf-avatar">'+avatar+'</div><div><strong>'+esc(name)+'</strong><small>@'+esc(p?.username||"member")+'</small></div></div>'+
       '<button class="cf-play" type="button" aria-label="Play or pause">▶</button>'+
@@ -148,7 +148,7 @@ function activate(index,scroll=false){
   pauseOthers(index);
   const c=cards[index],v=c.querySelector("video");
   c.classList.add("active");
-  if(v)v.play().catch(()=>{});
+  if(v){v.muted=true;v.autoplay=true;v.play().catch(()=>{})}
   if(scroll)c.scrollIntoView({behavior:"smooth",block:"start"});
   cards.forEach((x,i)=>x.setAttribute("aria-current",i===index?"true":"false"));
   if(index>=cards.length-3&&!done&&!busy)load(false);
@@ -181,6 +181,7 @@ function bindCards(){
     if(c.dataset.bound)return;
     c.dataset.bound="1";
     const v=c.querySelector("video"),play=c.querySelector(".cf-play");
+    if(v){v.muted=true;v.autoplay=true;v.setAttribute("autoplay","");v.addEventListener("canplay",()=>{if(c.classList.contains("active"))v.play().catch(()=>{})},{once:true});}
     let tracked=false;
     const track=()=>{if(!tracked){tracked=true;trackView(c.dataset.id)}};
     v?.addEventListener("play",track,{passive:true});
@@ -188,7 +189,7 @@ function bindCards(){
     play?.addEventListener("click",e=>{
       e.stopPropagation();
       if(!v)return;
-      if(v.paused){v.play().catch(()=>{});play.textContent="❚❚"}else{v.pause();play.textContent="▶"}
+      if(v.paused){v.muted=true;v.play().catch(()=>{});play.textContent="❚❚"}else{v.pause();play.textContent="▶"}
     });
     c.querySelector(".cf-share")?.addEventListener("click",async()=>{
       const u=new URL("caw-feed.html",location.href);u.searchParams.set("caw",c.dataset.id);
