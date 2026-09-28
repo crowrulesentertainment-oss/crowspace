@@ -1,4 +1,15 @@
 const CS=window.CS||{};CS.client=window.crowSupabase||null;
+CS.ensureClient=async()=>{
+ if(CS.client?.from)return CS.client;
+ const load=src=>new Promise((resolve,reject)=>{if(document.querySelector('script[src="'+src+'"]')){resolve();return}const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("Failed to load "+src));document.head.appendChild(s)});
+ try{
+  if(!window.supabase?.createClient)await load("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+  if(!window.CROW_CONFIG)await load("js/config.js?v=20260928-8");
+  if(!window.crowSupabase)await load("js/supabase.js?v=20260928-8");
+  CS.client=window.crowSupabase||null;
+ }catch(e){console.warn("CrowSpace client bootstrap:",e.message)}
+ return CS.client;
+};
 (function(){if(window.__CROWPOINTS_WATCHER__)return;window.__CROWPOINTS_WATCHER__=true;
 CS.rewardToast=function(points,reason){points=Number(points||0);if(!points)return;let t=document.getElementById("crowpoints-toast");if(!t){t=document.createElement("div");t.id="crowpoints-toast";t.style.cssText="position:fixed;right:18px;bottom:18px;z-index:99999;max-width:320px;padding:14px 18px;border:1px solid #59e7ff55;border-radius:14px;background:linear-gradient(135deg,#081626ee,#251039ee);box-shadow:0 18px 50px #0009;color:#fff;font:700 12px/1.5 Montserrat,Arial,sans-serif;backdrop-filter:blur(12px)";document.body.appendChild(t)}t.innerHTML='<strong style="display:block;color:#59e7ff;font:800 13px Orbitron,Arial,sans-serif">+ '+points.toLocaleString()+' CrowPoints</strong><span style="display:block;margin-top:4px;color:#b9c4d4">'+CS.escape(reason||"CrowSpace activity")+'</span>';clearTimeout(t._timer);t._timer=setTimeout(()=>t.remove(),4200)};
 CS.watchCrowPoints=async function(){if(!CS.client||window.__CROWPOINTS_POLL__)return;const u=await CS.user();if(!u)return;window.__CROWPOINTS_POLL__=true;let since=sessionStorage.getItem("crowpoints_seen_at")||new Date().toISOString();const poll=async()=>{try{const {data,error}=await CS.client.from("crowspace_point_events").select("id,points,action,created_at").eq("user_id",u.id).gt("created_at",since).order("created_at",{ascending:true}).limit(20);if(error)return;(data||[]).forEach(r=>{since=r.created_at;sessionStorage.setItem("crowpoints_seen_at",since);CS.rewardToast(r.points,String(r.action||"CrowSpace activity").replace(/_/g," "));});}catch{}};await poll();setInterval(poll,2500)};
@@ -156,11 +167,11 @@ CS.renderMembershipHome=async()=>{const el=document.getElementById("membershipHo
 CS.hydrateAvatars=async()=>{const els=[...document.querySelectorAll(".avatar[href*='profile.html?id=']")];if(!els.length||!CS.client)return;const ids=[...new Set(els.map(el=>{try{return new URL(el.href,location.href).searchParams.get("id")}catch{return null}}).filter(Boolean))];if(!ids.length)return;let data=[];try{const r=await CS.client.rpc("crowspace_public_profiles_by_ids",{ids});if(r.error)throw r.error;data=r.data||[]}catch(e){return}const map=Object.fromEntries(data.map(p=>[p.id,p]));els.forEach(el=>{let id;try{id=new URL(el.href,location.href).searchParams.get("id")}catch{}const p=map[id];if(!p)return;const name=p.display_name||p.username||"CrowSpace Member";const initial=name.trim().slice(0,1).toUpperCase()||"C";el.classList.add("avatar-has-image");el.innerHTML=p.avatar_url?'<img src="'+CS.escape(p.avatar_url)+'" alt="'+CS.escape(name)+'" loading="lazy">':CS.escape(initial);el.setAttribute("aria-label",name+" avatar")})};
 CS.loadCinematicStyles=()=>{if(document.getElementById("crowspace-cinematic-css"))return;const l=document.createElement("link");l.id="crowspace-cinematic-css";l.rel="stylesheet";l.href="css/crowspace-cinematic.css?v=20260928-1";document.head.appendChild(l)};
 CS.enhancePage=()=>{CS.loadCinematicStyles();
- if(document.body.classList.contains("crow-cinematic"))return;
+ if(document.body.classList.contains("crow-cinematic")){document.querySelector(".crow-main")?.classList.add("cinematic-ready");return;}
  document.body.classList.add("crow-cinematic");
  const main=document.querySelector("main");
  if(main){
-   main.classList.add("crow-main");
+   main.classList.add("crow-main","cinematic-ready");
    const path=(location.pathname.split("/").pop()||"index.html").replace(".html","");
    main.dataset.page=path;
    main.querySelectorAll(":scope > .section, :scope > .hero, :scope > .nest-shell, :scope > .auth-card").forEach((el,i)=>{
@@ -174,6 +185,6 @@ CS.enhancePage=()=>{CS.loadCinematicStyles();
  }
  const pulse=document.createElement("div");pulse.className="crow-ambient-pulse";pulse.setAttribute("aria-hidden","true");document.body.appendChild(pulse);
 };
-CS.init=async()=>{if(CS._initialized)return;CS._initialized=true;try{CS.enhancePage();await CS.refreshHeader();await CS.hydrateAvatars();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.heartbeat();await CS.renderUniversalStats();if(CS.client&&!CS._authSubscription){CS._authSubscription=CS.client.auth.onAuthStateChange((event,session)=>{setTimeout(async()=>{try{await CS.refreshHeader();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.renderUniversalStats()}catch(e){console.warn("CrowSpace auth refresh:",e.message)}},0)})}}catch(e){console.warn("CrowSpace initialization:",e.message)}};
+CS.init=async()=>{if(CS._initialized)return;CS._initialized=true;try{await CS.ensureClient();CS.enhancePage();await CS.refreshHeader();await CS.hydrateAvatars();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.heartbeat();await CS.renderUniversalStats();if(CS.client&&!CS._authSubscription){CS._authSubscription=CS.client.auth.onAuthStateChange((event,session)=>{setTimeout(async()=>{try{await CS.refreshHeader();await CS.renderMembershipBadge();await CS.renderMembershipHome();await CS.renderUniverseBar();await CS.renderUniversalStats()}catch(e){console.warn("CrowSpace auth refresh:",e.message)}},0)})}}catch(e){console.warn("CrowSpace initialization:",e.message)}};
 window.CS=CS;
 document.addEventListener("DOMContentLoaded",()=>CS.init());
