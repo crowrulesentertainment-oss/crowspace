@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   ]);
   const name=p?.display_name||p?.username||"CrowSpace Member",href=p?.username?"profile.html?username="+encodeURIComponent(p.username):"profile.html?user="+encodeURIComponent(x.user_id);
   const avatar=p?.avatar_url?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<div class="avatar">'+esc(name.slice(0,2).toUpperCase())+'</div>';
-  const mediaHtml=x.media_url ? (/(mp4|webm|quicktime|mov|m4v)(\?|$)/i.test(x.media_url) ? '<video class="caw-media" controls preload="metadata" src="'+esc(x.media_url)+'"></video>' : '<img class="caw-media" loading="lazy" src="'+esc(x.media_url)+'" alt="Caw media">') : '';
+  const mediaHtml=x.media_url ? (/(mp4|webm|quicktime|mov|m4v)(\?|$)/i.test(x.media_url) ? '<video class="caw-media" data-lightbox data-kind="video" data-src="'+esc(x.media_url)+'"></video>' : '<img class="caw-media" data-lightbox data-kind="image" data-src="'+esc(x.media_url)+'" alt="Caw media">') : '';
   const counts={like:0,repost:0,save:0},mine={};(ints||[]).forEach(i=>{if(counts[i.interaction_type]!=null)counts[i.interaction_type]++;if(user?.id===i.user_id)mine[i.interaction_type]=true});
   const btn=(t,a,b)=>'<button data-action="'+t+'" data-target-type="post" data-target-id="'+esc(id)+'" class="'+(mine[t]?"active":"")+'">'+(mine[t]?b:a)+' <span class="muted">'+counts[t]+'</span></button>';
   const commentRows=comments||[];
