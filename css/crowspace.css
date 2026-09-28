@@ -30,3 +30,5 @@
 .trend-day em{display:block;width:4px;min-height:3px;border-radius:3px 3px 0 0;background:currentColor;opacity:.25}.trend-day>span{align-items:flex-end}
 
 .invite-trend-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px}.invite-trend-head .invite-trend-label{margin-top:0}.invite-trend-toggle{display:flex;gap:4px}.invite-trend-toggle button{border:1px solid #ffffff18;background:transparent;color:inherit;border-radius:999px;padding:3px 6px;font-size:8px;cursor:pointer;opacity:.45}.invite-trend-toggle button.active{opacity:1}.invite-trend-toggle button:hover{opacity:1}
+
+.trend-rate .trend-day>span{display:none}.trend-rate .trend-rate-label{display:block;font-size:10px;line-height:1.2}.trend-rate-label{display:none}.invite-trend-toggle button[data-trend="conversion"]{border-style:dashed}
