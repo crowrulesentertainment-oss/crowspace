@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     }catch(err){
       console.warn("CrowSpace social action failed",err);
       el.title=err.message||"Action failed";
-    }finally{document.dispatchEvent(new CustomEvent("crowspace:social-updated",{detail:{action,targetId}}));\n    }finally{el.disabled=false;}
+    }finally{el.disabled=false;document.dispatchEvent(new CustomEvent("crowspace:social-updated",{detail:{action,targetId}}));}
   });
   document.querySelectorAll(".comment-box").forEach(box=>{
     const input=box.querySelector("input"),button=box.querySelector("button");
