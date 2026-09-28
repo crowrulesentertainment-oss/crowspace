@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  const list=document.getElementById("conversationList"),messages=document.getElementById("messages"),title=document.getElementById("chatTitle"),status=document.getElementById("messageStatus"),input=document.getElementById("messageInput");
  if(!sb||!list)return;
  const {data:{user}}=await sb.auth.getUser(); if(!user){list.innerHTML='<div class="empty">Sign in to use Messenger.</div>';return}
- let active=null, shareId=new URLSearchParams(location.search).get("share");
+ let active=null, channel=null, presenceChannel=null, shareId=new URLSearchParams(location.search).get("share");
  const esc=v=>String(v??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
  async function profiles(ids){if(!ids.length)return{};const {data}=await sb.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids);return Object.fromEntries((data||[]).map(p=>[p.user_id,p]))}
  async function loadList(){
@@ -12,6 +12,18 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const {data:cs}=await sb.from("crowspace_conversations").select("id,title,is_group,created_at").in("id",ids).order("created_at",{ascending:false});
   const html=[]; for(const c of cs||[]){const {data:ms}=await sb.from("crowspace_conversation_members").select("user_id").eq("conversation_id",c.id);const ps=await profiles((ms||[]).map(x=>x.user_id).filter(x=>x!==user.id));const p=Object.values(ps)[0];html.push('<button class="conversation '+(active===c.id?'active':'')+'" data-conversation="'+c.id+'"><div class="avatar">'+esc((p?.display_name||c.title||"CR").slice(0,2).toUpperCase())+'</div><div><b>'+esc(c.title||p?.display_name||"Conversation")+'</b><small>'+esc(p?.username?"@"+p.username:c.is_group?"Group chat":"Direct message")+'</small></div></button>')}
   list.innerHTML=html.join("")||'<div class="empty">No conversations yet.</div>';
+ }
+ async function setPresence(){await sb.from("crowspace_presence").upsert({user_id:user.id,last_seen_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:"user_id"}).catch(()=>{})}
+ async function subscribeRealtime(){
+  if(channel)await sb.removeChannel(channel);
+  channel=sb.channel("crowspace-messenger-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},p=>{if(p.new?.conversation_id===active&&p.new?.sender_id!==user.id)openConversation(active)}).subscribe();
+  presenceChannel=sb.channel("crowspace-presence").on("postgres_changes",{event:"*",schema:"public",table:"crowspace_presence"},()=>loadPresence()).subscribe();
+ }
+ async function loadPresence(){
+  const cutoff=new Date(Date.now()-2*60*1000).toISOString();
+  const {data}=await sb.from("crowspace_presence").select("user_id,last_seen_at").gte("last_seen_at",cutoff);
+  const online=new Set((data||[]).map(x=>x.user_id));
+  document.querySelectorAll("[data-presence-user]").forEach(el=>{const on=online.has(el.dataset.presenceUser);el.classList.toggle("online",on);el.title=on?"Online":"Offline"});
  }
  async function openConversation(id){
   active=id;await loadList();const {data:c}=await sb.from("crowspace_conversations").select("title,is_group").eq("id",id).maybeSingle();title.textContent=c?.title||"Conversation";
@@ -32,7 +44,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body});if(error){status.textContent=error.message;return}input.value="";status.textContent="";await openConversation(active);
  });
  input?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("sendMessage").click()}});
- await loadList();
+ await loadList(); await subscribeRealtime(); await setPresence(); await loadPresence();
+ setInterval(()=>{setPresence();loadPresence()},30000);
  if(shareId){const {data:p}=await sb.from("crowspace_posts").select("body,media_url").eq("id",shareId).maybeSingle();if(p){document.getElementById("sharedCaw").hidden=false;document.getElementById("sharedCawBody").textContent=p.body;input.value="Shared Caw: "+new URL("caw.html?id="+shareId,location.href).href;}}
  const first=list.querySelector("[data-conversation]");if(first)await openConversation(first.dataset.conversation);
 });
