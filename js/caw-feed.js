@@ -1,79 +1,126 @@
 (()=>{"use strict";
-const C={url:"https://cevylpnoexugwgygvtgu.supabase.co",key:"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"},feed=document.querySelector(".cf-feed"),status=document.querySelector(".cf-status"),tabs=[...document.querySelectorAll(".cf-tab")],more=document.querySelector(".cf-loadmore"),recs=document.querySelector(".cf-recs");
-let db,user=[],ownedFeatureSlugs=new Set(),mode="for-you",page=0,size=12,loading=false,done=false,caws=[],profiles={},stats={},followed=new Set(),seen=new Set(),commentCaw=null,realtime=null;
-const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])),initial=v=>(String(v||"C").trim()[0]||"C").toUpperCase(),wait=m=>new Promise(r=>setTimeout(r,m));
-function st(id){return stats[id]||{like_count:0,comment_count:0,viewer_liked:false,viewer_follows:false}}
-function media(x){return x.video_url||((x.storage_path)?C.url+"/storage/v1/object/public/crowspace-caws/"+String(x.storage_path).split("/").map(encodeURIComponent).join("/"):"")}
-async function boot(){
- status.textContent="Connecting to CrowSpace…";
- const timeout=(p,ms,label)=>Promise.race([p,wait(ms).then(()=>{throw Error(label+" timed out after "+ms/1000+" seconds")})]);
- try{
-  if(window.crowSupabase?.auth){db=window.crowSupabase}
-  else{
-   if(!window.supabase?.createClient){
-    const urls=["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js","https://unpkg.com/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"];
-    let loaded=false;
-    for(const src of urls){
-     status.textContent="Loading Supabase…";
-     try{await timeout(new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.async=true;s.onload=resolve;s.onerror=()=>reject(Error("library load failed"));document.head.appendChild(s)}),7000,"Supabase library");if(window.supabase?.createClient){loaded=true;break}}catch(e){}
-    }
-    if(!loaded)throw Error("Supabase could not be loaded. Check your connection and refresh.");
-   }
-   status.textContent="Creating CrowSpace session…";
-   db=window.supabase.createClient(C.url,C.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-   window.crowSupabase=db;
-  }
-  status.textContent="Checking member session…";
-  const r=await timeout(db.auth.getSession(),6000,"CrowSpace authentication");
-  if(r.error)throw r.error;
-  user=r.data?.session?.user||null;
-  if(!user){status.textContent="Sign in required…";location.href="login.html?next="+encodeURIComponent(location.href);return false}
-  const rewardQ=await db.from("crowspace_reward_inventory").select("reward_id,crowspace_rewards(slug,name)").eq("user_id",user.id); if(!rewardQ.error)(rewardQ.data||[]).forEach(x=>{if(x.crowspace_rewards?.slug)ownedFeatureSlugs.add(x.crowspace_rewards.slug)});
-  db.auth.onAuthStateChange((e)=>{if(e==="SIGNED_OUT")location.href="login.html?next="+encodeURIComponent(location.href)});
-  return true;
- }catch(e){throw e}
+const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
+const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const BUCKET="crowspace-caws";
+const feed=document.querySelector(".cf-feed"),status=document.querySelector(".cf-status"),loadMore=document.querySelector(".cf-loadmore");
+const tabs=[...document.querySelectorAll(".cf-tab")];
+let supabase=null,user=null,mode="for-you",rows=[],page=0,busy=false,done=false;
+
+const esc=v=>String(v??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const media=x=>{
+ if(x.video_url)return x.video_url;
+ if(x.storage_path)return SUPABASE_URL+"/storage/v1/object/public/"+BUCKET+"/"+x.storage_path.split("/").map(encodeURIComponent).join("/");
+ return "";
+};
+const setStatus=s=>{if(status)status.textContent=s};
+function showError(message){
+ feed.innerHTML='<div class="cf-empty"><h2>Caw Feed Error</h2><p>'+esc(message||"Unable to load Caws.")+'</p><button class="cf-retry" type="button">Try Again</button></div>';
+ feed.querySelector(".cf-retry")?.addEventListener("click",()=>load(true));
+ setStatus("Feed error");
 }
-function loadGlobalNav(){return true}
-function card(x,i){const featured=!!(x.reward_featured_until&&new Date(x.reward_featured_until)>new Date());const p=profiles[x.user_id]||{},s=st(x.id),name=p.display_name||p.username||"CrowSpace Member";return '<article class="cf-card '+(featured?"cf-reward-featured":"")+'" data-id="'+esc(x.id)+'"><div class="cf-media"><video class="cf-video" src="'+esc(media(x))+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'"':'')+' playsinline muted loop preload="'+(i<2?"auto":"metadata")+'"></video><div class="cf-shade"></div><div class="cf-creator"><a class="cf-avatar" href="profile.html?id='+encodeURIComponent(x.user_id)+'">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':esc(initial(name)))+'</a><div><strong>'+esc(name)+'</strong><span>'+(p.username?"@"+esc(p.username):"")+'</span></div></div><button class="cf-play" data-play="'+esc(x.id)+'">▶</button></div><div class="cf-info">'+(featured?'<div class="cf-reward-label">⭐ FEATURED CAW · CrowPoints</div>':'')+'<h2>'+esc(x.title||"Untitled Caw")+'</h2><div class="cf-caption">'+esc(x.caption||"")+'</div><div class="cf-meta"><span data-views="'+esc(x.id)+'">'+Number(x.views||0).toLocaleString()+'</span> views · <span data-likes="'+esc(x.id)+'">'+Number(s.like_count||0)+'</span> likes · <span data-comments-count="'+esc(x.id)+'">'+Number(s.comment_count||0)+'</span> comments</div></div><div class="cf-actions">'+(x.user_id===user.id&&ownedFeatureSlugs.has("caw-featured-highlight")&&!featured?'<button class="cf-act cf-feature-caw" data-feature-caw="'+esc(x.id)+'">⭐ Feature</button>':'')+'<button class="cf-act '+(s.viewer_liked?"active":"")+'" data-like="'+esc(x.id)+'">♥ <span>'+Number(s.like_count||0)+'</span></button><button class="cf-act" data-comments="'+esc(x.id)+'">💬 <span>'+Number(s.comment_count||0)+'</span></button><button class="cf-act" data-share="'+esc(x.id)+'">↗</button><button class="cf-act cf-follow '+(s.viewer_follows?"active":"")+'" data-follow="'+esc(x.user_id)+'">'+(s.viewer_follows?"Following":"Follow")+'</button></div></article>}
-async function loadProfileAndStats(items){
+async function makeClient(){
+ if(window.crowSupabase?.from){return window.crowSupabase}
+ if(!window.supabase?.createClient){
+  await new Promise((resolve,reject)=>{
+   const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=resolve;s.onerror=()=>reject(new Error("Supabase library failed to load."));document.head.appendChild(s);
+  });
+ }
+ supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ window.crowSupabase=supabase;
+ return supabase;
+}
+async function init(){
+ setStatus("Connecting to CrowSpace…");
+ supabase=await makeClient();
+ const {data,error}=await supabase.auth.getUser();
+ if(error)throw error;
+ user=data?.user||null;
+ if(!user){location.href="login.html?next="+encodeURIComponent(location.href);return false}
+ return true;
+}
+async function queryCaws(){
+ const from=page*12,to=from+11;
+ let q=supabase.from("crowspace_caws").select("id,user_id,title,caption,video_url,thumbnail_url,views,created_at,storage_path,mime_type,reward_featured_until").order("created_at",{ascending:false}).range(from,to);
+ if(mode==="following"){
+  const f=await supabase.from("crowspace_follows").select("followed_user_id").eq("follower_id",user.id);
+  if(f.error)throw f.error;
+  const ids=(f.data||[]).map(x=>x.followed_user_id);
+  if(!ids.length)return [];
+  q=q.in("user_id",ids);
+ }
+ const {data,error}=await q;
+ if(error)throw error;
+ let result=(data||[]).filter(x=>media(x));
+ if(mode==="trending")result.sort((a,b)=>Number(b.views||0)-Number(a.views||0));
+ return result;
+}
+async function profileMap(items){
  const ids=[...new Set(items.map(x=>x.user_id).filter(Boolean))];
- if(ids.length){const p=await db.rpc("crowspace_public_profiles_by_ids",{ids});if(!p.error)(p.data||[]).forEach(x=>profiles[x.id]=x)}
- if(items.length){const s=await db.rpc("crowspace_caw_social_stats",{p_caw_ids:items.map(x=>x.id)});if(!s.error)(s.data||[]).forEach(x=>stats[x.caw_id]=x)}
+ if(!ids.length)return {};
+ const r=await supabase.from("crowspace_profiles").select("user_id,display_name,username,avatar_url").in("user_id",ids);
+ if(r.error)return {};
+ return Object.fromEntries((r.data||[]).map(x=>[x.user_id,x]));
 }
-async function followingIds(){const r=await db.from("crowspace_follows").select("followed_user_id").eq("follower_id",user.id);if(r.error)throw r.error;followed=new Set((r.data||[]).map(x=>x.followed_user_id));return [...followed]}
-async function fetchPage(){
- const from=page*size,to=from+size-1;let q=db.from("crowspace_caws").select("id,user_id,title,caption,video_url,thumbnail_url,views,created_at,storage_path,reward_featured_until").order("created_at",{ascending:false}).range(from,to);
- if(mode==="following"){const ids=[...followed];if(!ids.length)return [];q=q.in("user_id",ids)}
- const r=await q;if(r.error)throw r.error;let rows=(r.data||[]).filter(x=>media(x));
- rows.sort((a,b)=>Number(!!(b.reward_featured_until&&new Date(b.reward_featured_until)>new Date()))-Number(!!(a.reward_featured_until&&new Date(a.reward_featured_until)>new Date())));
- if(mode==="trending"){rows.sort((a,b)=>(Number(b.views||0)+Number(st(b.id).like_count||0)*4+Number(st(b.id).comment_count||0)*6)-(Number(a.views||0)+Number(st(a.id).like_count||0)*4+Number(st(a.id).comment_count||0)*6))}
- return rows
+function card(x,p){
+ const featured=x.reward_featured_until&&new Date(x.reward_featured_until)>new Date();
+ const name=p?.display_name||p?.username||"CrowSpace Member";
+ const src=media(x);
+ return '<article class="cf-card '+(featured?"cf-featured":"")+'" data-id="'+esc(x.id)+'">'+
+ '<div class="cf-media"><video class="cf-video" src="'+esc(src)+'" '+(x.thumbnail_url?'poster="'+esc(x.thumbnail_url)+'" ':'')+'playsinline muted loop preload="metadata"></video>'+
+ '<div class="cf-gradient"></div><div class="cf-creator">'+(p?.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':'<span>'+esc(name[0]||"C")+'</span>')+'<strong>'+esc(name)+'</strong></div>'+
+ '<button class="cf-play" type="button">▶</button></div>'+
+ '<div class="cf-info">'+(featured?'<div class="cf-feature-label">⭐ FEATURED CAW</div>':'')+'<h2>'+esc(x.title||"Untitled Caw")+'</h2><p>'+esc(x.caption||"")+'</p><small>'+Number(x.views||0).toLocaleString()+' views</small></div>'+
+ '<div class="cf-actions"><button type="button" class="cf-act cf-like">♥</button><button type="button" class="cf-act cf-share">↗</button><a class="cf-act" href="profile.html?id='+encodeURIComponent(x.user_id)+'">Nest</a></div></article>';
 }
+async function render(items){
+ if(!items.length)return;
+ const profiles=await profileMap(items);
+ feed.insertAdjacentHTML("beforeend",items.map(x=>card(x,profiles[x.user_id])).join(""));
+ bindCards();
+}
+function bindCards(){
+ feed.querySelectorAll(".cf-card:not([data-bound])").forEach(c=>{
+  c.dataset.bound="1";
+  const v=c.querySelector("video"),play=c.querySelector(".cf-play");
+  play.onclick=()=>{if(v.paused){v.play().catch(()=>{});play.textContent="❚❚"}else{v.pause();play.textContent="▶"}};
+  c.querySelector(".cf-share").onclick=async()=>{const u=new URL("caw-feed.html",location.href);u.searchParams.set("caw",c.dataset.id);try{await navigator.clipboard.writeText(u.href);setStatus("Caw link copied")}catch{}};
+ });
+}
+let active=0;
+function sync(){
+ const cards=[...feed.querySelectorAll(".cf-card")];if(!cards.length)return;
+ let best=0,dist=Infinity,top=feed.getBoundingClientRect().top;
+ cards.forEach((c,i)=>{const d=Math.abs(c.getBoundingClientRect().top-top);if(d<dist){dist=d;best=i}});
+ active=best;
+ cards.forEach((c,i)=>{const v=c.querySelector("video");if(i===best){c.classList.add("active");v.play().catch(()=>{})}else{c.classList.remove("active");v.pause()}});
+ if(active>=cards.length-2&&!done&&!busy)load(false);
+}
+function swipeSetup(){
+ feed.addEventListener("scroll",()=>requestAnimationFrame(sync),{passive:true});
+ let sy=0;
+ feed.addEventListener("touchstart",e=>sy=e.touches[0].clientY,{passive:true});
+ feed.addEventListener("touchend",e=>{const dy=e.changedTouches[0].clientY-sy;if(Math.abs(dy)>55){const cards=[...feed.querySelectorAll(".cf-card")];cards[Math.max(0,Math.min(cards.length-1,active+(dy<0?1:-1)))]?.scrollIntoView({behavior:"smooth"})}},{passive:true});
+ window.addEventListener("keydown",e=>{if(["ArrowDown","PageDown"].includes(e.key)){e.preventDefault();move(1)}if(["ArrowUp","PageUp"].includes(e.key)){e.preventDefault();move(-1)}});
+}
+function move(delta){const cards=[...feed.querySelectorAll(".cf-card")];if(cards[active+delta])cards[active+delta].scrollIntoView({behavior:"smooth",block:"start"});}
 async function load(reset=false){
- if(loading)return;if(reset){page=0;done=false;caws=[];feed.innerHTML=""}
- loading=true;status.textContent=mode==="following"?"Loading Following…":mode==="trending"?"Loading Trending…":"Loading For You…";
- try{if(mode==="following"&&page===0)await followingIds();const rows=await fetchPage();await loadProfileAndStats(rows);if(rows.length<size)done=true;caws.push(...rows);renderAppend(rows);page++;renderRecommendations();status.textContent="CrowSpace · "+caws.length+" Caw"+(caws.length===1?"":"s");more.style.display=done?"none":"block";if(!rows.length&&!caws.length)feed.innerHTML='<div class="cf-empty"><h2>'+esc(mode==="following"?"No Followed Caws Yet":"No Caws Yet")+'</h2><p>'+esc(mode==="following"?"Follow creators to build your Following feed.":"There are no playable Caws available to members.")+'</p></div>'}catch(e){console.error(e);if(!caws.length)feed.innerHTML='<div class="cf-empty"><h2>Caw Feed Error</h2><p>'+esc(e.message)+'</p><button class="cf-refresh" onclick="location.reload()">Retry</button></div>';status.textContent="Feed error"}finally{loading=false}}
-function renderAppend(rows){const start=caws.length-rows.length;const frag=rows.map((x,i)=>card(x,start+i)).join("");if(feed.querySelector(".cf-empty"))feed.innerHTML="";feed.insertAdjacentHTML("beforeend",frag);if(feed.querySelectorAll(".cf-card").length===1&&!feed.querySelector(".cf-swipe-hint"))feed.insertAdjacentHTML("afterbegin",'<div class="cf-swipe-hint">SWIPE UP · NEXT CAW</div>');bindCards();observeCards();setTimeout(syncActiveCard,80)}
-function bindCards(){feed.querySelectorAll("[data-feature-caw]").forEach(b=>b.onclick=async()=>{b.disabled=true;b.textContent="Featuring…";const rq=await db.from("crowspace_rewards").select("id").eq("slug","caw-featured-highlight").maybeSingle();const r=rq.data&&await db.rpc("crowspace_apply_reward_feature",{p_reward_id:rq.data.id,p_target_id:b.dataset.featureCaw,p_target_type:"caw"});if(r?.error)alert(r.error.message);else load(true)});
-feed.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>{const v=b.closest(".cf-card").querySelector("video");if(v.paused){v.play().catch(()=>{});b.textContent="❚❚"}else{v.pause();b.textContent="▶"}});feed.querySelectorAll("[data-like]").forEach(b=>b.onclick=()=>like(b.dataset.like));feed.querySelectorAll("[data-comments]").forEach(b=>b.onclick=()=>openComments(b.dataset.comments));feed.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>share(b.dataset.share));feed.querySelectorAll("[data-follow]").forEach(b=>b.onclick=()=>follow(b.dataset.follow));feed.querySelectorAll("video").forEach(v=>{v.addEventListener("error",()=>status.textContent="Video unavailable");v.addEventListener("play",()=>feed.querySelectorAll("video").forEach(o=>{if(o!==v)o.pause()}))})}
-let activeCardIndex=0,lastWheel=0,touchStartY=0,touchStartX=0;
-function syncActiveCard(){const cards=[...feed.querySelectorAll(".cf-card")];if(!cards.length)return;let best=0,bestD=Infinity;cards.forEach((c,i)=>{const d=Math.abs(c.getBoundingClientRect().top-feed.getBoundingClientRect().top);if(d<bestD){bestD=d;best=i}});activeCardIndex=best;cards.forEach((c,i)=>{const v=c.querySelector("video");if(i===best){c.classList.add("in-view");v?.play().catch(()=>{});}else{c.classList.remove("in-view");if(v)v.pause()}});}
-function slideTo(index){const cards=[...feed.querySelectorAll(".cf-card")];if(!cards.length)return;const next=Math.max(0,Math.min(cards.length-1,index));activeCardIndex=next;cards[next]?.scrollIntoView({behavior:"smooth",block:"start"});setTimeout(syncActiveCard,350);if(next>=cards.length-2&&!done&&!loading)load(false);}
-function setupSwipePlayer(){feed.addEventListener("touchstart",e=>{const t=e.touches[0];touchStartY=t.clientY;touchStartX=t.clientX},{passive:true});feed.addEventListener("touchend",e=>{const t=e.changedTouches[0],dy=t.clientY-touchStartY,dx=t.clientX-touchStartX;if(Math.abs(dy)>55&&Math.abs(dy)>Math.abs(dx)*1.15){e.preventDefault();slideTo(activeCardIndex+(dy<0?1:-1));}},{passive:false});feed.addEventListener("wheel",e=>{if(window.innerWidth>700)return;const now=Date.now();if(now-lastWheel<550)return;lastWheel=now;if(Math.abs(e.deltaY)>25){e.preventDefault();slideTo(activeCardIndex+(e.deltaY>0?1:-1));}},{passive:false});window.addEventListener("keydown",e=>{if(e.key==="ArrowDown"||e.key==="PageDown"){e.preventDefault();slideTo(activeCardIndex+1)}if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();slideTo(activeCardIndex-1)}if(e.key===" "&&document.activeElement?.tagName!=="INPUT"&&document.activeElement?.tagName!=="TEXTAREA"){e.preventDefault();const v=feed.querySelectorAll(".cf-card")[activeCardIndex]?.querySelector("video");if(v){if(v.paused)v.play().catch(()=>{});else v.pause()}}});
+ if(busy)return;
+ if(reset){page=0;done=false;rows=[];feed.innerHTML="";setStatus("Loading Caws…")}
+ busy=true;
+ try{
+  const data=await queryCaws();
+  if(data.length<12)done=true;
+  rows.push(...data);
+  await render(data);
+  page++;
+  setStatus(rows.length?("CrowSpace · "+rows.length+" Caw"+(rows.length===1?"":"s")):"No Caws yet");
+  loadMore.style.display=done?"none":"block";
+  if(!rows.length)feed.innerHTML='<div class="cf-empty"><h2>No Caws Yet</h2><p>Upload a Caw to start the feed.</p><a href="create-caw.html">Create a Caw</a></div>';
+  setTimeout(sync,100);
+ }catch(e){console.error("Caw Feed:",e);if(!rows.length)showError(e.message)}finally{busy=false}
 }
-function observeCards(){if(!("IntersectionObserver"in window))return;const io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(e.isIntersecting&&e.intersectionRatio>.65){e.target.classList.add("in-view");v?.play().catch(()=>{});trackView(e.target.dataset.id)}else{e.target.classList.remove("in-view");v?.pause()}}),{threshold:[.65]});feed.querySelectorAll(".cf-card:not([data-observed])").forEach(c=>{c.dataset.observed="1";io.observe(c)})}
-async function trackView(id){if(seen.has(id))return;seen.add(id);const r=await db.from("crowspace_caw_views").insert({caw_id:id,user_id:user.id});if(r.error)return;const x=caws.find(q=>q.id===id);if(x){x.views=Number(x.views||0)+1;const el=feed.querySelector('[data-views="'+CSS.escape(id)+'"]');if(el)el.textContent=Number(x.views).toLocaleString()}}
-async function like(id){const s=st(id),on=!!s.viewer_liked,r=on?await db.from("crowspace_caw_likes").delete().eq("caw_id",id).eq("user_id",user.id):await db.from("crowspace_caw_likes").insert({caw_id:id,user_id:user.id});if(r.error)return alert(r.error.message);s.viewer_liked=!on;s.like_count=Math.max(0,Number(s.like_count||0)+(on?-1:1));stats[id]=s;feed.querySelectorAll('[data-like="'+CSS.escape(id)+'"]').forEach(b=>{b.classList.toggle("active",s.viewer_liked);b.querySelector("span").textContent=s.like_count});feed.querySelectorAll('[data-likes="'+CSS.escape(id)+'"]').forEach(e=>e.textContent=s.like_count)}
-async function follow(uid){if(uid===user.id)return;const ids=caws.filter(q=>q.user_id===uid).map(q=>q.id),on=ids.some(id=>st(id).viewer_follows),r=on?await db.from("crowspace_follows").delete().eq("follower_id",user.id).eq("followed_user_id",uid):await db.from("crowspace_follows").insert({follower_id:user.id,followed_user_id:uid});if(r.error)return alert(r.error.message);ids.forEach(id=>{stats[id]={...st(id),viewer_follows:!on}});feed.querySelectorAll('[data-follow="'+CSS.escape(uid)+'"]').forEach(b=>{b.classList.toggle("active",!on);b.textContent=!on?"Following":"Follow"});renderRecommendations()}
-async function share(id){const u=new URL("caw-feed.html",location.href);u.searchParams.set("caw",id);try{if(navigator.share)await navigator.share({title:"CrowSpace Caw",url:u.href});else{await navigator.clipboard.writeText(u.href);status.textContent="Caw link copied"}}catch(e){}}
-async function openComments(id){commentCaw=id;const panel=document.querySelector(".cf-comments"),list=document.querySelector(".cf-comment-list");panel.classList.add("open");list.innerHTML="<div class=cf-comment>Loading…</div>";const r=await db.from("crowspace_caw_comments").select("id,user_id,body,created_at").eq("caw_id",id).order("created_at",{ascending:true}).limit(100);if(r.error){list.innerHTML='<div class="cf-comment">'+esc(r.error.message)+'</div>';return}if(!r.data?.length){list.innerHTML='<div class="cf-comment">No comments yet.</div>';return}const ids=[...new Set(r.data.map(x=>x.user_id).filter(Boolean))];let pp={};if(ids.length){const p=await db.rpc("crowspace_public_profiles_by_ids",{ids});if(!p.error)(p.data||[]).forEach(x=>pp[x.id]=x)}list.innerHTML=r.data.map(x=>'<div class="cf-comment"><span class="cf-comment-user">'+esc(pp[x.user_id]?.display_name||pp[x.user_id]?.username||"CrowSpace Member")+'</span><span class="cf-comment-time">'+new Date(x.created_at).toLocaleString()+'</span><div class="cf-comment-body">'+esc(x.body)+'</div></div>').join("")}
-function renderRecommendations(){if(!recs)return;const creators=[...new Set(caws.map(x=>x.user_id).filter(Boolean))].filter(uid=>uid!==user.id&&!caws.some(x=>x.user_id===uid&&st(x.id).viewer_follows)).slice(0,8);recs.innerHTML=creators.map(uid=>{const p=profiles[uid]||{},n=p.display_name||p.username||"Creator";return '<div class="cf-rec"><a class="cf-avatar" href="profile.html?id='+encodeURIComponent(uid)+'">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" alt="">':esc(initial(n)))+'</a><strong>'+esc(n)+'</strong><button data-rec-follow="'+esc(uid)+'">Follow</button></div>'}).join("");recs.style.display=creators.length?"flex":"none";recs.querySelectorAll("[data-rec-follow]").forEach(b=>b.onclick=async()=>{await follow(b.dataset.recFollow);renderRecommendations()})}
-function realtimeStart(){try{realtime=db.channel("crowspace-caw-feed").on("postgres_changes",{event:"*",schema:"public",table:"crowspace_caw_likes"},p=>socialEvent(p)).on("postgres_changes",{event:"*",schema:"public",table:"crowspace_caw_comments"},p=>socialEvent(p)).subscribe()}catch(e){}}
-function socialEvent(p){const id=p.new?.caw_id||p.old?.caw_id;if(!id)return;setTimeout(async()=>{const s=await db.rpc("crowspace_caw_social_stats",{p_caw_ids:[id]});if(!s.error&&s.data?.[0]){stats[id]=s.data[0];const z=stats[id];feed.querySelectorAll('[data-like="'+CSS.escape(id)+'"] span').forEach(e=>e.textContent=z.like_count);feed.querySelectorAll('[data-comments="'+CSS.escape(id)+'"] span').forEach(e=>e.textContent=z.comment_count);feed.querySelectorAll('[data-likes="'+CSS.escape(id)+'"]').forEach(e=>e.textContent=z.like_count);feed.querySelectorAll('[data-comments-count="'+CSS.escape(id)+'"]').forEach(e=>e.textContent=z.comment_count);}},150)}
-document.querySelector(".cf-close").onclick=()=>{document.querySelector(".cf-comments").classList.remove("open");commentCaw=null};
-document.querySelector(".cf-comment-form").onsubmit=async e=>{e.preventDefault();if(!commentCaw)return;const input=document.querySelector(".cf-comment-form input"),body=input.value.trim();if(!body)return;const r=await db.from("crowspace_caw_comments").insert({caw_id:commentCaw,user_id:user.id,body});if(r.error)return alert(r.error.message);input.value="";await openComments(commentCaw)};
-tabs.forEach(t=>t.onclick=()=>{tabs.forEach(x=>x.classList.remove("active"));t.classList.add("active");mode=t.dataset.mode;load(true)});
-document.querySelector(".cf-refresh").onclick=()=>load(true);more.onclick=()=>load(false);
-feed.addEventListener("touchstart",e=>{feed._sy=e.touches[0].clientY},{passive:true});feed.addEventListener("touchend",e=>{const dy=e.changedTouches[0].clientY-(feed._sy||e.changedTouches[0].clientY);if(Math.abs(dy)>70){const cards=[...feed.querySelectorAll(".cf-card")],i=cards.findIndex(c=>c.classList.contains("in-view"));if(i>=0)cards[Math.max(0,Math.min(cards.length-1,i+(dy<0?1:-1)))]?.scrollIntoView({behavior:"smooth",block:"start"})}},{passive:true});
-(async()=>{try{setupSwipePlayer();if(await boot()){loadGlobalNav();await load(true);realtimeStart()}}catch(e){console.error(e);feed.innerHTML='<div class="cf-empty"><h2>Caw Feed Error</h2><p>'+esc(e.message)+'</p><button class="cf-refresh" onclick="location.reload()">Retry</button></div>';status.textContent="Feed error"}})();
+tabs.forEach(t=>t.addEventListener("click",()=>{tabs.forEach(x=>x.classList.remove("active"));t.classList.add("active");mode=t.dataset.mode;load(true)}));
+document.querySelector(".cf-refresh")?.addEventListener("click",()=>load(true));
+loadMore?.addEventListener("click",()=>load(false));
+(async()=>{try{if(await init()){swipeSetup();await load(true)}}catch(e){console.error(e);showError(e.message)}})();
 })();
