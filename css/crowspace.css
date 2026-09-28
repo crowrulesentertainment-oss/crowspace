@@ -24,3 +24,4 @@
 .message-reactions{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.message-reaction{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 8px;font-size:12px;cursor:pointer}.message-reaction:hover,.message-reaction.active{color:var(--text);border-color:var(--accent);background:var(--panel2)}.message-reaction span{font-size:11px}
 .message-edit{border:0;background:transparent;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 6px}.message-edit:hover{color:var(--accent)}
 .conversation-unread{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--accent);color:var(--bg);font-size:11px;font-weight:800}
+.message-reply-ref{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
