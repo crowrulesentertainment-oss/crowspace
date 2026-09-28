@@ -376,3 +376,17 @@ input[type="checkbox"],input[type="radio"]{min-height:auto;width:auto}
 
 /* Universal signup / auth polish */
 .crow-account-signup{margin-left:8px;padding:8px 12px;border-radius:999px;text-decoration:none;font-weight:700;background:linear-gradient(90deg,#00d9ff,#8b5cf6);color:#fff!important}.crow-account-signin{text-decoration:none}.auth-consent{display:flex;gap:8px;align-items:flex-start;text-align:left;font-size:.85rem;line-height:1.4;margin:12px 0}.auth-consent input{margin-top:3px}.auth-note{margin:14px 0;padding:14px;border:1px solid rgba(120,170,255,.25);border-radius:14px;background:rgba(20,30,55,.55)}#passwordStrength{font-size:.78rem;margin:-4px 0 10px}
+
+/* Sitewide universal account + verification */
+.crow-account-user{font-weight:800;text-decoration:none}
+.crow-account-verify{font-weight:800;text-decoration:none}
+.crow-account-signout{border:0;background:transparent;cursor:pointer;padding:0;font:inherit}
+.crow-verification-banner{margin:0 auto 18px;max-width:1200px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;border:1px solid rgba(187,82,0,.28);border-radius:14px;background:rgba(255,244,230,.96);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.crow-verification-banner>div:first-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+.crow-verification-banner strong{font-size:13px}
+.crow-verification-banner span{font-size:12px;opacity:.82}
+.crow-verification-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.crow-verification-actions .btn{white-space:nowrap}
+.crow-verification-close{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;padding:4px 7px;opacity:.65}
+.crow-verification-close:hover{opacity:1}
+@media(max-width:700px){.crow-verification-banner{margin:0 12px 14px;align-items:flex-start;flex-direction:column}.crow-verification-actions{width:100%}.crow-verification-actions .btn{flex:1}}
