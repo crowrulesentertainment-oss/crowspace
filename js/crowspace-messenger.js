@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
  const list=document.getElementById("conversationList"),messages=document.getElementById("messages"),title=document.getElementById("chatTitle"),status=document.getElementById("messageStatus"),input=document.getElementById("messageInput");
  if(!sb||!list)return;
  const {data:{user}}=await sb.auth.getUser(); if(!user){list.innerHTML='<div class="empty">Sign in to use Messenger.</div>';return}
- let active=null, channel=null, presenceChannel=null, shareId=new URLSearchParams(location.search).get("share");
+ let active=null, channel=null, presenceChannel=null, typingChannel=null, typingTimer=null, unread=0, shareId=new URLSearchParams(location.search).get("share");
  const esc=v=>String(v??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
  async function profiles(ids){if(!ids.length)return{};const {data}=await sb.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids);return Object.fromEntries((data||[]).map(p=>[p.user_id,p]))}
  async function loadList(){
@@ -14,9 +14,12 @@ document.addEventListener("DOMContentLoaded",async()=>{
   list.innerHTML=html.join("")||'<div class="empty">No conversations yet.</div>';
  }
  async function setPresence(){await sb.from("crowspace_presence").upsert({user_id:user.id,last_seen_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:"user_id"}).catch(()=>{})}
+ function setTyping(on){if(!typingChannel)return;if(on)typingChannel.track({user_id:user.id,typing:true}).catch(()=>{});else typingChannel.untrack().catch(()=>{})}
+ function notifyIncoming(m){unread++;document.title="("+unread+") Messenger";if("Notification" in window&&Notification.permission==="granted"&&document.visibilityState==="hidden")new Notification("New CrowSpace message",{body:m.body?.slice(0,120)||"New message"})}
  async function subscribeRealtime(){
   if(channel)await sb.removeChannel(channel);
-  channel=sb.channel("crowspace-messenger-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},p=>{if(p.new?.conversation_id===active&&p.new?.sender_id!==user.id)openConversation(active)}).subscribe();
+  channel=sb.channel("crowspace-messenger-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},p=>{if(p.new?.conversation_id===active&&p.new?.sender_id!==user.id)openConversation(active);if(p.new?.sender_id!==user.id)notifyIncoming(p.new)}).subscribe();
+  typingChannel=sb.channel("crowspace-typing",{config:{presence:{key:user.id}}}).on("presence",{event:"sync"},()=>{const state=typingChannel.presenceState();const typing=Object.values(state).flat().some(v=>v.user_id!==user.id&&v.typing);document.getElementById("typingIndicator").textContent=typing?"Someone is typing…":"CrowSpace Messenger"}).subscribe();
   presenceChannel=sb.channel("crowspace-presence").on("postgres_changes",{event:"*",schema:"public",table:"crowspace_presence"},()=>loadPresence()).subscribe();
  }
  async function loadPresence(){
@@ -25,7 +28,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const online=new Set((data||[]).map(x=>x.user_id));
   document.querySelectorAll("[data-presence-user]").forEach(el=>{const on=online.has(el.dataset.presenceUser);el.classList.toggle("online",on);el.title=on?"Online":"Offline"});
  }
- async function openConversation(id){
+ async function openConversation(id){unread=0;document.title="Messenger — CrowSpace";
   active=id;await loadList();const {data:c}=await sb.from("crowspace_conversations").select("title,is_group").eq("id",id).maybeSingle();title.textContent=c?.title||"Conversation";
   const {data:ms}=await sb.from("crowspace_messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true}).limit(100);const ps=await profiles([...new Set((ms||[]).map(x=>x.sender_id))]);
   messages.innerHTML=(ms||[]).map(m=>'<div class="dm '+(m.sender_id===user.id?'mine':'')+'"><b>'+esc(ps[m.sender_id]?.display_name||"Member")+'</b><p>'+esc(m.body)+'</p><small class="muted">'+new Date(m.created_at).toLocaleString()+'</small></div>').join("")||'<div class="empty">No messages yet.</div>';messages.scrollTop=messages.scrollHeight;
@@ -43,7 +46,9 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const body=input.value.trim();if(!body||!active)return;
   const {error}=await sb.from("crowspace_messages").insert({conversation_id:active,sender_id:user.id,body});if(error){status.textContent=error.message;return}input.value="";status.textContent="";await openConversation(active);
  });
+ input?.addEventListener("input",()=>{setTyping(true);clearTimeout(typingTimer);typingTimer=setTimeout(()=>setTyping(false),1200)});
  input?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("sendMessage").click()}});
+ if("Notification" in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});
  await loadList(); await subscribeRealtime(); await setPresence(); await loadPresence();
  setInterval(()=>{setPresence();loadPresence()},30000);
  if(shareId){const {data:p}=await sb.from("crowspace_posts").select("body,media_url").eq("id",shareId).maybeSingle();if(p){document.getElementById("sharedCaw").hidden=false;document.getElementById("sharedCawBody").textContent=p.body;input.value="Shared Caw: "+new URL("caw.html?id="+shareId,location.href).href;}}
