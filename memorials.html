@@ -38,6 +38,19 @@
 <section class="mem-hero"><p class="eyebrow">CROWSPACE × CROWRULES MEMORIALS</p><h1>Remember. Honor. Celebrate Their Life.</h1><p>The CrowSpace Memorials hub brings the latest published passing records into one place — a space to remember the people who shaped our world and communities.</p><div class="mem-actions"><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/">Explore Full Memorials Archive →</a><a class="btn" href="#submitMemorial">＋ Celebrate a Life</a></div></section>
 <section class="stats" id="stats"><div class="stat"><span class="muted">Published Memorials</span><strong id="total">—</strong></div><div class="stat"><span class="muted">Deaths Recorded</span><strong id="deathCount">—</strong></div><div class="stat"><span class="muted">Last 30 Days</span><strong id="recentCount">—</strong></div><div class="stat"><span class="muted">Celebrities</span><strong id="celebrityCount">—</strong></div></section>
 <section class="panel"><div class="section-head"><div><p class="eyebrow">LIVE FROM MEMORIALS</p><h2>Most Recent Deaths</h2><p class="muted">The three most recently recorded published deaths, ordered by passing date from the CrowRules Memorials archive.</p></div><div class="mem-actions"><a class="btn" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/featured.html">Featured Memorials</a><a class="btn" href="https://crowrulesentertainment-oss.github.io/memorials">CrowRules Memorials Archive →</a></div></div><div class="recent-grid" id="recentGrid"><div class="empty">Loading the latest memorials…</div></div></section>
+<section class="panel submit-panel" id="submitMemorial"><div class="section-head"><div><p class="eyebrow">CELEBRATE A LIFE</p><h2>Add a Memorial</h2><p class="muted">Submit a memorial directly to the CrowRules Memorials database. Community submissions are published as community memorials and are not marked as celebrity or featured records.</p></div></div><form id="memorialForm" novalidate>
+<label>Full name *<input id="m_name" required maxlength="160" autocomplete="name"></label>
+<label>Passing date *<input id="m_passing" type="date" required></label>
+<label>Birth date<input id="m_birth" type="date"></label>
+<label>Profession<input id="m_profession" maxlength="160"></label>
+<label>Location<input id="m_location" maxlength="200"></label>
+<label>Known for<input id="m_known" maxlength="500"></label>
+<label>Portrait URL<input id="m_portrait" type="url" maxlength="1000" placeholder="https://..."></label>
+<label>Source URL<input id="m_source" type="url" maxlength="1000" placeholder="https://..."></label>
+<label class="full">Memorial message / biography<textarea id="m_message" maxlength="5000" placeholder="Share a respectful remembrance."></textarea></label>
+<p class="form-note full">Required: full name and passing date. Please submit only information you have the right to share.</p>
+<div class="full mem-actions"><button class="btn primary" type="submit" id="submitBtn">＋ Add to Memorials</button><span class="submit-msg" id="submitMsg" role="status" aria-live="polite"></span></div>
+</form></section>
 <section class="panel"><div class="section-head"><div><p class="eyebrow">MEMORIAL ARCHIVE</p><h2>Explore the Records</h2></div></div><div class="toolbar"><input id="search" type="search" placeholder="Search names, professions, locations…" autocomplete="off"><select id="filter"><option value="all">All Memorials</option><option value="celebrity">Celebrities</option><option value="community">Community</option></select><select id="sort"><option value="recent">Newest Passing</option><option value="added">Recently Added</option><option value="name">Name A–Z</option></select></div><div class="archive-grid" id="archiveGrid"><div class="empty">Loading archive…</div></div></section>
 </main>
 <script src="js/config.js"></script>
@@ -52,31 +65,56 @@ let rows=[];
 async function load(){
  const grid=document.getElementById('recentGrid');
  try{
-  const res=await fetch('https://raw.githubusercontent.com/crowrulesentertainment-oss/memorials/main/data/memorial-feed.json?ts='+Date.now(),{cache:'no-store'});
-  if(!res.ok)throw new Error('GitHub Memorials feed returned HTTP '+res.status);
-  const feed=await res.json();
-  rows=Array.isArray(feed.memorials)?feed.memorials:[];
-  document.getElementById('total').textContent=Number(feed.total??rows.length).toLocaleString();
-  document.getElementById('deathCount').textContent=Number(feed.death_count??rows.filter(x=>x.passing_date).length).toLocaleString();
-  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+  if(!crowSupabase)throw new Error('Supabase client is not configured');
+  const {data,error,count}=await crowSupabase.from('memorials').select('*',{count:'exact'}).eq('published',true).order('passing_date',{ascending:false});
+  if(error)throw error;
+  rows=Array.isArray(data)?data:[];
+  document.getElementById('total').textContent=Number(count??rows.length).toLocaleString();
+  document.getElementById('deathCount').textContent=rows.filter(x=>x.passing_date).length.toLocaleString();
+  const cutoff=new Date();cutoff.setHours(0,0,0,0);cutoff.setDate(cutoff.getDate()-30);
   document.getElementById('recentCount').textContent=rows.filter(x=>x.passing_date&&new Date(x.passing_date+'T00:00:00')>=cutoff).length.toLocaleString();
-  document.getElementById('celebrityCount').textContent=rows.filter(x=>x.is_celebrity===true||String(x.memorial_type||'').toLowerCase().includes('celebr')).length.toLocaleString();
+  document.getElementById('celebrityCount').textContent=rows.filter(x=>x.is_celebrity===true).length.toLocaleString();
   renderRecent();renderArchive();
- }catch(e){console.error(e);grid.innerHTML='<div class="empty">Unable to load the CrowRules Memorials from Supabase right now. Please refresh.</div>'}
+ }catch(e){console.error('Memorial load error:',e);grid.innerHTML='<div class="empty">Unable to load Memorials from Supabase right now. Please refresh.</div>';document.getElementById('archiveGrid').innerHTML='<div class="empty">Memorial archive unavailable.</div>'}
 }
-function card(m){const n=esc(m.full_name||'Unnamed Memorial'),img=m.portrait_url;return `<article class="recent-card"><div class="portrait">${img?`<img src="${esc(img)}" alt="Portrait of ${n}" loading="lazy">`:`<span class="placeholder">${esc(initials(m.full_name))}</span>`}</div><div class="card-body"><h3>${n}</h3><div class="date">${fmt(m.passing_date)}</div>${m.profession?`<div class="muted">${esc(m.profession)}</div>`:''}${m.location?`<div class="muted">${esc(m.location)}</div>`:''}<span class="tag">${m.is_celebrity===true?'Celebrity':'Memorial'}</span><div style="margin-top:14px"><a class="btn primary" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/memorial.html?slug=${encodeURIComponent(m.slug||m.id)}">View Memorial →</a></div></div></article>`}
-function renderRecent(){const a=rows.filter(x=>x.passing_date).sort((a,b)=>String(b.passing_date).localeCompare(String(a.passing_date))).slice(0,3);document.getElementById('recentGrid').innerHTML=a.length?a.map(card).join(''):'<div class="empty">No passing dates are currently published.</div>'}
-function renderArchive(){let a=[...rows],q=document.getElementById('search').value.trim().toLowerCase(),f=document.getElementById('filter').value,s=document.getElementById('sort').value;if(q)a=a.filter(x=>`${x.full_name||''} ${x.profession||''} ${x.location||''} ${x.short_bio||''}`.toLowerCase().includes(q));if(f==='celebrity')a=a.filter(x=>x.is_celebrity===true);if(f==='community')a=a.filter(x=>x.is_celebrity!==true);if(s==='name')a.sort((x,y)=>(x.full_name||'').localeCompare(y.full_name||''));else if(s==='added')a.sort((x,y)=>String(y.created_at||'').localeCompare(String(x.created_at||'')));else a.sort((x,y)=>String(y.passing_date||'0000').localeCompare(String(x.passing_date||'0000')));document.getElementById('archiveGrid').innerHTML=a.slice(0,60).map(m=>`<article class="archive-card"><div class="archive-thumb">${m.portrait_url?`<img src="${esc(m.portrait_url)}" alt="" loading="lazy">`:`<span class="placeholder">${esc(initials(m.full_name))}</span>`}</div><div><h3 style="margin:0 0 5px">${esc(m.full_name||'Unnamed Memorial')}</h3><div class="date">${fmt(m.passing_date)}</div><div class="muted">${esc(m.profession||m.location||'Memorial')}</div><a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/memorial.html?slug=${encodeURIComponent(m.slug||m.id)}">Open memorial →</a></div></article>`).join('')||'<div class="empty">No memorials match your search.</div>'}
-['search','filter','sort'].forEach(id=>document.getElementById(id).addEventListener(id==='search'?'input':'change',renderArchive));
-const memorialForm=document.getElementById('memorialForm');
+load();
+})();
+</script>
+<script src="js/global-nav.js?v=20260927-4"></script></body>
+</htmlconst memorialForm=document.getElementById('memorialForm');
 if(memorialForm) memorialForm.addEventListener('submit',async e=>{
- e.preventDefault(); const msg=document.getElementById('submitMsg'); msg.textContent='';
- const u=await CS.user(); if(!u){msg.textContent='Please sign in to submit a memorial.';setTimeout(()=>location.href='login.html',700);return;}
- const payload={submitter_id:u.id,full_name:document.getElementById('m_name').value.trim(),birth_date:document.getElementById('m_birth').value||null,passing_date:document.getElementById('m_passing').value,profession:document.getElementById('m_profession').value.trim()||null,location:document.getElementById('m_location').value.trim()||null,known_for:document.getElementById('m_known').value.trim()||null,portrait_url:document.getElementById('m_portrait').value.trim()||null,memorial_message:document.getElementById('m_message').value.trim()||null,source_url:document.getElementById('m_source').value.trim()||null};
- const {error}=await crowSupabase.from('memorial_submissions').insert(payload);
- if(error){msg.textContent=error.message;return;}
- msg.textContent='Thank you. Your memorial submission has been received for review.';
- e.target.reset();
+ e.preventDefault();
+ const msg=document.getElementById('submitMsg'),btn=document.getElementById('submitBtn');
+ msg.textContent='';btn.disabled=true;btn.textContent='Saving…';
+ try{
+  if(!crowSupabase)throw new Error('Supabase client is not configured');
+  const name=document.getElementById('m_name').value.trim();
+  const passing=document.getElementById('m_passing').value;
+  if(name.length<2){throw new Error('Please enter the full name.')}
+  if(!passing){throw new Error('Please enter the passing date.')}
+  if(new Date(passing+'T00:00:00')>new Date()){throw new Error('The passing date cannot be in the future.')}
+  const slugBase=name.toLowerCase().normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,120)||'memorial';
+  const slug=slugBase+'-'+Date.now().toString(36);
+  const payload={
+   slug,full_name:name,birth_date:document.getElementById('m_birth').value||null,
+   passing_date:passing,location:document.getElementById('m_location').value.trim()||null,
+   short_bio:document.getElementById('m_message').value.trim()||null,
+   portrait_url:document.getElementById('m_portrait').value.trim()||null,
+   featured:false,published:true,memorial_type:'person',is_celebrity:false,
+   profession:document.getElementById('m_profession').value.trim()||null,
+   known_for:document.getElementById('m_known').value.trim()||null,
+   memorial_message:document.getElementById('m_message').value.trim()||null,
+   source_url:document.getElementById('m_source').value.trim()||null,
+   source_name:'CrowSpace Community Submission'
+  };
+  const {data,error}=await crowSupabase.from('memorials').insert(payload).select('slug').single();
+  if(error)throw error;
+  msg.textContent='Memorial added successfully.';
+  memorialForm.reset();
+  await load();
+  if(data?.slug){setTimeout(()=>{location.href='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/memorials/memorial.html?slug='+encodeURIComponent(data.slug)},900)}
+ }catch(err){console.error('Memorial submission error:',err);msg.textContent=err?.message||'Unable to add this memorial. Please try again.'}
+ finally{btn.disabled=false;btn.textContent='＋ Add to Memorials'}
 });
 load();
 })();
