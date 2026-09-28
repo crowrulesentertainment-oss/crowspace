@@ -26,4 +26,4 @@ document.addEventListener("DOMContentLoaded",async()=>{
  }else if((requested||requestedUsername)){action.removeAttribute("href");action.textContent="Public Profile";}
  const grid=document.getElementById("cawGrid");grid.innerHTML=posts?.length?posts.map(x=>'<a class="tile" href="caw.html?id='+encodeURIComponent(x.id)+'">'+String(x.body||"").slice(0,120).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]))+'</a>').join(""):'<div class="tile">No Caws yet</div>';
 });
-</script></body></html>
+</script><script src="js/crowspace-invites.js"></script></body></html>
