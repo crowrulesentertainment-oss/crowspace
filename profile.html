@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#02030a"><title>Profile | CrowSpace</title>
 <link rel="stylesheet" href="css/crowspace.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js?v=20260928-9"></script><script src="js/supabase.js?v=20260928-9"></script>
 <style>
 :root{--cyan:#62f5ff;--violet:#9c78ff;--pink:#ff54d9;--green:#52f0a5;--amber:#ffd166;--bg:#02030a;--line:rgba(115,140,190,.22)}
 .profile-page{max-width:1440px;margin:auto;padding:22px 18px 70px;position:relative}.profile-page:before{content:"";position:fixed;inset:68px 0 0;z-index:-1;pointer-events:none;opacity:.28;background:linear-gradient(90deg,transparent 49.8%,rgba(98,245,255,.08) 50%,transparent 50.2%),linear-gradient(0deg,transparent 49.8%,rgba(156,120,255,.06) 50%,transparent 50.2%);background-size:96px 96px}
@@ -43,8 +43,8 @@
 <footer>CrowSpace · One Account. One Universe.</footer>
 <script>
 (()=>{"use strict";
-const db=window.crowSupabase,app=document.getElementById("app"),toast=document.getElementById("toast"),params=new URLSearchParams(location.search);let uid=params.get("id"),viewer=null,profile=null,universal=null;
-const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])),safe=u=>{try{let x=new URL(u,location.href);return /^https?:$/.test(x.protocol)?x.href:""}catch{return""}},initials=s=>String(s||"CS").trim().split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()||"CS",fmt=d=>d?new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"—";
+let db=window.crowSupabase||null,app=document.getElementById("app"),toast=document.getElementById("toast"),params=new URLSearchParams(location.search),uid=params.get("id"),viewer=null,profile=null,universal=null;
+async function bootClient(){if(db?.from)return db;if(window.supabase?.createClient&&window.CROW_CONFIG?.supabaseUrl&&window.CROW_CONFIG?.supabaseKey){db=window.supabase.createClient(window.CROW_CONFIG.supabaseUrl,window.CROW_CONFIG.supabaseKey);window.crowSupabase=db;return db}throw Error("Supabase client failed to initialize.");}\nconst esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])),safe=u=>{try{let x=new URL(u,location.href);return /^https?:$/.test(x.protocol)?x.href:""}catch{return""}},initials=s=>String(s||"CS").trim().split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()||"CS",fmt=d=>d?new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"—";
 const count=async(t,c)=>{try{let r=await db.from(t).select("*",{count:"exact",head:true}).eq(c,uid);return r.error?0:r.count||0}catch{return 0}},socials=o=>{if(!o)return[];if(Array.isArray(o))return o.map(x=>typeof x==="string"?{name:"Social",url:x}:x).filter(x=>safe(x.url));if(typeof o==="object")return Object.entries(o).map(([name,url])=>({name,url})).filter(x=>safe(x.url));return[]},icon=n=>({youtube:"YT",instagram:"IG",facebook:"FB",twitter:"X",x:"X",tiktok:"TK",twitch:"TW",discord:"DC",threads:"TH",bluesky:"BS",linkedin:"LI",github:"GH",website:"WEB"}[String(n).toLowerCase()]||"↗");
 const av=(u,n)=>safe(u)?'<span class="mini"><img src="'+esc(safe(u))+'" alt=""></span>':'<span class="mini">'+esc(initials(n))+'</span>';
 const note=m=>{toast.textContent=m;toast.classList.add("show");clearTimeout(note.t);note.t=setTimeout(()=>toast.classList.remove("show"),2300)};
@@ -160,11 +160,13 @@ async function resolveProfileTarget(){
 }
 async function start(){
  try{
-  if(!db)throw Error("Supabase connection is unavailable.");
+  await bootClient();
   const auth=await db.auth.getUser(); viewer=auth.data?.user||null;
   uid=await resolveProfileTarget();
   if(!uid){app.innerHTML='<section class="p-shell"><div class="p-body empty"><h2>PROFILE NODE UNASSIGNED</h2><p>Sign in to open your CrowSpace profile.</p><a class="p-btn primary" href="login.html">SIGN IN →</a></div></section>';return}
-  [profile,universal]=await Promise.all([getProfile(),getUniversal()]);
+  profile=await getProfile();
+  if(!profile)throw Error("Profile data could not be loaded.");
+  try{universal=await getUniversal()}catch(e){console.warn("Universal membership unavailable:",e);universal=null}
   await render();
  }catch(e){
   console.error("CrowSpace profile boot:",e);
