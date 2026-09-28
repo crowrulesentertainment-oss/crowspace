@@ -1,1 +1,0 @@
-window.crowSupabase=null;if(window.CROW_CONFIG?.supabaseUrl&&window.CROW_CONFIG?.supabaseKey&&window.supabase?.createClient){window.crowSupabase=window.supabase.createClient(window.CROW_CONFIG.supabaseUrl,window.CROW_CONFIG.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});}
