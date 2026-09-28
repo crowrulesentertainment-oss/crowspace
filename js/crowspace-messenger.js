@@ -28,11 +28,14 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const online=new Set((data||[]).map(x=>x.user_id));
   document.querySelectorAll("[data-presence-user]").forEach(el=>{const on=online.has(el.dataset.presenceUser);el.classList.toggle("online",on);el.title=on?"Online":"Offline"});
  }
+ async function markRead(id){await sb.from("crowspace_conversation_members").update({last_read_at:new Date().toISOString()}).eq("conversation_id",id).eq("user_id",user.id).catch(()=>{})}
  async function openConversation(id){unread=0;document.title="Messenger — CrowSpace";
-  active=id;await loadList();const {data:c}=await sb.from("crowspace_conversations").select("title,is_group").eq("id",id).maybeSingle();title.textContent=c?.title||"Conversation";
+  active=id;await markRead(id);await loadList();const {data:c}=await sb.from("crowspace_conversations").select("title,is_group").eq("id",id).maybeSingle();title.textContent=c?.title||"Conversation";
   const {data:ms}=await sb.from("crowspace_messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true}).limit(100);const ps=await profiles([...new Set((ms||[]).map(x=>x.sender_id))]);
-  messages.innerHTML=(ms||[]).map(m=>'<div class="dm '+(m.sender_id===user.id?'mine':'')+'"><b>'+esc(ps[m.sender_id]?.display_name||"Member")+'</b><p>'+esc(m.body)+'</p><small class="muted">'+new Date(m.created_at).toLocaleString()+'</small></div>').join("")||'<div class="empty">No messages yet.</div>';messages.scrollTop=messages.scrollHeight;
+  messages.innerHTML=(ms||[]).map(m=>'<div class="dm '+(m.sender_id===user.id?'mine':'')+'"><b>'+esc(ps[m.sender_id]?.display_name||"Member")+'</b><p>'+esc(m.body)+'</p><small class="muted">'+new Date(m.created_at).toLocaleString()+(m.sender_id===user.id?' · Sent':'')+'</small>'+(m.sender_id===user.id?'<button class="message-delete" data-message="'+m.id+'" type="button">Delete</button>':"")+'</div>').join("")||'<div class="empty">No messages yet.</div>';messages.scrollTop=messages.scrollHeight;
  }
+ messages.addEventListener("click",async e=>{const b=e.target.closest("[data-message]");if(!b)return;if(!confirm("Delete this message?"))return;const {error}=await sb.from("crowspace_messages").delete().eq("id",b.dataset.message).eq("sender_id",user.id);if(error){status.textContent=error.message;return}await openConversation(active)});
+ document.getElementById("conversationSearch")?.addEventListener("input",async e=>{const q=e.target.value.toLowerCase().trim();document.querySelectorAll("#conversationList .conversation").forEach(b=>b.hidden=q&&!b.textContent.toLowerCase().includes(q))});
  list.addEventListener("click",e=>{const b=e.target.closest("[data-conversation]");if(b)openConversation(b.dataset.conversation)});
  document.getElementById("newConversation")?.addEventListener("click",async()=>{
   const username=prompt("Enter the CrowSpace username to message:"); if(!username)return;
