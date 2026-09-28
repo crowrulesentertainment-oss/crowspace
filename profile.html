@@ -145,7 +145,7 @@ body{
 .social-link-name{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);padding:5px 8px;border-radius:7px;background:#080c16;color:#fff;font-size:10px;font-weight:700;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;border:1px solid var(--line);z-index:5}
 .social-link:hover .social-link-name,.social-link:focus-visible .social-link-name{opacity:1}
 .social-link-empty{padding:16px;border:1px dashed var(--line);border-radius:13px;color:var(--muted)}
-</style></style><style>
+</style><style>
 /* MySpace 2.0 profile details */
 .profile-retro{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
 .retro-box{border:1px solid #8bb9dd;background:#f5faff;color:#17304a;border-radius:3px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.22)}
@@ -294,8 +294,8 @@ body{background:radial-gradient(circle at 15% 5%,rgba(85,230,255,.09),transparen
 <aside class="side-column">
 <section class="panel compact"><div class="panel-head"><h3>Live Presence</h3><span class="live-dot"></span></div><div id="online" class="content-block"><p class="empty">Checking…</p></div></section>
 <section class="panel compact"><div class="panel-head"><h3>Profile Signal</h3></div><div class="signal-grid"><div><span>STATUS</span><b id="statusSnapshot">—</b></div><div><span>MEMBER SINCE</span><b id="memberSinceSnapshot">—</b></div><div><span>MOOD</span><b id="moodSnapshot">—</b></div><div><span>UNIVERSE</span><b>CrowRules</b></div></div></section><section class="panel compact social-links-panel" id="socialLinksPanel">
-<div class="section-head"><div><p class="eyebrow">CONNECT BEYOND CROWSPACE</p><h2>Social Links</h2><p class="muted">Add links to your other social media accounts so people can find you across the web.</p></div></div>
-<div id="socialLinksList" class="social-links-list"><div class="social-link-empty">No social links added yet.</div></div>
+<div class="section-head social-links-heading"><div><p class="eyebrow">CONNECT BEYOND CROWSPACE</p><h2>Social Links</h2><p class="muted">Find this member across the web. Social links are managed from the Nest customization page.</p></div><a id="manageSocialLinks" class="btn social-manage-btn" href="customize.html">Manage Links →</a></div>
+<div id="socialLinksList" class="social-links-list"><div class="social-link-empty">Loading social links…</div></div>
 </section>
 <section class="panel compact"><div class="panel-head"><h3>Profile Link</h3></div><div class="copy-row"><input id="shareUrl" readonly><button id="copyProfileUrl" type="button">Copy</button></div><small id="copyStatus"></small></section>
 <section class="panel compact"><div class="panel-head"><h3>Audio & Favorites</h3></div><p id="music" class="empty">No favorite music added.</p><div id="musicPlayer"></div><div id="classicPlaylist"></div><p id="favorites" class="empty"></p></section>
@@ -899,70 +899,122 @@ body.avatar-modal-open{overflow:hidden}
   document.addEventListener("DOMContentLoaded",()=>setTimeout(start,250));
   window.addEventListener("beforeunload",()=>{if(channel&&typeof crowSupabase!=="undefined")crowSupabase.removeChannel(channel)});
 })();
-</script><script id="social-links-runtime">
+</script><style id="crowspace-social-links-upgrade">
+.social-links-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.social-manage-btn{white-space:nowrap;flex:0 0 auto}
+.social-links-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.social-link-card{min-width:0;display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);color:inherit;text-decoration:none;transition:.18s}
+.social-link-card:hover{transform:translateY(-2px);border-color:rgba(85,230,255,.38);background:rgba(85,230,255,.055)}
+.social-link-logo{width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border:1px solid rgba(255,255,255,.08);border-radius:11px;color:var(--cyan);background:rgba(255,255,255,.035)}
+.social-link-logo svg{width:22px;height:22px;display:block;fill:currentColor}
+.social-link-copy{min-width:0;display:grid;gap:3px}
+.social-link-copy strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.social-link-copy small{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.social-link-arrow{margin-left:auto;color:var(--muted);font-size:15px}
+.social-link-empty{display:grid;gap:5px;padding:14px;border:1px dashed var(--line);border-radius:13px;color:var(--muted);line-height:1.5}
+.social-link-empty strong{color:var(--text)}
+.social-link-empty span{font-size:11px}
+@media(max-width:620px){.social-links-heading{display:grid}.social-manage-btn{width:100%;text-align:center}.social-links-list{grid-template-columns:1fr}}
+</style>
+<script id="social-links-runtime">
 (function(){
-const social=document.getElementById("socialLinksList");
-function safeUrl(v){try{let s=String(v||"").trim();if(/^discord\\.gg\\//i.test(s))s="https://"+s;const u=new URL(s);return ["http:","https:"].includes(u.protocol)?u.href:""}catch(e){return""}}
-function socialName(url){
- const h=new URL(url).hostname.replace(/^www\./,"");
- if(/instagram/.test(h))return["Instagram","instagram"];
- if(/facebook/.test(h))return["Facebook","facebook"];
- if(/youtube/.test(h))return["YouTube","youtube"];
- if(/x\.com|twitter/.test(h))return["X","x"];
- if(/tiktok/.test(h))return["TikTok","tiktok"];
- if(/linkedin/.test(h))return["LinkedIn","linkedin"];
- if(/threads/.test(h))return["Threads","threads"];
- if(/github/.test(h))return["GitHub","github"];
- if(/twitch/.test(h))return["Twitch","twitch"];
- if(h==="discord.gg"||/(^|\\.)discord\.com$/.test(h)||/(^|\\.)discordapp\.com$/.test(h))return["Discord","discord"];
- return[h,"website"];
-}
-function logo(type){
- const common='viewBox="0 0 24 24" aria-hidden="true"';
- const svg={
- instagram:'<svg '+common+'><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="6.7" r="1.2"/></svg>',
- facebook:'<svg '+common+'><path d="M14 8h3V3.5c-.6-.1-2.1-.3-3.8-.3-3.8 0-6.4 2.3-6.4 6.6v3.7H3v5h3.8V21h5v-2.5h2.7l.7-5H12V10c0-1.4.4-2 2-2z"/></svg>',
- youtube:'<svg '+common+'><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l6 3-6 3z" fill="#080c16"/></svg>',
- x:'<svg '+common+'><path d="M4 3h4.8l3.8 5.1L17 3h3l-6 7.2L21 21h-4.8l-4.3-5.7L7 21H4l6.4-7.7z"/></svg>',
- tiktok:'<svg '+common+'><path d="M14.2 3h3.1c.3 1.8 1.4 3.2 3.2 3.8v3.2a8.5 8.5 0 0 1-3.2-1V15a6 6 0 1 1-6-6v3.2a2.8 2.8 0 1 0 2.8 2.8z"/></svg>',
- linkedin:'<svg '+common+'><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 9v8M7 6.5v.1M11 17v-4.2c0-2 1.1-3.1 2.7-3.1s2.3 1 2.3 3.1V17M11 9v8" fill="none" stroke="#080c16" stroke-width="2"/></svg>',
- threads:'<svg '+common+'><path d="M12 3.2c-4.6 0-7.6 2.8-7.6 7.8 0 5.3 3.2 9.8 8.1 9.8 3.9 0 6.4-2.1 6.4-5.4 0-3.1-2.3-5.2-5.8-5.2-3 0-4.6 1.4-4.6 3.3 0 1.7 1.5 2.7 3.5 2.7 2.4 0 4.4-1.4 4.7-4.5"/></svg>',
- github:'<svg '+common+'><path d="M12 2.2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.6.3-1.1.6-1.3-2.3-.3-4.7-1.1-4.7-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.7 9.7 0 0 1 5.1 0c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.7 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5A10 10 0 0 0 12 2.2z"/></svg>',
- twitch:'<svg '+common+'><path d="M4 3h17v12l-5 5h-4l-3 3v-3H4z"/><path d="M9 7v5M16 7v5" stroke="#080c16" stroke-width="2"/></svg>',
- discord:'<svg '+common+'><path d="M5 5.5A16 16 0 0 1 9 4l.6 1.2a13 13 0 0 1 4.8 0L15 4a16 16 0 0 1 4 1.5c1.2 1.9 1.8 4 1.7 6.2-.1 3.1-2.3 5.8-5.3 6.8l-1.2-1.7c.7-.2 1.4-.5 2-.9l-.5-.4c-2.7 1.3-5.7 1.3-8.4 0l-.5.4c.6.4 1.3.7 2 .9l-1.2 1.7C4.6 17.5 2.4 14.8 2.3 11.7 2.2 9.5 2.8 7.4 4 5.5zM8.5 13c.9 0 1.6-.8 1.6-1.7s-.7-1.7-1.6-1.7-1.6.8-1.6 1.7.7 1.7 1.6 1.7zm7 0c.9 0 1.6-.8 1.6-1.7s-.7-1.7-1.6-1.7-1.6.8-1.6 1.7.7 1.7 1.6 1.7z"/></svg>',
- website:'<svg '+common+'><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.3 2.5 3.4 5.5 3.4 9s-1.1 6.5-3.4 9c-2.3-2.5-3.4-6.5-3.4-9S9.7 5.5 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
- };
- return svg[type]||svg.website;
-}
-function renderSocialLinksValue(value){
- if(!social)return;
- let links=Array.isArray(value)?value:Object.entries(value||{}).map(([name,url])=>({name,url}));
- links=links.map(x=>({name:String(x.name||"").trim(),url:safeUrl(x.url||x.href||"")})).filter(x=>x.url);
- if(!links.length){social.innerHTML='<div class="social-link-empty">No social links added yet.</div>';return}
- social.innerHTML=links.slice(0,20).map(x=>{
-   const n=socialName(x.url);
-   return '<a class="social-link" href="'+CS.escape(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+CS.escape(x.name||n[0])+'" title="'+CS.escape(x.name||n[0])+'"><span class="social-link-logo">'+logo(n[1])+'</span></a>';
- }).join("");
-}
-async function loadSocialLinks(value){
- if(!social||!window.CROW_PROFILE_UID)return;
- if(value!==undefined){renderSocialLinksValue(value||[]);return}
- if(window.CROW_NEST_SETTINGS&&Object.prototype.hasOwnProperty.call(window.CROW_NEST_SETTINGS,"social_links")){
-   renderSocialLinksValue(window.CROW_NEST_SETTINGS.social_links);
-   return;
- }
- if(typeof crowSupabase==="undefined")return;
- social.innerHTML='<div class="social-link-empty">Loading social links…</div>';
- try{
-   const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
-   if(error)throw error;
-   renderSocialLinksValue(data?.social_links||[]);
- }catch(error){
-   console.error("CrowSpace social links:",error);
-   social.innerHTML='<div class="social-link-empty">Unable to load social links.</div>';
- }
-}
-window.addEventListener("crowspace:nest-settings-ready",event=>loadSocialLinks(event.detail?.social_links||[]));
-window.addEventListener("DOMContentLoaded",()=>setTimeout(()=>loadSocialLinks(),500));})();
+  const social=document.getElementById("socialLinksList");
+  const manage=document.getElementById("manageSocialLinks");
+  const escapeValue=(v)=>typeof CS!=="undefined"&&typeof CS.escape==="function"?CS.escape(String(v??"")):String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+  function safeUrl(v){
+    try{
+      let s=String(v||"").trim();
+      if(!s)return "";
+      if(/^(?:www\.)/i.test(s))s="https://"+s;
+      if(/^discord\.gg\//i.test(s))s="https://"+s;
+      if(!/^https?:\/\//i.test(s))s="https://"+s;
+      const u=new URL(s);
+      return ["http:","https:"].includes(u.protocol)?u.href:"";
+    }catch(e){return ""}
+  }
+  function socialName(url){
+    try{
+      const h=new URL(url).hostname.replace(/^www\./i,"").toLowerCase();
+      if(h.includes("instagram"))return["Instagram","instagram"];
+      if(h.includes("facebook"))return["Facebook","facebook"];
+      if(h.includes("youtube")||h==="youtu.be")return["YouTube","youtube"];
+      if(h==="x.com"||h.includes("twitter"))return["X","x"];
+      if(h.includes("tiktok"))return["TikTok","tiktok"];
+      if(h.includes("linkedin"))return["LinkedIn","linkedin"];
+      if(h.includes("threads"))return["Threads","threads"];
+      if(h.includes("github"))return["GitHub","github"];
+      if(h.includes("twitch"))return["Twitch","twitch"];
+      if(h==="discord.gg"||h==="discord.com"||h==="discordapp.com")return["Discord","discord"];
+      return[h,"website"];
+    }catch(e){return["Website","website"]}
+  }
+  function logo(type){
+    const common='viewBox="0 0 24 24" aria-hidden="true"';
+    const svg={
+      instagram:'<svg '+common+'><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="6.7" r="1.2"/></svg>',
+      facebook:'<svg '+common+'><path d="M14 8h3V3.5c-.6-.1-2.1-.3-3.8-.3-3.8 0-6.4 2.3-6.4 6.6v3.7H3v5h3.8V21h5v-2.5h2.7l.7-5H12V10c0-1.4.4-2 2-2z"/></svg>',
+      youtube:'<svg '+common+'><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l6 3-6 3z" fill="#080c16"/></svg>',
+      x:'<svg '+common+'><path d="M4 3h4.8l3.8 5.1L17 3h3l-6 7.2L21 21h-4.8l-4.3-5.7L7 21H4l6.4-7.7z"/></svg>',
+      tiktok:'<svg '+common+'><path d="M14.2 3h3.1c.3 1.8 1.4 3.2 3.2 3.8v3.2a8.5 8.5 0 0 1-3.2-1V15a6 6 0 1 1-6-6v3.2a2.8 2.8 0 1 0 2.8 2.8z"/></svg>',
+      linkedin:'<svg '+common+'><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 9v8M7 6.5v.1M11 17v-4.2c0-2 1.1-3.1 2.7-3.1s2.3 1 2.3 3.1V17M11 9v8" fill="none" stroke="#080c16" stroke-width="2"/></svg>',
+      threads:'<svg '+common+'><path d="M12 3.2c-4.6 0-7.6 2.8-7.6 7.8 0 5.3 3.2 9.8 8.1 9.8 3.9 0 6.4-2.1 6.4-5.4 0-3.1-2.3-5.2-5.8-5.2-3 0-4.6 1.4-4.6 3.3 0 1.7 1.5 2.7 3.5 2.7 2.4 0 4.4-1.4 4.7-4.5"/></svg>',
+      github:'<svg '+common+'><path d="M12 2.2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.6.3-1.1.6-1.3-2.3-.3-4.7-1.1-4.7-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.7 9.7 0 0 1 5.1 0c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.7 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5A10 10 0 0 0 12 2.2z"/></svg>',
+      twitch:'<svg '+common+'><path d="M4 3h17v12l-5 5h-4l-3 3v-3H4z"/><path d="M9 7v5M16 7v5" stroke="#080c16" stroke-width="2"/></svg>',
+      discord:'<svg '+common+'><path d="M5 5.5A16 16 0 0 1 9 4l.6 1.2a13 13 0 0 1 4.8 0L15 4a16 16 0 0 1 4 1.5c1.2 1.9 1.8 4 1.7 6.2-.1 3.1-2.3 5.8-5.3 6.8l-1.2-1.7c.7-.2 1.4-.5 2-.9l-.5-.4c-2.7 1.3-5.7 1.3-8.4 0l-.5.4c.6.4 1.3.7 2 .9l-1.2 1.7C4.6 17.5 2.4 14.8 2.3 11.7 2.2 9.5 2.8 7.4 4 5.5zM8.5 13c.9 0 1.6-.8 1.6-1.7s-.7-1.7-1.6-1.7-1.6.8-1.6 1.7  .7 1.7 1.6 1.7zm7 0c.9 0 1.6-.8 1.6-1.7s-.7-1.7-1.6-1.7-1.6.8-1.6 1.7.7 1.7 1.6 1.7z"/></svg>',
+      website:'<svg '+common+'><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.3 2.5 3.4 5.5 3.4 9s-1.1 6.5-3.4 9c-2.3-2.5-3.4-6.5-3.4-9S9.7 5.5 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
+    };
+    return svg[type]||svg.website;
+  }
+  function render(value){
+    if(!social)return;
+    let links=[];
+    if(Array.isArray(value))links=value;
+    else if(value&&typeof value==="object")links=Object.entries(value).map(([name,url])=>({name,url}));
+    links=links.map(x=>({name:String(x?.name||"").trim(),url:safeUrl(x?.url||x?.href||"")})).filter(x=>x.url);
+    const unique=[];
+    const seen=new Set();
+    for(const x of links){const key=x.url.toLowerCase();if(!seen.has(key)){seen.add(key);unique.push(x)}}
+    if(!unique.length){
+      social.innerHTML='<div class="social-link-empty"><strong>No social links added yet.</strong><span>Add Instagram, Facebook, YouTube, X, TikTok, LinkedIn, Discord, GitHub, Twitch or a personal website from Customize.</span></div>';
+      return;
+    }
+    social.innerHTML=unique.slice(0,20).map(x=>{
+      const meta=socialName(x.url);
+      return '<a class="social-link social-link-card" href="'+escapeValue(x.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+escapeValue(x.name||meta[0])+'">'+
+        '<span class="social-link-logo">'+logo(meta[1])+'</span>'+
+        '<span class="social-link-copy"><strong>'+escapeValue(x.name||meta[0])+'</strong><small>'+escapeValue(new URL(x.url).hostname.replace(/^www\./i,""))+'</small></span>'+
+        '<span class="social-link-arrow">↗</span></a>';
+    }).join("");
+  }
+  async function fetchLinks(retries){
+    if(!social||!window.CROW_PROFILE_UID||typeof crowSupabase==="undefined")return;
+    try{
+      const {data,error}=await crowSupabase.from("crowspace_nest_settings").select("social_links").eq("user_id",window.CROW_PROFILE_UID).maybeSingle();
+      if(error)throw error;
+      render(data?.social_links||[]);
+    }catch(error){
+      console.error("CrowSpace social links:",error);
+      if(retries>0){
+        social.innerHTML='<div class="social-link-empty">Loading social links…</div>';
+        setTimeout(()=>fetchLinks(retries-1),800);
+      }else{
+        social.innerHTML='<div class="social-link-empty">Social links are temporarily unavailable. Please refresh the Nest.</div>';
+      }
+    }
+  }
+  function load(value){
+    if(value!==undefined){render(value||[]);return}
+    if(window.CROW_NEST_SETTINGS&&Object.prototype.hasOwnProperty.call(window.CROW_NEST_SETTINGS,"social_links")){
+      render(window.CROW_NEST_SETTINGS.social_links);
+      return;
+    }
+    fetchLinks(3);
+  }
+  window.addEventListener("crowspace:nest-settings-ready",e=>load(e.detail?.social_links));
+  document.addEventListener("DOMContentLoaded",()=>{
+    setTimeout(()=>load(),150);
+    if(manage&&window.CROW_PROFILE_UID)manage.href="customize.html";
+  });
+})();
 </script></body>
 </html>
