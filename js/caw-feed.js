@@ -98,6 +98,9 @@ function bindCards(){
   c.querySelector(".cf-share").onclick=async()=>{const u=new URL("caw-feed.html",location.href);u.searchParams.set("caw",c.dataset.id);try{await navigator.clipboard.writeText(u.href);setStatus("Caw link copied")}catch{}};
  });
 }
+
+ if(window.CS?.bindCawWatchTime)window.CS.bindCawWatchTime(feed);
+}
 let active=0;
 function sync(){
  const cards=[...feed.querySelectorAll(".cf-card")];if(!cards.length)return;
