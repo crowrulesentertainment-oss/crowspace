@@ -1,4 +1,4 @@
-const CS=window.CS||{};CS.client=window.crowSupabase||null;
+const CS=window.CS||{};CS.client=window.crowSupabase||null;document.querySelectorAll('script[src*="global-nav.js"]').forEach(s=>{s.src="js/global-nav.js?v=20260927-5"});
 CS.escape=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 CS.user=async()=>{if(!CS.client)return null;try{const {data,error}=await CS.client.auth.getUser();return error?null:data?.user||null}catch{return null}};
 CS.profile=async id=>{if(!CS.client||!id)return null;try{const {data,error}=await CS.client.rpc("crowspace_profile_public",{target:id});if(error)return null;return Array.isArray(data)?data[0]||null:data||null}catch{return null}};
