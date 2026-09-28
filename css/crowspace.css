@@ -28,3 +28,5 @@
 .invite-mini-trend{height:52px;display:flex;align-items:flex-end;gap:5px;padding:4px 0}.trend-day{flex:1;text-align:center;font-size:8px;min-width:0}.trend-day>span{height:38px;display:flex;align-items:flex-end;justify-content:center;gap:2px}.trend-day i,.trend-day b{display:block;width:4px;min-height:3px;border-radius:3px 3px 0 0;background:currentColor}.trend-day b{opacity:.45}.trend-day small{display:block;margin-top:3px;opacity:.55}.invite-trend-label{margin-top:9px;font-size:9px;text-transform:uppercase;letter-spacing:.08em;opacity:.55}
 
 .trend-day em{display:block;width:4px;min-height:3px;border-radius:3px 3px 0 0;background:currentColor;opacity:.25}.trend-day>span{align-items:flex-end}
+
+.invite-trend-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px}.invite-trend-head .invite-trend-label{margin-top:0}.invite-trend-toggle{display:flex;gap:4px}.invite-trend-toggle button{border:1px solid #ffffff18;background:transparent;color:inherit;border-radius:999px;padding:3px 6px;font-size:8px;cursor:pointer;opacity:.45}.invite-trend-toggle button.active{opacity:1}.invite-trend-toggle button:hover{opacity:1}
