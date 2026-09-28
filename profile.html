@@ -536,7 +536,7 @@ async function loadMembership(){
 }
 async function relationshipButtons(){
   if(!viewer)return '<a class="btn primary" href="login.html">Sign In to Connect</a>';
-  if(viewer.id===uid)return '<button class="btn primary" type="button" data-avatar-open>Change Avatar</button><a class="btn" href="customize.html">Customize My Nest</a><a class="btn" href="friends.html">Friends</a>';
+  if(viewer.id===uid)return '<a class="btn primary" href="edit-profile.html">Edit Profile</a><button class="btn" type="button" data-avatar-open>Change Avatar</button><a class="btn" href="customize.html">Customize My Nest</a><a class="btn" href="friends.html">Friends</a>';
   let htmlOut="";
   const {data:f,error}=await crowSupabase.from("crowspace_friendships").select("requester_id,addressee_id,status").or("requester_id.eq."+viewer.id+",addressee_id.eq."+viewer.id);
   err("friendship lookup",error);
