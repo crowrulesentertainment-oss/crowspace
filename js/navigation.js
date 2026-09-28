@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     ["https://crowrulesentertainment-oss.github.io/podcasting/","Podcasting"],
     ["https://crowrulesentertainment-oss.github.io/memorials/","Memorials"],
     ["https://crowrulesentertainment-oss.github.io/sports/","Sports"],
-    ["creator-studio.html","Creator Studio"],["watch-parties.html","Watch Parties"],["marketplace.html","Marketplace"]
+    ["creator-studio.html","Creator Studio"],["portfolio.html","Creator Portfolio"],["watch-parties.html","Watch Parties"],["marketplace.html","Marketplace"]
   ];
   header.innerHTML=
     '<a class="brand" href="index.html"><span class="crow">𓅃</span><span>CROWSPACE</span></a>'+
