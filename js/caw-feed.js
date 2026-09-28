@@ -93,7 +93,7 @@ async function render(items){
 function bindCards(){
  feed.querySelectorAll(".cf-card:not([data-bound])").forEach(c=>{
   c.dataset.bound="1";
-  const v=c.querySelector("video"),play=c.querySelector(".cf-play");\n  let viewTracked=false;\n  const track=()=>{if(viewTracked)return;viewTracked=true;trackView(c.dataset.id)};\n  v.addEventListener("play",track,{passive:true});\n  v.addEventListener("timeupdate",()=>{if(v.currentTime>=2)track()},{passive:true});
+  const v=c.querySelector("video"),play=c.querySelector(".cf-play");\n  let viewTracked=false;\n  const track=async()=>{if(viewTracked)return;viewTracked=true;const added=await trackView(c.dataset.id);if(added){const el=c.querySelector(".cf-view-count");if(el)el.textContent=(Number((el.textContent||"").replace(/[^0-9]/g,""))+1).toLocaleString()+" views";}};\n  v.addEventListener("play",track,{passive:true});\n  v.addEventListener("timeupdate",()=>{if(v.currentTime>=2)track()},{passive:true});
   play.onclick=()=>{if(v.paused){v.play().catch(()=>{});play.textContent="❚❚"}else{v.pause();play.textContent="▶"}};
   c.querySelector(".cf-share").onclick=async()=>{const u=new URL("caw-feed.html",location.href);u.searchParams.set("caw",c.dataset.id);try{await navigator.clipboard.writeText(u.href);setStatus("Caw link copied")}catch{}};
  });
