@@ -4,12 +4,31 @@ document.addEventListener("DOMContentLoaded",async()=>{
  const sb=supabase.createClient(CROW_CONFIG.supabaseUrl,CROW_CONFIG.supabaseKey);
  const id=new URLSearchParams(location.search).get("id"),card=document.getElementById("cawCard");
  if(!id){card.innerHTML='<div class="empty">No Caw selected.</div>';return}
- const {data:x,error}=await sb.from("crowspace_posts").select("id,user_id,body,created_at,media_url").eq("id",id).maybeSingle();
- if(error||!x){card.innerHTML='<div class="empty">Caw not found.</div>';return}
- const {data:p}=await sb.from("crowspace_profiles").select("username,display_name,avatar_url").eq("user_id",x.user_id).maybeSingle();
  const esc=v=>String(v??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
- const name=p?.display_name||p?.username||"CrowSpace Member", href=p?.username?"profile.html?username="+encodeURIComponent(p.username):"profile.html?user="+encodeURIComponent(x.user_id);
- const avatar=p?.avatar_url?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<div class="avatar">'+esc(name.slice(0,2).toUpperCase())+'</div>';
- card.innerHTML='<div class="user-row"><a href="'+href+'">'+avatar+'</a><div><a href="'+href+'"><b>'+esc(name)+'</b></a><div class="muted"><a href="'+href+'">@'+esc(p?.username||"member")+'</a></div></div><span class="muted">'+new Date(x.created_at).toLocaleString()+'</span></div>'+(x.media_url?'<div class="media-placeholder">MEDIA ATTACHED</div>':'')+'<p>'+esc(x.body)+'</p><div class="reaction-bar"><button>♡ Like</button><button>💬 Comment</button><button>↗ Repost</button><button>🔖 Save</button></div><div class="comment-box"><input placeholder="Write a comment…"><button class="primary">Comment</button></div>';
+ async function load(){
+  const {data:x,error}=await sb.from("crowspace_posts").select("id,user_id,body,created_at,media_url").eq("id",id).maybeSingle();
+  if(error||!x){card.innerHTML='<div class="empty">Caw not found.</div>';return}
+  const [{data:p},{data:ints},{data:comments},{data:{user}}]=await Promise.all([
+   sb.from("crowspace_profiles").select("username,display_name,avatar_url").eq("user_id",x.user_id).maybeSingle(),
+   sb.from("crowspace_social_interactions").select("user_id,interaction_type").eq("target_type","post").eq("target_id",id),
+   sb.from("crowspace_comments").select("id,user_id,body,created_at").eq("post_id",id).order("created_at",{ascending:true}),
+   sb.auth.getUser()
+  ]);
+  const name=p?.display_name||p?.username||"CrowSpace Member",href=p?.username?"profile.html?username="+encodeURIComponent(p.username):"profile.html?user="+encodeURIComponent(x.user_id);
+  const avatar=p?.avatar_url?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<div class="avatar">'+esc(name.slice(0,2).toUpperCase())+'</div>';
+  const counts={like:0,repost:0,save:0},mine={};(ints||[]).forEach(i=>{if(counts[i.interaction_type]!=null)counts[i.interaction_type]++;if(user?.id===i.user_id)mine[i.interaction_type]=true});
+  const btn=(t,a,b)=>'<button data-action="'+t+'" data-target-type="post" data-target-id="'+esc(id)+'" class="'+(mine[t]?"active":"")+'">'+(mine[t]?b:a)+' <span class="muted">'+counts[t]+'</span></button>';
+  const commentRows=comments||[];
+  const profiles={};if(commentRows.length){const ids=[...new Set(commentRows.map(c=>c.user_id))];const {data:cp}=await sb.from("crowspace_profiles").select("user_id,username,display_name").in("user_id",ids);(cp||[]).forEach(z=>profiles[z.user_id]=z)}
+  const commentsHtml=commentRows.map(cm=>{const cp=profiles[cm.user_id]||{},ch=cp.username?"@"+cp.username:"CrowSpace Member";return '<div class="comment-preview"><b>'+esc(cp.display_name||ch)+'</b> <span class="muted">'+esc(ch)+'</span><div>'+esc(cm.body)+'</div></div>'}).join("");
+  card.innerHTML='<div class="user-row"><a href="'+href+'">'+avatar+'</a><div><a href="'+href+'"><b>'+esc(name)+'</b></a><div class="muted"><a href="'+href+'">@'+esc(p?.username||"member")+'</a></div></div><span class="muted">'+new Date(x.created_at).toLocaleString()+'</span></div>'+(x.media_url?'<div class="media-placeholder">MEDIA ATTACHED</div>':'')+'<p>'+esc(x.body)+'</p><div class="reaction-bar">'+btn("like","♡ Like","♥ Liked")+btn("repost","↗ Repost","↗ Reposted")+btn("save","🔖 Save","🔖 Saved")+'</div><div id="comments">'+commentsHtml+'</div><div class="comment-box"><input id="commentInput" maxlength="2000" placeholder="Write a comment…"><button class="primary" id="commentBtn">Comment</button></div>';
+  document.getElementById("commentBtn")?.addEventListener("click",async()=>{
+   const input=document.getElementById("commentInput"),text=input.value.trim();if(!text)return;
+   if(!user){input.value="";input.placeholder="Sign in to comment";return}
+   const {error}=await sb.from("crowspace_comments").insert({post_id:id,user_id:user.id,body:text});
+   if(error){input.placeholder=error.message;return} input.value="";await load();
+  });
+ }
+ document.addEventListener("crowspace:social-updated",load); await load();
 });
 </script></body></html>
