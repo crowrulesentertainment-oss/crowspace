@@ -1,4 +1,3 @@
-<style id="crowspace-caw-reward-feature">.cf-reward-featured{border:1px solid rgba(255,194,74,.5)!important;box-shadow:0 0 0 1px rgba(255,194,74,.08),0 20px 65px rgba(255,194,74,.08)}.cf-reward-label{display:inline-block;margin-bottom:8px;color:#ffd36a;font:800 9px Orbitron;letter-spacing:.08em}</style>
 (()=>{"use strict";
 const C={url:"https://cevylpnoexugwgygvtgu.supabase.co",key:"sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-"},feed=document.querySelector(".cf-feed"),status=document.querySelector(".cf-status"),tabs=[...document.querySelectorAll(".cf-tab")],more=document.querySelector(".cf-loadmore"),recs=document.querySelector(".cf-recs");
 let db,user=[],ownedFeatureSlugs=new Set(),mode="for-you",page=0,size=12,loading=false,done=false,caws=[],profiles={},stats={},followed=new Set(),seen=new Set(),commentCaw=null,realtime=null;
