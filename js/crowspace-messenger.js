@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const {data:c}=await sb.from("crowspace_conversations").select("title,is_group,created_by").eq("id",id).maybeSingle();
   if(!c?.is_group)return;
   document.getElementById("groupPanelTitle").textContent=c.title||"Group Info";
-  document.getElementById("renameGroup").hidden=c.created_by!==user.id;document.getElementById("createGroupInvite").hidden=c.created_by!==user.id;document.getElementById("manageJoinRequests").hidden=false;
+  document.getElementById("renameGroup").hidden=c.created_by!==user.id;document.getElementById("createGroupInvite").hidden=c.created_by!==user.id;const myMember=(members||[]).find(m=>m.user_id===user.id);document.getElementById("manageJoinRequests").hidden=!myMember||!["admin"].includes(myMember.role);
   const {data:members}=await sb.from("crowspace_conversation_members").select("user_id,joined_at,role").eq("conversation_id",id).order("joined_at",{ascending:true});
   const ps=await profiles((members||[]).map(m=>m.user_id));
   const onlineCut=new Date(Date.now()-120000).toISOString();
