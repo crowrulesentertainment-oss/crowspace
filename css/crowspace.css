@@ -19,3 +19,5 @@
 .message-delete{margin-top:6px;border:0;background:transparent;color:var(--muted);font-size:11px;cursor:pointer;padding:2px 0}.message-delete:hover{color:var(--text)}
 
 .message-box{align-items:center}.message-box button.secondary{flex:none}.message-attachment{display:block;max-width:280px;max-height:300px;border-radius:12px;margin-top:8px;object-fit:cover}
+
+.message-reply{display:block;border:0;background:transparent;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 0}.message-reply:hover{color:var(--accent)}.message-reply-ref{font-size:11px;color:var(--muted);border-left:2px solid var(--accent);padding-left:8px;margin:5px 0}.message-attachment{display:block;max-width:280px;max-height:300px;border-radius:12px;margin:8px 0;object-fit:cover;background:#000}.message-attachment:hover{filter:brightness(1.08)}
