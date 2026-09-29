@@ -16,7 +16,7 @@ function transfer(original,ctx){
  const safe=g?.disable?0:g?.status==="REDUCED"?strength*.5:strength;
  return{mode:"TRANSFERRED",reward:+reward.toFixed(3),strength:+safe.toFixed(3),evidence,guardrail:g?.status||"UNASSESSED",sources:rows.slice(0,5).map(x=>({series:x.source.context.series,similarity:+x.similarity.toFixed(2),tests:x.source.tests}))};
 }
-function learn(original,ctx){const x=transfer(original,ctx),st=L(KEY,{}),k=[original,ctx.series,ctx.window,ctx.momentum,ctx.experimentType].join("::");st[k]={key:k,originalKey:original,targetContext:ctx,...x,updatedAt:Date.now()};S(KEY,st);return st[k]}
+function learn(original,ctx){const x=transfer(original,ctx),st=L(KEY,{}),k=[original,ctx.series,ctx.window,ctx.momentum,ctx.experimentType].join("::"),experiment=L("crowspace-transfer-experiments-v37",{})[k],status=experiment?.status||"UNTESTED";const gated=status==="SUPPORTED";st[k]={key:k,originalKey:original,targetContext:ctx,...x,experimentStatus:status,allocationReward:gated?x.reward:0,allocationStrength:gated?x.strength:0,updatedAt:Date.now()};S(KEY,st);return st[k]}
 function state(){return L(KEY,{})}
 window.CrowSpaceContextTransferV35={candidates,transfer,learn,state};
 })();
