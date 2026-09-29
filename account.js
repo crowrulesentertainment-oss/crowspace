@@ -15,7 +15,7 @@ async function init(){
  profile=pr.data||{};member=me.data||{};identities=ids.data?.identities||[];
  render();
 }
-function render(){
+function render(){ $("displayName").value=member.display_name||profile.display_name||""; $("username").value=profile.username||member.username||""; $("bio").value=profile.bio||member.bio||"";
  $("accountName").textContent=member.display_name||profile.display_name||profile.username||user.email?.split("@")[0]||"Crow Member";
  $("accountHandle").textContent=profile.username?"@"+profile.username:(member.username?"@"+member.username:"@member");
  $("accountEmail").textContent=user.email||member.email||"";
