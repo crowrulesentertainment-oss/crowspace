@@ -2,7 +2,7 @@
    Browser-only execution layer for Audience Growth Action Plans.
 */
 (function(){
-const KEY="crowspace-growth-action-tasks-v1",PLANS="crowspace-growth-action-plans-v1",SNAP="crowspace-series-growth-v1",DB="crowspace-caws",STORE="videos";
+const KEY="crowspace-growth-action-tasks-v1",PLANS="crowspace-growth-action-plans-v1",SNAP="crowspace-series-growth-v1",DB="crowspace-caws",STORE="videos",EXP="crowspace-action-experiments-v1";
 const $=id=>document.getElementById(id),L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),E=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])),F=n=>Math.round(Number(n)||0).toLocaleString();
 function allCaws(){return new Promise(ok=>{try{const r=indexedDB.open(DB);r.onsuccess=()=>{try{const q=r.result.transaction(STORE,"readonly").objectStore(STORE).getAll();q.onsuccess=()=>ok(q.result||[]);q.onerror=()=>ok([])}catch(e){ok([])}};r.onerror=()=>ok([])}catch(e){ok([])}})}
 async function metrics(series,since){const items=await allCaws(),list=items.filter(x=>(x.series||"")===series&&x.status==="published"&&new Date(x.publishedAt||x.created||0).getTime()>=since);return{caws:list.length,views:list.reduce((n,x)=>n+(Number(x.views)||Number(x.viewCount)||0),0),interactions:list.reduce((n,x)=>n+(Number(x.likes)||0)+(Number(x.comments)||0)+(Number(x.recasts)||0),0)}}
@@ -13,8 +13,25 @@ function ensure(series,acts){
  const all=L(KEY,{}), now=new Date(), base=new Date(now); base.setHours(23,59,59,999);
  const existing=all[series]||[];
  const out=acts.map((a,i)=>{let t=existing.find(x=>x.sourceIndex===i);if(t)return t;const d=new Date(base);d.setDate(d.getDate()+Math.min(i,6));return{id:series+"-"+Date.now()+"-"+i,sourceIndex:i,title:a.title,detail:a.detail,priority:a.priority,due:d.toISOString(),completed:false,created:Date.now()};});
- all[series]=out;S(KEY,all);return out;
+ all[series]=out;S(KEY,all);syncExperiments(series,out);return out;
 }
+
+function syncExperiments(series,tasks){
+ const exps=L(EXP,{}),list=exps[series]||[],now=Date.now();
+ list.filter(e=>e.status==="active").forEach(e=>{
+  e.arms.forEach((arm,idx)=>{
+   const matching=tasks.filter(t=>t.experimentId===e.id&&t.experimentArm===idx&&t.completed&&t.result);
+   arm.taskIds=matching.map(t=>t.id);arm.outcomes=matching.map(t=>({taskId:t.id,views:N(t.result.viewsDelta),interactions:N(t.result.interactionsDelta),caws:N(t.result.cawsPublished),completedAt:t.completedAt||now}));
+  });
+ });
+ exps[series]=list;S(EXP,exps);
+}
+function createExperimentTasks(series,e){
+ const all=L(KEY,{}),tasks=all[series]||[],today=new Date();today.setHours(23,59,59,999);
+ e.arms.forEach((arm,idx)=>{if(tasks.some(t=>t.experimentId===e.id&&t.experimentArm===idx))return;const d=new Date(today);d.setDate(d.getDate()+idx);tasks.push({id:series+"-exp-"+e.id+"-"+idx,sourceIndex:100000+idx,title:"Experiment "+(idx?"B":"A")+" • "+arm.type,detail:"Adaptive test arm "+(idx?"B":"A")+" for "+e.name+". Complete this action and publish the associated Caw(s) to generate an outcome.",priority:"HIGH",due:d.toISOString(),completed:false,created:Date.now(),experimentId:e.id,experimentArm:idx,experimentSeries:series});});
+ all[series]=tasks;S(KEY,all);
+}
+
 function render(){
  const series=key(), acts=actions(); if(series==="all"||!acts.length){$("growthExecutionBoard")?.remove();return}
  const tasks=ensure(series,acts), box=$("growthExecutionBoard")||document.createElement("section");
