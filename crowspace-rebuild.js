@@ -126,9 +126,52 @@ async function privacyProfileMap(db,rows,setting="profile"){
  return new Map((r.data||[]).filter(x=>ids.includes(x.user_id)).map(x=>[x.user_id,x]));
 }
 function privacyBanner(text="Some content is hidden by the owner's privacy settings."){return '<div class="card pad muted privacy-banner">🔒 '+esc(text)+'</div>'}
-function metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
+
+async function universalSearch(db,q){
+ const term=String(q||"").trim();
+ if(term.length<2)return {term,results:[]};
+ const like="%"+term.replace(/[%_]/g,"\\function metric(label,value,detail)")+"%";
+ const out=[];
+ const [pr,po,ca,ci,bo,bp]=await Promise.all([
+  db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio,privacy_profile").or("display_name.ilike."+like+",username.ilike."+like+",bio.ilike."+like).limit(20),
+  db.from("crowspace_posts").select("id,user_id,title,body,created_at,privacy_posts").or("title.ilike."+like+",body.ilike."+like).order("created_at",{ascending:false}).limit(30),
+  db.from("crowspace_caws").select("id,user_id,title,caption,thumbnail_url,video_url,created_at").or("title.ilike."+like+",caption.ilike."+like).order("created_at",{ascending:false}).limit(20),
+  db.from("crowspace_circles").select("*").or("name.ilike."+like+",title.ilike."+like+",description.ilike."+like).limit(20),
+  db.from("crowspace_holiday_bots").select("id,slug,display_name,holiday_name,bio,avatar_url,active").eq("active",true).or("display_name.ilike."+like+",holiday_name.ilike."+like+",bio.ilike."+like).limit(20),
+  db.from("crowspace_holiday_bot_posts").select("id,bot_id,title,body,created_at").or("title.ilike."+like+",body.ilike."+like).order("created_at",{ascending:false}).limit(20)
+ ]);
+ const profileIds=new Set((pr.data||[]).filter(x=>x.privacy_profile!=="private").map(x=>x.user_id));
+ (pr.data||[]).filter(x=>profileIds.has(x.user_id)).forEach(x=>out.push({kind:"member",id:x.user_id,title:x.display_name||x.username||"Crow Member",meta:"@"+(x.username||"member"),body:x.bio||"",url:"profile.html?u="+encodeURIComponent(x.username||"")}));
+ const postOwners=[...new Set((po.data||[]).map(x=>x.user_id))];
+ const postProfiles=postOwners.length?await db.from("crowspace_profiles").select("user_id,privacy_posts").in("user_id",postOwners):{data:[]};
+ const postAllowed=new Set((postProfiles.data||[]).filter(x=>x.privacy_posts!=="private").map(x=>x.user_id));
+ (po.data||[]).filter(x=>postAllowed.has(x.user_id)).forEach(x=>out.push({kind:"post",id:x.id,title:x.title||"CrowSpace Post",meta:new Date(x.created_at).toLocaleString(),body:x.body||"",url:"#post-"+x.id}));
+ const cOwners=[...new Set((ca.data||[]).map(x=>x.user_id))];
+ const cProfiles=cOwners.length?await db.from("crowspace_profiles").select("user_id,privacy_media").in("user_id",cOwners):{data:[]};
+ const cAllowed=new Set((cProfiles.data||[]).filter(x=>x.privacy_media!=="private").map(x=>x.user_id));
+ (ca.data||[]).filter(x=>cAllowed.has(x.user_id)).forEach(x=>out.push({kind:"caw",id:x.id,title:x.title||"Caw",meta:new Date(x.created_at).toLocaleString(),body:x.caption||"",url:"caw.html?id="+encodeURIComponent(x.id)}));
+ (ci.data||[]).forEach(x=>out.push({kind:"circle",id:x.id,title:x.name||x.title||"Circle",meta:"Circle",body:x.description||"",url:"circles.html#"+encodeURIComponent(x.id)}));
+ (bo.data||[]).forEach(x=>out.push({kind:"holiday",id:x.id,title:x.display_name||x.holiday_name||"Holiday Bot",meta:"Holiday Network",body:x.bio||"",url:"holiday-bot.html?bot="+encodeURIComponent(x.slug)}));
+ const botIds=new Set((bo.data||[]).map(x=>x.id));
+ (bp.data||[]).filter(x=>botIds.has(x.bot_id)).forEach(x=>out.push({kind:"holiday-post",id:x.id,title:x.title||"Holiday Update",meta:new Date(x.created_at).toLocaleString(),body:x.body||"",url:"holiday-bot.html"}));
+ return {term,results:out};
+}
+function universalSearchUI(db){
+ if($("#crow-universal-search"))return;
+ const host=document.querySelector(".commandbar")||document.querySelector(".navin");
+ if(!host)return;
+ const wrap=document.createElement("div");wrap.id="crow-universal-search";wrap.className="universal-search";
+ wrap.innerHTML='<input id="crow-search-input" aria-label="Search CrowSpace" placeholder="Search CrowSpace…"><div id="crow-search-results" class="universal-search-results" hidden></div>';
+ host.appendChild(wrap);
+ const input=wrap.querySelector("#crow-search-input"),results=wrap.querySelector("#crow-search-results");
+ let timer;
+ const draw=async()=>{clearTimeout(timer);timer=setTimeout(async()=>{const q=input.value.trim();if(q.length<2){results.hidden=true;return}results.hidden=false;results.innerHTML='<div class="muted" style="padding:14px">Searching…</div>';const data=await universalSearch(db,q);results.innerHTML=data.results.slice(0,25).map(x=>'<a class="search-result" href="'+esc(x.url)+'"><b>'+esc(x.title)+'</b><span>'+esc(x.kind.toUpperCase())+' · '+esc(x.meta)+'</span><small>'+esc((x.body||"").slice(0,120))+'</small></a>').join("")||'<div class="muted" style="padding:14px">No public results found.</div>'},180)};
+ input.oninput=draw;
+ document.addEventListener("click",e=>{if(!wrap.contains(e.target))results.hidden=true});
+}
+\nfunction metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
 async function page(){
- shell();const p=document.body.dataset.page,db=await auth();communityChrome(p);
+ shell();const p=document.body.dataset.page,db=await auth();communityChrome(p);universalSearchUI(db);
  if(p==="index")return;
  if(p==="login"||p==="signup")return authPage(p,db);\n const liveUser=await guard();if(!liveUser)return;liveLayer(db,liveUser);
  if(p==="home"){const u=await guard();if(!u)return;const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});document.querySelectorAll("[data-personal-feed]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-personal-feed]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderPersonalFeed($("#feed"),b.dataset.personalFeed)});
