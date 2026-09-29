@@ -80,3 +80,5 @@
 .season-audience{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-audience b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-audience span{font-size:8px;color:var(--muted)}
 
 .season-episode-map{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-episode-map b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-episode-map span{font-size:8px;color:var(--muted);word-break:break-word}
+
+.season-completion-checklist{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-completion-checklist b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-completion-checklist span{font-size:8px;color:var(--muted)}
