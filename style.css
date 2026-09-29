@@ -128,3 +128,5 @@
 .series-average-runtime{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-average-runtime b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-average-runtime span{font-size:8px;color:var(--muted);line-height:1.5}
 
 .series-completion-forecast{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-completion-forecast b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-completion-forecast span{font-size:8px;color:var(--muted);line-height:1.5}
+
+.series-streak{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-streak b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-streak span{font-size:8px;color:var(--muted);line-height:1.5}
