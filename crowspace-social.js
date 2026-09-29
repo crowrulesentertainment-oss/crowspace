@@ -26,6 +26,15 @@ async function loadComments(targetId,kind="post"){
  if(ids.length){const r=await db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids);if(r.error)throw r.error;ps=r.data||[]}
  const map=new Map(ps.map(x=>[x.user_id,x]));return (data||[]).map(x=>({...x,profile:map.get(x.user_id)||{}}));
 }
+async function toggleCawLike(cawId,button){
+ const {db,user}=await requireUser();
+ const {data:existing,error}=await db.from("crowspace_social_interactions").select("id").eq("target_type","caw").eq("target_id",cawId).eq("user_id",user.id).eq("interaction_type","like").maybeSingle();
+ if(error)throw error;
+ if(existing)await db.from("crowspace_social_interactions").delete().eq("id",existing.id);
+ else {const r=await db.from("crowspace_social_interactions").insert({target_type:"caw",target_id:cawId,user_id:user.id,interaction_type:"like"});if(r.error)throw r.error}
+ const {count}=await db.from("crowspace_social_interactions").select("*",{count:"exact",head:true}).eq("target_type","caw").eq("target_id",cawId).eq("interaction_type","like");
+ button.classList.toggle("on",!existing);button.innerHTML=(!existing?"♥ ":"♡ ")+(count||0);
+}
 async function toggleFollow(targetUserId,button){
  const {db,user}=await requireUser();if(targetUserId===user.id)return;
  const {data:existing,error}=await db.from("crowspace_follows").select("follower_id").eq("follower_id",user.id).eq("followed_user_id",targetUserId).maybeSingle();if(error)throw error;
@@ -62,5 +71,5 @@ async function createConversation(otherUserId){
  const {data:c,error}=await db.from("crowspace_conversations").insert({created_by:user.id,title:"",is_group:false}).select("id").single();if(error)throw error;
  const {error:me}=await db.from("crowspace_conversation_members").insert([{conversation_id:c.id,user_id:user.id,role:"member"},{conversation_id:c.id,user_id:otherUserId,role:"member"}]);if(me)throw me;return c.id;
 }
-window.CrowSpaceSocial={ready,dbUser,requireUser,toggleLike,addComment,loadComments,toggleFollow,loadNotifications,markNotificationsRead,loadConversations,sendMessage,createConversation,esc};
+window.CrowSpaceSocial={ready,dbUser,requireUser,toggleLike,toggleCawLike,addComment,loadComments,toggleFollow,loadNotifications,markNotificationsRead,loadConversations,sendMessage,createConversation,esc};
 })();
