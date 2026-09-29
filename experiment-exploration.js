@@ -2,7 +2,7 @@
    Browser-only candidate generation from learned actions and experiment memory.
 */
 (function(){
-const LEARN="crowspace-action-learning-v1",MEM="crowspace-experiment-pattern-library-v1",DEC="crowspace-experiment-decisions-v1",EXP="crowspace-action-experiments-v1";
+const LEARN="crowspace-action-learning-v1",MEM="crowspace-experiment-pattern-library-v1",DEC="crowspace-experiment-decisions-v1",EXP="crowspace-action-experiments-v1",TASKS="crowspace-growth-action-tasks-v1",SCHED="crowspace-experiment-scheduler-v1";
 const $=id=>document.getElementById(id),N=x=>Number(x)||0,F=n=>Math.round(N(n)).toLocaleString(),L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),E=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 function pairKey(a,b){return[a,b].sort().join("::")}
 function candidates(s){
@@ -17,13 +17,16 @@ function candidates(s){
  successful.slice(0,4).forEach(x=>{const known=x.arms.map(a=>a.type);types.filter(t=>!known.includes(t.type)).slice(0,3).forEach(t=>push("VARIATION",known[0],t.type,"Vary a previously successful pattern by introducing another measured action type.",50))});
  return out.sort((a,b)=>b.score-a.score).slice(0,8);
 }
+function scheduled(s){return L(SCHED,{})[s]||null}
+function schedule(s,x){const all=L(EXP,{}),list=all[s]||[],existing=list.find(e=>e.status==="active"&&!e.completedAt);if(existing)return {ok:false,reason:"An active experiment is already scheduled."};const id=s+"-"+Date.now(),now=Date.now(),e={id,name:x.a+" vs "+x.b,series:s,status:"active",createdAt:now,scheduledAt:now,explorationKind:x.kind,explorationScore:x.score,arms:[{type:x.a,outcomes:[],taskIds:[]},{type:x.b,outcomes:[],taskIds:[]}]};list.push(e);all[s]=list;const tasks=L(TASKS,{});tasks[s]??=[];e.arms.forEach((a,i)=>{const taskId=s+"-exp-"+id+"-"+i;const task={id:taskId,title:"Experiment "+(i?"B":"A")+" • "+a.type,detail:"AUTO-SCHEDULED "+x.kind+" experiment: complete this labeled arm and publish the associated Caw(s).",priority:"HIGH",due:new Date(now+(i*86400000)).toISOString(),completed:false,created:now,experimentId:id,experimentArm:i,experimentSeries:s,attributedCawIds:[],attributedCaws:[],autoScheduled:true};e.arms[i].taskIds.push(taskId);tasks[s].push(task)});S(EXP,all);S(TASKS,tasks);S(SCHED,{...L(SCHED,{}),[s]:{experimentId:id,scheduledAt:now,candidate:{kind:x.kind,a:x.a,b:x.b,score:x.score}}});return {ok:true,e}}
+function autoSchedule(s){const cs=candidates(s),existing=scheduled(s);if(!cs.length||existing)return null;return schedule(s,cs[0])}
 function render(){
  const s=$( "studioSeries")?.value||"all",box=$( "experimentExplorationEngine");
  if(s==="all"){box?.remove();return}
- const cs=candidates(s);
+ const cs=candidates(s);const current=scheduled(s);
  if(!box){$( "experimentPatternLibrary")?.after(document.createElement("section"));const b=document.createElement("section");b.id="experimentExplorationEngine";$( "experimentPatternLibrary")?.after(b)}
  const el=$( "experimentExplorationEngine");el.className="card experiment-exploration-engine";
- el.innerHTML='<div class="explore-head"><div><span>EXPERIMENT EXPLORATION // CANDIDATES</span><h3>What Should We Test Next?</h3><small>New combinations, successful-pattern variations and deliberate retests are generated from local memory.</small></div></div>'+(cs.length?'<div class="explore-list">'+cs.map((x,i)=>'<article><div><em>'+E(x.kind)+'</em><b>'+E(x.a)+' <span>vs</span> '+E(x.b)+'</b><small>'+E(x.reason)+' · Exploration score: <strong>'+x.score+'</strong></small></div><button data-explore="'+i+'">Create Test</button></article>').join("")+'</div>':'<div class="explore-empty">No new candidate is available yet. Complete more measured action outcomes or an inconclusive experiment.</div>');
+ el.innerHTML='<div class="explore-head"><div><span>EXPERIMENT EXPLORATION // CANDIDATES</span><h3>What Should We Test Next?</h3><small>New combinations, successful-pattern variations and deliberate retests are generated from local memory. The highest-priority candidate can be auto-scheduled into the execution queue.</small></div></div>'+(current?'<div class="explore-scheduled"><b>AUTO-SCHEDULED</b><span>Experiment '+E(current.candidate.a)+' vs '+E(current.candidate.b)+' · score '+current.candidate.score+' · '+new Date(current.scheduledAt).toLocaleString()+'</span></div>':'<div class="explore-auto"><button id="autoScheduleExperiment">AUTO-SCHEDULE TOP CANDIDATE</button><small>Creates both A/B tasks and assigns them to the Growth Execution Queue.</small></div>')+(cs.length?'<div class="explore-list">'+cs.map((x,i)=>'<article><div><em>'+E(x.kind)+'</em><b>'+E(x.a)+' <span>vs</span> '+E(x.b)+'</b><small>'+E(x.reason)+' · Exploration score: <strong>'+x.score+'</strong></small></div><button data-explore="'+i+'">Create Test</button></article>').join("")+'</div>':'<div class="explore-empty">No new candidate is available yet. Complete more measured action outcomes or an inconclusive experiment.</div>');
  el.querySelectorAll("[data-explore]").forEach(btn=>btn.onclick=()=>{
    const x=cs[Number(btn.dataset.explore)],all=L(EXP,{}),list=all[s]||[],id=s+"-"+Date.now(),e={id,name:x.a+" vs "+x.b,series:s,status:"active",createdAt:Date.now(),explorationKind:x.kind,arms:[{type:x.a,outcomes:[],taskIds:[]},{type:x.b,outcomes:[],taskIds:[]}]};
    list.push(e);all[s]=list;
@@ -32,6 +35,6 @@ function render(){
    S(EXP,all);S("crowspace-growth-action-tasks-v1",tasks);render();
  });
 }
-window.CrowSpaceExperimentExplorer={candidates,render};
+window.CrowSpaceExperimentExplorer={candidates,render,autoSchedule,schedule};
 setTimeout(render,5000);setInterval(render,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(render,900)});
 })();
