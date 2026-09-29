@@ -11,7 +11,7 @@ function score(x){
  const low=Math.max(0,60-N(x.forecast))*.35;
  const survival=Math.max(0,50-N(x.survival))*.25;
  const age=Math.min(15,Math.max(0,(Date.now()-N(x.lastChallengeAt))/DAY/7));
- return Math.round(risk+fall+low+survival+age);
+ const learned=window.CrowSpaceChallengeLearningV50?.boost?.(x.reason||"UNKNOWN")||0;\n return Math.round(risk+fall+low+survival+age+learned);
 }
 function candidates(){
  const f=L(FORE,{}),ch=L(CH,{}),exp=L(EXP,{}),out=[];
