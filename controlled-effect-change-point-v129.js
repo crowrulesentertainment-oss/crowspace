@@ -17,7 +17,7 @@ function sync(){
    if(!best||Math.abs(shift)>Math.abs(best.shift))best={index:i,shift};
   }
   const enough=rows.length>=MIN_WINDOWS,change=best&&Math.abs(best.shift)>=MIN_SHIFT;
-  st[reason]={reason,windows:rows.length,changePointIndex:change?best.index:null,changeShift:change?best.shift:0,detected:!!(enough&&change),status:enough?(change?'CHANGE_POINT_DETECTED':'NO_MATERIAL_CHANGE'):'COLLECTING',minimumWindows:MIN_WINDOWS,minShift:MIN_SHIFT,updatedAt:Date.now(),method:'MAX_MEAN_SHIFT'};
+  st[reason]={reason,windows:rows.length,changePointIndex:change?best.index:null,changeShift:change?best.shift:0,rows,detected:!!(enough&&change),status:enough?(change?'CHANGE_POINT_DETECTED':'NO_MATERIAL_CHANGE'):'COLLECTING',minimumWindows:MIN_WINDOWS,minShift:MIN_SHIFT,updatedAt:Date.now(),method:'MAX_MEAN_SHIFT'};
  });S(KEY,st);return st
 }
 function summary(reason){return state()[reason]||{status:'EMPTY',windows:0}}
