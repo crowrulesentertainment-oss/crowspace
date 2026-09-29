@@ -19,7 +19,7 @@ function sync(){
  Object.keys(cal).forEach(k=>{st[k]={...policy(k),updatedAt:Date.now()};});
  S(KEY,st);return st
 }
-function boost(reason){const p=state()[reason];const l=window.CrowSpaceChallengePolicyLearningV54?.value?.(reason);if(l!==undefined&&p){const s=window.CrowSpaceChallengePolicyLearningV54?.status?.(reason);if(s==="UNDERPERFORMING")return Math.min(0,p.priorityBoost);if(s==="EFFECTIVE")return p.priorityBoost;return Math.round(p.priorityBoost*.75)}return p?.priorityBoost||0}
+function boost(reason){const g=window.CrowSpaceChallengeGovernanceV55?.influence?.(reason);if(g!==undefined&&window.CrowSpaceChallengeGovernanceV55?.canUse?.(reason))return Math.round(g*10);const p=state()[reason];return p?.priorityBoost||0}
 function decision(reason){return state()[reason]||policy(reason)}
 function best(){return Object.values(state()).sort((a,b)=>(b.priorityBoost||0)-(a.priorityBoost||0))}
 window.CrowSpaceChallengePolicyV53={sync,state,boost,decision,best};
