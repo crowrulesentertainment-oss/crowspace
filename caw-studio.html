@@ -9,7 +9,7 @@
 <main class="feed">
 <section class="hero studio-hero"><div><div class="eyebrow">CREATOR STUDIO // CAWS</div><h1>Make it.<br><em>Publish it.</em></h1><p>Your command center for short-form video. Create, save drafts, publish and manage your Caws.</p></div><div class="hero-orbit">✦</div></section>
 <section class="studio-toolbar"><button class="post-button" id="createCaw">＋ Create Caw</button><div class="studio-stats"><span><b id="totalCount">0</b> Total</span><span><b id="publishedCount">0</b> Published</span><span><b id="draftCount">0</b> Drafts</span><span><b id="totalViews">0</b> Views</span><span><b id="totalEngagement">0%</b> Engagement</span></div></section><section class="studio-insights card"><div><span>CREATOR INSIGHTS</span><b id="insightTitle">Your local Caw performance</b><small id="insightText">Publish a Caw to begin building your local analytics.</small></div><div class="insight-number" id="insightViews">0</div></section>
-<section class="studio-tabs"><button class="selected" data-tab="all">All Caws</button><button data-tab="published">Published</button><button data-tab="drafts">Drafts</button></section>
+<section class="studio-tabs"><button class="selected" data-tab="all">All Caws</button><button data-tab="published">Published</button><button data-tab="drafts">Drafts</button><select id="studioSort" aria-label="Sort Caws"><option value="newest">Newest</option><option value="views">Most Views</option><option value="engagement">Most Engagement</option><option value="likes">Most Likes</option></select></section>
 <section id="studioLibrary" class="studio-library"></section>
 </main></div>
 <div class="studio-modal" id="editorModal"><div class="studio-editor card">
@@ -20,4 +20,4 @@
 <div class="studio-meta"><span id="durationLabel">Duration: —</span><span id="uploadState">Ready</span><span>Browser storage</span></div>
 <div class="editor-actions"><button class="secondary-btn" id="saveDraft">Save Draft</button><button class="post-button" id="publishCaw">Publish Caw</button></div><p id="studioStatus" class="studio-status"></p>
 </div></div>
-<script src="caw-studio.js"></script></body></html>
+<div class="studio-modal" id="analyticsModal"><div class="studio-editor card analytics-modal"><button class="close" id="closeAnalytics">×</button><div class="eyebrow">CAW ANALYTICS</div><h2 id="analyticsTitle">Performance</h2><div class="studio-insights analytics-grid"><div><span>VIEWS</span><b id="analyticsViews">0</b></div><div><span>LIKES</span><b id="analyticsLikes">0</b></div><div><span>COMMENTS</span><b id="analyticsComments">0</b></div><div><span>RE-CAWS</span><b id="analyticsRecaws">0</b></div></div><p id="analyticsSummary"></p></div></div><script src="caw-studio.js"></script></body></html>
