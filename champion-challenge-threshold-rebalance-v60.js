@@ -15,7 +15,7 @@ function sync(){
   const ctx=window.CrowSpaceThresholdContextV64?.signal?.(x.reason,forecast)||0,ctxConf=window.CrowSpaceThresholdContextV64?.confidence?.(x.reason,forecast)||0,transfer=window.CrowSpaceThresholdTransferV65?.transfer?.(x.reason,forecast)||{signal:0,confidence:0},transferAdj=transfer.confidence>=.6?Math.max(-.04,Math.min(.04,transfer.signal*.06)):0,contextAdj=ctxConf>=.6?Math.max(-.06,Math.min(.06,ctx*.08)):transferAdj;
   const arbitration=window.CrowSpaceThresholdArbitrationV66?.influence?.(x.reason)||0;
   const memoryAdj=window.CrowSpaceThresholdArbitrationMemoryV67?.adjustment?.(x.reason)||0,stability=window.CrowSpaceThresholdStabilityV68?.factor?.(x.reason)||1,recovery=window.CrowSpaceThresholdRecoveryV69?.factor?.(x.reason)||1;
-  const confidenceGate=(window.CrowSpaceThresholdDecisionConfidenceV70?.gate?.(x.reason)||.25)*(window.CrowSpaceThresholdConfidenceMemoryV71?.factor?.(x.reason)||1)*(window.CrowSpaceThresholdConfidenceRegimeV72?.factor?.(x.reason)||1);
+  const confidenceGate=(window.CrowSpaceThresholdDecisionConfidenceV70?.gate?.(x.reason)||.25)*(window.CrowSpaceThresholdConfidenceMemoryV71?.factor?.(x.reason)||1)*(window.CrowSpaceThresholdConfidenceRegimeV72?.factor?.(x.reason)||1)*(window.CrowSpaceThresholdRecalibrationV73?.gate?.(x.reason)||1);
   const allocation=x.status==="HOLD"?0:Math.max(.1,Math.min(1,(base+score*.4+adj+forecastAdj+contextAdj+(arbitration+memoryAdj)*stability*recovery)*confidenceGate));
   st[x.reason]={reason:x.reason,status:x.status,score:+score.toFixed(3),allocation:+allocation.toFixed(2),quality:N(x.quality),tests:N(x.tests),recency:+recency.toFixed(2),updatedAt:Date.now()};
  });
