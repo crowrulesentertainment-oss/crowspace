@@ -7,7 +7,7 @@ function state(){return L(KEY,{})}
 function policy(reason){
  const x=L(CAL,{})[reason];
  if(!x)return{reason,status:"UNSEEN",priorityBoost:0,action:"OBSERVE"};
- const v=N(x.calibratedValue),conf=N(x.confidence),tests=N(x.tests),th=window.CrowSpaceChallengeThresholdsV57?.thresholds?.(reason),up=th?.prioritizeAt??.35,down=th?.suppressAt??-.25,alloc=window.CrowSpaceChallengeThresholdPortfolioV59?.allocation?.(reason);
+ const v=N(x.calibratedValue),conf=N(x.confidence),tests=N(x.tests),th=window.CrowSpaceChallengeThresholdsV57?.thresholds?.(reason),up=th?.prioritizeAt??.35,down=th?.suppressAt??-.25,alloc=window.CrowSpaceThresholdRebalanceV60?.allocation?.(reason)??window.CrowSpaceChallengeThresholdPortfolioV59?.allocation?.(reason);
  if(x.status==="CONTRADICTED")return{reason,status:"CONTRADICTED",priorityBoost:-5,action:"DEPRIORITIZE",tests,confidence:conf};
  if(tests<2)return{reason,status:"COLD_START",priorityBoost:0,action:"COLLECT",tests,confidence:conf};
  if(v>=up&&conf>=.6){const tv=window.CrowSpaceChallengeThresholdValidationV58?.quality?.(reason);return{reason,status:"SUPPORTIVE",priorityBoost:tv!==undefined&&tv<-.2?2:Math.round(8*(alloc===undefined?1:alloc)),action:"PRIORITIZE",tests,confidence:conf};}
