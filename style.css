@@ -90,3 +90,5 @@
 .series-overview{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-overview b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-overview span{font-size:8px;color:var(--muted)}
 
 .series-health{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-health b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-health span{font-size:8px;color:var(--muted)}
+
+.series-next-action{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-next-action b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-next-action span{font-size:8px;color:var(--muted)}
