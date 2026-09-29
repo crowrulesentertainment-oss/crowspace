@@ -120,3 +120,5 @@
 .series-top-episode{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-top-episode b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-top-episode span{font-size:8px;color:var(--muted);line-height:1.5}
 
 .series-season-spread{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-season-spread b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-season-spread span{font-size:8px;color:var(--muted);line-height:1.6}
+
+.series-season-balance{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px}.series-season-balance>b{display:block;font-size:7px;letter-spacing:.1em;color:var(--cyan);margin-bottom:7px}.series-season-balance>div{display:flex;flex-wrap:wrap;gap:6px}.series-season-balance span{font-size:8px;color:var(--muted);padding:5px 8px;border:1px solid var(--line);border-radius:999px}.series-season-balance strong{color:var(--text)}
