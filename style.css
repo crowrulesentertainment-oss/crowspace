@@ -112,3 +112,5 @@
 .series-consistency{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-consistency b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-consistency span{font-size:8px;color:var(--muted);line-height:1.6}
 
 .series-completion{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-completion b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-completion span{font-size:8px;color:var(--muted)}
+
+.series-next-release{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-next-release b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-next-release span{font-size:8px;color:var(--muted);line-height:1.5}
