@@ -3,7 +3,7 @@
    evidence is positive across multiple eligible series.
 */
 (function(){
-const COMP="crowspace-replacement-competition-v26","crowspace-replacement-validation-v27",EXP="crowspace-action-experiments-v1",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const COMP="crowspace-replacement-competition-v26",KEY="crowspace-replacement-validation-v27",EXP="crowspace-action-experiments-v1",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 function result(e){const r=e?.strategyTrial?.result||{};const effect=N(r.differenceInDifferences??r.viewDelta);return{effect,positive:r.classification==="CALIBRATED_POSITIVE"||effect>=10,negative:r.classification==="CALIBRATED_NEGATIVE"||effect<=-10,classification:r.classification||""}}
 function eligible(original,used){const all=L(EXP,{});return Object.keys(all).filter(s=>!used.includes(s)&&!((all[s]||[]).some(e=>e.status==="active"&&!e.completedAt))).filter(s=>s!==original)}
 function update(original,e){
