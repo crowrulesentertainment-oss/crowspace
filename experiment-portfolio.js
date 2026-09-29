@@ -49,6 +49,7 @@ function controlledConfidence(){
   return{key,tests:rows.length,strong,weak,neutral,series,consistency:+ratio.toFixed(2),weightedSignal:+weightedSignal.toFixed(3),confidence,contradiction,ageDays:+ageDays.toFixed(1),decayHalfLifeDays:30,avgEffect:+(rows.reduce((n,x,i)=>n+weights[i]*N(x.lift??x.differenceInDifferences),0)/wsum).toFixed(2)}
  }).sort((a,b)=>b.weightedSignal-a.weightedSignal);
 }
+function replacementConfidence(original,replacement){return window.CrowSpaceReplacementConfidence?.state?window.CrowSpaceReplacementConfidence.state(original):null}
 function confidenceRecovery(){
  const rows=controlledConfidence(),out={version:21,updatedAt:now(),strategies:0,recovery:0,mixed:0};
  rows.forEach(x=>{out.strategies++;if(x.contradiction||x.confidence==="MIXED")out.recovery++;if(x.confidence==="MIXED")out.mixed++});
