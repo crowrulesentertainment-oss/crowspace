@@ -16,7 +16,7 @@ function commandPalette(){
  wrap.className="command-palette";
  wrap.innerHTML='<div class="command-backdrop" data-close-command></div><div class="command-panel"><div class="command-top"><span>COMMAND CENTER</span><button class="btn" data-close-command>ESC</button></div><input id="command-input" class="command-input" placeholder="Search CrowSpace pages…" autocomplete="off"><div id="command-results" class="command-results"></div></div>';
  document.body.appendChild(wrap);
- const pages=[["home.html","Home","Command Feed"],["explore.html","Explore","Discover members"],["caws.html","Caws","Short-form video"],["circles.html","Circles","Communities"],["notifications.html","Alerts","Notifications"],["messages.html","Messages","Direct messages"],["holiday-bots.html","Holiday Network","Automated accounts"],["profile.html","Profile","Your identity"],["account.html","Account","Universal account"]];
+ const pages=[["home.html","Home","Command Feed"],["explore.html","Explore","Discover members"],["search.html","Search","Universal Discovery Hub"],["caws.html","Caws","Short-form video"],["circles.html","Circles","Communities"],["notifications.html","Alerts","Notifications"],["messages.html","Messages","Direct messages"],["holiday-bots.html","Holiday Network","Automated accounts"],["profile.html","Profile","Your identity"],["account.html","Account","Universal account"]];
  const input=wrap.querySelector("#command-input"),results=wrap.querySelector("#command-results");
  const draw=q=>{const v=q.toLowerCase().trim();results.innerHTML=pages.filter(p=>!v||p.join(" ").toLowerCase().includes(v)).map(p=>'<a class="command-result" href="'+p[0]+'"><b>'+esc(p[1])+'</b><span>'+esc(p[2])+'</span><kbd>↵</kbd></a>').join("")||'<div class="muted" style="padding:18px">No destination found.</div>'};
  const close=()=>{wrap.classList.remove("open");input.value="";draw("")};
@@ -36,7 +36,7 @@ function appShell(){
  const frame=document.createElement("div");frame.className="pageframe";
  const side=document.createElement("aside");side.className="sidebar";
  const active=p==="notifications"?"notifications":p;
- const links=[["home.html","home","HOME","Command feed"],["explore.html","explore","EXPLORE","Find members"],["caws.html","caws","CAWS","Short-form video"],["circles.html","circles","CIRCLES","Communities"],["notifications.html","notifications","ALERTS","Signals"],["messages.html","messages","MESSAGES","Direct conversations"],["holiday-bots.html","holiday-bots","HOLIDAY","Bot network"],["profile.html","profile","PROFILE","Identity"],["account.html","account","ACCOUNT","Universal account"]];
+ const links=[["home.html","home","HOME","Command feed"],["explore.html","explore","EXPLORE","Find members"],["search.html","search","SEARCH","Universal discovery"],["caws.html","caws","CAWS","Short-form video"],["circles.html","circles","CIRCLES","Communities"],["notifications.html","notifications","ALERTS","Signals"],["messages.html","messages","MESSAGES","Direct conversations"],["holiday-bots.html","holiday-bots","HOLIDAY","Bot network"],["profile.html","profile","PROFILE","Identity"],["account.html","account","ACCOUNT","Universal account"]];
  side.innerHTML='<div class="side-label">CROWSPACE OS</div>'+links.map(x=>'<a class="side-link '+(active===x[1]?"active":"")+'" href="'+x[0]+'"><b>'+x[2]+'</b><span>'+x[3]+'</span>'+(x[1]==="notifications"?'<em class="nav-badge side-badge" data-live-badge="alerts" hidden>0</em>':"")+(x[1]==="messages"?'<em class="nav-badge side-badge" data-live-badge="messages" hidden>0</em>':"")+'</a>').join("")+'<div class="side-status"><i></i><b data-live-status>CONNECTING</b><span>Supabase Realtime</span></div>';
  const content=document.createElement("div");content.className="content";
  children.forEach(x=>content.appendChild(x));
@@ -165,11 +165,11 @@ function universalSearchUI(db){
  host.appendChild(wrap);
  const input=wrap.querySelector("#crow-search-input"),results=wrap.querySelector("#crow-search-results");
  let timer;
- const draw=async()=>{clearTimeout(timer);timer=setTimeout(async()=>{const q=input.value.trim();if(q.length<2){results.hidden=true;return}results.hidden=false;results.innerHTML='<div class="muted" style="padding:14px">Searching…</div>';const data=await universalSearch(db,q);results.innerHTML=data.results.slice(0,25).map(x=>'<a class="search-result" href="'+esc(x.url)+'"><b>'+esc(x.title)+'</b><span>'+esc(x.kind.toUpperCase())+' · '+esc(x.meta)+'</span><small>'+esc((x.body||"").slice(0,120))+'</small></a>').join("")||'<div class="muted" style="padding:14px">No public results found.</div>'},180)};
+ const draw=()=>{clearTimeout(timer);timer=setTimeout(async()=>{const q=input.value.trim();if(q.length<2){results.hidden=true;return}results.hidden=false;results.innerHTML='<div class="search-result"><b>SEARCHING CROWSPACE…</b></div>';const data=await universalSearch(db,q);results.innerHTML=(data.results||[]).slice(0,8).map(x=>'<a class="search-result" href="'+esc(x.url)+'"><b>'+esc(x.title)+'</b><span>'+esc(x.kind.toUpperCase())+' · '+esc(x.meta)+'</span></a>').join("")+'<a class="search-result search-all" href="search.html?q='+encodeURIComponent(q)+'"><b>VIEW ALL RESULTS</b><span>Open the CrowSpace Discovery Hub</span></a>'||'<div class="muted" style="padding:14px">No public results found.</div>'},180)};
  input.oninput=draw;
+ input.onkeydown=e=>{if(e.key==="Enter"&&input.value.trim().length>=2)location.href="search.html?q="+encodeURIComponent(input.value.trim())};
  document.addEventListener("click",e=>{if(!wrap.contains(e.target))results.hidden=true});
-}
-\nfunction metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
+}\nfunction metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
 async function page(){
  shell();const p=document.body.dataset.page,db=await auth();communityChrome(p);universalSearchUI(db);
  if(p==="index")return;
@@ -179,6 +179,7 @@ $("#publish").onsubmit=async e=>{e.preventDefault();const body=$("#body").value.
  if(p==="profile")return profilePage(db);
  if(p==="account")return accountPage(db);
  if(p==="explore")return explorePage(db);
+ if(p==="search")return searchPage(db);
  if(p==="caws")return cawsPage(db);
  if(p==="circles")return circlesPage(db);
  if(p==="messages")return messagesPage(db);
