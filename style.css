@@ -60,3 +60,5 @@
 .season-targets{display:flex;flex-wrap:wrap;gap:7px;padding:9px 10px;margin-bottom:9px;border:1px solid var(--line);border-radius:7px}.season-targets>b{width:100%;font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-targets span{font-size:8px;color:var(--muted);padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px}.season-targets strong{color:var(--text)}
 
 .season-launch{display:flex;flex-direction:column;gap:6px;padding:9px 10px;margin-bottom:9px;border:1px solid var(--line);border-radius:7px}.season-launch b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-launch span{font-size:8px;color:var(--muted)}
+
+.episode-readiness{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px}.episode-readiness .mini-title{font-size:8px;letter-spacing:.12em;margin-bottom:7px}.readiness-episode{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}.readiness-episode b{font-size:9px}.readiness-episode span{font-size:7px;letter-spacing:.08em}.readiness-episode .ready{color:var(--cyan)}.readiness-episode .needs{color:#ff9f7a}
