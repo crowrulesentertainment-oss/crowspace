@@ -130,7 +130,23 @@ function privacyBanner(text="Some content is hidden by the owner's privacy setti
 async function universalSearch(db,q){
  const term=String(q||"").trim();
  if(term.length<2)return {term,results:[]};
- const like="%"+term.replace(/[%_]/g,"\\function metric(label,value,detail)")+"%";
+ const like="%"+term.replace(/[%_]/g,"\\async function searchPage(db){
+ const u=await guard();if(!u)return;
+ const q0=new URLSearchParams(location.search).get("q")||"";
+ const root=$("#search");
+ root.innerHTML='<section class="hero discovery-hero"><div class="eyebrow">CROWSPACE // UNIVERSAL DISCOVERY</div><h1>SEARCH THE UNIVERSE.</h1><p class="muted">Members, posts, Caws, Circles, Holiday Bots and more — filtered through CrowSpace privacy.</p><div class="search-big"><input id="hubQuery" value="'+esc(q0)+'" placeholder="Search everything in CrowSpace…"><button id="hubGo" class="btn primary">Search</button></div></section><section class="discovery-layout"><main><div class="card pad" id="searchSummary"><span class="muted">Enter a search above.</span></div><div id="searchResults" class="discovery-results"></div></main><aside><section class="card pad"><h3>DISCOVERY</h3><div id="searchFilters" class="filter-stack"><button class="btn active" data-kind="all">All</button><button class="btn" data-kind="member">Members</button><button class="btn" data-kind="post">Posts</button><button class="btn" data-kind="caw">Caws</button><button class="btn" data-kind="circle">Circles</button><button class="btn" data-kind="holiday">Holiday Bots</button></div></section><section class="card pad" style="margin-top:16px"><h3>TRENDING CAWS</h3><div id="trendingCaws" class="mini-list"><span class="muted">Loading…</span></div></section></aside></div>';
+ let results=[],kind="all";
+ const render=()=>{const rows=results.filter(x=>kind==="all"||x.kind===kind);$("#searchSummary").innerHTML='<b>'+rows.length+'</b> result'+(rows.length===1?"":"s")+(q0?' for “'+esc(q0)+'”':"");$("#searchResults").innerHTML=rows.map(x=>'<a class="card pad discovery-result" href="'+esc(x.url)+'"><span class="result-kind">'+esc(x.kind.toUpperCase())+'</span><h3>'+esc(x.title)+'</h3><div class="muted">'+esc(x.meta)+'</div><p>'+esc(x.body||"")+'</p></a>').join("")||'<div class="card pad muted">No visible results.</div>'};
+ const run=async()=>{const q=$("#hubQuery").value.trim();history.replaceState({}, "", "search.html"+(q?"?q="+encodeURIComponent(q):""));if(q.length<2){results=[];q0="";render();return}$("#searchSummary").innerHTML='<span class="muted">Searching…</span>';const data=await universalSearch(db,q);results=data.results||[];q0=q;render()};
+ $("#hubGo").onclick=run;$("#hubQuery").onkeydown=e=>{if(e.key==="Enter")run()};
+ document.querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{kind=b.dataset.kind;document.querySelectorAll("[data-kind]").forEach(x=>x.classList.toggle("active",x===b));render()});
+ const tr=await db.from("crowspace_caws").select("id,user_id,title,caption,views,created_at").order("views",{ascending:false}).limit(12);
+ const owners=[...new Set((tr.data||[]).map(x=>x.user_id).filter(Boolean))];const op=owners.length?await db.from("crowspace_profiles").select("user_id,privacy_media").in("user_id",owners):{data:[]};const allowed=new Set((op.data||[]).filter(x=>x.privacy_media!=="private").map(x=>x.user_id));
+ $("#trendingCaws").innerHTML=(tr.data||[]).filter(x=>allowed.has(x.user_id)).slice(0,6).map(x=>'<a href="caw.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.title||"Caw")+'</b><span>'+Number(x.views||0)+' views</span></a>').join("")||'<span class="muted">No public Caws yet.</span>';
+ if(q0)run();
+}
+
+function metric(label,value,detail)")+"%";
  const out=[];
  const [pr,po,ca,ci,bo,bp]=await Promise.all([
   db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio,privacy_profile").or("display_name.ilike."+like+",username.ilike."+like+",bio.ilike."+like).limit(20),
