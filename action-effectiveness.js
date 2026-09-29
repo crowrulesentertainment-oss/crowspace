@@ -1,0 +1,19 @@
+/* CrowSpace — Action Effectiveness Dashboard v1
+   Browser-only analytics for completed growth actions.
+*/
+(function(){
+const KEY="crowspace-growth-action-tasks-v1",DB="crowspace-caws",STORE="videos";
+const $=id=>document.getElementById(id),L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},F=n=>Math.round(Number(n)||0).toLocaleString(),E=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function series(){return $("studioSeries")?.value||"all"}
+function type(t){const s=(t.title+" "+t.detail).toLowerCase();if(/publish|cadence|rhythm|consistency|caw/.test(s))return"Publishing";if(/engagement|touchpoint|comment|like|audience/.test(s))return"Engagement";if(/hook|title|refresh/.test(s))return"Content";if(/goal|pace|momentum|window|amplify/.test(s))return"Growth";return"Other"}
+function allCaws(){return new Promise(ok=>{try{const r=indexedDB.open(DB);r.onsuccess=()=>{try{const q=r.result.transaction(STORE,"readonly").objectStore(STORE).getAll();q.onsuccess=()=>ok(q.result||[]);q.onerror=()=>ok([])}catch(e){ok([])}};r.onerror=()=>ok([])}catch(e){ok([])}})}
+async function render(){const s=series(),all=L(KEY,{}),tasks=s==="all"?Object.values(all).flat():all[s]||[],done=tasks.filter(t=>t.completed&&t.result),box=$("actionEffectivenessDashboard")||document.createElement("section");if(s==="all"||!done.length){box.remove();return}if(!$("actionEffectivenessDashboard"))$("growthExecutionBoard")?.after(box);box.id="actionEffectivenessDashboard";box.className="card action-effectiveness-dashboard";
+const groups={};done.forEach(t=>{const k=type(t);groups[k]??={n:0,v:0,i:0,c:0};groups[k].n++;groups[k].v+=Number(t.result.viewsDelta)||0;groups[k].i+=Number(t.result.interactionsDelta)||0;groups[k].c+=Number(t.result.cawsPublished)||0});
+const rows=Object.entries(groups).sort((a,b)=>b[1].v-a[1].v),max=Math.max(1,...rows.map(x=>x[1].v));
+const total=done.reduce((a,t)=>a+(Number(t.result.viewsDelta)||0),0),ints=done.reduce((a,t)=>a+(Number(t.result.interactionsDelta)||0),0),caws=done.reduce((a,t)=>a+(Number(t.result.cawsPublished)||0),0);
+const row=([k,x])=>'<article><div class="eff-main"><b>'+E(k)+'</b><small>'+x.n+' completed actions · '+F(x.c)+' Caws published</small><div class="eff-bar"><i style="width:'+Math.round(x.v/max*100)+'%"></i></div></div><div class="eff-values"><strong>'+F(x.v)+'</strong><span>views</span><strong>'+F(x.i)+'</strong><span>interactions</span></div></article>';
+const dates=done.map(t=>t.completedAt).filter(Boolean).sort((a,b)=>a-b),recent=dates.length?dates.slice(-7):[],last7=done.filter(t=>t.completedAt&&(Date.now()-t.completedAt)<=7*864e5),older=done.filter(t=>t.completedAt&&(Date.now()-t.completedAt)>7*864e5),rv=last7.reduce((a,t)=>a+(Number(t.result.viewsDelta)||0),0),ov=older.reduce((a,t)=>a+(Number(t.result.viewsDelta)||0),0),momentum=ov?Math.round((rv/Math.max(1,last7.length))/(ov/Math.max(1,older.length))*100):0;
+box.innerHTML='<div class="eff-head"><div><span>ACTION INTELLIGENCE</span><h3>Effectiveness Dashboard</h3><small>Outcome history from completed growth actions. Stored only in this browser.</small></div><div class="eff-badge">'+done.length+' measured</div></div><div class="eff-kpis"><div><b>'+F(total)+'</b><span>Views generated</span></div><div><b>'+F(ints)+'</b><span>Interactions generated</span></div><div><b>'+F(caws)+'</b><span>Caws published</span></div><div><b>'+F(momentum)+'%</b><span>Recent action momentum</span></div></div><div class="eff-groups">'+rows.map(row).join("")+'</div><div class="eff-foot"><span>'+recent.length+' recent completions tracked</span><span>Use this history to refine future action plans.</span></div>';
+}
+setTimeout(render,2800);setInterval(render,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(render,350)});
+})();
