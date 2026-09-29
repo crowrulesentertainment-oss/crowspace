@@ -57,7 +57,7 @@ function liveLayer(db,u){
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts"},()=>{refreshFeed();toast("New CrowSpace post received")});
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_holiday_bot_posts"},()=>{refreshFeed();toast("Holiday Bot activity received")});
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+u.id},()=>{badge("alerts");toast("New notification")});
- channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},payload=>{const r=payload.new||{};if(r.sender_id===u.id||r.recipient_id===u.id||r.user_id===u.id){badge("messages");toast("New message activity")}});
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},()=>{badge("messages");toast("New message activity")});
 
  const presence=db.channel("crowspace-presence",{config:{presence:{key:u.id}}});
  presence.on("presence",{event:"sync"},()=>{const p=presence.presenceState();const rows=[];Object.keys(p).forEach(k=>(p[k]||[]).forEach(v=>rows.push(v)));state.online=rows;state.presence=rows.length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=rows.length)});
