@@ -44,8 +44,8 @@ function reEvaluationPlan(){
 async function generateRecoveryExperiments(){
  const plans=reEvaluationPlan(),p=window.CrowSpaceExperimentPortfolio,x=window.CrowSpaceExperimentExplorer;
  if(!plans.length||!p||!x?.candidates||!x?.schedule)return[];
- const key="crowspace-strategy-recovery-v23",state=L(key,{}),expAll=L(EXP,{}),created=[];
- for(const plan of plans){
+ const key="crowspace-strategy-recovery-v23",state=L(key,{}),expAll=L(EXP,{}),created=[],activeKeys=new Set();
+ for(const plan of plans){\n  if(state[plan.key]?.status==="RETIRED")continue;\n  const attempts=N(state[plan.key]?.attempts);if(attempts>=3){state[plan.key]={...state[plan.key],status:"RETIRED",reason:"Three recovery experiments failed to restore confidence.",updatedAt:Date.now(),version:23};continue;}
   const existing=Object.values(expAll).flat().find(e=>e.recoveryExperiment&&e.recoveryExperiment.strategyKey===plan.key&&!e.lifecycleCompletedAt);
   if(existing){state[plan.key]={...state[plan.key],status:"ACTIVE",experimentId:existing.id,updatedAt:Date.now(),version:23};continue}
   const candidates=(plan.series||[]).filter(series=>{const list=expAll[series]||[];return !list.some(e=>e.status==="active"&&!e.completedAt)}).map(series=>({series,candidate:(x.candidates(series)||[])[0]})).filter(z=>z.candidate);
@@ -54,16 +54,16 @@ async function generateRecoveryExperiments(){
   const selected=candidates[0],baseline=p.strategyBaseline?p.strategyBaseline(selected.series):{observations:0,experiments:0,avgViewsPerCaw:0,interactionRate:0};
   const holdout=window.CrowSpaceControlledHoldouts?.capture?await window.CrowSpaceControlledHoldouts.capture(selected.series,plan.series||[]):null;
   if(!holdout){state[plan.key]={status:"WAITING",reason:"Unable to capture an eligible controlled holdout.",updatedAt:Date.now(),version:23};continue}
-  const trial={key:plan.key,strategy:plan.key,mutation:"RECOVERY",baseline,holdout,capturedAt:Date.now(),version:23,controlledHoldout:true,recovery:true,recoveryFrom:plan.confidence,priorSeries:plan.series||[],series:selected.series};
+  const parts=String(plan.key).split("|"),strategy={mode:parts[0],correctionMode:parts[1],explorationShare:N(parts[2])};\n  const trial={key:plan.key,strategy,mutation:"RECOVERY",baseline,holdout,capturedAt:Date.now(),version:23,controlledHoldout:true,recovery:true,recoveryFrom:plan.confidence,priorSeries:plan.series||[],series:selected.series};
   const result=await x.schedule(selected.series,selected.candidate,{strategyTrial:trial});
   if(result?.ok){
-   const list=L(EXP,{})[selected.series]||[],createdExp=list[list.length-1];createdExp&&(createdExp.recoveryExperiment={strategyKey:plan.key,version:23,recoveryFrom:plan.confidence});
+   const list=L(EXP,{})[selected.series]||[],createdExp=list[list.length-1];createdExp&&(createdExp.recoveryExperiment={strategyKey:plan.key,version:23,recoveryFrom:plan.confidence,attempt:N(state[plan.key]?.attempts)+1});
    const fresh=L(EXP,{});fresh[selected.series]=list;S(EXP,fresh);
-   state[plan.key]={status:"SCHEDULED",experimentId:createdExp?.id||null,series:selected.series,updatedAt:Date.now(),version:23};
+   state[plan.key]={status:"SCHEDULED",attempts:N(state[plan.key]?.attempts)+1,experimentId:createdExp?.id||null,series:selected.series,updatedAt:Date.now(),version:23};
    created.push({key:plan.key,series:selected.series,experimentId:createdExp?.id||null});
   }else state[plan.key]={status:"WAITING",reason:result?.reason||"Scheduler declined the recovery experiment.",updatedAt:Date.now(),version:23};
  }
- S(key,state);return created;
+ const planKeys=new Set(plans.map(x=>x.key));Object.keys(state).forEach(k=>{if(!planKeys.has(k)&&state[k].status!=="RETIRED"&&state[k].status!=="RESTORED")state[k]={...state[k],status:"RESTORED",reason:"Fresh evidence no longer meets the recovery trigger.",updatedAt:Date.now(),version:23}});S(key,state);return created;
 }
 async function orchestrate(s){
  const portfolio=window.CrowSpaceExperimentPortfolio;
