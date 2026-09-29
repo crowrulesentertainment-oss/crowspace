@@ -20,6 +20,7 @@ function record(e){
  const tr=e?.strategyTrial?.transferExperiment;if(!tr)return null;
  const result=e.strategyTrial?.result||{},effect=N(result.differenceInDifferences??result.viewDelta),positive=result.classification==="CALIBRATED_POSITIVE"||effect>=10,negative=result.classification==="CALIBRATED_NEGATIVE"||effect<=-10;
  const st=state(),x=st[tr.key]||tr;x.tests=N(x.tests)+1;x.positive=N(x.positive)+(positive?1:0);x.negative=N(x.negative)+(negative?1:0);x.effects=[effect,...(x.effects||[])].slice(0,20);x.lastResult={effect,positive,negative,at:Date.now()};x.status=x.negative>=2&&x.positive===0?"DISABLED":x.positive>=2&&x.negative===0?"SUPPORTED":negative?"REDUCED":"TESTED";x.updatedAt=Date.now();S(KEY,{...st,[tr.key]:x});
+ window.CrowSpaceTransferValidationV38?.update?.(e);
  window.CrowSpaceTransferGuardrailsV36?.guard?.(tr.originalKey,tr.targetContext);
  return x
 }
