@@ -27,6 +27,7 @@ async function lifecycle(){
    if(e.replacementExperiment&&window.CrowSpaceStrategyReplacement?.evaluate){window.CrowSpaceStrategyReplacement.evaluate(e.replacementExperiment.originalKey,e.strategyTrial?.result||null);}
    if(e.replacementExperiment?.competitionVersion===26&&window.CrowSpaceReplacementCompetition?.record){window.CrowSpaceReplacementCompetition.record(e.replacementExperiment.originalKey,e);}
    if(e.replacementExperiment?.validationVersion===27&&window.CrowSpaceReplacementValidation?.update){window.CrowSpaceReplacementValidation.update(e.replacementExperiment.originalKey,e);}
+   if(e.transferExperiment&&window.CrowSpaceTransferExperimentsV37?.record)window.CrowSpaceTransferExperimentsV37.record(e);
    changed.push({series:s,id:e.id,decision:d.status});
   }
  }
@@ -134,6 +135,24 @@ async function generateReplacementExperiments(){
  }
  return out;
 }
+async function generateTransferExperiments(){
+ const te=window.CrowSpaceTransferExperimentsV37,x=window.CrowSpaceExperimentExplorer,p=window.CrowSpaceExperimentPortfolio;if(!te||!x?.candidates||!x?.schedule||!p)return[];
+ const all=L(EXP,{}),created=[];
+ for(const item of te.ready()){
+  const target=item.targetContext;if(!target?.series)continue;
+  const active=(all[target.series]||[]).some(e=>e.status==="active"&&!e.completedAt);if(active)continue;
+  const action=(x.candidates(target.series)||[])[0];if(!action)continue;
+  const holdout=window.CrowSpaceControlledHoldouts?.capture?await window.CrowSpaceControlledHoldouts.capture(target.series,[]):null;if(!holdout)continue;
+  const baseline=p.strategyBaseline?p.strategyBaseline(target.series):{};
+  const trial={key:item.key,parent:item.originalKey,strategy:item.source?.strategy||{},mutation:"CONTEXT_TRANSFER",baseline,holdout,capturedAt:Date.now(),version:37,controlledHoldout:true,transferExperiment:{key:item.key,version:37,originalKey:item.originalKey,targetContext:target,source:item.source,transferStrength:item.strength,evidence:item.evidence},series:target.series};
+  const rr=await x.schedule(target.series,action,{strategyTrial:trial});if(!rr?.ok)continue;
+  const list=L(EXP,{})[target.series]||[],e=list[list.length-1];if(e)e.transferExperiment={key:item.key,version:37,originalKey:item.originalKey,targetContext:target,source:item.source,transferStrength:item.strength,evidence:item.evidence};
+  const fresh=L(EXP,{});fresh[target.series]=list;S(EXP,fresh);
+  const st=L("crowspace-transfer-experiments-v37",{});st[item.key]={...st[item.key],status:"TESTING",experimentId:e?.id||null,updatedAt:Date.now()};S("crowspace-transfer-experiments-v37",st);
+  created.push({key:item.key,series:target.series,experimentId:e?.id||null});
+ }
+ return created;
+}
 async function orchestrate(s){
  const portfolio=window.CrowSpaceExperimentPortfolio;
  const explorer=window.CrowSpaceExperimentExplorer;
@@ -161,6 +180,7 @@ async function orchestrate(s){
   }
  }const exps=L(EXP,{})[s]||[],active=exps.find(e=>e.status==="active"&&!e.completedAt),sch=L(SCHED,{}),cur=sch[s],now=Date.now();if(active){const a=L(ORCH,{});a[s]={status:"ACTIVE",updatedAt:now,experimentId:active.id,version:6};S(ORCH,a);return}if(cur?.cooldownUntil&&now<N(cur.cooldownUntil)){const a=L(ORCH,{});a[s]={status:"COOLDOWN",updatedAt:now,cooldownUntil:cur.cooldownUntil,message:"Next experiment unlocks "+new Date(cur.cooldownUntil).toLocaleString(),version:6};S(ORCH,a);return}if(window.CrowSpaceExperimentExplorer?.autoSchedule){const r=await window.CrowSpaceExperimentExplorer.autoSchedule(s),a=L(ORCH,{});a[s]={status:r?.ok?"SCHEDULED":"WAITING",updatedAt:Date.now(),reason:r?.reason||"",automatic:true,version:6};S(ORCH,a)}}
 function render(){const recovery=reEvaluationPlan();const s=$( "studioSeries")?.value||"all",old=$( "experimentLifecycle");if(s==="all"){old?.remove();return}const all=L(EXP,{}),list=all[s]||[],active=list.find(e=>e.status==="active"),orch=L(ORCH,{})[s],recent=list.filter(e=>e.lifecycleCompletedAt).sort((a,b)=>b.lifecycleCompletedAt-a.lifecycleCompletedAt).slice(0,3),el=old||document.createElement("section");if(!old){el.id="experimentLifecycle";$("experimentExplorationEngine")?.after(el)}el.className="card experiment-lifecycle";const state=active?"ACTIVE":orch?.status==="SCHEDULED"?"NEXT TEST SCHEDULED":"SCHEDULER RELEASED";el.innerHTML='<div class="life-head"><div><span>STRATEGY RE-EVALUATION ENGINE // V22</span><h3>Confidence Failures Trigger Fresh Evidence</h3><small>Experiments close, evaluate, enter memory, release the scheduler, and automatically queue the next eligible test.</small></div><b>'+E(state)+'</b></div><div class="life-orchestrator"><b>NEXT-TEST ORCHESTRATOR</b><span>'+E(orch?.reason||orch?.message||(orch?.status==="SCHEDULED"?"The next experiment has been scheduled automatically.":"Evaluating the next eligible experiment."))+'</span></div>'+(recent.length?'<div class="life-list">'+recent.map(e=>'<article><div><strong>'+E(e.name)+'</strong><small>'+E(e.lifecycleReason||"Completed")+' · '+new Date(e.completedAt).toLocaleString()+'</small></div><em>'+E((L(DEC,{})[s]?.[e.id]?.decision?.status)||"EVALUATED")+'</em></article>').join("")+'</div>':'<div class="life-empty">No autonomous lifecycle completions yet.</div>')}
-async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all"){if(window.CrowSpaceReplacementCompetition?.build)window.CrowSpaceReplacementCompetition.build();await generateReplacementCompetition();await validateReplacementAcrossSeries();window.CrowSpacePortfolioConfidenceV30?.allocations();window.CrowSpacePortfolioBanditV31?.allocate();window.CrowSpaceContextualBanditV32?.allocate(s);if(window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();if(window.CrowSpaceStrategyReplacement?.generate)window.CrowSpaceStrategyReplacement.generate();await generateReplacementExperiments();await generateRecoveryExperiments();await orchestrate(s)}render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
+async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all"){if(window.CrowSpaceReplacementCompetition?.build)window.CrowSpaceReplacementCompetition.build();await generateReplacementCompetition();await validateReplacementAcrossSeries();await generateTransferExperiments();
+ window.CrowSpacePortfolioConfidenceV30?.allocations();window.CrowSpacePortfolioBanditV31?.allocate();window.CrowSpaceContextualBanditV32?.allocate(s);if(window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();if(window.CrowSpaceStrategyReplacement?.generate)window.CrowSpaceStrategyReplacement.generate();await generateReplacementExperiments();await generateRecoveryExperiments();await orchestrate(s)}render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
 setTimeout(run,6500);setInterval(run,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(run,500)});window.CrowSpaceExperimentLifecycle={run,lifecycle,orchestrate,decisionFor:decide};
 window.CrowSpaceLifecycle={run,lifecycle,orchestrate,decide,reEvaluationPlan,generateRecoveryExperiments,validateReplacementAcrossSeries};})();
