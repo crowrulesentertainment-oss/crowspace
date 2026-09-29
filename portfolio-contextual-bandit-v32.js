@@ -5,7 +5,7 @@
 const VAL="crowspace-replacement-validation-v27",V31="crowspace-portfolio-bandit-v31",KEY="crowspace-portfolio-contextual-bandit-v32",HIST="crowspace-portfolio-contextual-history-v32",DAY=864e5,N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 function context(e){
  const d=e?.strategyTrial?.capturedAt||e?.completedAt||Date.now(),dt=new Date(d);
- return{series:e?.strategyTrial?.series||e?.series||"",window=dt.getHours()<12?"MORNING":dt.getHours()<17?"AFTERNOON":dt.getHours()<21?"EVENING":"NIGHT",momentum:e?.strategyTrial?.audienceMomentum||e?.audienceMomentum||"UNKNOWN",experimentType:e?.strategyTrial?.mutation||e?.strategyTrial?.replication?"REPLICATION":"STANDARD",ageBucket:Math.floor(Math.max(0,(Date.now()-d))/DAY/30)};
+ return{series:e?.strategyTrial?.series||e?.series||"",window:dt.getHours()<12?"MORNING":dt.getHours()<17?"AFTERNOON":dt.getHours()<21?"EVENING":"NIGHT",momentum:e?.strategyTrial?.audienceMomentum||e?.audienceMomentum||"UNKNOWN",experimentType:e?.strategyTrial?.mutation||e?.strategyTrial?.replication?"REPLICATION":"STANDARD",ageBucket:Math.floor(Math.max(0,(Date.now()-d))/DAY/30)};
 }
 function records(){
  const all=L(VAL,{}),out=[];Object.entries(all).forEach(([original,v])=>(v.tests||[]).forEach(t=>out.push({original,effect:N(t.effect),positive:!!t.positive,negative:!!t.negative,completedAt:t.completedAt,series:t.series,context:t.context||null})));return out;
