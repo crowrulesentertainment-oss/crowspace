@@ -1,0 +1,11 @@
+/* CrowSpace — Recalibration Outcome Attribution v120 */
+(function(){
+const LED='crowspace-recalibration-event-ledger-v104',OUT='crowspace-recalibration-event-outcomes-v105',VAL='crowspace-recalibration-outcome-evidence-validation-v119',KEY='crowspace-recalibration-outcome-attribution-v120',N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'')||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),MIN_EFFECT=.05;
+function state(){return L(KEY,{})}
+function sync(){const led=L(LED,{}),out=L(OUT,{}),val=L(VAL,{}),st=state();(led.events||[]).forEach(ev=>{const o=out.byDecision?.[ev.decisionId],v=val[ev.decisionId];if(!o||!v||v.status!=='VALID')return;const old=st[ev.decisionId]||{},baseline=N(ev.targetConfidence),observed=N(o.accuracy),delta=observed-baseline;old.decisionId=ev.decisionId;old.eventId=ev.eventId;old.reason=ev.reason;old.mode=ev.mode||null;old.baseline=baseline;old.observed=observed;old.delta=delta;old.status=delta>=MIN_EFFECT?'POSITIVE':delta<=-MIN_EFFECT?'NEGATIVE':'INCONCLUSIVE';old.validatedAt=N(o.observedAt);old.updatedAt=Date.now();old.evidence='VALIDATED_POST_DECISION';st[ev.decisionId]=old});S(KEY,st);return st}
+function stateFor(reason){return Object.values(state()).filter(x=>!reason||x.reason===reason)}
+function summary(reason){const a=stateFor(reason),p=a.filter(x=>x.status==='POSITIVE').length,n=a.filter(x=>x.status==='NEGATIVE').length,i=a.filter(x=>x.status==='INCONCLUSIVE').length;return {count:a.length,positive:p,negative:n,inconclusive:i,attributed:p+n,confidence:a.length?(p-n)/a.length:0,status:p?'ATTRIBUTED':a.length?'INCONCLUSIVE':'EMPTY'}}
+function attribution(reason){const s=summary(reason);return s.attributed?Math.max(.5,Math.min(1,s.positive/(s.attributed||1))):.75}
+function best(){return Object.values(state()).sort((a,b)=>Math.abs(b.delta||0)-Math.abs(a.delta||0))}
+window.CrowSpaceRecalibrationOutcomeAttributionV120={sync,state,stateFor,summary,attribution,best};setTimeout(sync,183000);setInterval(sync,30000);
+})();
