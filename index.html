@@ -16,10 +16,12 @@ body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle 
 .hud{position:absolute;inset:20px;pointer-events:none;border:1px solid rgba(98,244,255,.14);box-shadow:inset 0 0 70px rgba(98,244,255,.025)}
 .hud:before,.hud:after{content:"";position:absolute;width:70px;height:70px;border-color:rgba(98,244,255,.55);border-style:solid}
 .hud:before{top:-1px;left:-1px;border-width:2px 0 0 2px}.hud:after{right:-1px;bottom:-1px;border-width:0 2px 2px 0}
-.cinematic-content{position:relative;z-index:2;text-align:center;width:min(920px,92vw);animation:arrival 1.8s cubic-bezier(.16,1,.3,1) both}
-.brand{font-size:clamp(12px,1.5vw,16px);letter-spacing:.55em;color:var(--cyan);font-weight:700;margin-bottom:20px;text-shadow:0 0 18px rgba(98,244,255,.8)}
-.logo{font-size:clamp(54px,12vw,150px);font-weight:900;letter-spacing:.08em;line-height:.9;margin:0;text-shadow:0 0 12px rgba(98,244,255,.65),0 0 60px rgba(155,108,255,.35)}
-.logo span{color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.65)}
+.cinematic-content{position:relative;z-index:2;text-align:center;width:min(920px,92vw);margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:arrival 1.8s cubic-bezier(.16,1,.3,1) both}
+.logo-wrap{position:relative;width:min(860px,90vw);margin:0 auto 8px;display:grid;place-items:center}
+.logo-glow{position:absolute;inset:25% 12%;z-index:-1;border-radius:50%;background:radial-gradient(ellipse,rgba(98,244,255,.14),rgba(155,108,255,.09) 40%,transparent 72%);filter:blur(22px);animation:logoGlow 3s ease-in-out infinite}
+.brand{font-size:clamp(12px,1.5vw,16px);letter-spacing:.55em;color:var(--cyan);font-weight:700;margin-bottom:16px;text-align:center;text-shadow:0 0 18px rgba(98,244,255,.8)}
+.logo{font-size:clamp(58px,11vw,148px);font-weight:950;letter-spacing:.045em;line-height:.82;margin:0 auto;text-align:center;display:block;width:100%;background:linear-gradient(90deg,var(--cyan),#fff,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 18px rgba(98,244,255,.5),0 0 65px rgba(155,108,255,.32);filter:drop-shadow(0 0 10px rgba(98,244,255,.35))}
+.logo span{color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.8)}
 .tagline{margin:25px 0 34px;color:rgba(238,247,255,.65);letter-spacing:.28em;text-transform:uppercase;font-size:clamp(10px,1.3vw,14px)}
 .date{font-size:clamp(22px,4vw,42px);letter-spacing:.2em;font-weight:800;margin-bottom:22px}.date b{color:var(--cyan);text-shadow:0 0 25px rgba(98,244,255,.65)}
 .countdown{display:flex;justify-content:center;gap:clamp(9px,2vw,25px);margin:0 auto 34px}.unit{min-width:clamp(68px,12vw,118px);padding:17px 10px 13px;border:1px solid rgba(98,244,255,.22);background:rgba(7,10,22,.55);backdrop-filter:blur(8px);box-shadow:inset 0 0 25px rgba(98,244,255,.035),0 0 20px rgba(98,244,255,.04)}
@@ -39,6 +41,7 @@ body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle 
 @keyframes onlineIn{from{opacity:0;transform:translateY(18px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
 @keyframes launchFade{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden}}
 @keyframes pulse{50%{text-shadow:0 0 25px var(--cyan),0 0 75px var(--violet),0 0 130px rgba(98,244,255,.65)}}
+@keyframes logoGlow{50%{transform:scale(1.12);opacity:.72}}
 @media(max-width:560px){.hud{inset:10px}.corner{display:none}.countdown{gap:5px}.unit{min-width:62px;padding:13px 5px}.brand{letter-spacing:.3em}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 </style>
@@ -48,7 +51,7 @@ body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle 
 <canvas id="spaceCanvas" aria-hidden="true"></canvas><div class="hud" aria-hidden="true"></div>
 <div class="corner tl">CRW//SYS 10.02.26</div><div class="corner tr">SOCIAL UNIVERSE // STANDBY</div><div class="corner bl">ONE ACCOUNT // ONE UNIVERSE</div><div class="corner br" id="clock">LOCAL TIME // --:--:--</div>
 <section class="cinematic-content">
-<div class="brand">CROWRULES PRESENTS</div><h1 class="logo">CROW<span>SPACE</span></h1><div class="tagline">The next social universe is coming online</div>
+<div class="brand">CROWRULES PRESENTS</div><div class="logo-wrap"><h1 class="logo">CROW<span>SPACE</span></h1><div class="logo-glow"></div></div><div class="tagline">The next social universe is coming online</div>
 <div class="date"><b>OCTOBER 2, 2026</b></div>
 <div class="countdown" aria-live="polite"><div class="unit"><div class="num" id="days">00</div><div class="label">DAYS</div></div><div class="unit"><div class="num" id="hours">00</div><div class="label">HOURS</div></div><div class="unit"><div class="num" id="minutes">00</div><div class="label">MINUTES</div></div><div class="unit"><div class="num" id="seconds">00</div><div class="label">SECONDS</div></div></div>
 <div class="progress"><i id="progressBar"></i></div><div class="status" id="status">INITIALIZING CROWSPACE // COUNTDOWN ACTIVE</div>
