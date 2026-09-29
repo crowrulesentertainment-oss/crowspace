@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070910"><title>CrowSpace — Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<header class="topbar">
+<a class="brand" href="home.html"><span class="brand-mark">◉</span><span>CROW<span>SPACE</span></span></a>
+<div class="search"><span>⌕</span><input placeholder="Search CrowSpace"></div>
+<nav class="top-actions"><button>🔔</button><button>✉</button><button class="avatar">JR</button></nav>
+</header>
+<div class="shell">
+<aside class="sidebar">
+<a class="nav active" href="home.html"><span>⌂</span> Home</a><a class="nav" href="#explore"><span>⌕</span> Explore</a><a class="nav" href="#caws"><span>▶</span> Caws</a><a class="nav" href="#circles"><span>◈</span> Circles</a><a class="nav" href="#notifications"><span>♢</span> Notifications</a><a class="nav" href="#messages"><span>✉</span> Messages</a><a class="nav" href="#profile"><span>●</span> Profile</a>
+<div class="sidebar-line"></div><div class="mini-title">CROWSPACE</div><div class="side-note">A cinematic social universe. Posts are posts. Caws are short-form video.</div><button class="post-button" id="openComposer">＋ Create Post</button>
+</aside>
+<main class="feed">
+<section class="hero"><div><div class="eyebrow">CROWSPACE // ONLINE</div><h1>Your space.<br><em>Your universe.</em></h1><p>A futuristic social home for people, stories, communities and video.</p></div><div class="hero-orbit">◎</div></section>
+<section class="composer card"><div class="avatar large">JR</div><button class="composer-input" id="composerButton">What's happening?</button><div class="composer-tools"><button>▧ Photo</button><button>▶ Caw</button><button>◈ Poll</button></div></section>
+<div class="feed-tabs"><button class="selected">For You</button><button>Following</button><button>Latest</button></div>
+<section id="posts"></section>
+</main>
+<aside class="rightbar">
+<section class="card panel"><div class="panel-title">TAKING FLIGHT</div><div class="trend">#CrowSpace <small>1.2K posts</small></div><div class="trend">#Tacoma <small>842 posts</small></div><div class="trend">#FilmMakers <small>526 posts</small></div><div class="trend">#CrowRules <small>318 posts</small></div></section>
+<section class="card panel"><div class="panel-title">WHO TO FOLLOW</div><div class="person"><div class="avatar">KC</div><div><b>KingCrow</b><small>@kingcrow</small></div><button>Follow</button></div><div class="person"><div class="avatar">CR</div><div><b>Crow Creator</b><small>@creator</small></div><button>Follow</button></div></section>
+<section class="card panel seasonal"><div class="panel-title">SEASONAL WORLD</div><h3 id="seasonTitle">CROWSPACE // NIGHT CITY</h3><p id="seasonText">The universe is always changing.</p></section>
+</aside></div>
+<div class="modal" id="composerModal"><div class="modal-box card"><button class="close" id="closeComposer">×</button><div class="eyebrow">NEW POST</div><h2>Share something.</h2><textarea id="postText" maxlength="500" placeholder="What's happening?"></textarea><div class="modal-actions"><span>Posts are local in this first version.</span><button class="post-button" id="publishPost">Post</button></div></div></div>
+<script src="app.js"></script>
+</body></html>
