@@ -22,7 +22,6 @@ async function execute(){
  }
  return out
 }
-function state(){return L(KEY,{})}
 window.CrowSpaceChallengeExecutionV43={execute,state};
 setTimeout(execute,28000);setInterval(execute,30000);
 })();
