@@ -1,0 +1,18 @@
+/* CrowSpace — Adaptive Action Experiments v1
+   Browser-only A/B-style action testing for growth workflows.
+*/
+(function(){
+const EXP="crowspace-action-experiments-v1",TASK="crowspace-growth-action-tasks-v1",LEARN="crowspace-action-learning-v1";
+const $=id=>document.getElementById(id),N=x=>Number(x)||0,F=n=>Math.round(N(n)).toLocaleString(),L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),E=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function key(){return $("studioSeries")?.value||"all"}
+function types(){const d=L(LEARN,{})[key()]||{};return Object.entries(d).filter(([,x])=>x.actions>=2).sort((a,b)=>b[1].avgViews-a[1].avgViews).map(x=>x[0])}
+function render(){const s=key(),all=L(EXP,{}),exps=all[s]||[],box=$("adaptiveActionExperiments")||document.createElement("section");if(s==="all"){box.remove();return}if(!$("adaptiveActionExperiments"))$("actionLearningEngine")?.after(box);box.id="adaptiveActionExperiments";box.className="card adaptive-action-experiments";
+const suggestions=types(),active=exps.filter(x=>x.status==="active"),completed=exps.filter(x=>x.status==="complete");
+const outcome=(e,arm)=>{const a=e.arms[arm],vals=a.outcomes||[];return{n:vals.length,views:vals.reduce((z,x)=>z+N(x.views),0),interactions:vals.reduce((z,x)=>z+N(x.interactions),0),caws:vals.reduce((z,x)=>z+N(x.caws),0)}};
+const card=e=>{const a=outcome(e,0),b=outcome(e,1),enough=a.n>=2&&b.n>=2,delta=enough?Math.round((b.views/Math.max(1,b.n))/(a.views/Math.max(1,a.n))*100-100):null;return '<article class="exp-card"><div class="exp-card-head"><div><b>'+E(e.name)+'</b><small>'+new Date(e.createdAt).toLocaleDateString()+' · '+(e.status==="active"?"ACTIVE":"COMPLETE")+'</small></div>'+(delta===null?'<em>COLLECTING DATA</em>':'<em>'+E((delta>=0?"+":"")+delta+'% VIEW LIFT')+'</em>')+'</div><div class="exp-arms"><div><strong>A</strong><b>'+E(e.arms[0].type)+'</b><span>'+a.n+' outcomes · '+F(a.views)+' views</span></div><div><strong>B</strong><b>'+E(e.arms[1].type)+'</b><span>'+b.n+' outcomes · '+F(b.views)+' views</span></div></div><div class="exp-actions">'+(e.status==="active"?'<button data-complete="'+E(e.id)+'">Close Experiment</button>':'')+'</div></article>};
+box.innerHTML='<div class="exp-head"><div><span>ADAPTIVE EXPERIMENTS</span><h3>Test the Next Move</h3><small>Compare two action types using completed local outcomes. No Supabase.</small></div><button id="newExperiment" '+(suggestions.length<2?'disabled':'')+'>＋ New Test</button></div>'+(!suggestions.length?'<div class="exp-empty">Complete at least two measured actions of an action type to unlock experiments.</div>':'')+active.map(card).join("")+completed.slice(-4).reverse().map(card).join("");
+$("newExperiment")?.addEventListener("click",()=>{const ts=types();if(ts.length<2)return;const e={id:s+"-"+Date.now(),name:ts[0]+" vs "+ts[1],series:s,status:"active",createdAt:Date.now(),arms:[{type:ts[0],outcomes:[]},{type:ts[1],outcomes:[]}]};all[s]??=[];all[s].push(e);S(EXP,all);render()});
+box.querySelectorAll("[data-complete]").forEach(b=>b.onclick=()=>{const id=b.dataset.complete;const e=(all[s]||[]).find(x=>x.id===id);if(e){e.status="complete";e.completedAt=Date.now();S(EXP,all);render()}});
+}
+setTimeout(render,3600);setInterval(render,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(render,600)});
+})();
