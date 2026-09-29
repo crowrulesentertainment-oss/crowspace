@@ -3,7 +3,7 @@
    while requiring fresh observations before full trust returns.
 */
 (function(){
-const CAL="crowspace-recalibration-evidence-calibration-v80",DIV="crowspace-recalibration-evidence-diversity-v79",KEY="crowspace-recalibration-calibration-recovery-v81",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const CAL="crowspace-recalibration-evidence-calibration-v80",VER="crowspace-recalibration-recovery-verification-v82",DIV="crowspace-recalibration-evidence-diversity-v79",KEY="crowspace-recalibration-calibration-recovery-v81",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 function state(){return L(KEY,{})}
 function sync(){
  const cal=L(CAL,{}),div=L(DIV,{}),st=state();
@@ -19,7 +19,7 @@ function sync(){
  });
  S(KEY,st);return st
 }
-function factor(reason){return state()[reason]?.factor||1}
+function factor(reason){const base=state()[reason]?.factor||1;const verify=window.CrowSpaceRecalibrationVerificationV82?.factor?.(reason)||1;return base*verify}
 function mode(reason){return state()[reason]?.mode||"NORMAL_MONITOR"}
 function status(reason){return state()[reason]?.status||"STABLE"}
 function best(){return Object.values(state()).sort((a,b)=>(b.restored||0)-(a.restored||0))}
