@@ -15,7 +15,7 @@ function sync(){
     old.tests++;old.success+=success?1:0;old.failure+=success?0:1;old.history=[{at:Date.now(),success,accuracy:N(m.accuracy),target:N(x.targetConfidence),regime:r.regime},...(old.history||[])].slice(0,20);old.lastMarker=marker;
    }
   }
-  old.reason=x.reason;old.accuracy=N(m.accuracy);old.target=N(x.targetConfidence);old.successRate=old.tests?old.success/old.tests:0;
+  old.reason=x.reason;old.decisionId=x.decisionId||old.decisionId||null;old.accuracy=N(m.accuracy);old.target=N(x.targetConfidence);old.successRate=old.tests?old.success/old.tests:0;
   old.status=old.tests<2?"COLLECTING":old.successRate>=.7?"RECOVERED":old.successRate<=.3?"FAILING":"MIXED";old.updatedAt=Date.now();st[x.reason]=old;
  });
  S(KEY,st);return st
