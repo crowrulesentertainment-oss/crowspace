@@ -86,3 +86,5 @@
 .season-publish-gate{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-publish-gate b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-publish-gate span{font-size:8px;color:var(--muted)}
 
 .season-archive{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-archive b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-archive span{font-size:8px;color:var(--muted)}
+
+.series-overview{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.series-overview b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.series-overview span{font-size:8px;color:var(--muted)}
