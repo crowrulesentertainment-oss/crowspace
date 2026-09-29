@@ -1,51 +1,6 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#070910">
-<title>CrowSpace — Social Universe</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
-<header class="topbar">
-  <a class="brand" href="index.html"><span class="brand-mark">◉</span><span>CROW<span>SPACE</span></span></a>
-  <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search CrowSpace"></div>
-  <nav class="top-actions"><button>🔔</button><button>✉</button><button class="avatar">JR</button></nav>
-</header>
-<div class="shell">
-<aside class="sidebar">
-  <a class="nav active" href="#"><span>⌂</span> Home</a>
-  <a class="nav" href="#explore"><span>⌕</span> Explore</a>
-  <a class="nav" href="#caws"><span>▶</span> Caws</a>
-  <a class="nav" href="#circles"><span>◈</span> Circles</a>
-  <a class="nav" href="#notifications"><span>♢</span> Notifications</a>
-  <a class="nav" href="#messages"><span>✉</span> Messages</a>
-  <a class="nav" href="#profile"><span>●</span> Profile</a>
-  <div class="sidebar-line"></div>
-  <div class="mini-title">CROWSPACE</div>
-  <div class="side-note">A cinematic social universe. Posts are posts. Caws are short-form video.</div>
-  <button class="post-button" id="openComposer">＋ Create Post</button>
-</aside>
-<main class="feed">
-  <section class="hero">
-    <div><div class="eyebrow">CROWSPACE // ONLINE</div><h1>Your space.<br><em>Your universe.</em></h1><p>A futuristic social home for people, stories, communities and video.</p></div>
-    <div class="hero-orbit">◎</div>
-  </section>
-  <section class="composer card">
-    <div class="avatar large">JR</div><button class="composer-input" id="composerButton">What's happening?</button>
-    <div class="composer-tools"><button>▧ Photo</button><button>▶ Caw</button><button>◈ Poll</button></div>
-  </section>
-  <div class="feed-tabs"><button class="selected">For You</button><button>Following</button><button>Latest</button></div>
-  <section id="posts"></section>
-</main>
-<aside class="rightbar">
-  <section class="card panel"><div class="panel-title">TAKING FLIGHT</div><div class="trend">#CrowSpace <small>1.2K posts</small></div><div class="trend">#Tacoma <small>842 posts</small></div><div class="trend">#FilmMakers <small>526 posts</small></div><div class="trend">#CrowRules <small>318 posts</small></div></section>
-  <section class="card panel"><div class="panel-title">WHO TO FOLLOW</div><div class="person"><div class="avatar">KC</div><div><b>KingCrow</b><small>@kingcrow</small></div><button>Follow</button></div><div class="person"><div class="avatar">CR</div><div><b>Crow Creator</b><small>@creator</small></div><button>Follow</button></div></section>
-  <section class="card panel seasonal"><div class="panel-title">SEASONAL WORLD</div><h3 id="seasonTitle">CROWSPACE // NIGHT CITY</h3><p id="seasonText">The universe is always changing.</p></section>
-</aside>
-</div>
-<div class="modal" id="composerModal"><div class="modal-box card"><button class="close" id="closeComposer">×</button><div class="eyebrow">NEW POST</div><h2>Share something.</h2><textarea id="postText" maxlength="500" placeholder="What's happening?"></textarea><div class="modal-actions"><span>Posts are local in this first version.</span><button class="post-button" id="publishPost">Post</button></div></div></div>
-<script src="app.js"></script>
-</body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#05070d"><title>CrowSpace — Launching October 1, 2026</title><link rel="stylesheet" href="style.css"><style>
+body{min-height:100vh;display:grid;place-items:center;overflow:hidden;background:#05070d}.intro{width:min(1000px,92vw);text-align:center;position:relative;z-index:2}.logo{font:800 clamp(28px,5vw,58px) Orbitron;letter-spacing:5px}.logo span,h1 em{color:var(--cyan)}.kicker{font:700 11px Orbitron;letter-spacing:4px;color:var(--cyan);margin:22px 0}h1{font:800 clamp(32px,7vw,76px) Orbitron;line-height:1.05;margin:0}h1 em{font-style:normal}.subtitle{color:var(--muted);font-size:14px;letter-spacing:1px;margin:22px auto 34px;max-width:600px;line-height:1.8}.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:720px;margin:auto}.unit{padding:25px 10px;border:1px solid var(--line);border-radius:14px;background:rgba(14,18,29,.75);backdrop-filter:blur(16px)}.num{font:800 clamp(30px,6vw,58px) Orbitron}.label{font:700 9px Orbitron;letter-spacing:3px;color:var(--muted);margin-top:8px}.enter{display:inline-block;margin-top:32px;padding:13px 24px;border:1px solid rgba(93,231,255,.5);border-radius:9px;color:#061018;background:var(--cyan);font-weight:800;text-decoration:none;opacity:.35;pointer-events:none}.enter.ready{opacity:1;pointer-events:auto}.status{margin-top:15px;color:#657287;font-size:10px;letter-spacing:2px;font-family:Orbitron}@media(max-width:520px){.countdown{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><div class="ambient ambient-one"></div><div class="ambient ambient-two"></div><main class="intro"><div class="logo">CROW<span>SPACE</span></div><div class="kicker">A NEW SOCIAL UNIVERSE IS INITIALIZING</div><h1>LAUNCHING<br><em>OCTOBER 1, 2026</em></h1><p class="subtitle">Posts. Caws. Circles. Creators. Communities.<br>The next chapter of CrowSpace begins here.</p><div class="countdown"><div class="unit"><div class="num" id="days">00</div><div class="label">DAYS</div></div><div class="unit"><div class="num" id="hours">00</div><div class="label">HOURS</div></div><div class="unit"><div class="num" id="minutes">00</div><div class="label">MINUTES</div></div><div class="unit"><div class="num" id="seconds">00</div><div class="label">SECONDS</div></div></div><a class="enter" id="enter" href="home.html">ENTER CROWSPACE</a><div class="status" id="status">INITIALIZING LAUNCH SEQUENCE…</div></main><script>
+const target=new Date("2026-10-01T00:00:00-07:00").getTime();function tick(){const diff=Math.max(0,target-Date.now()),s=Math.floor(diff/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60;for(const [id,v] of [["days",d],["hours",h],["minutes",m],["seconds",sec]])document.getElementById(id).textContent=String(v).padStart(2,"0");if(diff<=0){document.getElementById("status").textContent="CROWSPACE IS ONLINE";document.getElementById("enter").classList.add("ready")}}tick();setInterval(tick,1000);
+</script></body></html>
