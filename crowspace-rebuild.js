@@ -50,11 +50,11 @@ function appShell(){
 async function socialGraph(db,u){
  const box=document.querySelector("[data-social-graph]");if(!box)return;
  const following=await db.from("crowspace_follows").select("following_id").eq("follower_id",u.id);
- const ids=(following.data||[]).map(x=>x.following_id);
- const p=await db.from("crowspace_profiles").select("user_id,display_name,username,avatar_url,bio").neq("user_id",u.id).limit(24);
- const followSet=new Set(ids);
- box.innerHTML='<div class="social-graph-head"><div><span class="eyebrow">SOCIAL GRAPH</span><h2>YOUR NETWORK.</h2></div><span class="muted">'+ids.length+' following</span></div><div class="member-grid">'+(p.data||[]).map(x=>'<article class="member-card"><img src="'+esc(x.avatar_url||avatar(x))+'"><b>'+esc(x.display_name||x.username||"Member")+'</b><small>@'+esc(x.username||"member")+'</small><p>'+esc(x.bio||"CrowSpace member")+'</p><button class="btn '+(followSet.has(x.user_id)?"active":"")+'" data-follow="'+esc(x.user_id)+'">'+(followSet.has(x.user_id)?"Following":"Follow")+'</button></article>').join("")+'</div>';
- box.querySelectorAll("[data-follow]").forEach(b=>b.onclick=async()=>{const id=b.dataset.follow;if(followSet.has(id))await db.from("crowspace_follows").delete().eq("follower_id",u.id).eq("following_id",id);else await db.from("crowspace_follows").insert({follower_id:u.id,following_id:id});socialGraph(db,u)});
+ const ids=(following.data||[]).map(x=>x.following_id),p=await db.from("crowspace_profiles").select("user_id,display_name,username,avatar_url,bio").neq("user_id",u.id).limit(24),followSet=new Set(ids);
+ const counts=await db.from("crowspace_follows").select("follower_id,following_id");
+ const followerCount=new Map(),followingCount=new Map();(counts.data||[]).forEach(x=>{followerCount.set(x.following_id,(followerCount.get(x.following_id)||0)+1);followingCount.set(x.follower_id,(followingCount.get(x.follower_id)||0)+1)});
+ box.innerHTML='<div class="social-graph-head"><div><span class="eyebrow">SOCIAL GRAPH</span><h2>YOUR NETWORK.</h2></div><span class="muted">'+ids.length+' following · '+(followerCount.get(u.id)||0)+' followers</span></div><div class="member-grid">'+(p.data||[]).map(x=>'<article class="member-card"><img src="'+esc(x.avatar_url||avatar(x))+'"><b>'+esc(x.display_name||x.username||"Member")+'</b><small>@'+esc(x.username||"member")+'</small><div class="muted">'+(followerCount.get(x.user_id)||0)+' followers · '+(followingCount.get(x.user_id)||0)+' following</div><p>'+esc(x.bio||"CrowSpace member")+'</p><button class="btn '+(followSet.has(x.user_id)?"active":"")+'" data-follow="'+esc(x.user_id)+'">'+(followSet.has(x.user_id)?"Following":"Follow")+'</button></article>').join("")+'</div>';
+ box.querySelectorAll("[data-follow]").forEach(b=>b.onclick=async()=>{const id=b.dataset.follow;if(followSet.has(id))await db.from("crowspace_follows").delete().eq("follower_id",u.id).eq("following_id",id);else await db.from("crowspace_follows").insert({follower_id:u.id,following_id:id});socialGraph(db,u)})
 }
 function liveLayer(db,u){
  if(window.CrowSpaceLive?.stop)window.CrowSpaceLive.stop();
@@ -79,17 +79,44 @@ function liveLayer(db,u){
  setStatus("CONNECTING");
 }
 \nfunction shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard};}
-async function feed(limit=40){const db=await auth();const [a,b]=await Promise.all([db.from("crowspace_posts").select("id,user_id,body,title,media_url,created_at,like_count,comment_count").order("created_at",{ascending:false}).limit(limit),db.from("crowspace_holiday_bot_posts").select("id,bot_id,title,body,created_at").order("created_at",{ascending:false}).limit(limit)]);if(a.error)throw a.error;if(b.error)throw b.error;const rows=a.data||[],bp=b.data||[];const ids=[...new Set(rows.map(x=>x.user_id))], bids=[...new Set(bp.map(x=>x.bot_id))];const [ps,bs]=await Promise.all([ids.length?db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):Promise.resolve({data:[]}),bids.length?db.from("crowspace_holiday_bots").select("id,slug,display_name,avatar_url,holiday_name").in("id",bids):Promise.resolve({data:[]})]);const pm=new Map((ps.data||[]).map(x=>[x.user_id,x])),bm=new Map((bs.data||[]).map(x=>[x.id,x]));return [...rows.map(p=>{const x=pm.get(p.user_id)||{};return {...p,kind:"member",name:x.display_name||x.username||"Crow Member",handle:x.username?"@"+x.username:"@member",avatar:avatar(x.avatar_url)}}),...bp.map(p=>{const x=bm.get(p.bot_id)||{};return {...p,kind:"bot",name:x.display_name||"Holiday Crow",handle:"@"+(x.slug||"holiday-crow"),avatar:avatar(x.avatar_url),bot_slug:x.slug}})].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
+async function feed(limit=60){
+ const db=await auth();
+ const [a,b]=await Promise.all([
+  db.from("crowspace_posts").select("id,user_id,body,title,media_url,created_at,like_count,comment_count").order("created_at",{ascending:false}).limit(limit),
+  db.from("crowspace_holiday_bot_posts").select("id,bot_id,title,body,created_at").order("created_at",{ascending:false}).limit(limit)
+ ]);
+ if(a.error)throw a.error;if(b.error)throw b.error;
+ const rows=a.data||[],bp=b.data||[],ids=[...new Set(rows.map(x=>x.user_id))],bids=[...new Set(bp.map(x=>x.bot_id))];
+ const [ps,bs]=await Promise.all([
+  ids.length?db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):Promise.resolve({data:[]}),
+  bids.length?db.from("crowspace_holiday_bots").select("id,slug,display_name,avatar_url,holiday_name").in("id",bids):Promise.resolve({data:[]})
+ ]);
+ const pm=new Map((ps.data||[]).map(x=>[x.user_id,x])),bm=new Map((bs.data||[]).map(x=>[x.id,x]));
+ return [...rows.map(p=>{const x=pm.get(p.user_id)||{};return {...p,kind:"member",name:x.display_name||x.username||"Crow Member",handle:x.username?"@"+x.username:"@member",avatar:avatar(x.avatar_url)}}),...bp.map(p=>{const x=bm.get(p.bot_id)||{};return {...p,kind:"bot",name:x.display_name||"Holiday Crow",handle:"@"+(x.slug||"holiday-crow"),avatar:avatar(x.avatar_url),bot_slug:x.slug}})].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+}
+async function personalizedFeed(limit=60,mode="for-you"){
+ const db=await auth(),u=await user();if(!u)return [];
+ const f=await db.from("crowspace_follows").select("following_id").eq("follower_id",u.id);
+ const ids=[u.id,...(f.data||[]).map(x=>x.following_id)];
+ const rows=await feed(limit);
+ if(mode==="following")return rows.filter(x=>x.kind==="member"&&ids.includes(x.user_id));
+ const followed=rows.filter(x=>x.kind==="member"&&ids.includes(x.user_id));
+ const bots=rows.filter(x=>x.kind==="bot");
+ const own=rows.filter(x=>x.kind==="member"&&x.user_id===u.id);
+ const community=rows.filter(x=>x.kind==="member"&&!ids.includes(x.user_id));
+ return [...followed,...own,...bots,...community].slice(0,limit)
+}
 function postCard(p){
  return '<article class="card post" id="post-'+esc(p.id)+'"><div class="posthead"><img class="avatar" src="'+esc(p.avatar)+'"><div><b>'+ (p.kind==="bot"?'<a href="holiday-bot.html?bot='+encodeURIComponent(p.bot_slug)+'">'+esc(p.name)+'</a>':esc(p.name))+'</b><div class="muted">'+esc(p.handle)+' · '+new Date(p.created_at).toLocaleString()+'</div></div></div>'+(p.title?'<h3>'+esc(p.title)+'</h3>':'')+'<div class="postbody">'+esc(p.body)+'</div><div class="actions"><button class="btn" data-like="'+esc(p.id)+'">♡ <span>'+esc(p.like_count||0)+'</span></button><button class="btn" data-comment="'+esc(p.id)+'">Comment <span>'+esc(p.comment_count||0)+'</span></button><button class="btn" data-share="'+esc(p.id)+'">↗ Share</button></div></article>';
 }
+async function renderPersonalFeed(el,mode){const rows=await personalizedFeed(60,mode);el.innerHTML=rows.map(postCard).join("")||'<div class="card pad muted">Nothing here yet. Follow members to build your feed.</div>';}
 function metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
 async function page(){
  shell();const p=document.body.dataset.page,db=await auth();
  if(p==="index")return;
  if(p==="login"||p==="signup")return authPage(p,db);\n const liveUser=await guard();if(!liveUser)return;liveLayer(db,liveUser);
- if(p==="home"){const u=await guard();if(!u)return;const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});
-$("#publish").onsubmit=async e=>{e.preventDefault();const body=$("#body").value.trim();if(!body)return;const r=await db.from("crowspace_posts").insert({user_id:u.id,body,title:$("#title").value.trim()||null});if(r.error){toast(r.error.message);return}$("#title").value="";$("#body").value="";toast("Posted to CrowSpace");await renderFeed($("#feed"))};await renderFeed($("#feed"));return}
+ if(p==="home"){const u=await guard();if(!u)return;const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});document.querySelectorAll("[data-personal-feed]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-personal-feed]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderPersonalFeed($("#feed"),b.dataset.personalFeed)});
+$("#publish").onsubmit=async e=>{e.preventDefault();const body=$("#body").value.trim();if(!body)return;const r=await db.from("crowspace_posts").insert({user_id:u.id,body,title:$("#title").value.trim()||null});if(r.error){toast(r.error.message);return}$("#title").value="";$("#body").value="";toast("Posted to CrowSpace");await renderFeed($("#feed"))};await renderFeed($("#feed"));await renderPersonalFeed($("#feed"),"for-you");return}
  if(p==="profile")return profilePage(db);
  if(p==="account")return accountPage(db);
  if(p==="explore")return explorePage(db);
