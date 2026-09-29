@@ -55,10 +55,10 @@ async function generateRecoveryExperiments(){
   const selected=candidates[0],baseline=p.strategyBaseline?p.strategyBaseline(selected.series):{observations:0,experiments:0,avgViewsPerCaw:0,interactionRate:0};
   const holdout=window.CrowSpaceControlledHoldouts?.capture?await window.CrowSpaceControlledHoldouts.capture(selected.series,plan.series||[]):null;
   if(!holdout){state[plan.key]={status:"WAITING",reason:"Unable to capture an eligible controlled holdout.",updatedAt:Date.now(),version:23};continue}
-  const parts=String(plan.key).split("|"),strategy={mode:parts[0],correctionMode:parts[1],explorationShare:N(parts[2])};\n  const trial={key:plan.key,strategy,mutation:"RECOVERY",baseline,holdout,capturedAt:Date.now(),version:23,controlledHoldout:true,recovery:true,recoveryFrom:plan.confidence,priorSeries:plan.series||[],series:selected.series};
+  const parts=String(plan.key).split("|"),strategy={mode:parts[0],correctionMode:parts[1],explorationShare:N(parts[2])};\n  const trial={key:plan.key,strategy,mutation:"RECOVERY",baseline,holdout,capturedAt:Date.now(),version:24,controlledHoldout:true,recovery:true,recoveryFrom:plan.confidence,priorSeries:plan.series||[],series:selected.series};
   const result=await x.schedule(selected.series,selected.candidate,{strategyTrial:trial});
   if(result?.ok){
-   const list=L(EXP,{})[selected.series]||[],createdExp=list[list.length-1];createdExp&&(createdExp.recoveryExperiment={strategyKey:plan.key,version:23,recoveryFrom:plan.confidence,attempt:N(state[plan.key]?.attempts)+1});
+   const list=L(EXP,{})[selected.series]||[],createdExp=list[list.length-1];createdExp&&(createdExp.recoveryExperiment={strategyKey:plan.key,version:24,recoveryFrom:plan.confidence,originalTests:plan.tests,originalSeries:plan.series||[],originalWeightedSignal:plan.weightedSignal??null,attempt:N(state[plan.key]?.attempts)+1});
    const fresh=L(EXP,{});fresh[selected.series]=list;S(EXP,fresh);
    state[plan.key]={status:"SCHEDULED",attempts:N(state[plan.key]?.attempts)+1,experimentId:createdExp?.id||null,series:selected.series,updatedAt:Date.now(),version:23};
    created.push({key:plan.key,series:selected.series,experimentId:createdExp?.id||null});
