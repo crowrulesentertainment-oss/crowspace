@@ -41,6 +41,30 @@ function reEvaluationPlan(){
  return Object.values(plans);
 }
 
+async function generateRecoveryExperiments(){
+ const plans=reEvaluationPlan(),p=window.CrowSpaceExperimentPortfolio,x=window.CrowSpaceExperimentExplorer;
+ if(!plans.length||!p||!x?.candidates||!x?.schedule)return[];
+ const key="crowspace-strategy-recovery-v23",state=L(key,{}),expAll=L(EXP,{}),created=[];
+ for(const plan of plans){
+  const existing=Object.values(expAll).flat().find(e=>e.recoveryExperiment&&e.recoveryExperiment.strategyKey===plan.key&&!e.lifecycleCompletedAt);
+  if(existing){state[plan.key]={...state[plan.key],status:"ACTIVE",experimentId:existing.id,updatedAt:Date.now(),version:23};continue}
+  const candidates=(plan.series||[]).filter(series=>{const list=expAll[series]||[];return !list.some(e=>e.status==="active"&&!e.completedAt)}).map(series=>({series,candidate:(x.candidates(series)||[])[0]})).filter(z=>z.candidate);
+  if(!candidates.length){state[plan.key]={status:"WAITING",reason:"No eligible series/action candidate is currently available.",updatedAt:Date.now(),version:23};continue}
+  candidates.sort((a,b)=>N(b.candidate.score)-N(a.candidate.score));
+  const selected=candidates[0],baseline=p.strategyBaseline?p.strategyBaseline(selected.series):{observations:0,experiments:0,avgViewsPerCaw:0,interactionRate:0};
+  const holdout=window.CrowSpaceControlledHoldouts?.capture?await window.CrowSpaceControlledHoldouts.capture(selected.series,plan.series||[]):null;
+  if(!holdout){state[plan.key]={status:"WAITING",reason:"Unable to capture an eligible controlled holdout.",updatedAt:Date.now(),version:23};continue}
+  const trial={key:plan.key,strategy:plan.key,mutation:"RECOVERY",baseline,holdout,capturedAt:Date.now(),version:23,controlledHoldout:true,recovery:true,recoveryFrom:plan.confidence,priorSeries:plan.series||[],series:selected.series};
+  const result=await x.schedule(selected.series,selected.candidate,{strategyTrial:trial});
+  if(result?.ok){
+   const list=L(EXP,{})[selected.series]||[],createdExp=list[list.length-1];createdExp&&(createdExp.recoveryExperiment={strategyKey:plan.key,version:23,recoveryFrom:plan.confidence});
+   const fresh=L(EXP,{});fresh[selected.series]=list;S(EXP,fresh);
+   state[plan.key]={status:"SCHEDULED",experimentId:createdExp?.id||null,series:selected.series,updatedAt:Date.now(),version:23};
+   created.push({key:plan.key,series:selected.series,experimentId:createdExp?.id||null});
+  }else state[plan.key]={status:"WAITING",reason:result?.reason||"Scheduler declined the recovery experiment.",updatedAt:Date.now(),version:23};
+ }
+ S(key,state);return created;
+}
 async function orchestrate(s){
  const portfolio=window.CrowSpaceExperimentPortfolio;
  const explorer=window.CrowSpaceExperimentExplorer;
@@ -68,6 +92,6 @@ async function orchestrate(s){
   }
  }const exps=L(EXP,{})[s]||[],active=exps.find(e=>e.status==="active"&&!e.completedAt),sch=L(SCHED,{}),cur=sch[s],now=Date.now();if(active){const a=L(ORCH,{});a[s]={status:"ACTIVE",updatedAt:now,experimentId:active.id,version:6};S(ORCH,a);return}if(cur?.cooldownUntil&&now<N(cur.cooldownUntil)){const a=L(ORCH,{});a[s]={status:"COOLDOWN",updatedAt:now,cooldownUntil:cur.cooldownUntil,message:"Next experiment unlocks "+new Date(cur.cooldownUntil).toLocaleString(),version:6};S(ORCH,a);return}if(window.CrowSpaceExperimentExplorer?.autoSchedule){const r=await window.CrowSpaceExperimentExplorer.autoSchedule(s),a=L(ORCH,{});a[s]={status:r?.ok?"SCHEDULED":"WAITING",updatedAt:Date.now(),reason:r?.reason||"",automatic:true,version:6};S(ORCH,a)}}
 function render(){const recovery=reEvaluationPlan();const s=$( "studioSeries")?.value||"all",old=$( "experimentLifecycle");if(s==="all"){old?.remove();return}const all=L(EXP,{}),list=all[s]||[],active=list.find(e=>e.status==="active"),orch=L(ORCH,{})[s],recent=list.filter(e=>e.lifecycleCompletedAt).sort((a,b)=>b.lifecycleCompletedAt-a.lifecycleCompletedAt).slice(0,3),el=old||document.createElement("section");if(!old){el.id="experimentLifecycle";$("experimentExplorationEngine")?.after(el)}el.className="card experiment-lifecycle";const state=active?"ACTIVE":orch?.status==="SCHEDULED"?"NEXT TEST SCHEDULED":"SCHEDULER RELEASED";el.innerHTML='<div class="life-head"><div><span>STRATEGY RE-EVALUATION ENGINE // V22</span><h3>Confidence Failures Trigger Fresh Evidence</h3><small>Experiments close, evaluate, enter memory, release the scheduler, and automatically queue the next eligible test.</small></div><b>'+E(state)+'</b></div><div class="life-orchestrator"><b>NEXT-TEST ORCHESTRATOR</b><span>'+E(orch?.reason||orch?.message||(orch?.status==="SCHEDULED"?"The next experiment has been scheduled automatically.":"Evaluating the next eligible experiment."))+'</span></div>'+(recent.length?'<div class="life-list">'+recent.map(e=>'<article><div><strong>'+E(e.name)+'</strong><small>'+E(e.lifecycleReason||"Completed")+' · '+new Date(e.completedAt).toLocaleString()+'</small></div><em>'+E((L(DEC,{})[s]?.[e.id]?.decision?.status)||"EVALUATED")+'</em></article>').join("")+'</div>':'<div class="life-empty">No autonomous lifecycle completions yet.</div>')}
-async async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all")await orchestrate(s);render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
+async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all"){await generateRecoveryExperiments();await orchestrate(s)}render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
 setTimeout(run,6500);setInterval(run,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(run,500)});window.CrowSpaceExperimentLifecycle={run,lifecycle,orchestrate,decisionFor:decide};
-window.CrowSpaceLifecycle={run,lifecycle,orchestrate,decide,reEvaluationPlan};\n})();
+window.CrowSpaceLifecycle={run,lifecycle,orchestrate,decide,reEvaluationPlan,generateRecoveryExperiments};\n})();
