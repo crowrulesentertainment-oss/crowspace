@@ -62,3 +62,21 @@ a{color:var(--cyan);text-decoration:none}button,input,textarea,select{font:inher
 
 /* V8 PERSONAL FEED */
 .feed-filters{display:flex;flex-wrap:wrap;gap:8px}.feed-filters .btn.active{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 18px rgba(120,239,255,.12)}
+
+/* V10 MYSPACE x FACEBOOK COMMUNITY LAYER */
+:root{--classic-blue:#1877f2;--classic-deep:#0b3d91;--myspace-pink:#ff4fb3;--card:#fff}
+body{background:radial-gradient(circle at 50% -10%,rgba(120,239,255,.08),transparent 35%),#05070d}
+.pageframe{max-width:1480px;margin:auto}
+.sidebar{background:linear-gradient(180deg,rgba(8,15,31,.98),rgba(4,7,15,.98));border-right:1px solid rgba(120,239,255,.16)}
+.content{min-width:0}
+.commandbar{border-radius:14px;background:rgba(10,17,34,.88);box-shadow:0 8px 30px rgba(0,0,0,.22)}
+.card{border-radius:14px}
+.hero{padding:28px;border:1px solid rgba(120,239,255,.12);border-radius:18px;background:linear-gradient(135deg,rgba(24,119,242,.10),rgba(255,79,179,.06),rgba(10,17,34,.7))}
+.community-tabs{display:flex;gap:8px;overflow:auto;padding:8px 0}.community-tabs .btn{white-space:nowrap}
+.social-layout{display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr) minmax(220px,290px);gap:16px;margin-top:16px}
+.social-rail{display:flex;flex-direction:column;gap:12px}.social-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(9,13,27,.82)}
+.cover-profile{overflow:hidden}.cover-profile .cover{height:120px;background:linear-gradient(120deg,#102d63,#32145e,#58124d);position:relative}.cover-profile .cover:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(120,239,255,.16),transparent);animation:coverSweep 6s linear infinite}@keyframes coverSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.friend-strip{display:flex;gap:10px;overflow:auto;padding:8px 0}.friend-chip{min-width:72px;text-align:center}.friend-chip img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--cyan)}.friend-chip small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story-row{display:flex;gap:10px;overflow:auto;padding:4px}.story{min-width:105px;height:150px;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(160deg,#111a36,#3b1750);border:1px solid var(--line);padding:8px;display:flex;align-items:end}.story b{font-size:11px}
+.profile-links{display:flex;flex-wrap:wrap;gap:8px}.profile-links .btn{font-size:11px}
+@media(max-width:1000px){.social-layout{grid-template-columns:1fr 1fr}.social-layout .right-rail{grid-column:1/-1}}@media(max-width:700px){.social-layout{grid-template-columns:1fr}.social-layout .right-rail{grid-column:auto}}
