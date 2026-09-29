@@ -1,0 +1,13 @@
+const posts=[
+{id:1,name:"Jonathan Riehle",handle:"@jriehle",time:"12m",avatar:"JR",body:"Building CrowSpace from the ground up. A new social universe for people, stories, communities and video. One step at a time.",likes:12,replies:4,reposts:2,media:false},
+{id:2,name:"KingCrow",handle:"@kingcrow",time:"38m",avatar:"KC",body:"What should we build next? The future of CrowSpace is just getting started. #CrowSpace #CrowRules",likes:28,replies:8,reposts:5,media:true},
+{id:3,name:"Crow Creator",handle:"@creator",time:"1h",avatar:"CR",body:"There is room here for creators, filmmakers, gamers, artists and everyone building something.",likes:19,replies:6,reposts:3,media:false}
+];
+const postsEl=document.getElementById("posts");
+function renderPosts(){postsEl.innerHTML=posts.map(p=>`<article class="post card"><div class="post-head"><div class="avatar">${p.avatar}</div><div class="post-meta"><b>${p.name}</b><small>${p.handle} · ${p.time}</small></div></div><div class="post-body">${escapeHtml(p.body).replace(/#(\w+)/g,'<span style="color:var(--cyan)">#$1</span>')}</div>${p.media?'<div class="post-media">MEDIA SPACE</div>':''}<div class="post-actions"><button onclick="this.textContent='♥ Liked'">♡ ${p.likes}</button><button>💬 ${p.replies}</button><button>↻ ${p.reposts}</button><button>↗ Share</button></div></article>`).join("")}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+const modal=document.getElementById("composerModal");const open=()=>modal.classList.add("show");const close=()=>modal.classList.remove("show");
+document.getElementById("openComposer").onclick=open;document.getElementById("composerButton").onclick=open;document.getElementById("closeComposer").onclick=close;
+document.getElementById("publishPost").onclick=()=>{const text=document.getElementById("postText").value.trim();if(!text)return;posts.unshift({id:Date.now(),name:"Jonathan Riehle",handle:"@jriehle",time:"now",avatar:"JR",body:text,likes:0,replies:0,reposts:0,media:false});document.getElementById("postText").value="";close();renderPosts()};
+function seasonal(){const d=new Date(),m=d.getMonth()+1,day=d.getDate();let title="CROWSPACE // NIGHT CITY",txt="The universe is always changing.";if(m===10){title="CROWSPACE // HAUNTED CITY";txt="Halloween atmosphere activated. Shadows are moving."}else if(m===12){title="CROWSPACE // NORTH POLE";txt="Christmas mode is approaching. Santa will arrive at @Santa."}else if(m===1&&day<=2){title="CROWSPACE // MIDNIGHT";txt="A new year begins in the CrowSpace universe."}document.getElementById("seasonTitle").textContent=title;document.getElementById("seasonText").textContent=txt}
+renderPosts();seasonal();
