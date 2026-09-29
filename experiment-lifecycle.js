@@ -26,6 +26,7 @@ async function lifecycle(){
    if(e.recoveryExperiment&&window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();
    if(e.replacementExperiment&&window.CrowSpaceStrategyReplacement?.evaluate){window.CrowSpaceStrategyReplacement.evaluate(e.replacementExperiment.originalKey,e.strategyTrial?.result||null);}
    if(e.replacementExperiment?.competitionVersion===26&&window.CrowSpaceReplacementCompetition?.record){window.CrowSpaceReplacementCompetition.record(e.replacementExperiment.originalKey,e);}
+   if(e.replacementExperiment?.validationVersion===27&&window.CrowSpaceReplacementValidation?.update){window.CrowSpaceReplacementValidation.update(e.replacementExperiment.originalKey,e);}
    changed.push({series:s,id:e.id,decision:d.status});
   }
  }
@@ -67,6 +68,25 @@ async function generateRecoveryExperiments(){
   }else state[plan.key]={status:"WAITING",reason:result?.reason||"Scheduler declined the recovery experiment.",updatedAt:Date.now(),version:23};
  }
  const planKeys=new Set(plans.map(x=>x.key));Object.keys(state).forEach(k=>{if(!planKeys.has(k)&&state[k].status!=="RETIRED"&&state[k].status!=="RESTORED")state[k]={...state[k],status:"RESTORED",reason:"Fresh evidence no longer meets the recovery trigger.",updatedAt:Date.now(),version:23}});S(key,state);return created;
+}
+async function validateReplacementAcrossSeries(){
+ const v=window.CrowSpaceReplacementValidation,comp=window.CrowSpaceReplacementCompetition,x=window.CrowSpaceExperimentExplorer,p=window.CrowSpaceExperimentPortfolio;if(!v||!comp||!x?.candidates||!x?.schedule)return[];
+ const cs=comp.state(),all=L(EXP,{}),out=[];
+ for(const [original,g] of Object.entries(cs)){
+  if(g.status!=="PROMOTED"||!g.promotedKey)continue;
+  let vs=v.state(original);if(!vs||vs.replacementKey!==g.promotedKey){vs={originalKey:original,replacementKey:g.promotedKey,tests:[],positiveTests:0,negativeTests:0,series:[],status:"VALIDATING",version:27};S("crowspace-replacement-validation-v27",{...L("crowspace-replacement-validation-v27",{}),[original]:vs)}
+  if(vs.status==="VALIDATED"||vs.status==="REJECTED")continue;
+  const used=vs.series||[],selected=v.eligible(original,used).find(s=>!(all[s]||[]).some(e=>e.status==="active"&&!e.completedAt));if(!selected)continue;
+  const action=(x.candidates(selected)||[])[0];if(!action)continue;
+  const holdout=window.CrowSpaceControlledHoldouts?.capture?await window.CrowSpaceControlledHoldouts.capture(selected,used):null;if(!holdout)continue;
+  const parts=String(g.promotedKey).split("|"),strategy={mode:parts[0],correctionMode:parts[1],explorationShare:Number(parts[2])||0},baseline=p.strategyBaseline?p.strategyBaseline(selected):{};
+  const trial={key:g.promotedKey,strategy,parent:original,mutation:"MULTI_SERIES_VALIDATION",baseline,holdout,capturedAt:Date.now(),version:27,controlledHoldout:true,replacementValidation:true,originalKey:original,series:selected,priorSeries:used};
+  const rr=await x.schedule(selected,action,{strategyTrial:trial});if(rr?.ok){
+   const list=L(EXP,{})[selected]||[],e=list[list.length-1];if(e)e.replacementExperiment={originalKey:original,replacementKey:g.promotedKey,competitionVersion:26,validationVersion:27,series:selected};
+   const fresh=L(EXP,{});fresh[selected]=list;S(EXP,fresh);out.push({originalKey:original,replacementKey:g.promotedKey,series:selected,experimentId:e?.id||null});
+  }
+ }
+ return out;
 }
 async function generateReplacementCompetition(){
  const comp=window.CrowSpaceReplacementCompetition;if(!comp)return[];
@@ -143,4 +163,4 @@ async function orchestrate(s){
 function render(){const recovery=reEvaluationPlan();const s=$( "studioSeries")?.value||"all",old=$( "experimentLifecycle");if(s==="all"){old?.remove();return}const all=L(EXP,{}),list=all[s]||[],active=list.find(e=>e.status==="active"),orch=L(ORCH,{})[s],recent=list.filter(e=>e.lifecycleCompletedAt).sort((a,b)=>b.lifecycleCompletedAt-a.lifecycleCompletedAt).slice(0,3),el=old||document.createElement("section");if(!old){el.id="experimentLifecycle";$("experimentExplorationEngine")?.after(el)}el.className="card experiment-lifecycle";const state=active?"ACTIVE":orch?.status==="SCHEDULED"?"NEXT TEST SCHEDULED":"SCHEDULER RELEASED";el.innerHTML='<div class="life-head"><div><span>STRATEGY RE-EVALUATION ENGINE // V22</span><h3>Confidence Failures Trigger Fresh Evidence</h3><small>Experiments close, evaluate, enter memory, release the scheduler, and automatically queue the next eligible test.</small></div><b>'+E(state)+'</b></div><div class="life-orchestrator"><b>NEXT-TEST ORCHESTRATOR</b><span>'+E(orch?.reason||orch?.message||(orch?.status==="SCHEDULED"?"The next experiment has been scheduled automatically.":"Evaluating the next eligible experiment."))+'</span></div>'+(recent.length?'<div class="life-list">'+recent.map(e=>'<article><div><strong>'+E(e.name)+'</strong><small>'+E(e.lifecycleReason||"Completed")+' · '+new Date(e.completedAt).toLocaleString()+'</small></div><em>'+E((L(DEC,{})[s]?.[e.id]?.decision?.status)||"EVALUATED")+'</em></article>').join("")+'</div>':'<div class="life-empty">No autonomous lifecycle completions yet.</div>')}
 async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all"){if(window.CrowSpaceReplacementCompetition?.build)window.CrowSpaceReplacementCompetition.build();await generateReplacementCompetition();if(window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();if(window.CrowSpaceStrategyReplacement?.generate)window.CrowSpaceStrategyReplacement.generate();await generateReplacementExperiments();await generateRecoveryExperiments();await orchestrate(s)}render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
 setTimeout(run,6500);setInterval(run,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(run,500)});window.CrowSpaceExperimentLifecycle={run,lifecycle,orchestrate,decisionFor:decide};
-window.CrowSpaceLifecycle={run,lifecycle,orchestrate,decide,reEvaluationPlan,generateRecoveryExperiments};\n})();
+window.CrowSpaceLifecycle={run,lifecycle,orchestrate,decide,reEvaluationPlan,generateRecoveryExperiments,validateReplacementAcrossSeries};\n})();
