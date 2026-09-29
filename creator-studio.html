@@ -30,6 +30,20 @@ async function stats(){const [p,c,f]=await Promise.all([sb.from("crowspace_posts
 </script><section id="thumbnailRecoveryV91" class="tile" style="margin-top:24px">
 <div class="section-head"><div><span class="eyebrow">V91 · THUMBNAIL RECOVERY INTELLIGENCE</span><h2 style="margin:.35rem 0">Recovery Control Room</h2><p class="muted">Repeated failures are tracked per media. Five failures in 24 hours quarantines a source and stops automatic retries.</p></div><button id="refreshThumbnailRecoveryV91">Refresh</button></div>
 <div id="thumbnailRecoveryMetricsV91" class="studio" style="margin-top:14px"></div><div id="thumbnailRecoveryListV91" style="margin-top:14px"></div>
+</section>
+<section id="thumbnailSourceRepairV93" class="tile" style="margin-top:24px">
+<div class="section-head"><div><span class="eyebrow">V93 · AUTOMATIC SOURCE REPAIR</span><h2 style="margin:.35rem 0">Source Repair</h2><p class="muted">CrowSpace validates the current source and can recover a broken public URL from the media storage path before retrying thumbnail generation.</p></div><button id="refreshThumbnailRepairV93">Refresh</button></div>
+<div id="thumbnailRepairListV93" style="margin-top:14px"></div>
+</section><script>
+async function renderThumbnailRepairV93(){
+ const box=document.getElementById("thumbnailRepairListV93");if(!box)return;
+ const {data,error}=await sb.from("crowspace_thumbnail_source_repairs").select("id,media_id,old_source_url,repaired_source_url,repair_method,status,error_message,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(25);
+ if(error){box.innerHTML="<div class='empty'>"+esc(error.message)+"</div>";return}
+ if(!data?.length){box.innerHTML="<div class='empty'>No source repairs recorded yet. Automatic repair activates when a thumbnail source fails.</div>";return}
+ box.innerHTML=data.map(x=>"<div class='queue-row'><div class='queue-row-head'><div><strong>"+esc(x.repair_method||"source repair")+"</strong><div class='queue-meta'>"+esc((x.status||"tested").toUpperCase())+" · "+new Date(x.created_at).toLocaleString()+"</div></div><span class='badge'>"+esc(x.status||"tested")+"</span></div>"+(x.error_message?"<div class='file-note'>"+esc(x.error_message)+"</div>":"")+"</div>").join("");
+}
+document.getElementById("refreshThumbnailRepairV93")?.addEventListener("click",renderThumbnailRepairV93);
+renderThumbnailRepairV93();
 </section><script>
 async function renderThumbnailRecoveryV91(){
  const metrics=document.getElementById("thumbnailRecoveryMetricsV91"),list=document.getElementById("thumbnailRecoveryListV91");if(!metrics||!list)return;
