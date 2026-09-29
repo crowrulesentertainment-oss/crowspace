@@ -11,7 +11,7 @@ function score(x){
  const low=Math.max(0,60-N(x.forecast))*.35;
  const survival=Math.max(0,50-N(x.survival))*.25;
  const age=Math.min(15,Math.max(0,(Date.now()-N(x.lastChallengeAt))/DAY/7));
- const reason=x.reason||"UNKNOWN",cal=window.CrowSpaceChallengeCalibrationV52?.value?.(reason);\n const learned=cal!==undefined?Math.round(cal*10):(window.CrowSpaceChallengeGuardrailsV51?.boost?.(reason)??(window.CrowSpaceChallengeLearningV50?.boost?.(reason)||0));
+ const reason=x.reason||"UNKNOWN",cal=window.CrowSpaceChallengeCalibrationV52?.value?.(reason);\n const learned=window.CrowSpaceChallengePolicyV53?.boost?.(reason)??(cal!==undefined?Math.round(cal*10):(window.CrowSpaceChallengeGuardrailsV51?.boost?.(reason)??(window.CrowSpaceChallengeLearningV50?.boost?.(reason)||0)));
  return Math.round(risk+fall+low+survival+age+learned);
 }
 function candidates(){
