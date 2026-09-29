@@ -63,7 +63,7 @@ async function loadSocial(){
  $("followers").textContent=(followers.count||0).toLocaleString();
  $("following").textContent=(following.count||0).toLocaleString();
  const {data:ledger}=await db.from("crowrules_crowpoints_ledger").select("points,reason,source,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(10);
- $("pointsHistory").innerHTML=(ledger||[]).length?(ledger||[]).map(x=>'<div class="points-row"><b>'+(x.points>=0?"+":"")+x.points+'</b><span>'+esc(x.reason)+'</span><small>'+new Date(x.created_at).toLocaleDateString()+'</small></div>').join(""):"<div class="empty">No CrowPoints activity yet.</div>";
+ $("pointsHistory").innerHTML=(ledger||[]).length?(ledger||[]).map(x=>'<div class="points-row"><b>'+(x.points>=0?"+":"")+x.points+'</b><span>'+esc(x.reason)+'</span><small>'+new Date(x.created_at).toLocaleDateString()+'</small></div>').join(""):'<div class="empty">No CrowPoints activity yet.</div>';
  const n=await db.from("crowspace_notifications").select("id",{count:"exact",head:true}).eq("user_id",user.id).is("read_at",null);$("unread").textContent=n.count||0;
 }
 window.CrowSpaceAccount={init};
