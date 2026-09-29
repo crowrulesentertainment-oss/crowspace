@@ -51,16 +51,16 @@ function schedulerStatus(s,items){
  const cur=reconcile(s),active=activeExperiment(s),open=openTaskCount(s),last=lastCompletedAt(s),cooldownUntil=last?last+COOLDOWN:0;
  return {current:cur,active,open,last,cooldownUntil,timing:planTiming(s,items)}
 }
-async function schedule(s,x){
+async function schedule(s,x,meta){
  const items=await allCaws(),st=schedulerStatus(s,items);
  if(st.active)return{ok:false,reason:"An active experiment is already running."};
  if(st.open+2>MAX_OPEN_TASKS)return{ok:false,reason:"Queue capacity reached: "+st.open+" open tasks of "+MAX_OPEN_TASKS+" allowed."};
  if(Date.now()<st.cooldownUntil)return{ok:false,reason:"Scheduler cooldown is active until "+new Date(st.cooldownUntil).toLocaleString()+"."};
  const all=L(EXP,{}),list=all[s]||[],id=s+"-"+Date.now(),now=Date.now(),t=st.timing;
- const e={id,name:x.a+" vs "+x.b,series:s,status:"active",createdAt:now,scheduledAt:now,startsAt:t.start.getTime(),endsAt:t.finish.getTime(),durationDays:7,armGapHours:24,explorationKind:x.kind,explorationScore:x.score,schedulerVersion:4,schedulingWindow:"learned publishing window",arms:[{type:x.a,outcomes:[],taskIds:[],scheduledFor:t.start.getTime()},{type:x.b,outcomes:[],taskIds:[],scheduledFor:t.second.getTime()}]};
+ const e={id,name:x.a+" vs "+x.b,series:s,status:"active",createdAt:now,scheduledAt:now,startsAt:t.start.getTime(),endsAt:t.finish.getTime(),durationDays:7,armGapHours:24,explorationKind:x.kind,explorationScore:x.score,schedulerVersion:4,strategyTrial:meta?.strategyTrial||null,schedulingWindow:"learned publishing window",arms:[{type:x.a,outcomes:[],taskIds:[],scheduledFor:t.start.getTime()},{type:x.b,outcomes:[],taskIds:[],scheduledFor:t.second.getTime()}]};
  list.push(e);all[s]=list;
  const tasks=L(TASKS,{});tasks[s]??=[];
- e.arms.forEach((a,i)=>{const when=a.scheduledFor,taskId=s+"-exp-"+id+"-"+i;e.arms[i].taskIds.push(taskId);tasks[s].push({id:taskId,title:"Experiment "+(i?"B":"A")+" • "+a.type,detail:"AUTO-SCHEDULED v4 "+x.kind+" arm. Planned start: "+new Date(when).toLocaleString()+". Publish the associated Caw(s) during this window.",priority:"HIGH",due:new Date(when).toISOString(),scheduledFor:when,completed:false,created:now,experimentId:id,experimentArm:i,experimentSeries:s,attributedCawIds:[],attributedCaws:[],autoScheduled:true,schedulerVersion:4})});
+ e.arms.forEach((a,i)=>{const when=a.scheduledFor,taskId=s+"-exp-"+id+"-"+i;e.arms[i].taskIds.push(taskId);tasks[s].push({id:taskId,title:"Experiment "+(i?"B":"A")+" • "+a.type,detail:"AUTO-SCHEDULED v4 "+x.kind+" arm. Planned start: "+new Date(when).toLocaleString()+". Publish the associated Caw(s) during this window.",priority:"HIGH",due:new Date(when).toISOString(),scheduledFor:when,completed:false,created:now,experimentId:id,experimentArm:i,experimentSeries:s,attributedCawIds:[],attributedCaws:[],autoScheduled:true,schedulerVersion:4,strategyTrial:meta?.strategyTrial||null})});
  S(EXP,all);S(TASKS,tasks);
  const sched=state();sched[s]={experimentId:id,scheduledAt:now,startsAt:t.start.getTime(),endsAt:t.finish.getTime(),cooldownUntil:t.finish.getTime()+COOLDOWN,candidate:{kind:x.kind,a:x.a,b:x.b,score:x.score},windowSource:t.model.length?"historical publishing windows":"fallback window",windowModel:t.model.slice(0,3).map(w=>({day:w.day,hour:w.hour,count:w.count,avg:w.avg})),queueOpenBefore:st.open,queueCapacity:MAX_OPEN_TASKS,version:4};S(SCHED,sched);
  return{ok:true,e}
