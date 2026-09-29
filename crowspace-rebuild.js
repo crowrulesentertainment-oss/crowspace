@@ -55,34 +55,24 @@ function liveLayer(db,u){
  const badge=(kind)=>{document.querySelectorAll("[data-live-badge='"+kind+"']").forEach(x=>{const n=Number(x.dataset.count||0)+1;x.dataset.count=n;x.textContent=n>99?"99+":n;x.hidden=false})};
  const channel=db.channel("crowspace-live");
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts"},()=>{refreshFeed();toast("New CrowSpace post received")});
- channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_holiday_bot_posts"},()=>{refreshFeed();toast("Holiday Bot activity received")});
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_holiday_bot_posts"},()=>{refreshFeed();toast("Holiday Bot activity received")});channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_likes"},()=>refreshFeed());channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_comments"},()=>refreshFeed());
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+u.id},()=>{badge("alerts");toast("New notification")});
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},()=>{badge("messages");toast("New message activity")});
 
- const presence=db.channel("crowspace-presence",{config:{presence:{key:u.id}}});
+ const presence=db.channel("crowspace-presence",{config:{presence:{key:u.id}}});const typing=db.channel("crowspace-typing");typing.on("broadcast",{event:"typing"},p=>{const x=p.payload||{};if(x.user_id!==u.id)document.querySelectorAll("[data-typing]").forEach(e=>e.textContent=x.typing?((x.name||"Someone")+" is typing…"):"")});typing.subscribe();
  presence.on("presence",{event:"sync"},()=>{const p=presence.presenceState();const rows=[];Object.keys(p).forEach(k=>(p[k]||[]).forEach(v=>rows.push(v)));state.online=rows;state.presence=rows.length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=rows.length)});
  presence.on("presence",{event:"join"},()=>{state.presence=Object.keys(presence.presenceState()).length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=state.presence)});
  presence.on("presence",{event:"leave"},()=>{state.presence=Object.keys(presence.presenceState()).length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=state.presence)});
- state.channels=[channel,presence];
+ state.channels=[channel,presence,typing];
  channel.subscribe((s)=>{if(s==="SUBSCRIBED")setStatus("LIVE");else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")setStatus("RECONNECTING")});
  presence.subscribe(async(s)=>{if(s==="SUBSCRIBED"){await presence.track({user_id:u.id,page:document.body.dataset.page,online_at:new Date().toISOString()})}});
- window.CrowSpaceLive={state,stop:()=>state.channels.forEach(x=>db.removeChannel(x))};
+ window.CrowSpaceLive={state,typing,stop:()=>state.channels.forEach(x=>db.removeChannel(x))};
  setStatus("CONNECTING");
 }
 \nfunction shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard};}
 async function feed(limit=40){const db=await auth();const [a,b]=await Promise.all([db.from("crowspace_posts").select("id,user_id,body,title,media_url,created_at,like_count,comment_count").order("created_at",{ascending:false}).limit(limit),db.from("crowspace_holiday_bot_posts").select("id,bot_id,title,body,created_at").order("created_at",{ascending:false}).limit(limit)]);if(a.error)throw a.error;if(b.error)throw b.error;const rows=a.data||[],bp=b.data||[];const ids=[...new Set(rows.map(x=>x.user_id))], bids=[...new Set(bp.map(x=>x.bot_id))];const [ps,bs]=await Promise.all([ids.length?db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):Promise.resolve({data:[]}),bids.length?db.from("crowspace_holiday_bots").select("id,slug,display_name,avatar_url,holiday_name").in("id",bids):Promise.resolve({data:[]})]);const pm=new Map((ps.data||[]).map(x=>[x.user_id,x])),bm=new Map((bs.data||[]).map(x=>[x.id,x]));return [...rows.map(p=>{const x=pm.get(p.user_id)||{};return {...p,kind:"member",name:x.display_name||x.username||"Crow Member",handle:x.username?"@"+x.username:"@member",avatar:avatar(x.avatar_url)}}),...bp.map(p=>{const x=bm.get(p.bot_id)||{};return {...p,kind:"bot",name:x.display_name||"Holiday Crow",handle:"@"+(x.slug||"holiday-crow"),avatar:avatar(x.avatar_url),bot_slug:x.slug}})].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
-function postCard(p){return '<article class="card post"><div class="posthead"><img class="avatar" src="'+esc(p.avatar)+'"><div><b>'+ (p.kind==="bot"?'<a href="holiday-bot.html?bot='+encodeURIComponent(p.bot_slug)+'">'+esc(p.name)+'</a>':esc(p.name))+'</b><div class="muted">'+esc(p.handle)+' · '+new Date(p.created_at).toLocaleString()+'</div></div></div>'+(p.title?'<h3>'+esc(p.title)+'</h3>':'')+'<div class="postbody">'+esc(p.body)+'</div><div class="actions"><button class="btn" data-share="'+esc(p.id)+'">↗ Share</button></div></article>'}
-async function renderFeed(el,filter="all"){try{const rows=await feed();const shown=filter==="all"?rows:rows.filter(x=>x.kind===filter);el.innerHTML=shown.length?shown.map(postCard).join(""):'<div class="card empty">No posts match this filter.</div>';el.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(location.href+"#post-"+b.dataset.share);toast("Post link copied")})}catch(e){console.error(e);el.innerHTML='<div class="card empty">CrowSpace feed unavailable.</div>'}}
-async function dashboardData(db,u){
- const [posts,profiles,alerts,messages,caws,bots]=await Promise.all([
-  db.from("crowspace_posts").select("id",{count:"exact",head:true}),
-  db.from("crowspace_profiles").select("user_id",{count:"exact",head:true}),
-  db.from("crowspace_notifications").select("id",{count:"exact",head:true}).eq("user_id",u.id),
-  db.from("crowspace_messages").select("id",{count:"exact",head:true}).or("sender_id.eq."+u.id+",recipient_id.eq."+u.id),
-  db.from("crowspace_caws").select("id",{count:"exact",head:true}),
-  db.from("crowspace_holiday_bots").select("id",{count:"exact",head:true}).eq("active",true)
- ]);
- return {posts:posts.count||0,profiles:profiles.count||0,alerts:alerts.count||0,messages:messages.count||0,caws:caws.count||0,bots:bots.count||0};
+function postCard(p){
+ return '<article class="card post" id="post-'+esc(p.id)+'"><div class="posthead"><img class="avatar" src="'+esc(p.avatar)+'"><div><b>'+ (p.kind==="bot"?'<a href="holiday-bot.html?bot='+encodeURIComponent(p.bot_slug)+'">'+esc(p.name)+'</a>':esc(p.name))+'</b><div class="muted">'+esc(p.handle)+' · '+new Date(p.created_at).toLocaleString()+'</div></div></div>'+(p.title?'<h3>'+esc(p.title)+'</h3>':'')+'<div class="postbody">'+esc(p.body)+'</div><div class="actions"><button class="btn" data-like="'+esc(p.id)+'">♡ <span>'+esc(p.like_count||0)+'</span></button><button class="btn" data-comment="'+esc(p.id)+'">Comment <span>'+esc(p.comment_count||0)+'</span></button><button class="btn" data-share="'+esc(p.id)+'">↗ Share</button></div></article>';
 }
 function metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
 async function page(){
