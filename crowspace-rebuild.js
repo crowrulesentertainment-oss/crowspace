@@ -46,7 +46,30 @@ function appShell(){
  content.prepend(top);
  $("#open-command").onclick=()=>document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true}));
 }
-function shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard}}
+
+function liveLayer(db,u){
+ if(window.CrowSpaceLive?.stop)window.CrowSpaceLive.stop();
+ const state={channels:[],presence:0,online:[],status:"CONNECTING"};
+ const setStatus=s=>{state.status=s;document.querySelectorAll("[data-live-status]").forEach(x=>{x.textContent=s;x.className="live-status "+s.toLowerCase()})};
+ const refreshFeed=()=>{const el=$("#feed");if(el)renderFeed(el,document.querySelector("[data-feed-filter].active")?.dataset.feedFilter||"all")};
+ const badge=(kind)=>{document.querySelectorAll("[data-live-badge='"+kind+"']").forEach(x=>{const n=Number(x.dataset.count||0)+1;x.dataset.count=n;x.textContent=n>99?"99+":n;x.hidden=false})};
+ const channel=db.channel("crowspace-live");
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts"},()=>{refreshFeed();toast("New CrowSpace post received")});
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_holiday_bot_posts"},()=>{refreshFeed();toast("Holiday Bot activity received")});
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+u.id},()=>{badge("alerts");toast("New notification")});
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},payload=>{const r=payload.new||{};if(r.sender_id===u.id||r.recipient_id===u.id||r.user_id===u.id){badge("messages");toast("New message activity")}});
+
+ const presence=db.channel("crowspace-presence",{config:{presence:{key:u.id}}});
+ presence.on("presence",{event:"sync"},()=>{const p=presence.presenceState();const rows=[];Object.keys(p).forEach(k=>(p[k]||[]).forEach(v=>rows.push(v)));state.online=rows;state.presence=rows.length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=rows.length)});
+ presence.on("presence",{event:"join"},()=>{state.presence=Object.keys(presence.presenceState()).length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=state.presence)});
+ presence.on("presence",{event:"leave"},()=>{state.presence=Object.keys(presence.presenceState()).length;document.querySelectorAll("[data-live-online]").forEach(x=>x.textContent=state.presence)});
+ state.channels=[channel,presence];
+ channel.subscribe((s)=>{if(s==="SUBSCRIBED")setStatus("LIVE");else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")setStatus("RECONNECTING")});
+ presence.subscribe(async(s)=>{if(s==="SUBSCRIBED"){await presence.track({user_id:u.id,page:document.body.dataset.page,online_at:new Date().toISOString()})}});
+ window.CrowSpaceLive={state,stop:()=>state.channels.forEach(x=>db.removeChannel(x))};
+ setStatus("CONNECTING");
+}
+\nfunction shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard};}
 async function feed(limit=40){const db=await auth();const [a,b]=await Promise.all([db.from("crowspace_posts").select("id,user_id,body,title,media_url,created_at,like_count,comment_count").order("created_at",{ascending:false}).limit(limit),db.from("crowspace_holiday_bot_posts").select("id,bot_id,title,body,created_at").order("created_at",{ascending:false}).limit(limit)]);if(a.error)throw a.error;if(b.error)throw b.error;const rows=a.data||[],bp=b.data||[];const ids=[...new Set(rows.map(x=>x.user_id))], bids=[...new Set(bp.map(x=>x.bot_id))];const [ps,bs]=await Promise.all([ids.length?db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):Promise.resolve({data:[]}),bids.length?db.from("crowspace_holiday_bots").select("id,slug,display_name,avatar_url,holiday_name").in("id",bids):Promise.resolve({data:[]})]);const pm=new Map((ps.data||[]).map(x=>[x.user_id,x])),bm=new Map((bs.data||[]).map(x=>[x.id,x]));return [...rows.map(p=>{const x=pm.get(p.user_id)||{};return {...p,kind:"member",name:x.display_name||x.username||"Crow Member",handle:x.username?"@"+x.username:"@member",avatar:avatar(x.avatar_url)}}),...bp.map(p=>{const x=bm.get(p.bot_id)||{};return {...p,kind:"bot",name:x.display_name||"Holiday Crow",handle:"@"+(x.slug||"holiday-crow"),avatar:avatar(x.avatar_url),bot_slug:x.slug}})].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
 function postCard(p){return '<article class="card post"><div class="posthead"><img class="avatar" src="'+esc(p.avatar)+'"><div><b>'+ (p.kind==="bot"?'<a href="holiday-bot.html?bot='+encodeURIComponent(p.bot_slug)+'">'+esc(p.name)+'</a>':esc(p.name))+'</b><div class="muted">'+esc(p.handle)+' · '+new Date(p.created_at).toLocaleString()+'</div></div></div>'+(p.title?'<h3>'+esc(p.title)+'</h3>':'')+'<div class="postbody">'+esc(p.body)+'</div><div class="actions"><button class="btn" data-share="'+esc(p.id)+'">↗ Share</button></div></article>'}
 async function renderFeed(el,filter="all"){try{const rows=await feed();const shown=filter==="all"?rows:rows.filter(x=>x.kind===filter);el.innerHTML=shown.length?shown.map(postCard).join(""):'<div class="card empty">No posts match this filter.</div>';el.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(location.href+"#post-"+b.dataset.share);toast("Post link copied")})}catch(e){console.error(e);el.innerHTML='<div class="card empty">CrowSpace feed unavailable.</div>'}}
@@ -66,7 +89,7 @@ async function page(){
  shell();const p=document.body.dataset.page,db=await auth();
  if(p==="index")return;
  if(p==="login"||p==="signup")return authPage(p,db);
- if(p==="home"){const u=await guard();if(!u)return;const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});
+ if(p==="home"){const u=await guard();if(!u)return;liveLayer(db,u);const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});
 $("#publish").onsubmit=async e=>{e.preventDefault();const body=$("#body").value.trim();if(!body)return;const r=await db.from("crowspace_posts").insert({user_id:u.id,body,title:$("#title").value.trim()||null});if(r.error){toast(r.error.message);return}$("#title").value="";$("#body").value="";toast("Posted to CrowSpace");await renderFeed($("#feed"))};await renderFeed($("#feed"));return}
  if(p==="profile")return profilePage(db);
  if(p==="account")return accountPage(db);
