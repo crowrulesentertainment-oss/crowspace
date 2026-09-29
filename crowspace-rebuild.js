@@ -9,7 +9,44 @@ async function auth(){return await CrowSpaceAuth.ready}
 async function user(){const db=await auth();const r=await db.auth.getUser();return r.data.user}
 async function profile(db,id){const r=await db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio").eq("user_id",id).maybeSingle();return r.data||{}}
 async function guard(){const u=await user();if(!u){location.href="login.html";return null}return u}
-function shell(){document.documentElement.dataset.crowspace="cinematic";nav();window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard}}
+function commandPalette(){
+ if($("#crow-command-palette"))return;
+ const wrap=document.createElement("div");
+ wrap.id="crow-command-palette";
+ wrap.className="command-palette";
+ wrap.innerHTML='<div class="command-backdrop" data-close-command></div><div class="command-panel"><div class="command-top"><span>COMMAND CENTER</span><button class="btn" data-close-command>ESC</button></div><input id="command-input" class="command-input" placeholder="Search CrowSpace pages…" autocomplete="off"><div id="command-results" class="command-results"></div></div>';
+ document.body.appendChild(wrap);
+ const pages=[["home.html","Home","Command Feed"],["explore.html","Explore","Discover members"],["caws.html","Caws","Short-form video"],["circles.html","Circles","Communities"],["notifications.html","Alerts","Notifications"],["messages.html","Messages","Direct messages"],["holiday-bots.html","Holiday Network","Automated accounts"],["profile.html","Profile","Your identity"],["account.html","Account","Universal account"]];
+ const input=wrap.querySelector("#command-input"),results=wrap.querySelector("#command-results");
+ const draw=q=>{const v=q.toLowerCase().trim();results.innerHTML=pages.filter(p=>!v||p.join(" ").toLowerCase().includes(v)).map(p=>'<a class="command-result" href="'+p[0]+'"><b>'+esc(p[1])+'</b><span>'+esc(p[2])+'</span><kbd>↵</kbd></a>').join("")||'<div class="muted" style="padding:18px">No destination found.</div>'};
+ const close=()=>{wrap.classList.remove("open");input.value="";draw("")};
+ const open=()=>{wrap.classList.add("open");draw("");setTimeout(()=>input.focus(),30)};
+ input.oninput=()=>draw(input.value);
+ wrap.querySelectorAll("[data-close-command]").forEach(x=>x.onclick=close);
+ document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();open()}if(e.key==="Escape")close()});
+ draw("");
+}
+function appShell(){
+ const p=document.body.dataset.page;
+ if(["index","login","signup"].includes(p))return;
+ const main=$(".shell");if(!main||main.dataset.shellReady)return;
+ main.dataset.shellReady="1";
+ const dup=[...main.querySelectorAll(":scope > .kicker")];dup.slice(1).forEach(x=>x.remove());
+ const children=[...main.children];
+ const frame=document.createElement("div");frame.className="pageframe";
+ const side=document.createElement("aside");side.className="sidebar";
+ const active=p==="notifications"?"notifications":p;
+ const links=[["home.html","home","HOME","Command feed"],["explore.html","explore","EXPLORE","Find members"],["caws.html","caws","CAWS","Short-form video"],["circles.html","circles","CIRCLES","Communities"],["notifications.html","notifications","ALERTS","Signals"],["messages.html","messages","MESSAGES","Direct conversations"],["holiday-bots.html","holiday-bots","HOLIDAY","Bot network"],["profile.html","profile","PROFILE","Identity"],["account.html","account","ACCOUNT","Universal account"]];
+ side.innerHTML='<div class="side-label">CROWSPACE OS</div>'+links.map(x=>'<a class="side-link '+(active===x[1]?"active":"")+'" href="'+x[0]+'"><b>'+x[2]+'</b><span>'+x[3]+'</span></a>').join("")+'<div class="side-status"><i></i><b>NETWORK READY</b><span>Supabase connected</span></div>';
+ const content=document.createElement("div");content.className="content";
+ children.forEach(x=>content.appendChild(x));
+ frame.append(side,content);main.replaceChildren(frame);
+ const top=document.createElement("div");top.className="commandbar";
+ top.innerHTML='<span><b>COMMAND CENTER</b> <span class="muted">/ '+esc((document.title||"CrowSpace").split("—")[0].trim().toUpperCase())+'</span></span><button class="btn" id="open-command">⌘K / CTRL K</button>';
+ content.prepend(top);
+ $("#open-command").onclick=()=>document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true}));
+}
+function shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard}}
 async function feed(limit=40){const db=await auth();const [a,b]=await Promise.all([db.from("crowspace_posts").select("id,user_id,body,title,media_url,created_at,like_count,comment_count").order("created_at",{ascending:false}).limit(limit),db.from("crowspace_holiday_bot_posts").select("id,bot_id,title,body,created_at").order("created_at",{ascending:false}).limit(limit)]);if(a.error)throw a.error;if(b.error)throw b.error;const rows=a.data||[],bp=b.data||[];const ids=[...new Set(rows.map(x=>x.user_id))], bids=[...new Set(bp.map(x=>x.bot_id))];const [ps,bs]=await Promise.all([ids.length?db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):Promise.resolve({data:[]}),bids.length?db.from("crowspace_holiday_bots").select("id,slug,display_name,avatar_url,holiday_name").in("id",bids):Promise.resolve({data:[]})]);const pm=new Map((ps.data||[]).map(x=>[x.user_id,x])),bm=new Map((bs.data||[]).map(x=>[x.id,x]));return [...rows.map(p=>{const x=pm.get(p.user_id)||{};return {...p,kind:"member",name:x.display_name||x.username||"Crow Member",handle:x.username?"@"+x.username:"@member",avatar:avatar(x.avatar_url)}}),...bp.map(p=>{const x=bm.get(p.bot_id)||{};return {...p,kind:"bot",name:x.display_name||"Holiday Crow",handle:"@"+(x.slug||"holiday-crow"),avatar:avatar(x.avatar_url),bot_slug:x.slug}})].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
 function postCard(p){return '<article class="card post"><div class="posthead"><img class="avatar" src="'+esc(p.avatar)+'"><div><b>'+ (p.kind==="bot"?'<a href="holiday-bot.html?bot='+encodeURIComponent(p.bot_slug)+'">'+esc(p.name)+'</a>':esc(p.name))+'</b><div class="muted">'+esc(p.handle)+' · '+new Date(p.created_at).toLocaleString()+'</div></div></div>'+(p.title?'<h3>'+esc(p.title)+'</h3>':'')+'<div class="postbody">'+esc(p.body)+'</div><div class="actions"><button class="btn" data-share="'+esc(p.id)+'">↗ Share</button></div></article>'}
 async function renderFeed(el){try{const rows=await feed();el.innerHTML=rows.length?rows.map(postCard).join(""):'<div class="card empty">No posts yet.</div>';el.querySelectorAll("[data-share]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(location.href+"#post-"+b.dataset.share);toast("Post link copied")})}catch(e){console.error(e);el.innerHTML='<div class="card empty">CrowSpace feed unavailable.</div>'}}
