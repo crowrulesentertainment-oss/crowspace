@@ -12,15 +12,15 @@ async function orchestrate(s){
  const portfolio=window.CrowSpaceExperimentPortfolio;
  const explorer=window.CrowSpaceExperimentExplorer;
  const evo=L(EVOL,{candidates:[],tested:[]});
- const ready=(evo.candidates||[]).find(x=>x.status==="READY");
+ const ready=(evo.candidates||[]).find(x=>x.status==="READY"||x.status==="REPLICATE");
  if(portfolio?.chooseForStrategy&&explorer?.candidates&&explorer?.schedule&&ready){
   const selected=portfolio.chooseForStrategy(ready.strategy);
   const action=(selected?explorer.candidates(selected.series):[])[0];
   const exps=L(EXP,{})[selected?.series]||[],active=exps.find(e=>e.status==="active"&&!e.completedAt);
   const existing=(L(EXP,{})[selected?.series]||[]).find(e=>e.strategyTrial?.key===ready.key&&!e.lifecycleCompletedAt);
   if(selected?.series&&action&&!active&&!existing){
-   const baseline=portfolio.strategyBaseline?portfolio.strategyBaseline(selected.series):{observations:0,experiments:0,avgViewsPerCaw:0,interactionRate:0}; const trial={key:ready.key,parent:ready.parent,strategy:ready.strategy,mutation:ready.mutation,baseline,capturedAt:Date.now(),version:15}; const r=await explorer.schedule(selected.series,action,{strategyTrial:trial});
-   const oa=L(ORCH,{});oa[selected.series]={status:r?.ok?"STRATEGY TEST SCHEDULED":"WAITING",updatedAt:Date.now(),reason:r?.reason||"",automatic:true,strategyEvolution:true,strategyKey:ready.key,version:15};S(ORCH,oa);if(r?.ok)return;
+   const baseline=portfolio.strategyBaseline?portfolio.strategyBaseline(selected.series):{observations:0,experiments:0,avgViewsPerCaw:0,interactionRate:0}; const trial={key:ready.key,parent:ready.parent,strategy:ready.strategy,mutation:ready.mutation,baseline,capturedAt:Date.now(),version:16,replication:!!ready.replication}; const r=await explorer.schedule(selected.series,action,{strategyTrial:trial});
+   const oa=L(ORCH,{});oa[selected.series]={status:r?.ok?"STRATEGY TEST SCHEDULED":"WAITING",updatedAt:Date.now(),reason:r?.reason||"",automatic:true,strategyEvolution:true,strategyKey:ready.key,replication:!!ready.replication,version:16};S(ORCH,oa);if(r?.ok)return;
   }
  }
  if(portfolio?.choose){
