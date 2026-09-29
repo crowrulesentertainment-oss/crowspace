@@ -19,7 +19,7 @@ function sync(){
  });
  S(KEY,st);return st
 }
-function factor(reason){const base=state()[reason]?.factor||1;const verify=window.CrowSpaceRecalibrationVerificationV82?.factor?.(reason)||1;const memory=window.CrowSpaceRecalibrationVerificationMemoryV83?.factor?.(reason)||1;const recovery=window.CrowSpaceVerificationMemoryRecoveryV84?.factor?.(reason)||1;const stability=window.CrowSpaceVerificationRecoveryStabilityV85?.factor?.(reason)||1;return base*verify*memory*recovery*stability}
+function factor(reason){const base=state()[reason]?.factor||1;const verify=window.CrowSpaceRecalibrationVerificationV82?.factor?.(reason)||1;const memory=window.CrowSpaceRecalibrationVerificationMemoryV83?.factor?.(reason)||1;const recovery=window.CrowSpaceVerificationMemoryRecoveryV84?.factor?.(reason)||1;const stability=window.CrowSpaceVerificationRecoveryStabilityV85?.factor?.(reason)||1;const audit=window.CrowSpaceRecalibrationIntegrityAuditV86?.factor?.(reason)||1;return base*verify*memory*recovery*stability*audit}
 function mode(reason){return state()[reason]?.mode||"NORMAL_MONITOR"}
 function status(reason){return state()[reason]?.status||"STABLE"}
 function best(){return Object.values(state()).sort((a,b)=>(b.restored||0)-(a.restored||0))}
