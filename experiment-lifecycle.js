@@ -24,6 +24,7 @@ async function lifecycle(){
    remember(s,e,d);
    if(e.strategyTrial&&window.CrowSpaceExperimentPortfolio?.recordStrategyTest)window.CrowSpaceExperimentPortfolio.recordStrategyTest(e.id,e.strategyTrial.strategy,e.strategyTrial.series||e.series);
    if(e.recoveryExperiment&&window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();
+   if(e.replacementExperiment&&window.CrowSpaceStrategyReplacement?.evaluate){window.CrowSpaceStrategyReplacement.evaluate(e.replacementExperiment.originalKey,e.strategyTrial?.result||null);}
    changed.push({series:s,id:e.id,decision:d.status});
   }
  }
@@ -66,6 +67,31 @@ async function generateRecoveryExperiments(){
  }
  const planKeys=new Set(plans.map(x=>x.key));Object.keys(state).forEach(k=>{if(!planKeys.has(k)&&state[k].status!=="RETIRED"&&state[k].status!=="RESTORED")state[k]={...state[k],status:"RESTORED",reason:"Fresh evidence no longer meets the recovery trigger.",updatedAt:Date.now(),version:23}});S(key,state);return created;
 }
+async function generateReplacementExperiments(){
+ const rep=window.CrowSpaceStrategyReplacement;if(!rep)return[];
+ const ready=rep.generate(),state=rep.state(),x=window.CrowSpaceExperimentExplorer,p=window.CrowSpaceExperimentPortfolio;
+ if(!x?.candidates||!x?.schedule||!p)return[];
+ const out=[],expAll=L(EXP,{});
+ for(const item of ready){
+  if(item.status!=="READY_FOR_CONTROLLED_TEST")continue;
+  const key=item.replacementKey, strategy=item.replacement?.strategy;if(!strategy)continue;
+  const selected=(item.replacement?.series||[]).find(s=>!(expAll[s]||[]).some(e=>e.status==="active"&&!e.completedAt)) || Object.keys(expAll).find(s=>!(expAll[s]||[]).some(e=>e.status==="active"&&!e.completedAt));
+  if(!selected)continue;
+  const action=(x.candidates(selected)||[])[0];if(!action)continue;
+  const holdout=window.CrowSpaceControlledHoldouts?.capture?await window.CrowSpaceControlledHoldouts.capture(selected,[]):null;if(!holdout)continue;
+  const baseline=p.strategyBaseline?p.strategyBaseline(selected):{};
+  const trial={key,strategy,mutation:item.replacement.mutation,parent:item.originalKey,baseline,holdout,capturedAt:Date.now(),version:25,controlledHoldout:true,replacement:true,replaces:item.originalKey,series:selected,requiredFreshEvidence:true};
+  const r=await x.schedule(selected,action,{strategyTrial:trial});
+  if(r?.ok){
+   const list=L(EXP,{})[selected]||[],e=list[list.length-1];
+   if(e)e.replacementExperiment={originalKey:item.originalKey,replacementKey:key,version:25};
+   const fresh=L(EXP,{});fresh[selected]=list;S(EXP,fresh);
+   const st=L("crowspace-strategy-replacements-v25",{});st[item.originalKey]={...st[item.originalKey],status:"TESTING",experimentId:e?.id||null,series:selected,updatedAt:Date.now(),version:25};S("crowspace-strategy-replacements-v25",st);
+   out.push({originalKey:item.originalKey,replacementKey:key,experimentId:e?.id||null});
+  }
+ }
+ return out;
+}
 async function orchestrate(s){
  const portfolio=window.CrowSpaceExperimentPortfolio;
  const explorer=window.CrowSpaceExperimentExplorer;
@@ -93,6 +119,6 @@ async function orchestrate(s){
   }
  }const exps=L(EXP,{})[s]||[],active=exps.find(e=>e.status==="active"&&!e.completedAt),sch=L(SCHED,{}),cur=sch[s],now=Date.now();if(active){const a=L(ORCH,{});a[s]={status:"ACTIVE",updatedAt:now,experimentId:active.id,version:6};S(ORCH,a);return}if(cur?.cooldownUntil&&now<N(cur.cooldownUntil)){const a=L(ORCH,{});a[s]={status:"COOLDOWN",updatedAt:now,cooldownUntil:cur.cooldownUntil,message:"Next experiment unlocks "+new Date(cur.cooldownUntil).toLocaleString(),version:6};S(ORCH,a);return}if(window.CrowSpaceExperimentExplorer?.autoSchedule){const r=await window.CrowSpaceExperimentExplorer.autoSchedule(s),a=L(ORCH,{});a[s]={status:r?.ok?"SCHEDULED":"WAITING",updatedAt:Date.now(),reason:r?.reason||"",automatic:true,version:6};S(ORCH,a)}}
 function render(){const recovery=reEvaluationPlan();const s=$( "studioSeries")?.value||"all",old=$( "experimentLifecycle");if(s==="all"){old?.remove();return}const all=L(EXP,{}),list=all[s]||[],active=list.find(e=>e.status==="active"),orch=L(ORCH,{})[s],recent=list.filter(e=>e.lifecycleCompletedAt).sort((a,b)=>b.lifecycleCompletedAt-a.lifecycleCompletedAt).slice(0,3),el=old||document.createElement("section");if(!old){el.id="experimentLifecycle";$("experimentExplorationEngine")?.after(el)}el.className="card experiment-lifecycle";const state=active?"ACTIVE":orch?.status==="SCHEDULED"?"NEXT TEST SCHEDULED":"SCHEDULER RELEASED";el.innerHTML='<div class="life-head"><div><span>STRATEGY RE-EVALUATION ENGINE // V22</span><h3>Confidence Failures Trigger Fresh Evidence</h3><small>Experiments close, evaluate, enter memory, release the scheduler, and automatically queue the next eligible test.</small></div><b>'+E(state)+'</b></div><div class="life-orchestrator"><b>NEXT-TEST ORCHESTRATOR</b><span>'+E(orch?.reason||orch?.message||(orch?.status==="SCHEDULED"?"The next experiment has been scheduled automatically.":"Evaluating the next eligible experiment."))+'</span></div>'+(recent.length?'<div class="life-list">'+recent.map(e=>'<article><div><strong>'+E(e.name)+'</strong><small>'+E(e.lifecycleReason||"Completed")+' · '+new Date(e.completedAt).toLocaleString()+'</small></div><em>'+E((L(DEC,{})[s]?.[e.id]?.decision?.status)||"EVALUATED")+'</em></article>').join("")+'</div>':'<div class="life-empty">No autonomous lifecycle completions yet.</div>')}
-async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all"){if(window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();await generateRecoveryExperiments();await orchestrate(s)}render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
+async function run(){try{await lifecycle();const s=$( "studioSeries")?.value||"all";if(s!=="all"){if(window.CrowSpaceRecoveryIntelligence?.analyze)window.CrowSpaceRecoveryIntelligence.analyze();if(window.CrowSpaceStrategyReplacement?.generate)window.CrowSpaceStrategyReplacement.generate();await generateReplacementExperiments();await generateRecoveryExperiments();await orchestrate(s)}render()}catch(e){console.warn("CrowSpace Experiment Lifecycle",e)}}
 setTimeout(run,6500);setInterval(run,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(run,500)});window.CrowSpaceExperimentLifecycle={run,lifecycle,orchestrate,decisionFor:decide};
 window.CrowSpaceLifecycle={run,lifecycle,orchestrate,decide,reEvaluationPlan,generateRecoveryExperiments};\n})();
