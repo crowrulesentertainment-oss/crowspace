@@ -19,7 +19,7 @@
 </aside>
 <main class="feed">
 <section class="hero"><div><div class="eyebrow">CROWSPACE // ONLINE</div><h1>Your space.<br><em>Your universe.</em></h1><p>A futuristic social home for people, stories, communities and video.</p></div><div class="hero-orbit">◎</div></section>
-<section class="composer card"><div class="avatar large">JR</div><button class="composer-input" id="composerButton">What's happening?</button><div class="composer-tools"><button>▧ Photo</button><button>▶ Caw</button><button>◈ Poll</button></div></section>
+<section class="composer card"><div class="avatar large">JR</div><button class="composer-input" id="composerButton">What's happening?</button><div class="composer-tools"><button>▧ Photo</button><button id="createCawShortcut">▶ Caw</button><button>◈ Poll</button></div></section>
 <div class="feed-tabs"><button class="selected">For You</button><button>Following</button><button>Latest</button></div>
 <section id="posts"></section>
 </main>
@@ -29,5 +29,5 @@
 <section class="card panel seasonal"><div class="panel-title">SEASONAL WORLD</div><h3 id="seasonTitle">CROWSPACE // NIGHT CITY</h3><p id="seasonText">The universe is always changing.</p></section>
 </aside></div>
 <div class="modal" id="composerModal"><div class="modal-box card"><button class="close" id="closeComposer">×</button><div class="eyebrow">NEW POST</div><h2>Share something.</h2><textarea id="postText" maxlength="500" placeholder="What's happening?"></textarea><div class="modal-actions"><span>Posts are local in this first version.</span><button class="post-button" id="publishPost">Post</button></div></div></div>
-<script src="app.js"></script>
+<script src="app.js"></script><script>document.getElementById("createCawShortcut")?.addEventListener("click",()=>location.href="caw-studio.html");</script>
 </body></html>
