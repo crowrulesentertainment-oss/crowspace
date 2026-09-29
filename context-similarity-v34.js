@@ -29,6 +29,6 @@ function relationships(){
  return out.sort((a,b)=>b.similarity-a.similarity);
 }
 function build(){const rel=relationships(),out={updatedAt:Date.now(),version:34,relationships:rel,contexts:rows().length};S(KEY,out);S(HIST,[out,...L(HIST,[])].slice(0,100));return out}
-window.CrowSpaceContextSimilarityV34={learn,relationships,build,state:()=>L(KEY,{})};
+window.CrowSpaceContextSimilarityV34={learn,similarity:featureDistance,relationships,build,state:()=>L(KEY,{})};
 setTimeout(build,13500);setInterval(build,15000);
 })();
