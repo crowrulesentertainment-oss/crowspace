@@ -130,7 +130,39 @@ function privacyBanner(text="Some content is hidden by the owner's privacy setti
 async function universalSearch(db,q){
  const term=String(q||"").trim();
  if(term.length<2)return {term,results:[]};
- const like="%"+term.replace(/[%_]/g,"\\async function searchPage(db){
+ const like="%"+term.replace(/[%_]/g,"\\async function discoveryIntel(db){
+ const u=await guard();if(!u)return;
+ const root=$("#discovery-intel");if(!root)return;
+ const [p,fv,fo,fr,caws,posts,circles,bots]=await Promise.all([
+  db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio,privacy_profile,privacy_connections").limit(200),
+  db.from("crowspace_follows").select("follower_id,followed_user_id").limit(2000),
+  db.from("member_friendships").select("requester_id,addressee_id,status").eq("status","accepted").limit(1000),
+  db.from("crowspace_follows").select("follower_id,followed_user_id").limit(2000),
+  db.from("crowspace_caws").select("id,user_id,title,caption,views,created_at").order("views",{ascending:false}).limit(30),
+  db.from("crowspace_posts").select("id,user_id,title,body,like_count,comment_count,created_at").order("created_at",{ascending:false}).limit(30),
+  db.from("crowspace_circles").select("*").limit(30),
+  db.from("crowspace_holiday_bots").select("id,slug,display_name,holiday_name,bio,avatar_url,active").eq("active",true).limit(30)
+ ]);
+ const profiles=p.data||[], follows=fv.data||[], friends=fo.data||[];
+ const pm=new Map(profiles.map(x=>[x.user_id,x]));
+ const following=new Set(follows.filter(x=>x.follower_id===u.id).map(x=>x.followed_user_id));
+ const friendIds=new Set(friends.flatMap(x=>x.requester_id===u.id?[x.addressee_id]:x.addressee_id===u.id?[x.requester_id]:[]));
+ const blocked=new Set((await db.from("member_blocks").select("blocked_id").eq("blocker_id",u.id)).data||[]);
+ const mutualCount=new Map();
+ follows.filter(x=>following.has(x.follower_id)&&x.followed_user_id!==u.id).forEach(x=>mutualCount.set(x.followed_user_id,(mutualCount.get(x.followed_user_id)||0)+1));
+ const suggested=profiles.filter(x=>x.user_id!==u.id&&!following.has(x.user_id)&&!friendIds.has(x.user_id)&&!blocked.has(x.user_id)&&x.privacy_profile!=="private")
+  .map(x=>({...x,score:(mutualCount.get(x.user_id)||0)*30+(x.bio?2:0)})).sort((a,b)=>b.score-a.score).slice(0,6);
+ const ownerIds=[...new Set((caws.data||[]).map(x=>x.user_id).filter(Boolean)),...new Set((posts.data||[]).map(x=>x.user_id).filter(Boolean))];
+ const ownerProfiles=ownerIds.length?(await db.from("crowspace_profiles").select("user_id,display_name,username,privacy_posts,privacy_media").in("user_id",ownerIds)).data||[]:[];
+ const opm=new Map(ownerProfiles.map(x=>[x.user_id,x]));
+ const allowedCaws=(caws.data||[]).filter(x=>{const z=opm.get(x.user_id);return z&&z.privacy_media!=="private"});
+ const allowedPosts=(posts.data||[]).filter(x=>{const z=opm.get(x.user_id);return z&&z.privacy_posts!=="private"});
+ const trend=allowedCaws.sort((a,b)=>Number(b.views||0)-Number(a.views||0)).slice(0,6);
+ const hot=allowedPosts.sort((a,b)=>(Number(b.like_count||0)+Number(b.comment_count||0))-(Number(a.like_count||0)+Number(a.comment_count||0))).slice(0,6);
+ const recent=JSON.parse(localStorage.getItem("crowspace_recent_searches")||"[]").slice(0,8);
+ root.innerHTML='<div class="intel-grid"><section class="card pad"><div class="eyebrow">FOR YOU</div><h2>Suggested Members</h2><div class="people-grid">'+(suggested.map(x=>'<a class="person-card" href="profile.html?u='+encodeURIComponent(x.username||"")+'"><img class="avatar" src="'+esc(avatar(x.avatar_url))+'"><b>'+esc(x.display_name||x.username||"Member")+'</b><span class="muted">'+(mutualCount.get(x.user_id)||0)+' mutual connection'+((mutualCount.get(x.user_id)||0)===1?"":"s")+'</span></a>').join("")||'<span class="muted">No new member suggestions right now.</span>')+'</div></section><section class="card pad"><div class="eyebrow">TRENDING</div><h2>Hot Posts</h2>'+hot.map(x=>'<a class="intel-row" href="home.html#post-'+encodeURIComponent(x.id)+'"><b>'+esc(x.title||"CrowSpace Post")+'</b><span class="muted">'+(Number(x.like_count||0)+Number(x.comment_count||0))+' interactions</span></a>').join("")||'<span class="muted">No trending posts yet.</span>'+'</section><section class="card pad"><div class="eyebrow">TRENDING</div><h2>Trending Caws</h2>'+trend.map(x=>'<a class="intel-row" href="caw.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.title||"Caw")+'</b><span class="muted">'+Number(x.views||0)+' views</span></a>').join("")||'<span class="muted">No trending Caws yet.</span>'+'</section><section class="card pad"><div class="eyebrow">COMMUNITIES</div><h2>Popular Circles</h2>'+((circles.data||[]).slice(0,6).map(x=>'<a class="intel-row" href="circles.html"><b>'+esc(x.name||x.title||"Circle")+'</b><span class="muted">'+esc(x.description||"Community")+'</span></a>').join("")||'<span class="muted">No Circles available.</span>')+'</section><section class="card pad"><div class="eyebrow">HOLIDAY NETWORK</div><h2>Recommended Bots</h2>'+((bots.data||[]).slice(0,6).map(x=>'<a class="intel-row" href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'"><b>'+esc(x.display_name||x.holiday_name)+'</b><span class="muted">'+esc(x.holiday_name||"Holiday Bot")+'</span></a>').join("")||'<span class="muted">No Holiday Bots active.</span>')+'</section><section class="card pad"><div class="eyebrow">YOUR SEARCHES</div><h2>Recent Searches</h2>'+((recent.map(x=>'<a class="intel-row" href="search.html?q='+encodeURIComponent(x)+'"><b>'+esc(x)+'</b><span class="muted">Search again</span></a>').join(""))||'<span class="muted">Your recent searches will appear here.</span>')+'</section></div>';
+}
+async function searchPage(db){
  const u=await guard();if(!u)return;
  const q0=new URLSearchParams(location.search).get("q")||"";
  const root=$("#search");
@@ -143,7 +175,7 @@ async function universalSearch(db,q){
  const tr=await db.from("crowspace_caws").select("id,user_id,title,caption,views,created_at").order("views",{ascending:false}).limit(12);
  const owners=[...new Set((tr.data||[]).map(x=>x.user_id).filter(Boolean))];const op=owners.length?await db.from("crowspace_profiles").select("user_id,privacy_media").in("user_id",owners):{data:[]};const allowed=new Set((op.data||[]).filter(x=>x.privacy_media!=="private").map(x=>x.user_id));
  $("#trendingCaws").innerHTML=(tr.data||[]).filter(x=>allowed.has(x.user_id)).slice(0,6).map(x=>'<a href="caw.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.title||"Caw")+'</b><span>'+Number(x.views||0)+' views</span></a>').join("")||'<span class="muted">No public Caws yet.</span>';
- if(q0)run();
+ if(q0)run(); const intel=document.getElementById("discovery-intel");if(intel)discoveryIntel(db);
 }
 
 function metric(label,value,detail)")+"%";
