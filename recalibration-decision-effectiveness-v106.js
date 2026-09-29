@@ -2,15 +2,15 @@
    Browser-only. Measures attributable outcome effectiveness from the v104 → v105 lineage.
 */
 (function(){
-const OUT="crowspace-recalibration-event-outcomes-v105",VAL="crowspace-recalibration-outcome-evidence-validation-v119",KEY="crowspace-recalibration-decision-effectiveness-v106",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const OUT="crowspace-recalibration-event-outcomes-v105",VAL="crowspace-recalibration-outcome-evidence-validation-v119",ATT="crowspace-recalibration-outcome-attribution-v120",KEY="crowspace-recalibration-decision-effectiveness-v106",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 function state(){return L(KEY,{})}
 function sync(){
  const src=L(OUT,{}),st=state();
- Object.values(src.byDecision||{}).forEach(x=>{const validation=window.CrowSpaceRecalibrationOutcomeEvidenceValidationV119?.state?.()[x.decisionId];if(validation&&validation.status!=="VALID")return;
+ Object.values(src.byDecision||{}).forEach(x=>{const validation=window.CrowSpaceRecalibrationOutcomeEvidenceValidationV119?.state?.()[x.decisionId];if(validation&&validation.status!=="VALID")return;const attribution=window.CrowSpaceRecalibrationOutcomeAttributionV120?.state?.()[x.decisionId];if(attribution&&attribution.status==="NEGATIVE")return;if(attribution&&attribution.status==="INCONCLUSIVE")return;
   const old=st[x.decisionId]||{tests:0,success:0,history:[]};
   const marker=String(x.decisionId)+":"+String(x.observedAt||0)+":"+String(x.outcome||"");
   if(old.lastMarker!==marker){
-   old.tests++;old.success+=x.outcome==="RECOVERED"?1:0;
+   old.tests++;old.success+=(attribution?.status==="POSITIVE"||x.outcome==="RECOVERED")?1:0;
    old.history=[{at:Date.now(),outcome:x.outcome,success:x.outcome==="RECOVERED",successRate:N(x.successRate)},...(old.history||[])].slice(0,20);
    old.lastMarker=marker;
   }
