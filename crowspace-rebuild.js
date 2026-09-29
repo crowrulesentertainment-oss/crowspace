@@ -47,6 +47,15 @@ function appShell(){
  $("#open-command").onclick=()=>document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true}));
 }
 
+async function socialGraph(db,u){
+ const box=document.querySelector("[data-social-graph]");if(!box)return;
+ const following=await db.from("crowspace_follows").select("following_id").eq("follower_id",u.id);
+ const ids=(following.data||[]).map(x=>x.following_id);
+ const p=await db.from("crowspace_profiles").select("user_id,display_name,username,avatar_url,bio").neq("user_id",u.id).limit(24);
+ const followSet=new Set(ids);
+ box.innerHTML='<div class="social-graph-head"><div><span class="eyebrow">SOCIAL GRAPH</span><h2>YOUR NETWORK.</h2></div><span class="muted">'+ids.length+' following</span></div><div class="member-grid">'+(p.data||[]).map(x=>'<article class="member-card"><img src="'+esc(x.avatar_url||avatar(x))+'"><b>'+esc(x.display_name||x.username||"Member")+'</b><small>@'+esc(x.username||"member")+'</small><p>'+esc(x.bio||"CrowSpace member")+'</p><button class="btn '+(followSet.has(x.user_id)?"active":"")+'" data-follow="'+esc(x.user_id)+'">'+(followSet.has(x.user_id)?"Following":"Follow")+'</button></article>').join("")+'</div>';
+ box.querySelectorAll("[data-follow]").forEach(b=>b.onclick=async()=>{const id=b.dataset.follow;if(followSet.has(id))await db.from("crowspace_follows").delete().eq("follower_id",u.id).eq("following_id",id);else await db.from("crowspace_follows").insert({follower_id:u.id,following_id:id});socialGraph(db,u)});
+}
 function liveLayer(db,u){
  if(window.CrowSpaceLive?.stop)window.CrowSpaceLive.stop();
  const state={channels:[],presence:0,online:[],status:"CONNECTING"};
@@ -55,7 +64,7 @@ function liveLayer(db,u){
  const badge=(kind)=>{document.querySelectorAll("[data-live-badge='"+kind+"']").forEach(x=>{const n=Number(x.dataset.count||0)+1;x.dataset.count=n;x.textContent=n>99?"99+":n;x.hidden=false})};
  const channel=db.channel("crowspace-live");
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_posts"},()=>{refreshFeed();toast("New CrowSpace post received")});
- channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_holiday_bot_posts"},()=>{refreshFeed();toast("Holiday Bot activity received")});channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_likes"},()=>refreshFeed());channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_comments"},()=>refreshFeed());
+ channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_holiday_bot_posts"},()=>{refreshFeed();toast("Holiday Bot activity received")});channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_likes"},()=>refreshFeed());channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_comments"},()=>refreshFeed());channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows"},()=>socialGraph(db,u));
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+u.id},()=>{badge("alerts");toast("New notification")});
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_messages"},()=>{badge("messages");toast("New message activity")});
 
