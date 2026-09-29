@@ -7,7 +7,7 @@ function state(){return J(KEY,{reviews:{},history:[]})}
 function sync(){
  const src=J(SRC,{}),st=state(),now=Date.now();
  ['ELIGIBLE','REVIEW'].forEach(route=>(src.routes?.[route]||[]).forEach(x=>{
-  if(!st.reviews[x.suggestionId])st.reviews[x.suggestionId]={suggestionId:x.suggestionId,eventId:x.eventId,priority:x.priority,suggestedOwner:x.suggestedOwner||null,evidenceBand:x.band||'UNKNOWN',route,status:'PENDING',updatedAt:now};
+  if(!st.reviews[x.suggestionId])st.reviews[x.suggestionId]={suggestionId:x.suggestionId,eventId:x.eventId,notificationId:x.notificationId,priority:x.priority,suggestedOwner:x.suggestedOwner||null,evidenceBand:x.band||'UNKNOWN',route,status:'PENDING',updatedAt:now};
  }));
  S(KEY,st);return st
 }
