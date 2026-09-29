@@ -21,7 +21,7 @@ async function loadPosts(){
   const {data:{user}}=await db.auth.getUser();
   if(user&&rows.length){const r=await db.from("crowspace_reactions").select("post_id").eq("user_id",user.id).in("post_id",rows.map(x=>x.id));if(!r.error)mine=new Set((r.data||[]).map(x=>x.post_id))}
   const normal=(rows||[]).map(p=>{const pr=map.get(p.user_id)||{};return {...p,kind:"member",name:pr.display_name||pr.username||"Crow Member",handle:pr.username?"@"+pr.username:"@member",avatar:(pr.avatar_url||"").trim(),time:relativeTime(p.created_at),liked:mine.has(p.id),like_count:p.like_count||0,comment_count:p.comment_count||0}});
-  const holiday=(botPosts||[]).map(p=>{const b=botMap.get(p.bot_id)||{};return {...p,kind:"bot",name:b.display_name||"Holiday Crow",handle:"@"+(b.slug||"holiday-crow"),avatar:(b.avatar_url||"").trim(),time:relativeTime(p.created_at),liked:false,like_count:0,comment_count:0}});
+  const holiday=(botPosts||[]).map(p=>{const b=botMap.get(p.bot_id)||{};return {...p,kind:"bot",name:b.display_name||"Holiday Crow",handle:"@"+(b.slug||"holiday-crow"),avatar:(b.avatar_url||("https://api.dicebear.com/9.x/thumbs/svg?seed="+encodeURIComponent(b.slug||"holiday-crow")+"&backgroundColor=0b1020,172554&backgroundType=gradientLinear")).trim(),time:relativeTime(p.created_at),liked:false,like_count:0,comment_count:0}});
   posts=[...normal,...holiday].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,80);
   renderPosts();
  }catch(e){console.error("[CrowSpace feed]",e);postsEl.innerHTML='<div class="card" style="padding:20px">CrowSpace feed is temporarily unavailable. Please refresh.</div>'}
