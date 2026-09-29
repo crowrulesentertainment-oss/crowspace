@@ -177,6 +177,24 @@ async function messagesPage(db){
  $("#sendMessage").onclick=async()=>{const conversation_id=$("#messageConversation").value.trim(),body=$("#messageBody").value.trim();if(!conversation_id||!body)return toast("Conversation ID and message are required");const q=await db.from("crowspace_messages").insert({conversation_id,sender_id:u.id,body});if(q.error)toast(q.error.message);else{$("#messageBody").value="";toast("Message sent")}};
  if(ids.length)await db.from("crowspace_conversation_members").update({last_read_at:new Date().toISOString()}).eq("user_id",u.id).in("conversation_id",ids);
 }
+async function notificationsPage(db){
+ const u=await guard();if(!u)return;
+ const r=await db.from("crowspace_notifications").select("id,actor_id,type,body,post_id,caw_id,interaction_type,read_at,created_at").eq("user_id",u.id).order("created_at",{ascending:false}).limit(100);
+ const rows=r.data||[],ids=[...new Set(rows.map(x=>x.actor_id).filter(Boolean))];
+ const p=ids.length?await db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids):{data:[]};
+ const pm=new Map((p.data||[]).map(x=>[x.user_id,x]));
+ const unread=rows.filter(x=>!x.read_at).length;
+ $("#notifications").innerHTML='<section class="hero"><div class="eyebrow">CROWRULES // LIVE SIGNALS</div><h1>ALERTS.</h1><p class="muted">'+(unread?unread+' unread notification'+(unread===1?'':'s'):'You are all caught up.')+'</p><div class="actions"><button id="markAlertsRead" class="btn primary">Mark all read</button></div></section><section class="list" style="margin-top:16px">'+(rows.map(x=>{const a=pm.get(x.actor_id)||{};return '<article class="card pad '+(!x.read_at?'unread':'')+'"><div class="post-head"><img class="avatar" src="'+esc(avatar(a.avatar_url))+'"><div><b>'+esc(a.display_name||a.username||'CrowSpace')+'</b><small class="muted">'+esc(x.type||x.interaction_type||'activity')+' · '+new Date(x.created_at).toLocaleString()+'</small></div></div><p>'+esc(x.body||'You have new CrowSpace activity.')+'</p></article>'}).join('')||'<div class="card empty">No notifications yet.</div>')+'</section>';
+ $("#markAlertsRead").onclick=async()=>{const q=await db.from("crowspace_notifications").update({read_at:new Date().toISOString()}).eq("user_id",u.id).is("read_at",null);if(q.error)toast(q.error.message);else{toast("Notifications marked read");notificationsPage(db)}};
+}
+async function botPage(db){
+ const slug=new URLSearchParams(location.search).get("bot");
+ if(!slug){location.href="holiday-bots.html";return}
+ const r=await db.from("crowspace_holiday_bots").select("*").eq("slug",slug).maybeSingle();
+ if(r.error||!r.data){$("#bot").innerHTML='<div class="card empty">Holiday Bot not found.</div>';return}
+ const b=r.data,posts=await db.from("crowspace_holiday_bot_posts").select("id,title,body,post_type,post_date,created_at").eq("bot_id",b.id).order("created_at",{ascending:false}).limit(50);
+ $("#bot").innerHTML='<section class="hero"><div class="eyebrow">HOLIDAY NETWORK // BOT PROFILE</div><img class="avatar" src="'+esc(avatar(b.avatar_url))+'"><h1>'+esc(b.display_name||b.holiday_name||'Holiday Bot')+'</h1><p class="muted">'+esc(b.holiday_name||'CrowSpace Holiday Bot')+'</p><p>'+esc(b.bio||'Automated CrowSpace holiday personality.')+'</p><div class="actions"><a class="btn" href="holiday-bots.html">All Holiday Bots</a></div></section><section class="card pad" style="margin-top:16px"><h2>Bot Activity</h2>'+((posts.data||[]).map(x=>'<article class="post"><h3>'+esc(x.title||x.post_type||'Holiday Update')+'</h3><div class="muted">'+new Date(x.created_at||x.post_date).toLocaleString()+'</div><p>'+esc(x.body||'')+'</p></article>').join('')||'<div class="empty">No posts yet.</div>')+'</section>';
+}
 async function botsPage(db){const r=await db.from("crowspace_holiday_bots").select("slug,display_name,holiday_name,bio,avatar_url,active").eq("active",true).order("display_name");$("#bots").innerHTML='<section class="hero"><div class="eyebrow">AUTOMATED ACCOUNTS</div><h1>HOLIDAY BOTS.</h1><p class="muted">Follow the personalities that keep CrowSpace moving through the year.</p></section><section class="grid" style="margin-top:16px">'+(r.data||[]).map(x=>'<article class="card pad"><a href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'"><img class="avatar" src="'+esc(avatar(x.avatar_url))+'"></a><h3><a href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'">'+esc(x.display_name)+'</a></h3><div class="muted">'+esc(x.holiday_name)+'</div><p class="muted">'+esc(x.bio||"")+'</p><a class="btn" href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'">View Profile</a></article>').join("")+'</section>'}
 document.addEventListener("DOMContentLoaded",()=>page().catch(e=>{console.error("[CrowSpace rebuild]",e);toast("CrowSpace could not load this page.")}));
 })();
