@@ -55,6 +55,18 @@ async function action(type){
  if(type==="unfollow"){r=await db.from("crowspace_follows").delete().eq("follower_id",user.id).eq("followed_user_id",target.user_id)}
  if(r?.error)alert(r.error.message);else load();
 }
+function showStudio(){
+ const box=$("#studioContent"),card=$("#profileStudioCard"); if(!box||!card)return;
+ if(!user||user.id!==target.user_id){card.hidden=true;return} card.hidden=false;
+ const opts=(v)=>['public','members','friends','private'].map(x=>'<option value="'+x+'" '+(v===x?'selected':'')+'>'+({public:'Everyone',members:'CrowSpace Members',friends:'Friends',private:'Only Me'}[x])+'</option>').join('');
+ box.innerHTML='<div class="studio-grid"><div class="studio-field"><label>Display Name</label><input id="studioDisplay" value="'+esc(target.display_name||'')+'"></div><div class="studio-field"><label>Avatar URL</label><input id="studioAvatar" value="'+esc(target.avatar_url||'')+'"></div><div class="studio-field studio-wide"><label>Bio</label><textarea id="studioBio">'+esc(target.bio||'')+'</textarea></div><div class="studio-wide studio-note"><b>PRIVACY & PERMISSIONS</b><br>These controls are enforced by Supabase Row Level Security across CrowSpace.</div><div class="studio-field"><label>Profile</label><select id="privacyProfile">'+opts(target.privacy_profile||'public')+'</select></div><div class="studio-field"><label>Posts</label><select id="privacyPosts">'+opts(target.privacy_posts||'public')+'</select></div><div class="studio-field"><label>Media & Caws</label><select id="privacyMedia">'+opts(target.privacy_media||'public')+'</select></div><div class="studio-field"><label>Activity</label><select id="privacyActivity">'+opts(target.privacy_activity||'friends')+'</select></div><div class="studio-field"><label>Connections</label><select id="privacyConnections">'+opts(target.privacy_connections||'public')+'</select></div><div class="studio-field"><label>Guestbook</label><select id="privacyGuestbook">'+opts(target.privacy_guestbook||'members')+'</select></div><div class="studio-field"><label>Messages</label><select id="privacyMessages">'+opts(target.privacy_messages||'friends')+'</select></div><div class="studio-field"><label>Visitor Messages</label><select id="allowGuestbook"><option value="true" '+(target.allow_guestbook!==false?'selected':'')+'>Allowed</option><option value="false" '+(target.allow_guestbook===false?'selected':'')+'>Disabled</option></select></div></div><div class="actions"><button class="btn primary" onclick="savePrivacy()">Save Privacy Settings</button></div>';
+}
+async function savePrivacy(){
+ if(!user||user.id!==target.user_id)return;
+ const payload={display_name:$("#studioDisplay")?.value?.trim()||target.display_name,bio:$("#studioBio")?.value||target.bio,avatar_url:$("#studioAvatar")?.value?.trim()||target.avatar_url,privacy_profile:$("#privacyProfile").value,privacy_posts:$("#privacyPosts").value,privacy_media:$("#privacyMedia").value,privacy_activity:$("#privacyActivity").value,privacy_connections:$("#privacyConnections").value,privacy_guestbook:$("#privacyGuestbook").value,privacy_messages:$("#privacyMessages").value,allow_guestbook:$("#allowGuestbook").value==="true"};
+ const r=await db.from("crowspace_profiles").update(payload).eq("user_id",user.id);
+ if(r.error){alert(r.error.message);return} Object.assign(target,payload); alert("Privacy settings saved."); load();
+}
 function render(posts,caws){
  const viewerCanSee=user?.id===target.user_id||!blocks.some(x=>x.blocker_id===user?.id&&x.blocked_id===target.user_id)&&!blocks.some(x=>x.blocker_id===target.user_id&&x.blocked_id===user?.id);
 
