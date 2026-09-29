@@ -12,13 +12,13 @@ body{background:radial-gradient(circle at 50% 0,#131a32 0,#070914 45%);color:#ee
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const av=u=>u||"https://ui-avatars.com/api/?background=10172c&color=78efff&name=Crow";
 const client=()=>window.CrowSpaceAuth?.client;
-let db,user,profiles=[],follows=[],friendships=[],blocks=[],topFriends=[],target,wallPosts=[],wallCaws=[],activity=[],guestbook=[],studioTheme="default";
+let db,user,profiles=[],follows=[],friendships=[],blocks=[],topFriends=[],target,wallPosts=[],wallCaws=[],activity=[],guestbook=[],studioTheme="default",privacySettings={};
 const qs=new URLSearchParams(location.search);
 async function load(){
  db=client(); if(!db){$("#profile").innerHTML='<div class="notice">CrowSpace account services are unavailable.</div>';return}
  const auth=await db.auth.getUser(); user=auth.data.user;
  const requested=qs.get("u")||qs.get("id");
- let q=db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,banner_url,creator_category,profile_theme,portfolio_tagline,portfolio_bio,portfolio_work_title,portfolio_collections_title,featured_caw_id,created_at");
+ let q=db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,banner_url,creator_category,profile_theme,portfolio_tagline,portfolio_bio,portfolio_work_title,portfolio_collections_title,featured_caw_id,privacy_profile,privacy_posts,privacy_media,privacy_activity,privacy_connections,privacy_guestbook,privacy_messages,allow_guestbook,created_at");
  if(requested) q=q.eq("username",requested);
  else if(user) q=q.eq("user_id",user.id);
  const pr=await q.limit(1).maybeSingle(); target=pr.data;
