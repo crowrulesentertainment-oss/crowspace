@@ -19,7 +19,7 @@ function confirm(id){
 function execute(id){
  const s=state(),x=s.executions[String(id)];if(!x||x.status!=='CONFIRMED')return null;
  const a=J(ASSIGN,{}),target=a.assignments?.[x.notificationId||x.suggestionId];x.status='EXECUTED';x.executedAt=Date.now();x.updatedAt=x.executedAt;
- if(target){target.owner=x.suggestedOwner;target.assignedAt=x.executedAt;target.updatedAt=x.executedAt;}
+ if(target){x.previousOwner=target.owner||null;target.owner=x.suggestedOwner;target.assignedAt=x.executedAt;target.updatedAt=x.executedAt;}
  s.history=[{suggestionId:x.suggestionId,eventId:x.eventId,owner:x.suggestedOwner,at:x.executedAt},...(s.history||[])].slice(0,MAX);S(ASSIGN,a);S(KEY,s);return x
 }
 function summary(){const a=Object.values(state().executions);return {ready:a.filter(x=>x.status==='READY').length,confirmed:a.filter(x=>x.status==='CONFIRMED').length,executed:a.filter(x=>x.status==='EXECUTED').length,total:a.length}}
