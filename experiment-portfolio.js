@@ -14,10 +14,10 @@ function portfolio(){const keys=new Set([...Object.keys(L(EXP,{})),...Object.key
 function strategyKey(a){return[a.mode,a.correctionMode,a.explorationShare].join("|")}
 function strategyMemory(){const raw=L(MEM,{});return Array.isArray(raw)?raw:[]}
 function strategyBaseline(s){
- const xs=completed(s).filter(e=>!e.strategyTrial).map(outcome).filter(Boolean);
- if(!xs.length)return{observations:0,experiments:0,avgViewsPerCaw:0,interactionRate:0};
- const views=xs.reduce((n,x)=>n+N(x.avgViews),0),obs=xs.reduce((n,x)=>n+N(x.observations),0);
- return{observations:obs,experiments:xs.length,avgViewsPerCaw:views/xs.length,interactionRate:0};
+ const xs=completed(s).filter(e=>!e.strategyTrial),rows=[];
+ xs.forEach(e=>(e.arms||[]).forEach(a=>(a.outcomes||[]).forEach(o=>{const c=o.caws||[]; if(c.length)rows.push(...c.map(x=>({views:N(x.views),interactions:N(x.interactions)})));})));
+ const obs=xs.reduce((n,e)=>n+(e.arms||[]).reduce((a,x)=>a+(x.outcomes||[]).length,0),0),views=rows.reduce((n,x)=>n+x.views,0),inter=rows.reduce((n,x)=>n+x.interactions,0);
+ return{observations:obs,experiments:xs.length,avgViewsPerCaw:rows.length?views/rows.length:0,interactionRate:views?inter/views:0,caws:rows.length,capturedAt:now()};
 }
 function strategyTrialResult(e){
  if(!e?.strategyTrial)return null;
