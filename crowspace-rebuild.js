@@ -47,6 +47,11 @@ function appShell(){
  $("#open-command").onclick=()=>document.dispatchEvent(new KeyboardEvent("keydown",{key:"k",ctrlKey:true}));
 }
 
+function communityChrome(page){
+ const main=document.querySelector(".content");if(!main)return;
+ const tabs='<div class="community-tabs"><a class="btn" href="home.html">Feed</a><a class="btn" href="explore.html">People</a><a class="btn" href="caws.html">Caws</a><a class="btn" href="circles.html">Circles</a><a class="btn" href="messages.html">Messages</a><a class="btn" href="notifications.html">Notifications</a><a class="btn" href="holiday-bots.html">Holiday Network</a></div>';
+ const first=main.querySelector(".hero,.card");if(first)first.insertAdjacentHTML("beforebegin",tabs);
+}
 async function socialGraph(db,u){
  const box=document.querySelector("[data-social-graph]");if(!box)return;
  const following=await db.from("crowspace_follows").select("following_id").eq("follower_id",u.id);
@@ -112,7 +117,7 @@ function postCard(p){
 async function renderPersonalFeed(el,mode){const rows=await personalizedFeed(60,mode);el.innerHTML=rows.map(postCard).join("")||'<div class="card pad muted">Nothing here yet. Follow members to build your feed.</div>';}
 function metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
 async function page(){
- shell();const p=document.body.dataset.page,db=await auth();
+ shell();const p=document.body.dataset.page,db=await auth();communityChrome(p);
  if(p==="index")return;
  if(p==="login"||p==="signup")return authPage(p,db);\n const liveUser=await guard();if(!liveUser)return;liveLayer(db,liveUser);
  if(p==="home"){const u=await guard();if(!u)return;const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});document.querySelectorAll("[data-personal-feed]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-personal-feed]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderPersonalFeed($("#feed"),b.dataset.personalFeed)});
