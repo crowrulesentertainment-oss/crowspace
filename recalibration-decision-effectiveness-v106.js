@@ -2,11 +2,11 @@
    Browser-only. Measures attributable outcome effectiveness from the v104 → v105 lineage.
 */
 (function(){
-const OUT="crowspace-recalibration-event-outcomes-v105",KEY="crowspace-recalibration-decision-effectiveness-v106",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const OUT="crowspace-recalibration-event-outcomes-v105",VAL="crowspace-recalibration-outcome-evidence-validation-v119",KEY="crowspace-recalibration-decision-effectiveness-v106",N=x=>Number(x)||0,L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 function state(){return L(KEY,{})}
 function sync(){
  const src=L(OUT,{}),st=state();
- Object.values(src.byDecision||{}).forEach(x=>{
+ Object.values(src.byDecision||{}).forEach(x=>{const validation=window.CrowSpaceRecalibrationOutcomeEvidenceValidationV119?.state?.()[x.decisionId];if(validation&&validation.status!=="VALID")return;
   const old=st[x.decisionId]||{tests:0,success:0,history:[]};
   const marker=String(x.decisionId)+":"+String(x.observedAt||0)+":"+String(x.outcome||"");
   if(old.lastMarker!==marker){
