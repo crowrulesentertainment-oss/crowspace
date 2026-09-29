@@ -9,7 +9,7 @@ function H(s){return(L(SNAP,{})[s]||[]).slice().sort((a,b)=>a.date.localeCompare
 function model(h){if(h.length<2)return{daily:0,trend:"limited"};const r=h.slice(-8),d=[];for(let i=1;i<r.length;i++)d.push(N(r[i].views)-N(r[i-1].views));const a=d.reduce((x,y)=>x+y,0)/d.length,old=d.slice(0,-3).reduce((x,y)=>x+y,0)/(d.length-3||1),trend=a>old*1.15?"accelerating":a<old*.85?"cooling":"steady";return{daily:a,trend}}
 function recent(items,s,days){const cut=Date.now()-days*864e5;return items.filter(x=>(x.series||"")===s&&x.status==="published"&&new Date(x.publishedAt||x.created||x.createdAt||x.updatedAt||Date.now()).getTime()>=cut)}
 function plan(items,s,h,g){
- const m=model(h),p=recent(items,s,30),views=N(h.at(-1)?.views),target=N(g.viewTarget),need=Math.max(0,target-m.daily*30),actions=[];
+ const m=model(h),p=recent(items,s,30),views=N(h.at(-1)?.views),target=N(g.viewTarget),need=Math.max(0,target-m.daily*30),actions=[],learned=L("crowspace-action-learning-v1",{})[s]||{};
  if(!target) actions.push({type:"GOAL",title:"Set a 30-day audience goal",detail:"Create a measurable views target so the plan can monitor pace.",priority:"HIGH"});
  if(p.length<2) actions.push({type:"PUBLISH",title:"Establish a publishing rhythm",detail:"Publish at least 2 episodes in the next 30 days to create enough audience signals.",priority:"HIGH"});
  else if(p.length<4) actions.push({type:"PUBLISH",title:"Increase publishing consistency",detail:"Aim for one additional episode this month if your production capacity allows.",priority:"MEDIUM"});
@@ -20,7 +20,7 @@ function plan(items,s,h,g){
  else actions.push({type:"ENGAGE",title:"Build interaction signals",detail:"Respond to comments and invite a specific audience response on the next Caw.",priority:"MEDIUM"});
  if(target&&m.daily<target/30)actions.push({type:"PACE",title:"Close the pace gap",detail:"Required pace is "+F(target/30)+" views/day; current pace is "+F(m.daily)+".",priority:"HIGH"});
  if(need>0&&m.daily>0)actions.push({type:"CADENCE",title:"Use the strongest publishing window",detail:"Keep testing the day/time associated with your better-performing recent episodes.",priority:"MEDIUM"});
- return actions.slice(0,6);
+\n if(Object.keys(learned).length){const usable=Object.entries(learned).filter(([,x])=>x.actions).sort((a,b)=>b[1].avgViews-a[1].avgViews);if(usable.length){const [k,x]=usable[0];actions.push({type:"LEARNED",title:"Repeat the "+k.toLowerCase()+" pattern",detail:"Action learning shows an average of "+F(x.avgViews)+" views per completed action in this series. Reuse the pattern and keep measuring the next result.",priority:"MEDIUM"})}}\n return actions.slice(0,6);
 }
 function render(items){
  const sel=$("studioSeries");if(!sel||sel.value==="all")return;const s=sel.value,h=H(s),g=(L(GOALS,{})[s]||{}),actions=plan(items,s,h,g),plans=L(PLANS,{});let box=$("growthActionPlans");
