@@ -4,7 +4,22 @@
   const qsa = (selector, root) => Array.from((root || document).querySelectorAll(selector));
 
   window.CrowSpace = window.CrowSpace || {};
-  window.CrowSpace.version = "Universal Core 1.1";
+  window.CrowSpace.version = "Universal Core 2.0";
+
+  if (!document.querySelector('script[src="crowspace-auth.js"]')) {
+    const authScript=document.createElement("script");
+    authScript.src="crowspace-auth.js";
+    document.head.appendChild(authScript);
+  }
+
+  function mountAuthUI(user) {
+    let box=document.getElementById("crowspaceAuthStatus");
+    if(!box){box=document.createElement("div");box.id="crowspaceAuthStatus";box.style.cssText="position:fixed;right:18px;bottom:18px;z-index:9998;display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid rgba(93,231,255,.25);border-radius:12px;background:rgba(5,8,14,.92);backdrop-filter:blur(12px);font:11px Montserrat,Arial,sans-serif;color:#dfe8f4";document.body.appendChild(box)}
+    if(user){box.innerHTML='<span style="opacity:.8">CROW MEMBER</span><a href="profile.html" style="color:#7fe8ff;text-decoration:none">PROFILE</a><button id="crowspaceSignOut" style="background:none;border:1px solid #3b3b49;color:#ddd;border-radius:8px;padding:5px 8px;cursor:pointer">SIGN OUT</button>';const b=document.getElementById("crowspaceSignOut");if(b)b.onclick=async()=>{await window.CrowSpaceAuth.signOut();location.reload()}}
+    else box.innerHTML='<a href="login.html" style="color:#7fe8ff;text-decoration:none">SIGN IN</a><a href="signup.html" style="color:#fff;text-decoration:none">JOIN CROWSPACE</a>';
+  }
+  window.addEventListener("crowspace-auth-ready",e=>mountAuthUI(e.detail.user));
+  window.addEventListener("crowspace-auth",e=>mountAuthUI(e.detail.user));
 
   qsa(".search input").forEach(function (input) {
     input.addEventListener("keydown", function (event) {
