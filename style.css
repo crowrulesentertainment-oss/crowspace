@@ -66,3 +66,5 @@
 .season-runtime{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-runtime b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-runtime span{font-size:8px;color:var(--muted)}
 
 .health-breakdown{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.health-breakdown b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.health-breakdown span{font-size:8px;color:var(--muted)}
+
+.season-missing-assets{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-missing-assets b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-missing-assets span{font-size:8px;color:var(--muted)}
