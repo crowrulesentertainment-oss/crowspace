@@ -9,3 +9,4 @@
 @media(max-width:700px){.portfolio-head{flex-direction:column}.portfolio-summary{grid-template-columns:1fr}.portfolio-list article{gap:10px}}
 
 .portfolio-trial{margin:12px 0;padding:12px 14px;border:1px solid rgba(120,150,255,.18);border-radius:12px;background:rgba(8,12,28,.45);display:flex;flex-direction:column;gap:5px}.portfolio-trial span{font-size:.72rem;letter-spacing:.12em;font-weight:800}.portfolio-trial small{opacity:.72;line-height:1.5}
+.portfolio-trial strong{font-weight:800;letter-spacing:.08em}.portfolio-trial .replication{display:inline-block;margin-left:8px;font-size:.7rem;opacity:.8}
