@@ -21,6 +21,7 @@ function strategyBaseline(s){
 }
 function strategyTrialResult(e){
  if(!e?.strategyTrial)return null;
+ if(e.strategyTrial.result?.measurementType==="PORTFOLIO_CAUSAL_ESTIMATE")return e.strategyTrial.result;
  const arms=(e.arms||[]).map(a=>{const o=a.outcomes||[],c=o.flatMap(x=>x.caws||[]),views=c.length?c.reduce((n,x)=>n+N(x.views),0):o.reduce((n,x)=>n+N(x.views),0),inter=c.length?c.reduce((n,x)=>n+N(x.interactions),0):o.reduce((n,x)=>n+N(x.interactions),0),count=c.length||o.length;return{actions:o.length,caws:count,views,interactions:inter,avgViewsPerCaw:count?views/count:0,interactionRate:views?inter/views:0}});
  const caws=arms.reduce((n,x)=>n+x.caws,0),views=arms.reduce((n,x)=>n+x.views,0),inter=arms.reduce((n,x)=>n+x.interactions,0),avg=caws?views/caws:0,rate=views?inter/views:0,base=e.strategyTrial.baseline||{};
  const baseViews=N(base.avgViewsPerCaw),baseRate=N(base.interactionRate),delta=baseViews?((avg/baseViews)-1)*100:0,rateDelta=baseRate?((rate/baseRate)-1)*100:0;
