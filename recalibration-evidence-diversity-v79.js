@@ -17,8 +17,8 @@ function sync(){
  });
  S(KEY,st);return st
 }
-function canUse(reason){const x=state()[reason];const cal=window.CrowSpaceRecalibrationCalibrationV80?.accuracy?.(reason);return !!x?.gate&&(!cal||cal>=.5)}
-function factor(reason){const x=state()[reason];return x?.gate?1:x?.effective>=.4?.65:.4}
+function canUse(reason){const x=state()[reason];const cal=window.CrowSpaceRecalibrationCalibrationV80?.accuracy?.(reason);const recovery=window.CrowSpaceRecalibrationRecoveryV81?.factor?.(reason)||1;return !!x?.gate&&(!cal||cal>=.5)&&recovery>.05}
+function factor(reason){const x=state()[reason];const recovery=window.CrowSpaceRecalibrationRecoveryV81?.factor?.(reason)||1;return (x?.gate?1:x?.effective>=.4?.65:.4)*recovery}
 function best(){return Object.values(state()).sort((a,b)=>(b.effective||0)-(a.effective||0))}
 window.CrowSpaceRecalibrationDiversityV79={sync,state,canUse,factor,best};
 setTimeout(sync,101000);setInterval(sync,30000);
