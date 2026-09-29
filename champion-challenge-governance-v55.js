@@ -15,7 +15,7 @@ function sync(){
  });
  S(KEY,st);return st
 }
-function influence(reason){return state()[reason]?.influence||0}
+function influence(reason){const x=state()[reason];if(!x)return 0;const f=window.CrowSpaceChallengeSelfCorrectionV56?.factor?.(reason)||1;return (x.influence||0)*f}
 function canUse(reason){const x=state()[reason];return !!x&&!x.rollback&&x.tests>=2&&x.confidence>=.35}
 function best(){return Object.values(state()).sort((a,b)=>(b.influence||0)-(a.influence||0))}
 window.CrowSpaceChallengeGovernanceV55={sync,state,influence,canUse,best};
