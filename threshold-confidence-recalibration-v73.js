@@ -10,7 +10,7 @@ function sync(){
   const old=st[x.reason]||{attempts:0,history:[]},needs=!!x.recalibrate;
   if(needs&&old.lastAt&&now-N(old.lastAt)<7*864e5)return;
   const diverse=window.CrowSpaceRecalibrationDiversityV79?.canUse?.(x.reason);\n  const learned=diverse?window.CrowSpaceRecalibrationEvidenceV78?.mode?.(x.reason):null||window.CrowSpaceRecalibrationCompetitionV77?.mode?.(x.reason)||window.CrowSpaceRecalibrationExplorationV76?.mode?.(x.reason)||window.CrowSpaceRecalibrationStrategyV75?.mode?.(x.reason);\n  const mode=learned|| (x.regime==="SHIFTING"?"RESET_AND_COLLECT":"CONSERVATIVE_RECALIBRATION");
-  old.reason=x.reason;old.mode=needs?mode:"MONITOR";old.required=needs;old.attempts+=needs?1:0;old.lastAt=needs?now:(old.lastAt||null);
+  if(needs&&old.lastAt!==now){old.decisionId=String(now)+"-"+String(x.reason).replace(/[^a-z0-9_-]/gi,"_");}\n  old.reason=x.reason;old.mode=needs?mode:"MONITOR";old.required=needs;old.attempts+=needs?1:0;old.lastAt=needs?now:(old.lastAt||null);
   old.targetConfidence=needs?.6:.7;old.targetTests=needs?4:3;old.history=[{at:now,mode:old.mode,accuracy:N(x.accuracy),shift:N(x.shift)},...(old.history||[])].slice(0,20);
   old.status=needs?"ACTIVE":"STABLE";old.updatedAt=now;st[x.reason]=old;
  });
