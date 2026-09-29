@@ -62,3 +62,5 @@
 .season-launch{display:flex;flex-direction:column;gap:6px;padding:9px 10px;margin-bottom:9px;border:1px solid var(--line);border-radius:7px}.season-launch b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-launch span{font-size:8px;color:var(--muted)}
 
 .episode-readiness{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px}.episode-readiness .mini-title{font-size:8px;letter-spacing:.12em;margin-bottom:7px}.readiness-episode{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}.readiness-episode b{font-size:9px}.readiness-episode span{font-size:7px;letter-spacing:.08em}.readiness-episode .ready{color:var(--cyan)}.readiness-episode .needs{color:#ff9f7a}
+
+.season-runtime{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-runtime b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-runtime span{font-size:8px;color:var(--muted)}
