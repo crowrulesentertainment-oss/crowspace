@@ -1,0 +1,34 @@
+/* CrowSpace — Audience Growth Action Plans v1
+   Browser-only. Recommendations are generated from local creator analytics.
+*/
+(function(){
+const DB="crowspace-caws",STORE="videos",SNAP="crowspace-series-growth-v1",GOALS="crowspace-audience-goals-v1",PLANS="crowspace-growth-action-plans-v1";
+const $=id=>document.getElementById(id),N=x=>Number(x)||0,F=n=>Math.round(N(n)).toLocaleString(),L=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}},S=(k,v)=>localStorage.setItem(k,JSON.stringify(v)),E=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function all(){return new Promise((ok,no)=>{const r=indexedDB.open(DB);r.onsuccess=()=>{try{const q=r.result.transaction(STORE,"readonly").objectStore(STORE).getAll();q.onsuccess=()=>ok(q.result||[]);q.onerror=()=>no(q.error)}catch(e){ok([])}};r.onerror=()=>no(r.error)})}
+function H(s){return(L(SNAP,{})[s]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date))}
+function model(h){if(h.length<2)return{daily:0,trend:"limited"};const r=h.slice(-8),d=[];for(let i=1;i<r.length;i++)d.push(N(r[i].views)-N(r[i-1].views));const a=d.reduce((x,y)=>x+y,0)/d.length,old=d.slice(0,-3).reduce((x,y)=>x+y,0)/(d.length-3||1),trend=a>old*1.15?"accelerating":a<old*.85?"cooling":"steady";return{daily:a,trend}}
+function recent(items,s,days){const cut=Date.now()-days*864e5;return items.filter(x=>(x.series||"")===s&&x.status==="published"&&new Date(x.publishedAt||x.created||x.createdAt||x.updatedAt||Date.now()).getTime()>=cut)}
+function plan(items,s,h,g){
+ const m=model(h),p=recent(items,s,30),views=N(h.at(-1)?.views),target=N(g.viewTarget),need=Math.max(0,target-m.daily*30),actions=[];
+ if(!target) actions.push({type:"GOAL",title:"Set a 30-day audience goal",detail:"Create a measurable views target so the plan can monitor pace.",priority:"HIGH"});
+ if(p.length<2) actions.push({type:"PUBLISH",title:"Establish a publishing rhythm",detail:"Publish at least 2 episodes in the next 30 days to create enough audience signals.",priority:"HIGH"});
+ else if(p.length<4) actions.push({type:"PUBLISH",title:"Increase publishing consistency",detail:"Aim for one additional episode this month if your production capacity allows.",priority:"MEDIUM"});
+ else actions.push({type:"PUBLISH",title:"Maintain publishing cadence",detail:"Keep the current release rhythm while monitoring audience response.",priority:"MEDIUM"});
+ if(m.trend==="cooling")actions.push({type:"OPTIMIZE",title:"Refresh the next episode hook",detail:"Review recent captions, thumbnails and opening moments; test a clearer premise on the next release.",priority:"HIGH"});
+ if(m.trend==="accelerating")actions.push({type:"AMPLIFY",title:"Amplify the current momentum",detail:"Consider promoting the strongest recent episode and linking viewers to the next episode.",priority:"HIGH"});
+ if(m.daily<=0)actions.push({type:"ENGAGE",title:"Strengthen audience touchpoints",detail:"Add a clear call to comment, follow or Re-Caw in upcoming posts.",priority:"HIGH"});
+ else actions.push({type:"ENGAGE",title:"Build interaction signals",detail:"Respond to comments and invite a specific audience response on the next Caw.",priority:"MEDIUM"});
+ if(target&&m.daily<target/30)actions.push({type:"PACE",title:"Close the pace gap",detail:"Required pace is "+F(target/30)+" views/day; current pace is "+F(m.daily)+".",priority:"HIGH"});
+ if(need>0&&m.daily>0)actions.push({type:"CADENCE",title:"Use the strongest publishing window",detail:"Keep testing the day/time associated with your better-performing recent episodes.",priority:"MEDIUM"});
+ return actions.slice(0,6);
+}
+function render(items){
+ const sel=$("studioSeries");if(!sel||sel.value==="all")return;const s=sel.value,h=H(s),g=(L(GOALS,{})[s]||{}),actions=plan(items,s,h,g),plans=L(PLANS,{});let box=$("growthActionPlans");
+ if(!box){$("goalAutomation")?.insertAdjacentHTML("afterend",'<section id="growthActionPlans" class="card growth-action-plans"></section>');box=$("growthActionPlans")}if(!box)return;
+ const done=plans[s]?.completed||{};
+ box.innerHTML='<div class="ap-head"><div><span>AUDIENCE GROWTH ACTION PLAN</span><h3>Next Moves</h3><small>Generated from local series pace, publishing activity and saved goals.</small></div><button id="apReset">Reset Actions</button></div><div class="ap-list">'+actions.map((a,i)=>'<article class="'+(done[i]?"done":"")+'"><label><input type="checkbox" data-ap="'+i+'" '+(done[i]?"checked":"")+'><span><b>'+E(a.title)+'</b><small>'+E(a.detail)+'</small></span></label><em>'+E(a.priority)+'</em></article>').join("")+'</div><div class="ap-foot"><span>'+actions.filter((_,i)=>done[i]).length+' of '+actions.length+' actions completed</span><small>Plan refreshes automatically as new local analytics arrive.</small></div>';
+ box.querySelectorAll("[data-ap]").forEach(ch=>ch.onchange=()=>{const p=L(PLANS,{});p[s]||(p[s]={});p[s].completed||(p[s].completed={});p[s].completed[ch.dataset.ap]=ch.checked;S(PLANS,p);render(items)});
+ $("apReset").onclick=()=>{const p=L(PLANS,{});if(p[s])p[s].completed={};S(PLANS,p);render(items)};
+}
+async function run(){try{render(await all())}catch(e){console.warn("CrowSpace Action Plans",e)}}setTimeout(run,2000);setInterval(run,5000);document.addEventListener("change",e=>{if(e.target?.id==="studioSeries")setTimeout(run,100)});
+})();
