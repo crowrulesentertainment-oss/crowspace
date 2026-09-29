@@ -34,3 +34,5 @@
 #cawEpisode{max-width:150px}.caw-series{display:inline-flex;padding:3px 7px;margin-right:5px;border:1px solid var(--line);border-radius:999px;color:var(--cyan);font-size:8px;font-weight:700}
 
 #cawSeason{max-width:120px}
+
+.series-heading{display:flex;flex-direction:column;gap:5px}.series-heading small{font-size:8px;color:var(--muted);letter-spacing:.04em}.series-heading .mini-title{font-size:8px}
