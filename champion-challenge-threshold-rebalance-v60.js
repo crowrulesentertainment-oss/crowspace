@@ -10,8 +10,8 @@ function sync(){
  Object.values(p).forEach(x=>{
   const q=v[x.reason]||{},age=decay(q.updatedAt||x.updatedAt),quality=Math.max(0,Math.min(1,(N(x.quality)+1)/2)),evidence=Math.min(1,N(x.tests)/6),recency=age;
   const score=quality*.5+evidence*.3+recency*.2;
-  const base=x.status==="EXPLOIT"?.6:x.status==="EXPLORE"?.25:0;
-  const allocation=x.status==="HOLD"?0:Math.max(.1,Math.min(1,base+score*.4));
+  const base=x.status==="EXPLOIT"?.6:x.status==="EXPLORE"?.25:0,adj=window.CrowSpaceThresholdMemoryV61?.adjustment?.(x.reason)||0;
+  const allocation=x.status==="HOLD"?0:Math.max(.1,Math.min(1,base+score*.4+adj));
   st[x.reason]={reason:x.reason,status:x.status,score:+score.toFixed(3),allocation:+allocation.toFixed(2),quality:N(x.quality),tests:N(x.tests),recency:+recency.toFixed(2),updatedAt:Date.now()};
  });
  S(KEY,st);return st
