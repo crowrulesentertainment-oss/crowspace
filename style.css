@@ -76,3 +76,5 @@
 .season-engagement{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-engagement b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-engagement span{font-size:8px;color:var(--muted)}
 
 .season-top-episodes{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-top-episodes b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-top-episodes span{font-size:8px;color:var(--muted)}
+
+.season-audience{margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:5px}.season-audience b{font-size:7px;letter-spacing:.1em;color:var(--cyan)}.season-audience span{font-size:8px;color:var(--muted)}
