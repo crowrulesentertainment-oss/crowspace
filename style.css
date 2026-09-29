@@ -44,3 +44,5 @@
 .season-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.season-stats span{font-size:8px;color:var(--muted);padding:7px 9px;border:1px solid var(--line);border-radius:7px}.season-stats b{color:var(--text)}
 
 .season-compare{display:flex;flex-direction:column;gap:6px;margin-top:10px}.season-compare-row{display:grid;grid-template-columns:minmax(120px,1.5fr) repeat(4,1fr);gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:8px;color:var(--muted)}.season-compare-row b{color:var(--text)}@media(max-width:700px){.season-compare-row{grid-template-columns:1fr 1fr}.season-compare-row span{font-size:7px}}
+
+.season-progress{padding:9px 10px;margin-bottom:7px;border:1px solid var(--line);border-radius:7px}.season-progress>div:first-child{display:flex;justify-content:space-between;font-size:8px;margin-bottom:6px}.season-progress span{color:var(--muted)}.progress-track{height:5px;background:rgba(255,255,255,.06);border-radius:9px;overflow:hidden}.progress-track i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:9px}
