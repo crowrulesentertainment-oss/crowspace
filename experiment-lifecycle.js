@@ -139,7 +139,7 @@ async function orchestrate(s){
  const explorer=window.CrowSpaceExperimentExplorer;
  const evidence=window.CrowSpaceStrategyEvidence;
  const evo=L(EVOL,{candidates:[],tested:[]});
- const ready=(evo.candidates||[]).find(x=>x.status==="READY"||x.status==="REPLICATE");
+ const ready=(evo.candidates||[]).find(x=>{if(!(x.status==="READY"||x.status==="REPLICATE"))return false;const g=x.replacementKey||x.replacement?.key;if(g&&window.CrowSpaceReplacementGovernance&&!window.CrowSpaceReplacementGovernance.canExploit(x.originalKey||x.parent||"",g))return false;return true});
  if(portfolio?.chooseForStrategy&&explorer?.candidates&&explorer?.schedule&&ready&&!(window.CrowSpaceRecoveryIntelligence?.canResurrect&&ready.key&&!window.CrowSpaceRecoveryIntelligence.canResurrect(ready.key))){
   const priorSeries=ready.priorSeries||ready.testedSeries||[]; const selected=portfolio.chooseForStrategy(ready.strategy, evidence?.chooseReplicationSeries?priorSeries:priorSeries);
   const action=(selected?explorer.candidates(selected.series):[])[0];
