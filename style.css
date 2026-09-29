@@ -42,3 +42,5 @@
 .timeline-card{display:flex;align-items:stretch;gap:3px}.timeline-arrows{display:flex;flex-direction:column}.timeline-arrows button{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:10px;cursor:pointer;padding:0 5px}.timeline-arrows button:hover{color:var(--cyan);border-color:var(--cyan)}
 
 .season-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.season-stats span{font-size:8px;color:var(--muted);padding:7px 9px;border:1px solid var(--line);border-radius:7px}.season-stats b{color:var(--text)}
+
+.season-compare{display:flex;flex-direction:column;gap:6px;margin-top:10px}.season-compare-row{display:grid;grid-template-columns:minmax(120px,1.5fr) repeat(4,1fr);gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:8px;color:var(--muted)}.season-compare-row b{color:var(--text)}@media(max-width:700px){.season-compare-row{grid-template-columns:1fr 1fr}.season-compare-row span{font-size:7px}}
