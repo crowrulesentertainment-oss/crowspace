@@ -85,6 +85,17 @@ function liveLayer(db,u){
 }
 
 
+/* V35 — Adaptive Feed Intelligence */
+async function refreshAdaptiveFeed(){
+ try{
+  const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return;
+  const r=await db.rpc("crowspace_refresh_feed_profile");if(r.error)throw r.error;
+  const s=await db.rpc("crowspace_adaptive_feed_signals");window.CrowSpaceAdaptive={profile:r.data||null,signals:s.data||[]};
+  return window.CrowSpaceAdaptive;
+ }catch(e){console.debug("CrowSpace adaptive learning skipped",e);return null}
+}
+window.CrowSpaceAdaptiveFeed={refresh:refreshAdaptiveFeed};
+
 /* V34 — Personal Feed Learning */
 async function recordFeedLearning(eventType,targetId=null,targetType=null,queryText=null,weight=1,metadata={}){
  try{const _u=await user();if(_u)learnLocal(_u.id,targetType||eventType,String(targetId||queryText||"unknown"),Number(weight)||1);const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return; await db.rpc("crowspace_record_feed_event",{p_event_type:eventType,p_target_id:targetId,p_target_type:targetType,p_query_text:queryText,p_weight:weight,p_metadata:metadata});}catch(e){console.debug("CrowSpace learning skipped",e)}
