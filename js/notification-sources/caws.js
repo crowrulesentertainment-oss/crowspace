@@ -1,0 +1,1 @@
+window.CrowSpaceNotificationSources=window.CrowSpaceNotificationSources||{};window.CrowSpaceNotificationSources.caws=async function(db,user){return (await window.CrowSpaceNotificationSources.social(db,user)).filter(n=>!!n.caw_id)};
