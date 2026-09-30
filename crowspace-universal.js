@@ -39,7 +39,7 @@ function injectTools(top){
 function footer(){
  if(document.querySelector('.cs-footer'))return;
  const f=document.createElement('footer');f.className='cs-footer';
- f.innerHTML='<span>CrowSpace · CrowRules · One Account. One Universe.</span><span><a href="home.html">Home</a> · <a href="members.html">Members</a> · <a href="settings.html">Settings</a> · <a href="account.html">Account</a></span>';
+ f.innerHTML='<span>CrowSpace · CrowRules · One Account. One Universe.</span><span><a href="home.html">Home</a> · <a href="members.html">Members</a> · <a href="rankings.html">Rankings</a> · <a href="settings.html">Settings</a> · <a href="account.html">Account</a></span>';
  document.body.appendChild(f);
 }
 function overlays(){
@@ -206,6 +206,7 @@ function relationshipEnhance(){
   if(!dock){dock=document.createElement('section');dock.id='cs-profile-relationship';dock.className='cs-relationship-dock';const main=document.querySelector('main')||document.body;main.prepend(dock)}
   mountRelationshipCard(dock,t);
  });
+ document.querySelectorAll('[data-user-id]').forEach(el=>{const value=el.getAttribute('data-user-id');if(!value||el.dataset.csRelationLink)return;el.dataset.csRelationLink='1';const controls=document.createElement('span');controls.className='cs-inline-relation';el.appendChild(controls);mountRelationshipCard(controls,value)});
  document.querySelectorAll('a[href*="profile.html"]').forEach(a=>{
   const value=relationTargetFromHref(a.href);if(!value||a.dataset.csRelationLink)return;a.dataset.csRelationLink='1';
   const wrap=document.createElement('span');wrap.className='cs-rel-link-wrap';a.parentNode?.insertBefore(wrap,a);wrap.appendChild(a);
