@@ -1,3 +1,11 @@
+/* V44 — Recommendation Explanation Center */
+async function recommendationWhy(targetId,targetType="content"){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db||!targetId)return[];const r=await db.rpc("crowspace_recommendation_explanations_for",{p_target:targetId,p_type:targetType});if(r.error)throw r.error;return r.data||[]}catch(e){return[]}
+}
+function recommendationReasonFallback(item={}){
+ const out=[]; if(item.following)out.push("Because you follow this creator."); if(item.interaction)out.push("Because you've interacted with similar content."); if(item.trending)out.push("Trending within your interests."); if(item.exploration)out.push("A new discovery related to your interests."); if(item.recent)out.push("Based on your recent activity."); return out.length?out:["Recommended from your CrowSpace activity."]
+}
+window.CrowSpaceRecommendationExplanations={why:recommendationWhy,fallback:recommendationReasonFallback};
 /* V43 — Content Suppression & Recovery Engine */
 async function setContentPreference(targetId,targetType,preference){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db||!targetId)return null;const r=await db.rpc("crowspace_set_content_preference",{p_target:targetId,p_type:targetType||"content",p_preference:preference});if(r.error)throw r.error;await loadContentPreferences();return r.data}catch(e){console.debug("CrowSpace content preference skipped",e);return null}
