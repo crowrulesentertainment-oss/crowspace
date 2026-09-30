@@ -330,7 +330,7 @@ function render(){
  '<section class="card" style="margin-top:16px"><div class="title">PROFILE WALL</div><div class="tabs"><span class="pill active" data-wall="posts">Posts</span><span class="pill" data-wall="caws">Caws</span></div><div id="wall"></div></section>'+
  '<section id="guestbook" class="card section-anchor" style="margin-top:16px"><div class="title">PROFILE GUESTBOOK</div><div id="guestbook"></div></section>'+
  '</div><aside>'+
- '<section class="card"><div class="title">SOCIAL STATUS</div><div class="notice">'+(self?"This is your CrowSpace profile. Changes saved here sync to Supabase.":(relationship?.followsYou?"This member follows you. ":"")+(relationship?.following?"You follow this member.":"Connect through CrowSpace."))+'</div></section>'+
+ '<section class="card"><div class="title">SOCIAL STATUS</div><div class="notice">'+(self?"This is your CrowSpace profile. Changes saved here are synced to Supabase.":(relationship?.followsYou?"This member follows you. ":"")+(relationship?.following?"You follow this member.":"Connect through CrowSpace."))+'</div></section>'+
  '<section class="card" style="margin-top:16px"><div class="title">FEATURED WORK</div><div class="notice"><b>'+esc(target.portfolio_work_title||"My Work")+'</b><br><br>'+esc(target.portfolio_collections_title||"Collections")+'</div></section>'+
  '</aside></div>';
  const b=$("banner");if(target.banner_url)b.style.backgroundImage="url('"+esc(target.banner_url)+"')";
