@@ -148,6 +148,38 @@ body:before,body:after,.scanline{display:none!important}
 @media(max-width:1100px){.nx-layout{grid-template-columns:200px minmax(0,1fr)}.nx-right{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){.shell.home-v14{padding:10px!important}.nx-layout{grid-template-columns:1fr}.nx-right{grid-column:auto;grid-template-columns:1fr}.nx-brand{padding:18px}.nx-metrics{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:480px){.nx-metrics{grid-template-columns:1fr}.nx-feed-head{display:block}.nx-live{display:inline-block;margin-top:8px}}
+</style><style>
+/* V74 — NEXUS AURORA / CLEAN EDITION */
+:root{--a-bg:#f5f8fb;--a-panel:#fff;--a-panel2:#f8fbfd;--a-text:#12202b;--a-muted:#667b88;--a-line:#dce7ed;--a-cyan:#087f9b;--a-violet:#6751b8;--a-shadow:0 10px 28px rgba(22,50,66,.08)}
+html,body{background:var(--a-bg)!important;color:var(--a-text)!important}
+body{background-image:radial-gradient(circle at 50% -20%,rgba(8,127,155,.10),transparent 34%)!important}
+.nav{background:rgba(255,255,255,.92)!important;border-color:var(--a-line)!important;box-shadow:0 1px 10px rgba(20,50,65,.05)}
+.shell.home-v14{max-width:1320px!important;padding:18px 22px 48px!important}
+.nx-card{background:var(--a-panel)!important;border:1px solid var(--a-line)!important;border-radius:18px!important;box-shadow:var(--a-shadow)!important}
+.nx-brand{background:linear-gradient(135deg,#fff,#eef8fb)!important;padding:30px!important}
+.nx-brand:after{border-color:rgba(8,127,155,.12)!important;box-shadow:0 0 0 22px rgba(103,81,184,.035),0 0 0 44px rgba(8,127,155,.025)!important}
+.nx-kicker{color:var(--a-cyan)!important}
+.nx-brand h1{color:#172935!important;font-size:clamp(2.2rem,5vw,4.4rem)!important}
+.nx-brand h1 span{color:var(--a-violet)!important}
+.nx-brand p,.nx-section-title span,.nx-status div,.nx-signal small,.nx-note{color:var(--a-muted)!important}
+.nx-actions a{background:#f7fafc!important;color:#243844!important;border-color:var(--a-line)!important}
+.nx-actions a.primary{background:linear-gradient(135deg,var(--a-cyan),var(--a-violet))!important;color:white!important}
+.nx-nav a{color:#405562!important}
+.nx-nav a:hover{background:#eef8fb!important;border-color:#c8e5ec!important;color:#12303d!important}
+.nx-status div{border-bottom:1px solid #edf2f5;padding-bottom:8px}
+.nx-status div:last-child{border-bottom:0;padding-bottom:0}
+.nx-status strong{color:var(--a-cyan)!important}
+.nx-feed{padding:20px!important}
+.nx-feed-head h2{color:#172935!important}
+.nx-metric{background:var(--a-panel2)!important;border-color:var(--a-line)!important}
+.nx-metric strong{color:var(--a-cyan)!important}
+.nx-metric span{color:var(--a-muted)!important}
+.nx-live{color:#13775f!important;border-color:#bfe4d7!important;background:#f0fbf7}
+.nx-signal{background:#f8fbfd!important;border-color:var(--a-line)!important}
+.nx-signal b{color:#263b48!important}
+.nx-note{background:#f6f1ff!important;border-left-color:var(--a-violet)!important}
+.nx-hide-legacy{display:none!important}
+@media(max-width:760px){.shell.home-v14{padding:10px 12px 35px!important}.nx-brand{padding:22px!important}}
 </style></head>
 <body data-page="home">
 <div class="scanline" aria-hidden="true"></div>
@@ -158,26 +190,24 @@ body:before,body:after,.scanline{display:none!important}
 
 
 <main class="shell home-v14"><div class="nx-card nx-brand">
-<div class="nx-kicker">CROWRULES // NEXUS DECK // V73</div>
-<h1>THE <span>CROWSPACE</span><br>NETWORK.</h1>
-<p>A quieter, sharper social interface for people, posts, Caws, connections and discovery — powered by your CrowSpace account.</p>
-<div class="nx-actions"><a class="primary" href="#feed">Open Feed</a><a href="search.html">Explore</a><a href="caws.html">Caws</a></div>
+<div class="nx-kicker">CROWRULES / CROWSPACE</div>
+<h1>WELCOME TO <span>CROWSPACE.</span></h1>
+<p id="nx-hero-copy">Your people, stories, Caws and connections — in one simple social home.</p>
+<div class="nx-actions"><a class="primary" href="#feed">View My Feed</a><a href="search.html">Explore CrowSpace</a></div>
 </div>
-<div class="nx-layout" style="margin-top:14px">
+<div class="nx-layout" style="margin-top:16px">
 <aside class="nx-column">
-<div class="nx-card"><div class="nx-section-title"><b>NEXUS NAV</b><span>01</span></div><nav class="nx-nav">
-<a href="home.html">⌂ Home</a><a href="profile.html">◉ My Profile</a><a href="search.html">⌕ Explore</a><a href="caws.html">▶ Caws</a><a href="circles.html">◌ Circles</a><a href="messages.html">✉ Messages</a><a href="notifications.html">● Alerts</a><a href="discovery.html">◇ Discovery</a>
-</nav></div>
-<div class="nx-card"><div class="nx-section-title"><b>CORE STATUS</b><span>LIVE</span></div><div class="nx-status"><div><span>Supabase</span><strong id="nx-supabase">Checking</strong></div><div><span>Account</span><strong id="nx-account">Checking</strong></div><div><span>Learning</span><strong>SYNCED</strong></div><div><span>Privacy</span><strong>RLS</strong></div></div></div>
+<div class="nx-card"><div class="nx-section-title"><b>YOUR CROWSPACE</b><span>MENU</span></div><nav class="nx-nav"><a href="home.html">⌂ Home</a><a href="profile.html">◉ Profile</a><a href="search.html">⌕ Explore</a><a href="caws.html">▶ Caws</a><a href="circles.html">◌ Circles</a><a href="messages.html">✉ Messages</a><a href="notifications.html">● Notifications</a><a href="discovery.html">◇ Discovery</a></nav></div>
+<div class="nx-card"><div class="nx-section-title"><b>ACCOUNT</b><span>STATUS</span></div><div class="nx-status"><div><span>Connection</span><strong id="nx-supabase">Checking</strong></div><div><span>Account</span><strong id="nx-account">Checking</strong></div><div><span>Learning</span><strong>Synced</strong></div><div><span>Privacy</span><strong>Protected</strong></div></div></div>
 </aside>
 <main class="nx-column">
-<section class="nx-card nx-feed"><div class="nx-feed-head"><div><div class="nx-kicker">YOUR HOME</div><h2 id="nx-welcome">Welcome to CrowSpace</h2><p>One account. One universe. Your social world lives here.</p></div><span class="nx-live">● NEXUS ONLINE</span></div>
+<section class="nx-card nx-feed"><div class="nx-feed-head"><div><div class="nx-kicker">HOME</div><h2 id="nx-welcome">Your CrowSpace</h2><p>A simple place to see what is happening.</p></div><span class="nx-live">● LIVE</span></div>
 <div class="nx-metrics"><div class="nx-metric"><strong id="nx-members">—</strong><span>Members</span></div><div class="nx-metric"><strong id="nx-posts">—</strong><span>Posts</span></div><div class="nx-metric"><strong id="nx-caws">—</strong><span>Caws</span></div></div>
-<div class="nx-note" style="margin-top:12px">Your live CrowSpace feed remains below this Nexus header. Personalization, relationships, comments, likes, Caws and realtime updates continue to use the existing Supabase systems.</div></section>
+<div class="nx-note" style="margin-top:14px">Your feed is personalized using your CrowSpace activity while Supabase handles account data, permissions and realtime updates.</div></section>
 </main>
 <aside class="nx-column nx-right">
-<div class="nx-card"><div class="nx-right-title">LIVE SIGNALS</div><div class="nx-signal"><b>Personalization</b><small>Adaptive feed intelligence is connected to your account.</small></div><div class="nx-signal"><b>Realtime</b><small>New social activity can update the Home experience without a reload.</small></div><div class="nx-signal"><b>Privacy</b><small>Supabase Row Level Security remains the access boundary.</small></div></div>
-<div class="nx-card"><div class="nx-right-title">WELCOME</div><div id="nx-welcome-copy" class="nx-note">Connecting your CrowSpace account…</div></div>
+<div class="nx-card"><div class="nx-right-title">WHAT'S ACTIVE</div><div class="nx-signal"><b>Your Feed</b><small>Posts from the people and communities connected to you.</small></div><div class="nx-signal"><b>Caws</b><small>Short-form video and visual moments from CrowSpace.</small></div><div class="nx-signal"><b>Discovery</b><small>Find members, groups and new things to explore.</small></div></div>
+<div class="nx-card"><div class="nx-right-title">YOUR ACCOUNT</div><div id="nx-welcome-copy" class="nx-note">Connecting your account…</div></div>
 </aside>
 </div><div class="nx-hide-legacy"><div class="nexus-status" id="nexus-status"><span>◈ NEXUS CORE</span><span id="nexus-db">Connecting to Supabase…</span></div>
 <section class="hero v14-hero"><div><div class="eyebrow">CROWRULES // ONE ACCOUNT // ONE UNIVERSE</div><h1>CROWSPACE.</h1><p id="welcome" class="muted">Your social home inside the CrowRules universe.</p></div><div class="hero-actions"><a class="btn primary" href="#feed">Open My Feed</a><a class="btn" href="profile.html">My Profile</a></div></section>
