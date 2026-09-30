@@ -1,3 +1,8 @@
+/* V40 — Recommendation Exploration & Diversity */
+async function diverseRecommendations(limit=30){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return[];const r=await db.rpc("crowspace_diverse_recommendations",{p_limit:limit});if(r.error)throw r.error;window.CrowSpaceDiversity={items:r.data||[]};return r.data||[]}catch(e){console.debug("CrowSpace diversity recommendations skipped",e);return[]}
+}
+window.CrowSpaceDiversity={load:diverseRecommendations};
 /* V39 — Interest-Aware Recommendations */
 async function interestRecommendations(limit=30){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return[];const r=await db.rpc("crowspace_interest_recommendations",{p_limit:limit});if(r.error)throw r.error;window.CrowSpaceRecommendations={items:r.data||[]};return r.data||[]}catch(e){console.debug("CrowSpace recommendations skipped",e);return[]}
