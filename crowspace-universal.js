@@ -4,9 +4,9 @@
 const links=[
  ['⌂ Home','home.html'],['◉ Profile','profile.html'],['⌕ Search','search.html'],['▶ Caws','caws.html'],
  ['◌ Circles','circles.html'],['👥 Friends','friends.html'],['✉ Messages','messages.html'],['● Alerts','notifications.html'],
- ['◇ Discover','discovery.html'],['★ Members','members.html'],['🏆 Rankings','rankings.html'],['▣ Groups','groups.html'],['📅 Events','events.html'],['⚙ Settings','settings.html']
+ ['◇ Discover','discovery.html'],['★ Members','members.html'],['🏆 Rankings','rankings.html'],['🎂 Birthdays','birthdays.html'],['▣ Groups','groups.html'],['◉ Circles','circles.html'],['📅 Events','events.html'],['📰 News','news.html'],['🎬 Creator Studio','creator-studio.html'],['🎉 Holiday Hub','holiday-hub.html'],['⚙ Settings','settings.html']
 ];
-const sub=[['Feed','feed.html'],['Explore','explore.html'],['Holiday Bots','holiday-bots.html'],['Account','account.html'],['Caw Studio','caw-studio.html']];
+const sub=[['Feed','feed.html'],['Explore','explore.html'],['Holiday Bots','holiday-bots.html'],['Account','account.html'],['Caw Studio','caw-studio.html'],['Birthdays','birthdays.html'],['Holiday Hub','holiday-hub.html'],['News','news.html'],['Creator Studio','creator-studio.html']];
 const active=path=>{const p=location.pathname.split('/').pop()||'home.html';return p===path};
 function makeLink(label,href,activeClass=''){const a=document.createElement('a');a.href=href;a.textContent=label;if(activeClass)a.className=activeClass;return a}
 function nav(){
@@ -218,8 +218,8 @@ document.addEventListener('crowspace-social-update',()=>{document.querySelectorA
 
 function loadV24Discovery(){
  if(location.pathname.split('/').pop()==='index.html')return;
- if(document.querySelector('script[data-crowspace-v24]'))return;
- const s=document.createElement('script');s.src='crowspace-discovery.js';s.dataset.crowspaceV24='1';document.body.appendChild(s);
+ if(!document.querySelector('script[data-crowspace-v24]')){const s=document.createElement('script');s.src='crowspace-discovery.js';s.dataset.crowspaceV24='1';document.body.appendChild(s)}
+ if(!document.querySelector('script[data-crowspace-v25]')){const s=document.createElement('script');s.src='crowspace-content-graph.js';s.dataset.crowspaceV25='1';document.body.appendChild(s)}
 }
 document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(()=>{relationshipEnhance();loadV24Discovery()},250))});
 })();
