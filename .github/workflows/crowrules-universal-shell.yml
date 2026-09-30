@@ -15,13 +15,17 @@ jobs:
         run: |
           from pathlib import Path
           import re
-          SCRIPT='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1'
+          SCRIPT='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4'
           tag=f'<script src="{SCRIPT}" defer></script>'
           changed=[]
           for p in Path('.').rglob('*.html'):
               if '.git' in p.parts: continue
               s=p.read_text(encoding='utf-8')
-              if SCRIPT in s: continue
+              # Permanently remove every historical CrowRules sitewide loader.
+              # This prevents old V1/V2/V3 tags from being reintroduced by automation.
+              cleaned=re.sub(r'<script\\b[^>]*crowrules-sitewide\\.js\\?v=[^"\\']+[^>]*>\\s*</script>', '', s, flags=re.I)
+              cleaned=re.sub(r'<script\\b[^>]*crowrules-sitewide\\.js[^>]*>\\s*</script>', '', cleaned, flags=re.I)
+              s=cleaned
               if re.search(r'</head>',s,re.I):
                   s=re.sub(r'</head>',tag+'</head>',s,count=1,flags=re.I)
                   p.write_text(s,encoding='utf-8')
@@ -37,5 +41,5 @@ jobs:
             echo "No HTML changes needed."
             exit 0
           fi
-          git commit -m "V1 standardize Universal CrowRules Shell across all HTML pages"
+          git commit -m "V4 permanently standardize Universal CrowRules Shell"
           git push
