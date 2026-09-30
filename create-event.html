@@ -9,9 +9,9 @@
 <body data-page="create-event"><main class="cs-page-shell">
 <section class="cs-page-hero"><div class="cs-eyebrow">CROWSPACE // EVENT STUDIO</div><h1>Create an Event</h1><p>Paste a YouTube URL and CrowSpace automatically prepares the event video and live-chat experience.</p></section>
 <form id="event-form" class="cs-card event-form">
-<div class="field"><label for="title">EVENT TITLE</label><input id="title" maxlength="180" required placeholder="Back Deck Live #008"></div>
-<div class="field"><label for="description">DESCRIPTION</label><textarea id="description" maxlength="5000" placeholder="Tell the community what is happening."></textarea></div>
-<div class="field"><label for="starts_at">START DATE & TIME</label><input id="starts_at" type="datetime-local"></div>
+<div class="field"><label for="title">EVENT TITLE</label><input id="title" maxlength="160" required placeholder="Back Deck Live #008"></div>
+<div class="field"><label for="event_type">EVENT TYPE</label><select id="event_type"><option value="community">COMMUNITY</option><option value="meetup">MEETUP</option><option value="creator">CREATOR</option><option value="crowrules">CROWRULES</option><option value="dreamscapes">DREAMSCAPES</option><option value="memorials">MEMORIALS</option><option value="other">OTHER</option></select></div>\n<div class="field"><label for="description">DESCRIPTION</label><textarea id="description" maxlength="5000" placeholder="Tell the community what is happening."></textarea></div>
+<div class="field"><label for="starts_at">START DATE & TIME</label><input id="starts_at" type="datetime-local" required></div>
 <div class="field"><label for="youtube_url">YOUTUBE URL</label><input id="youtube_url" type="url" placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX"><div class="hint">You can use a watch, live, youtu.be, embed, or Shorts URL. CrowSpace extracts the video ID automatically.</div><div id="yt-preview" class="yt-preview"></div></div>
 <label class="toggle"><input id="is_live" type="checkbox"> THIS IS A LIVE EVENT — ENABLE YOUTUBE LIVE CHAT</label>
 <div class="field" style="margin-top:14px"><label for="visibility">VISIBILITY</label><select id="visibility"><option value="public">PUBLIC</option><option value="members">MEMBERS</option></select></div>
@@ -27,7 +27,7 @@
   e.preventDefault();const d=db(),me=u();if(!d||!me){location.href='login.html';return}
   const yt=$('youtube_url').value.trim(),id=window.CrowSpaceYouTubeEvents?.videoId(yt)||null;
   if(yt&&!id){$('status').textContent='Enter a valid YouTube URL.';return}
-  const payload={title:$('title').value.trim(),description:$('description').value.trim(),starts_at:$('starts_at').value?new Date($('starts_at').value).toISOString():null,youtube_url:yt||null,youtube_video_id:id,is_live:$('is_live').checked,live_chat_enabled:Boolean($('is_live').checked&&id),visibility:$('visibility').value,created_by:me.id,created_at:new Date().toISOString()};
+  const payload={title:$('title').value.trim(),event_type:$('event_type').value,description:$('description').value.trim()||null,starts_at:new Date($('starts_at').value).toISOString(),youtube_url:yt||null,youtube_video_id:id,is_live:$('is_live').checked,live_chat_enabled:Boolean($('is_live').checked&&id),created_by:me.id,created_at:new Date().toISOString()};
   $('save').disabled=true;$('status').textContent='CREATING EVENT…';
   try{let r=await d.from('crowspace_events').insert(payload).select('id').single();if(r.error)throw r.error;$('status').textContent='EVENT CREATED ✓';location.href='event.html?id='+encodeURIComponent(r.data.id)}
   catch(err){$('status').textContent=err.message||'Unable to create event.';$('save').disabled=false}
