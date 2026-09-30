@@ -375,10 +375,6 @@ window.addEventListener("beforeunload",stopRealtime);
 
 let profileStarted=false, profileRetryTimer=null, profileWatchdog=null;
 function setConnectionState(mode,message){
-  const app=document.getElementById("app");
-  if(mode==="connecting" && app){
-    app.setAttribute("aria-live","polite");
-  }
   document.body.dataset.profileConnection=mode;
   const app=$("app"); if(!app)return;
   if(mode==="connecting"){
