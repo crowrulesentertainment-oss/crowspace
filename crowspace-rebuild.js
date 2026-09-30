@@ -407,3 +407,10 @@ window.CrowSpaceAlgorithmControlsAPI={get:getAlgorithmControls,update:updateAlgo
 /* V50 creator/interest tuning helpers */
 async function adjustAlgorithmSignal(key,delta=0,targetType="interest"){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db||!key)return null;const r=await db.rpc("crowspace_adjust_algorithm_signal",{p_key:key,p_delta:Number(delta)||0,p_target_type:targetType});if(r.error)throw r.error;return r.data||null}catch(e){console.debug("Algorithm signal adjustment unavailable",e);return null}}
 window.CrowSpaceAlgorithmControlsAPI={...(window.CrowSpaceAlgorithmControlsAPI||{}),adjust:adjustAlgorithmSignal};
+
+/* V55 — Algorithm Experiment History & Rollback */
+const ALGO_HISTORY_KEY="crowspace_algorithm_history";
+async function saveAlgorithmExperiment(label="Manual snapshot",controls=null){try{const u=await user();if(!u)return null;const s=controls||await getAlgorithmControls();if(!s)return null;const key=ALGO_HISTORY_KEY+"_"+u.id;const rows=JSON.parse(localStorage.getItem(key)||"[]");rows.unshift({id:crypto.randomUUID?.()||String(Date.now()),label,controls:{...s},created_at:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(rows.slice(0,20)));return rows[0]}catch(e){return null}}
+async function getAlgorithmHistory(){try{const u=await user();if(!u)return [];return JSON.parse(localStorage.getItem(ALGO_HISTORY_KEY+"_"+u.id)||"[]")}catch(e){return []}}
+async function rollbackAlgorithmExperiment(snapshot){if(!snapshot?.controls)return null;const out=await updateAlgorithmControls(snapshot.controls);if(out)await rebuildPersonalFeed();return out}
+window.CrowSpaceAlgorithmHistory={save:saveAlgorithmExperiment,list:getAlgorithmHistory,rollback:rollbackAlgorithmExperiment};
