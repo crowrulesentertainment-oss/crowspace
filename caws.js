@@ -8,7 +8,7 @@ async function load(){
  if(error)throw error;
  const rows=data||[],ids=[...new Set(rows.map(x=>x.user_id))];let ps=[];
  if(ids.length){const r=await db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids);if(r.error)throw r.error;ps=r.data||[]}
- const map=new Map(ps.map(x=>[x.user_id,x]));caws=rows.map(x=>{const p=map.get(x.user_id)||{};return {...x,creator:p.display_name||p.username||"Crow Creator",handle:p.username?"@"+p.username:"@member",avatar_url:p.avatar_url||""}});
+ const map=new Map(ps.map(x=>[x.user_id,x]));caws=rows.map(x=>{const p=map.get(x.user_id)||{};return {...x,creator:p.display_name||p.username||"Crow Creator",handle:p.username?"@"+p.username:"@member",avatar_url:p.avatar_url||""}});caws=await (window.CrowSpaceCrossSurface?.rank?.(caws,"caw")||caws);
  if(!caws.length)caws=[{id:"empty",title:"CrowSpace Caws",caption:"Publish a Caw from Creator Studio to see it here.",video_url:"",thumbnail_url:"",creator:"Crow Creator",handle:"@creator"}];
  render();
 }
