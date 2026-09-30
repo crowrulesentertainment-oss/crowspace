@@ -1,3 +1,6 @@
+/* V49 — Personal Algorithm Laboratory */
+async function loadAlgorithmLab(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_algorithm_laboratory");if(r.error)throw r.error;window.CrowSpaceAlgorithmLab=r.data;return r.data}catch(e){return null}}
+window.CrowSpaceAlgorithm={load:loadAlgorithmLab};
 /* V48 — Learning Recovery Center */
 async function clearLearningType(type){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_clear_learning_type",{p_event_type:type});if(r.error)throw r.error;return r.data}catch(e){return null}}
 async function restoreLearningProfile(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_restore_learning_profile");if(r.error)throw r.error;return r.data}catch(e){return null}}
