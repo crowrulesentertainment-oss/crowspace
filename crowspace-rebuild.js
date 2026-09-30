@@ -429,3 +429,8 @@ window.CrowSpaceAdaptiveThresholds={calculate:adaptiveThresholds,passes:adaptive
 function signalConfidence(value,occurrences=1,ageDays=0){const magnitude=Math.abs(Number(value)||0);const repeat=Math.min(1,Number(occurrences||1)/8);const freshness=Math.max(0,1-Math.max(0,Number(ageDays||0))/90);const confidence=Math.max(.05,Math.min(1,.2+magnitude/20*.35+repeat*.3+freshness*.15));return Number(confidence.toFixed(3))}
 function confidenceAdjustedSignal(value,occurrences=1,ageDays=0){return Number(value||0)*signalConfidence(value,occurrences,ageDays)}
 window.CrowSpaceSignalConfidence={score:signalConfidence,adjust:confidenceAdjustedSignal};
+
+/* V59 — Context-Aware Signal Engine */
+function contextSignalWeight(surface="home",eventType="view"){const map={home:{view:1,like:1.2,comment:1.5,follow:1.4,search:.8},search:{view:.9,like:1.3,comment:1.4,follow:1.5,search:1},profile:{view:1.1,like:1.4,comment:1.5,follow:1.7,search:.7},caws:{view:1.1,like:1.3,comment:1.5,follow:1.6,search:.8},circles:{view:1,like:1.2,comment:1.4,follow:1.5,search:1},explore:{view:1,like:1.25,comment:1.45,follow:1.5,search:.9}};return Number(map[String(surface).toLowerCase()]?.[String(eventType).toLowerCase()]??1)}
+function contextAdjustedSignal(value,surface,eventType){return Number(value||0)*contextSignalWeight(surface,eventType)}
+window.CrowSpaceContextSignals={weight:contextSignalWeight,adjust:contextAdjustedSignal};
