@@ -639,7 +639,7 @@ window.addEventListener('crowspace:supabase-ready',boot);
 <p id="crow212state" style="color:#8995aa">Building recommendations from your CrowSpace graph…</p>
 <div id="crow212grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px"></div>
 </section>
-<script src="js/crowspace-recommendations-21-2.js"></script>
+<script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-graph-learning-21-9.js"></script><script src="js/crowspace-recommendations-21-2.js"></script>
 <script>
 (async()=>{try{await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user,db=CrowSpaceAuth.client,s=document.getElementById('crow212state'),g=document.getElementById('crow212grid');if(!u){s.textContent='Sign in to unlock your personalized CrowRules discovery universe.';return}
 const st=await db.from('crowspace_discovery_settings').select('personalization_enabled,recommendations_enabled').eq('user_id',u.id).maybeSingle();if(st.data&&(st.data.personalization_enabled===false||st.data.recommendations_enabled===false)){s.textContent='Personalized discovery is disabled in Settings.';return}
@@ -701,5 +701,5 @@ document.addEventListener("crowspace:recommendation-update",async e=>{
  if(!rt||!cd||!d.action||!d.id||d.type!=="creator"||d.action!=="follow")return;
  try{await rt.refresh(CrowSpaceAuth.client,CrowSpaceAuth.user);window.dispatchEvent(new CustomEvent("crowspace:connected-universe-update",{detail:{creatorId:d.id}}))}catch(err){console.warn("CrowSpace 21.6",err)}
 });
-</script><script src="js/crowspace-connected-ui-21-7.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpaceConnectedUI21_7&&CrowSpaceConnectedUI21_7.start());</script><script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-graph-learning-21-9.js"></script></body>
+</script><script src="js/crowspace-connected-ui-21-7.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpaceConnectedUI21_7&&CrowSpaceConnectedUI21_7.start());</script><script src="js/crowspace-persistent-graph-21-8.js"></script></body>
 </html>
