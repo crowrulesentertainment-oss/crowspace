@@ -1,87 +1,12 @@
-/* CrowSpace 21.5 — Real-Time Recommendation Intelligence */
+/* CrowSpace 21.5/21.18 — Real-Time Recommendation Intelligence */
 window.CrowSpaceRecommendationRuntime21_5=(()=>{
-  const listeners=new Set();
-  const state={version:0,signals:[],surfaces:null};
-  const eventActions=new Set(["impression","open","complete","save","hide","not_interested","follow"]);
-  const feedbackMap={like:"engaged",save:"engaged",follow:"engaged",more_like_this:"less_like_this",not_interested:"not_interested",hide:"hidden"};
-
-  function emit(reason,payload={}){
-    state.version++;
-    const detail={reason,version:state.version,...payload};
-    listeners.forEach(fn=>{try{fn(detail)}catch(e){console.warn("CrowSpace 21.5 listener",e)}});
-    document.dispatchEvent(new CustomEvent("crowspace:recommendation-update",{detail}));
-    return detail;
-  }
-
-  function subscribe(fn){
-    if(typeof fn!=="function") return ()=>{};
-    listeners.add(fn);
-    return ()=>listeners.delete(fn);
-  }
-
-  async function record(db,user,type,id,action,metadata={}){
-    if(!db||!user||!id) return {error:new Error("Missing recommendation identity")};
-    const itemId=String(id);
-    const feedbackType=feedbackMap[action];
-    if(!feedbackType) return {error:new Error("Unsupported feedback action")};
-
-    const results={feedback:null,event:null,sideEffect:null};
-
-    results.feedback=await db.from("crowspace_recommendation_feedback").insert({
-      user_id:user.id,target_id:itemId,target_type:String(type),feedback_type:feedbackType,metadata
-    });
-
-    if(eventActions.has(action)){
-      results.event=await db.from("crowspace_recommendation_events").insert({
-        user_id:user.id,item_type:String(type),item_id:itemId,action
-      });
-    }
-
-    if(action==="follow" && type==="creator" && itemId!==String(user.id)){
-      const existing=await db.from("crowspace_followers").select("id").eq("follower_id",user.id).eq("following_id",itemId).maybeSingle();
-      if(!existing.error&&!existing.data){
-        results.sideEffect=await db.from("crowspace_followers").insert({follower_id:user.id,following_id:itemId});
-      }
-    }
-
-    if(action==="like" && type==="post"){
-      const existing=await db.from("crowspace_likes").select("id").eq("user_id",user.id).eq("post_id",itemId).maybeSingle();
-      if(!existing.error&&!existing.data){
-        results.sideEffect=await db.from("crowspace_likes").insert({user_id:user.id,post_id:itemId});
-      }
-    }
-
-    state.signals.push({type:String(type),id:itemId,action,at:Date.now()});
-    emit(action,{type:String(type),id:itemId,action,metadata});
-    return results;
-  }
-
-  async function refresh(db,user){
-    if(!db||!user||!window.CrowSpaceRecommendations21_2) return null;
-    const surfaces=await window.CrowSpaceRecommendations21_2.surfaces(db,user);
-    state.surfaces=surfaces;
-    emit("refresh",{surfaces});
-    return surfaces;
-  }
-
-  function start(db,user,options={}){
-    if(!db||!user) return null;
-    const channel=db.channel("crowspace-21-5-recommendations-"+user.id);
-    channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_recommendation_feedback",filter:"user_id=eq."+user.id},payload=>{
-      emit("feedback-realtime",{payload});
-      if(options.refresh!==false) refresh(db,user).catch(()=>{});
-    });
-    channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_recommendation_events",filter:"user_id=eq."+user.id},payload=>{
-      emit("event-realtime",{payload});
-      if(options.refresh!==false) refresh(db,user).catch(()=>{});
-    });
-    channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_followers",filter:"follower_id=eq."+user.id},payload=>{
-      emit("follow-realtime",{payload});
-      if(options.refresh!==false) refresh(db,user).catch(()=>{});
-    });
-    channel.subscribe();
-    return channel;
-  }
-
-  return {version:"21.5",state,subscribe,record,refresh,start,emit};
+ const listeners=new Set(),state={version:0,signals:[],surfaces:null};
+ const eventActions=new Set(["impression","open","complete","save","hide","not_interested","follow"]);
+ const feedbackMap={like:"engaged",save:"engaged",follow:"engaged",more_like_this:"less_like_this",not_interested:"not_interested",hide:"hidden"};
+ function emit(reason,payload={}){state.version++;const detail={reason,version:state.version,...payload};listeners.forEach(fn=>{try{fn(detail)}catch(e){console.warn("CrowSpace recommendation listener",e)}});document.dispatchEvent(new CustomEvent("crowspace:recommendation-update",{detail}));return detail}
+ function subscribe(fn){if(typeof fn!=="function")return()=>{};listeners.add(fn);return()=>listeners.delete(fn)}
+ async function record(db,user,type,id,action,metadata={}){if(!db||!user||!id)return{error:new Error("Missing recommendation identity")};const itemId=String(id),feedbackType=feedbackMap[action];if(!feedbackType)return{error:new Error("Unsupported feedback action")};const results={feedback:null,event:null,sideEffect:null};results.feedback=await db.from("crowspace_recommendation_feedback").insert({user_id:user.id,target_id:itemId,target_type:String(type),feedback_type:feedbackType,metadata});if(eventActions.has(action))results.event=await db.from("crowspace_recommendation_events").insert({user_id:user.id,item_type:String(type),item_id:itemId,action});if(action==="follow"&&type==="creator"&&itemId!==String(user.id)){const existing=await db.from("crowspace_followers").select("id").eq("follower_id",user.id).eq("following_id",itemId).maybeSingle();if(!existing.error&&!existing.data)results.sideEffect=await db.from("crowspace_followers").insert({follower_id:user.id,following_id:itemId})}if(action==="like"&&type==="post"){const existing=await db.from("crowspace_likes").select("id").eq("user_id",user.id).eq("post_id",itemId).maybeSingle();if(!existing.error&&!existing.data)results.sideEffect=await db.from("crowspace_likes").insert({user_id:user.id,post_id:itemId})}state.signals.push({type:String(type),id:itemId,action,at:Date.now()});emit(action,{type:String(type),id:itemId,action,metadata});return results}
+ async function refresh(db,user){if(!db||!user||!window.CrowSpaceRecommendations21_2)return null;let surfaces=await window.CrowSpaceRecommendations21_2.surfaces(db,user);const resolver=window.CrowSpaceEntityResolution21_18,pi=window.CrowSpacePreferenceIntelligence21_17,rt=window.CrowSpacePreferenceRuntime21_12;if(resolver&&pi){for(const key of Object.keys(surfaces)){if(!Array.isArray(surfaces[key]))continue;const enriched=await resolver.enrichForPreferences(db,surfaces[key]);const states=await pi.states(db,user);surfaces[key]=pi.apply(enriched,states)}}if(rt&&rt.controls().personalizationEnabled===false){}state.surfaces=surfaces;emit("refresh",{surfaces});return surfaces}
+ function start(db,user,options={}){if(!db||!user)return null;const channel=db.channel("crowspace-21-5-recommendations-"+user.id);channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_recommendation_feedback",filter:"user_id=eq."+user.id},payload=>{emit("feedback-realtime",{payload});if(options.refresh!==false)refresh(db,user).catch(()=>{})});channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_recommendation_events",filter:"user_id=eq."+user.id},payload=>{emit("event-realtime",{payload});if(options.refresh!==false)refresh(db,user).catch(()=>{})});channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_followers",filter:"follower_id=eq."+user.id},payload=>{emit("follow-realtime",{payload});if(options.refresh!==false)refresh(db,user).catch(()=>{})});channel.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_recommendation_interest_states",filter:"user_id=eq."+user.id},payload=>{emit("preference-realtime",{payload});if(options.refresh!==false)refresh(db,user).catch(()=>{})});channel.subscribe();return channel}
+ return{version:"21.18",state,subscribe,record,refresh,start,emit};
 })();
