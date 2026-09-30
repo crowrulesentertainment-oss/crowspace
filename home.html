@@ -255,37 +255,72 @@ async function loadPosts(){
 async function applyFeedRanking(){
   if(!user||!allPosts.length)return;
   try{
-    const [settings,events,prefs]=await Promise.all([
-      db.from('crowspace_discovery_settings').select('personalization_enabled,adaptive_feed_enabled,freshness_weight,familiarity_weight,exploration_weight,post_weight').eq('user_id',user.id).maybeSingle(),
-      db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(250),
-      db.from('crowspace_content_preferences').select('target_id,target_type,preference,strength').eq('user_id',user.id).limit(250)
+    const [settings,events,prefs,follows,friends,profile,feedback]=await Promise.all([
+      db.from('crowspace_discovery_settings').select('personalization_enabled,adaptive_feed_enabled,recommendations_enabled,freshness_weight,familiarity_weight,exploration_weight,post_weight,positive_signal_multiplier,negative_signal_multiplier,creator_affinity_weight').eq('user_id',user.id).maybeSingle(),
+      db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(500),
+      db.from('crowspace_content_preferences').select('target_id,target_type,preference,strength').eq('user_id',user.id).limit(500),
+      db.from('crowspace_follows').select('followed_user_id').eq('follower_id',user.id).limit(500),
+      db.from('crowspace_friendships').select('requester_id,addressee_id,status').or('requester_id.eq.'+user.id+',addressee_id.eq.'+user.id).limit(500),
+      db.from('crowspace_feed_profiles').select('weights,affinities,interest_graph').eq('user_id',user.id).maybeSingle(),
+      db.from('crowspace_recommendation_feedback').select('target_id,target_type,feedback_type,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(250)
     ]);
     const s=settings.data;
     if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false)return;
-    const ev=events.data||[], pref=prefs.data||[];
-    const author={};
-    ev.forEach(e=>{if(e.target_type==='profile'&&e.target_id){
-      const w=Number(e.weight||1);
-      const base={like:1,comment:1.5,follow:2,profile_visit:1,repeat_engagement:2,caw_view:.7,caw_complete:1.5,ignore:-1}[e.event_type]||0;
-      author[e.target_id]=(author[e.target_id]||0)+base*w;
-    }});
-    const blocked=new Set(pref.filter(p=>['hidden','not_interested'].includes(p.preference)).map(p=>String(p.target_id)));
-    const freshness=Number(s?.freshness_weight??1), familiarity=Number(s?.familiarity_weight??1), exploration=Number(s?.exploration_weight??1), postWeight=Number(s?.post_weight??1);
+    const ev=events.data||[], pref=prefs.data||[], followRows=follows.data||[], friendshipRows=friends.data||[], feedbackRows=feedback.data||[];
+    const following=new Set(followRows.map(x=>String(x.followed_user_id)).filter(Boolean));
+    const connected=new Set();
+    friendshipRows.forEach(f=>{
+      if(f.status!=='accepted')return;
+      const other=String(f.requester_id)===String(user.id)?f.addressee_id:f.requester_id;
+      if(other)connected.add(String(other));
+    });
+    const affinity={};
+    const weights=profile.data?.weights&&typeof profile.data.weights==='object'?profile.data.weights:{};
+    const eventBase={like:1,comment:1.5,follow:2,profile_visit:1,repeat_engagement:2,caw_view:.7,caw_complete:1.5,ignore:-1,search:.5};
+    ev.forEach(e=>{
+      if(!e.target_id)return;
+      const type=String(e.target_type||'').toLowerCase();
+      if(type!=='profile'&&type!=='user'&&type!=='member')return;
+      const w=Number(e.weight??1), base=Number(weights[e.event_type]??eventBase[e.event_type]??0);
+      affinity[String(e.target_id)]=(affinity[String(e.target_id)]||0)+base*w;
+    });
+    const hiddenPosts=new Set(),hiddenAuthors=new Set();
+    pref.forEach(p=>{
+      const id=String(p.target_id||''); if(!id)return;
+      const t=String(p.target_type||'').toLowerCase();
+      if(!['hidden','not_interested'].includes(p.preference))return;
+      if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id); else hiddenPosts.add(id);
+    });
+    feedbackRows.forEach(f=>{
+      const id=String(f.target_id||''); if(!id)return;
+      const t=String(f.target_type||'').toLowerCase();
+      if(['hidden','not_interested','less_like_this'].includes(f.feedback_type)){
+        if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id); else hiddenPosts.add(id);
+      }
+    });
+    const freshness=Number(s?.freshness_weight??1), familiarity=Number(s?.familiarity_weight??1), exploration=Number(s?.exploration_weight??1), postWeight=Number(s?.post_weight??1), positive=Number(s?.positive_signal_multiplier??1), negative=Number(s?.negative_signal_multiplier??1);
     const now=Date.now();
-    allPosts=allPosts.map((p,i)=>{
+    const scored=allPosts.map(p=>{
+      const authorId=String(p.user_id||'');
       const ageHours=Math.max(0,(now-new Date(p.created_at).getTime())/36e5);
       const fresh=1/(1+ageHours/12);
-      const likes=Number(p.like_count||0), comments=Number(p.comment_count||0);
-      const engagement=Math.log1p(likes+comments*1.5);
-      const familiar=author[p.user_id]||0;
-      const blockedScore=blocked.has(String(p.id))?-1000:0;
-      const explorationBoost=(i%7===0?1:0);
-      return {...p,__feedScore:(freshness*fresh)+(familiarity*familiar)+(postWeight*engagement)+(exploration*explorationBoost)+blockedScore};
+      const engagement=Math.log1p(Number(p.like_count||0)+Number(p.comment_count||0)*1.5);
+      const familiar=Number(affinity[authorId]||0);
+      const social=(following.has(authorId)?3:0)+(connected.has(authorId)?2:0);
+      const discoverBoost=(following.has(authorId)||connected.has(authorId))?0:1;
+      const blocked=(hiddenPosts.has(String(p.id))||hiddenAuthors.has(authorId))?-1000:0;
+      const signal=familiar>=0?familiar*positive:familiar*negative;
+      const score=(freshness*fresh)+(familiarity*signal)+(postWeight*engagement)+(exploration*discoverBoost)+social+blocked;
+      return {...p,__feedScore:score,__feedSocial:following.has(authorId)?'Following':connected.has(authorId)?'Friend':'Discover'};
     }).sort((a,b)=>b.__feedScore-a.__feedScore);
-    const personalized=allPosts.some(p=>p.__feedScore!==undefined);
-    $('feed-note').textContent=personalized?'Personalized ranking active · freshness + engagement + your interaction signals.':'Showing latest posts.';
+    allPosts=scored;
+    const followedCount=scored.filter(p=>p.__feedSocial==='Following').length;
+    const friendCount=scored.filter(p=>p.__feedSocial==='Friend').length;
+    const discoveryCount=scored.filter(p=>p.__feedSocial==='Discover').length;
+    $('feed-note').textContent='Social graph ranking active · '+followedCount+' following · '+friendCount+' friends · '+discoveryCount+' discovery posts.';
   }catch(e){
-    $('feed-note').textContent='Personalized ranking unavailable · showing latest posts.';
+    console.warn('[CrowSpace] social graph ranking unavailable',e);
+    $('feed-note').textContent='Social graph ranking unavailable · showing latest posts.';
   }
 }
 async function loadPersonalizedFeed(){
