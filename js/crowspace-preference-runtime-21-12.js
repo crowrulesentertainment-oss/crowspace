@@ -1,26 +1,18 @@
-/* CrowSpace 21.12 — Preference-Aware Recommendation Runtime */
+/* CrowSpace 21.12/21.14 — Persistent Preference-Aware Runtime */
 window.CrowSpacePreferenceRuntime21_12=(()=>{
- const version="21.12",KEY="crowspace-recommendation-controls",typeMap={creator:"creators",caw:"caws",event:"events",group:"groups",circle:"circles",post:"posts",project:"projects",portfolio:"projects",media:"media",media_album:"media",property:"properties"};
- const defaults={intensity:"balanced",categories:{creators:true,caws:true,events:true,groups:true,circles:true,posts:true,projects:true,media:true,properties:true},preferCreators:[],topics:[],historyEnabled:true};
- const read=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return {...defaults,...x,categories:{...defaults.categories,...(x.categories||{})}}}catch{return structuredClone(defaults)}};
- const multiplier=s=>s==="low"?.65:s==="high"?1.35:1;
+ const version="21.14",KEY="crowspace-recommendation-controls",typeMap={creator:"creators",caw:"caws",event:"events",group:"groups",circle:"circles",post:"posts",project:"projects",portfolio:"projects",media:"media",media_album:"media",property:"properties"};
+ const defaults={intensity:"balanced",categories:{creators:true,caws:true,events:true,groups:true,circles:true,posts:true,projects:true,media:true,properties:true},preferCreators:[],avoidCreators:[],topics:[],avoidTopics:[],historyEnabled:true,personalizationEnabled:true};
+ const local=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return {...defaults,...x,categories:{...defaults.categories,...(x.categories||{})}}}catch{return structuredClone(defaults)}};
+ const normalize=p=>({...defaults,...p,categories:{...defaults.categories,...(p?.categories||{})},preferCreators:p?.preferred_creators||p?.preferCreators||[],avoidCreators:p?.reduced_creators||p?.avoidCreators||[],topics:p?.preferred_topics||p?.topics||[],avoidTopics:p?.reduced_topics||p?.avoidTopics||[],historyEnabled:p?.history_enabled??p?.historyEnabled??true,personalizationEnabled:p?.personalization_enabled??p?.personalizationEnabled??true});
+ async function load(db,user){if(!db||!user)return local();const {data,error}=await db.from("crowspace_recommendation_preferences").select("*").eq("user_id",user.id).maybeSingle();if(error||!data)return local();const p=normalize(data);localStorage.setItem(KEY,JSON.stringify(p));return p}
+ async function save(db,user,next,action="updated"){const p=normalize({...local(),...next});if(db&&user){const row={user_id:user.id,discovery_intensity:p.intensity,categories:p.categories,preferred_creators:p.preferCreators,reduced_creators:p.avoidCreators,preferred_topics:p.topics,reduced_topics:p.avoidTopics,personalization_enabled:p.personalizationEnabled,history_enabled:p.historyEnabled,updated_at:new Date().toISOString()};const res=await db.from("crowspace_recommendation_preferences").upsert(row,{onConflict:"user_id"});if(!res.error)await db.from("crowspace_recommendation_preference_history").insert({user_id:user.id,action,snapshot:row});}localStorage.setItem(KEY,JSON.stringify(p));document.dispatchEvent(new CustomEvent("crowspace:recommendation-controls",{detail:p}));return p}
+ async function reset(db,user){const p=structuredClone(defaults);p.reset_at=new Date().toISOString();if(db&&user){await db.from("crowspace_recommendation_preferences").upsert({user_id:user.id,discovery_intensity:p.intensity,categories:p.categories,preferred_creators:[],reduced_creators:[],preferred_topics:[],reduced_topics:[],personalization_enabled:true,history_enabled:true,reset_at:p.reset_at,updated_at:p.reset_at},{onConflict:"user_id"});await db.from("crowspace_recommendation_preference_history").insert({user_id:user.id,action:"reset",snapshot:p})}localStorage.setItem(KEY,JSON.stringify(p));document.dispatchEvent(new CustomEvent("crowspace:recommendation-reset"));return p}
+ const multiplier=s=>s.intensity==="low"?.65:s.intensity==="high"?1.35:1;
  const allowed=(s,t)=>s.categories?.[typeMap[t]||t]!==false;
- const suppressed=(s,x)=>Array.isArray(s.suppressed)&&s.suppressed.includes(String(x.id));
- function apply(items,s=read()){
-  const m=multiplier(s);
-  return (items||[]).filter(x=>allowed(s,x.type)&&!suppressed(s,x)).map(x=>({...x,score:Number(x.score||0)*m,preferenceIntensity:s.intensity,preferenceFiltered:true})).sort((a,b)=>b.score-a.score);
- }
- async function recommend(db,user,limit=60){
-  if(!window.CrowSpaceRecommendations21_2)return [];
-  const base=await window.CrowSpaceRecommendations21_2.recommend(db,user,Math.max(limit*4,100));
-  return apply(base).slice(0,limit);
- }
- function set(next){const current=read(),merged={...current,...next,categories:{...current.categories,...(next.categories||{})}};localStorage.setItem(KEY,JSON.stringify(merged));document.dispatchEvent(new CustomEvent("crowspace:recommendation-controls",{detail:merged}));return merged}
- function reset(){localStorage.removeItem(KEY);document.dispatchEvent(new CustomEvent("crowspace:recommendation-reset"));return read()}
- function wire(){
-  const rerank=detail=>window.dispatchEvent(new CustomEvent("crowspace:recommendation-rerank",{detail:{version,controls:read(),...detail}}));
-  document.addEventListener("crowspace:recommendation-controls",e=>rerank({changed:true,source:e.detail}));
-  document.addEventListener("crowspace:recommendation-reset",()=>rerank({reset:true}));
- }
- return {version,defaults,controls:read,set,reset,apply,recommend,allowed,wire};
+ const matches=(v,a)=>a.some(x=>String(x).toLowerCase()===String(v||"").toLowerCase());
+ function apply(items,s=local()){if(s.personalizationEnabled===false)return (items||[]).filter(x=>allowed(s,x.type));const pc=new Set(s.preferCreators.map(String)),rc=new Set(s.avoidCreators.map(String)),m=multiplier(s);return (items||[]).filter(x=>allowed(s,x.type)).filter(x=>!rc.has(String(x.creator_id||x.owner_id||""))).filter(x=>!(x.topic&&matches(x.topic,s.avoidTopics))).map(x=>{let score=Number(x.score||0),reasons=[...(x.reasons||[])];if(pc.has(String(x.creator_id||x.owner_id||""))){score+=18;reasons.unshift("creator you explicitly prefer")}if(x.topic&&matches(x.topic,s.topics)){score+=12;reasons.unshift("topic you explicitly prefer")}return {...x,score:score*m,reasons:[...new Set(reasons)].slice(0,3),preferenceFiltered:true}}).sort((a,b)=>b.score-a.score)}
+ async function recommend(db,user,limit=60){if(!window.CrowSpaceRecommendations21_2)return [];const s=await load(db,user);const base=await window.CrowSpaceRecommendations21_2.recommend(db,user,Math.max(limit*4,100));return apply(base,s).slice(0,limit)}
+ function controls(){return local()}
+ function wire(){document.addEventListener("crowspace:recommendation-controls",()=>window.dispatchEvent(new CustomEvent("crowspace:recommendation-rerank",{detail:{version,controls:local()}})));document.addEventListener("crowspace:recommendation-reset",()=>window.dispatchEvent(new CustomEvent("crowspace:recommendation-rerank",{detail:{version,controls:local(),reset:true}})))}
+ return {version,defaults,controls,load,save,reset,apply,recommend,allowed,wire};
 })();
