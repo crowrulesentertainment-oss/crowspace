@@ -42,7 +42,9 @@
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-        flowType: 'pkce'
+        flowType: 'pkce',
+        storageKey: 'crowrules-universal-session-v1',
+        storage: window.localStorage
       },
       global: { headers: { 'x-application-name': 'crowspace' } }
     });
@@ -58,9 +60,13 @@
     window.supabaseClient = db;
     window.db = db;
 
+    const sessionResult = await db.auth.getSession();
+    if (sessionResult.error) throw sessionResult.error;
     const authResult = await db.auth.getUser();
     if (authResult.error && authResult.error.message !== 'Auth session missing!') throw authResult.error;
-    window.CrowSpaceAuth.user = authResult.data?.user || null;
+    window.CrowSpaceAuth.session = sessionResult.data?.session || null;
+    window.CrowSpaceAuth.user = authResult.data?.user || sessionResult.data?.session?.user || null;
+    window.CrowSpaceAuth.isLoggedIn = !!window.CrowSpaceAuth.user;
 
     window.CrowSpaceAuth.refreshUser = async function () {
       const result = await db.auth.getUser();
@@ -95,7 +101,9 @@
     window.CrowSpaceAuth.signOut = function () { return db.auth.signOut(); };
 
     db.auth.onAuthStateChange(function (event, session) {
+      window.CrowSpaceAuth.session = session || null;
       window.CrowSpaceAuth.user = session?.user || null;
+      window.CrowSpaceAuth.isLoggedIn = !!window.CrowSpaceAuth.user;
       window.dispatchEvent(new CustomEvent('crowspace-auth', {
         detail: { event: event, user: window.CrowSpaceAuth.user, session: session || null }
       }));
@@ -108,7 +116,10 @@
     return db;
   }
 
-  window.CrowSpaceAuth = { ready: null, client: null, supabase: null, user: null, refreshUser: null, ensureProfile: null, signOut: null };
+  window.CrowSpaceAuth = {
+    ready: null, client: null, supabase: null, user: null, session: null,
+    isLoggedIn: false, refreshUser: null, ensureProfile: null, signOut: null
+  };
   window.CrowSpaceAuth.ready = bootstrap().catch(function (error) {
     console.error('[CrowSpace Auth] Supabase initialization failed:', error);
     window.dispatchEvent(new CustomEvent('crowspace:supabase-error', { detail: error }));
