@@ -70,7 +70,7 @@ function match(e){return (!query||[e.title,e.description,e.location,e.event_type
 function rsvpFor(id){return rsvps.find(r=>r.event_id===id)}
 function card(e){
  const r=rsvpFor(e.id), going=r?.status==='going', interested=r?.status==='interested', mine=user&&e.created_by===user.id;
- return '<div class="mini-event"><strong>'+esc(e.title||'CrowSpace Event')+'</strong><div class="mini-meta">'+fmt(e.starts_at)+' · '+esc(e.event_type||'event')+(e.is_online?' · ONLINE':'')+(live(e)?' · 🔴 LIVE':'')+'</div><div class="mini-actions">'+
+ return '<div class="mini-event" data-event-id="'+esc(e.id)+'"><strong>'+esc(e.title||'CrowSpace Event')+'</strong>'+(eventUnread[e.id]?'<span class="event-notification-indicator"><i></i>'+eventUnread[e.id]+' NEW</span>':'')+'<div class="mini-meta">'+fmt(e.starts_at)+' · '+esc(e.event_type||'event')+(e.is_online?' · ONLINE':'')+(live(e)?' · 🔴 LIVE':'')+'</div><div class="mini-actions">'+
  '<button class="'+(going?'rsvp-going':'')+'" data-rsvp="'+e.id+'" data-status="going">✓ GOING</button><button class="'+(interested?'rsvp-interest':'')+'" data-rsvp="'+e.id+'" data-status="interested">★ INTERESTED</button>'+
  '<button data-remind="'+e.id+'">🔔 REMIND</button><button onclick="location.href=\'event.html?id='+encodeURIComponent(e.id)+'\'">OPEN</button>'+(mine?'<button onclick="location.href=\'event-organizer.html?event='+encodeURIComponent(e.id)+'\'">MANAGE</button>':'')+'</div></div>'
 }
