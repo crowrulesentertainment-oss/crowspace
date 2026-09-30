@@ -258,7 +258,7 @@ async function universalSearch(db,q){
  (bo.data||[]).forEach(x=>out.push({kind:"holiday",id:x.id,title:x.display_name||x.holiday_name||"Holiday Bot",meta:"Holiday Network",body:x.bio||"",url:"holiday-bot.html?bot="+encodeURIComponent(x.slug)}));
  const botIds=new Set((bo.data||[]).map(x=>x.id));
  (bp.data||[]).filter(x=>botIds.has(x.bot_id)).forEach(x=>out.push({kind:"holiday-post",id:x.id,title:x.title||"Holiday Update",meta:new Date(x.created_at).toLocaleString(),body:x.body||"",url:"holiday-bot.html"}));
- return {term,results:out};
+ const ranked=await rankCrossSurface(out);return {term,results:ranked};
 }
 function universalSearchUI(db){
  if($("#crow-universal-search"))return;
@@ -355,7 +355,18 @@ async function botPage(db){
 async function botsPage(db){const r=await db.from("crowspace_holiday_bots").select("slug,display_name,holiday_name,bio,avatar_url,active").eq("active",true).order("display_name");$("#bots").innerHTML='<section class="hero"><div class="eyebrow">AUTOMATED ACCOUNTS</div><h1>HOLIDAY BOTS.</h1><p class="muted">Follow the personalities that keep CrowSpace moving through the year.</p></section><section class="grid" style="margin-top:16px">'+(r.data||[]).map(x=>'<article class="card pad"><a href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'"><img class="avatar" src="'+esc(avatar(x.avatar_url))+'"></a><h3><a href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'">'+esc(x.display_name)+'</a></h3><div class="muted">'+esc(x.holiday_name)+'</div><p class="muted">'+esc(x.bio||"")+'</p><a class="btn" href="holiday-bot.html?bot='+encodeURIComponent(x.slug)+'">View Profile</a></article>').join("")+'</section>'}
 document.addEventListener("DOMContentLoaded",()=>page().catch(e=>{console.error("[CrowSpace rebuild]",e);toast("CrowSpace could not load this page.")}));
 })();
-/* V50 — Algorithm Controls & Signal Tuning */
+/* V51 — Cross-Surface Algorithm Engine */
+async function crossSurfaceContext(){try{const controls=window.CrowSpaceAlgorithmControls||await getAlgorithmControls?.();let learning={};try{const u=await user();learning=JSON.parse(localStorage.getItem("crowspace_learning_"+u?.id)||"{}")}catch(e){}return {controls:controls||{},learning}}catch(e){return {controls:{},learning:{}}}}
+function crossSurfaceScore(item,ctx){const c=ctx?.controls||{},l=ctx?.learning||{},type=String(item.kind||item.target_type||item.type||"content").toLowerCase(),id=item.id||item.target_id,creator=item.user_id||item.creator_id;let s=0;
+const signal=Number(l?.[type]?.[id]||l?.content?.[id]||0);s+=signal*(signal<0?(Number(c.negative_signal_multiplier)||1):(Number(c.positive_signal_multiplier)||1))*5;
+if(type.includes("caw")||type.includes("video"))s+=(Number(c.caw_weight)||1)*3;
+if(type.includes("post"))s+=(Number(c.post_weight)||1)*3;
+if(creator)s+=Number(l?.profile?.[creator]||0)*(Number(c.creator_affinity_weight)||1)*2;
+if(item.created_at){const age=Math.max(0,(Date.now()-new Date(item.created_at).getTime())/3600000);s+=Math.max(0,24-age*.5)*(Number(c.freshness_weight)||1)}
+return s}
+async function rankCrossSurface(items,kind){const ctx=await crossSurfaceContext();return (items||[]).map((x,i)=>({...x,_crossScore:crossSurfaceScore({...x,kind},ctx),_crossIndex:i})).sort((a,b)=>b._crossScore-a._crossScore||a._crossIndex-b._crossIndex)}
+window.CrowSpaceCrossSurface={context:crossSurfaceContext,score:crossSurfaceScore,rank:rankCrossSurface};
+\n/* V50 — Algorithm Controls & Signal Tuning */
 async function getAlgorithmControls(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_get_algorithm_controls");if(r.error)throw r.error;window.CrowSpaceAlgorithmControls={...(r.data||{})};return r.data||null}catch(e){return null}}
 async function updateAlgorithmControls(s){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_update_algorithm_controls",{p_freshness:Number(s.freshness_weight),p_familiarity:Number(s.familiarity_weight),p_exploration:Number(s.exploration_weight),p_caw:Number(s.caw_weight),p_post:Number(s.post_weight),p_positive:Number(s.positive_signal_multiplier),p_negative:Number(s.negative_signal_multiplier),p_creator:Number(s.creator_affinity_weight)});if(r.error)throw r.error;window.CrowSpaceAlgorithmControls={...(r.data||{})};return r.data||null}catch(e){console.debug("Algorithm controls unavailable",e);return null}}
 async function rebuildPersonalFeed(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_rebuild_personal_feed");if(r.error)throw r.error;return r.data||null}catch(e){console.debug("Feed rebuild unavailable",e);return null}}
