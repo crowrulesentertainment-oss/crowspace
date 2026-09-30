@@ -1,3 +1,6 @@
+/* V47 — Interest & Creator Management */
+async function manageDiscoverySignal(key,delta=0,mode="adjust"){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_manage_discovery_signal",{p_key:key,p_delta:delta,p_mode:mode});if(r.error)throw r.error;window.CrowSpaceDiscoveryDashboard=r.data;return r.data}catch(e){console.debug("Discovery signal management unavailable",e);return null}}
+window.CrowSpaceDiscoveryManager={adjust:manageDiscoverySignal,remove:(key)=>manageDiscoverySignal(key,0,"remove"),reset:()=>manageDiscoverySignal("",0,"reset_all")};
 /* V46 — Personal Discovery Dashboard */
 async function loadDiscoveryDashboard(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_discovery_dashboard");if(r.error)throw r.error;window.CrowSpaceDiscoveryDashboard=r.data;return r.data}catch(e){console.debug("Discovery dashboard unavailable",e);return null}}
 window.CrowSpaceDiscoveryDashboardAPI={load:loadDiscoveryDashboard};
