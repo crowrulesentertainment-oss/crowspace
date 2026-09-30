@@ -1,3 +1,18 @@
+/* V36 — Cross-Device Learning Sync */
+async function syncLearningProfile(){
+ try{
+  const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;
+  const r=await db.rpc("crowspace_sync_learning_profile");if(r.error)throw r.error;
+  const s=await db.rpc("crowspace_learning_snapshot");if(s.error)throw s.error;
+  const snap=s.data||{};if(window.user?.id){
+   localStorage.setItem("crowspace_learning_"+window.user.id,JSON.stringify({interests:snap.interests||{},creators:snap.creators||{},synced_at:snap.synced_at,version:snap.version}));
+  }
+  window.CrowSpaceLearningSync={snapshot:snap,synced:true};
+  return snap;
+ }catch(e){console.debug("CrowSpace learning sync skipped",e);return null}
+}
+window.CrowSpaceLearningSync={sync:syncLearningProfile};
+
 (function(){
 "use strict";
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
