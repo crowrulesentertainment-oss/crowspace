@@ -93,7 +93,29 @@
 .pulse-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet));transition:width .6s ease}
 .pulse-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
 @media(max-width:760px){.pulse-grid{grid-template-columns:1fr 1fr}}
-</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><style id="crow-profile-v85">
+.creator-timeline{margin-top:18px;padding:18px;border:1px solid rgba(85,239,255,.16);border-radius:16px;background:linear-gradient(145deg,#07101e,#040711);box-shadow:0 18px 55px #0008}
+.timeline-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.timeline-head h3{margin:0;font:800 12px Orbitron;color:var(--cyan);letter-spacing:.1em}
+.timeline-head span{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.timeline-filters{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.timeline-filter{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#050a14;color:var(--muted);font:700 10px Rajdhani;cursor:pointer}
+.timeline-filter.active{border-color:var(--cyan);color:var(--cyan);background:#55efff0b}
+.timeline-list{position:relative;margin-top:8px;padding-left:22px}
+.timeline-list:before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:linear-gradient(var(--cyan),var(--violet),transparent)}
+.timeline-item{position:relative;padding:0 0 16px 15px}
+.timeline-item:last-child{padding-bottom:2px}
+.timeline-item:before{content:"";position:absolute;left:-20px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px rgba(85,239,255,.55)}
+.timeline-item[data-type="connection"]:before{background:var(--violet)}
+.timeline-item[data-type="guestbook"]:before{background:var(--pink)}
+.timeline-item[data-type="milestone"]:before{background:var(--green)}
+.timeline-card{padding:12px;border:1px solid var(--line);border-radius:12px;background:#050a14}
+.timeline-card b{font-size:11px;color:var(--text)}
+.timeline-card p{margin:5px 0 0;color:#b9c8da;font-size:11px;line-height:1.5}
+.timeline-card small{display:block;margin-top:6px;color:var(--muted);font-size:9px}
+.timeline-empty{padding:18px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:11px}
+.timeline-load{display:flex;justify-content:center;margin-top:12px}
+</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -392,7 +414,31 @@ if(!app.querySelector('.creator-hub')){
       const hub=app.querySelector('.creator-hub');
       if(hub)hub.insertAdjacentElement('afterend',pulse); else hero.insertAdjacentElement('afterend',pulse);
       pulse.addEventListener('click',e=>{const b=e.target.closest('[data-pulse]');if(!b)return;if(b.dataset.pulse==='activity')document.getElementById('activity')?.scrollIntoView({behavior:'smooth',block:'start'});if(b.dataset.pulse==='studio')document.getElementById('creatorStudio')?.scrollIntoView({behavior:'smooth',block:'start'});});
-    }\n    if(!app.querySelector('.profile-quickgrid')){
+    }\n
+    if(!app.querySelector('.creator-timeline')){
+      const timeline=document.createElement('section');
+      timeline.className='creator-timeline'; timeline.id='creatorTimeline';
+      timeline.innerHTML='<div class="timeline-head"><h3>CREATOR ACTIVITY TIMELINE</h3><span>Live profile history</span></div><div class="timeline-filters"><button class="timeline-filter active" data-timeline-filter="all">ALL</button><button class="timeline-filter" data-timeline-filter="post">POSTS</button><button class="timeline-filter" data-timeline-filter="caw">CAWS</button><button class="timeline-filter" data-timeline-filter="guestbook">GUESTBOOK</button><button class="timeline-filter" data-timeline-filter="connection">CONNECTIONS</button><button class="timeline-filter" data-timeline-filter="milestone">MILESTONES</button></div><div class="timeline-list" data-timeline-list></div>';
+      const pulse=app.querySelector('.profile-pulse');
+      if(pulse)pulse.insertAdjacentElement('afterend',timeline); else {const hub=app.querySelector('.creator-hub');if(hub)hub.insertAdjacentElement('afterend',timeline);}
+      function buildTimeline(filter='all'){
+        const items=[];
+        (posts||[]).forEach(x=>items.push({type:'post',date:x.created_at,title:x.title||'CrowSpace Post',body:x.body||'New post published.'}));
+        (caws||[]).forEach(x=>items.push({type:'caw',date:x.created_at,title:x.title||'Caw published',body:'A new Caw was added to this profile.'}));
+        (guestbook||[]).forEach(x=>items.push({type:'guestbook',date:x.created_at,title:'Guestbook activity',body:x.body||x.message||'A guestbook message was added.'}));
+        (followers||[]).forEach(x=>items.push({type:'connection',date:x.created_at,title:'New follower connection',body:'A member is following this profile.'}));
+        (following||[]).forEach(x=>items.push({type:'connection',date:x.created_at,title:'New following connection',body:'This profile connected with another member.'}));
+        if(target?.created_at)items.push({type:'milestone',date:target.created_at,title:'Profile created',body:'This CrowSpace identity joined the profile network.'});
+        if(target?.updated_at && target.updated_at!==target.created_at)items.push({type:'milestone',date:target.updated_at,title:'Profile updated',body:'Profile identity and creator information were refreshed.'});
+        const shown=items.filter(x=>filter==='all'||x.type===filter).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,30);
+        const list=timeline.querySelector('[data-timeline-list]');
+        list.innerHTML=shown.length?shown.map(x=>'<article class="timeline-item" data-type="'+esc(x.type)+'"><div class="timeline-card"><b>'+esc(x.title)+'</b><p>'+esc(String(x.body).slice(0,280))+'</p><small>'+esc(x.date?new Date(x.date).toLocaleString():'Recent activity')+'</small></div></article>').join(''):'<div class="timeline-empty">No activity matches this filter yet.</div>';
+      }
+      timeline.addEventListener('click',e=>{const b=e.target.closest('[data-timeline-filter]');if(!b)return;timeline.querySelectorAll('.timeline-filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');buildTimeline(b.dataset.timelineFilter)});
+      buildTimeline();
+      timeline.dataset.ready='1';
+    }
+    if(!app.querySelector('.profile-quickgrid')){
       const q=document.createElement('div');
       q.className='profile-quickgrid';
       q.innerHTML='<a class="quick-card" href="#creatorStudio"><b>CREATOR STUDIO</b><span>Edit identity, portfolio, links and featured work.</span></a><a class="quick-card" href="#socialGraph"><b>SOCIAL GRAPH</b><span>Manage followers, following and connections.</span></a><a class="quick-card" href="#guestbook"><b>GUESTBOOK</b><span>See messages and profile activity.</span></a><a class="quick-card" href="#activity"><b>ACTIVITY</b><span>Jump into your latest profile activity.</span></a>';
