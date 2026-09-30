@@ -335,9 +335,12 @@ window.addEventListener("beforeunload",stopRealtime);
       }catch(err){b.disabled=false;toast(err.message||'Action unavailable')}
     });
   }
-  const oldRender = render;
-  window.render=function(){oldRender();enhance()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance,{once:true});else enhance();
+  const appNode=document.getElementById('app');
+  if(appNode){
+    const observer=new MutationObserver(enhance);
+    observer.observe(appNode,{childList:true,subtree:true});
+  }
+  enhance();
 })();
 
 let profileStarted=false, profileRetryTimer=null, profileWatchdog=null;
