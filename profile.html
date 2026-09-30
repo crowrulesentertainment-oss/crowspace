@@ -23,8 +23,8 @@ async function load(){
  if(requested) q=q.eq("username",requested);
  else if(user) q=q.eq("user_id",user.id);
  const pr=await q.limit(1).maybeSingle(); target=pr.data; if(user&&target.user_id!==user.id&&window.CrowSpaceLearning?.record) window.CrowSpaceLearning.record("profile_visit",target.user_id,"profile",null,2);
- if(!target){$("#profile").innerHTML='<div class="notice">Profile not found.</div>';return}
- const [fr,fo,tf,bl,posts,caws,likesMade,commentsMade,guest]=await Promise.all([
+ if(!target){$("#profile").innerHTML='<div class="notice">Profile not found.</div>';return} if(user&&target.user_id!==user.id) window.CrowSpaceLearning?.record?.("profile_visit",target.user_id,"profile",null,2)
+ const [fr,fo,tf,bl,postRows,cawRows,likesMade,commentsMade,guest]=await Promise.all([
   db.from("member_friendships").select("*").or("requester_id.eq."+target.user_id+",addressee_id.eq."+target.user_id),
   db.from("crowspace_follows").select("follower_id,followed_user_id").or("follower_id.eq."+target.user_id+",followed_user_id.eq."+target.user_id),
   db.from("crowspace_top_friends").select("friend_id,position").eq("user_id",target.user_id).order("position").limit(10),
@@ -34,7 +34,7 @@ async function load(){
   db.from("crowspace_likes").select("id,post_id,user_id,created_at").eq("user_id",target.user_id).order("created_at",{ascending:false}).limit(100),
   db.from("crowspace_comments").select("id,post_id,user_id,body,created_at").eq("user_id",target.user_id).order("created_at",{ascending:false}).limit(100)
  ]);
- friendships=fr.data||[];follows=fo.data||[];topFriends=tf.data||[];blocks=bl.data||[];posts=posts.data||[];caws=caws.data||[];guestbook=guest.data||[];
+ friendships=fr.data||[];follows=fo.data||[];topFriends=tf.data||[];blocks=bl.data||[];posts=postRows.data||[];caws=cawRows.data||[];guestbook=guest.data||[];
  const ids=[...new Set([...topFriends.map(x=>x.friend_id),...friendships.flatMap(x=>[x.requester_id,x.addressee_id]),...follows.map(x=>x.follower_id),...follows.map(x=>x.followed_user_id)].filter(x=>x&&x!==target.user_id))];
  if(ids.length){const pp=await db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url").in("user_id",ids);profiles=pp.data||[]}
  const guestIds=[...new Set(guestbook.map(x=>x.author_user_id).filter(Boolean))]; if(guestIds.length){const gp=await db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",guestIds); profiles=[...profiles,...(gp.data||[])].filter((p,i,a)=>a.findIndex(x=>x.user_id===p.user_id)===i)}
