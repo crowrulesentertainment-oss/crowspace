@@ -344,7 +344,6 @@ async function applyFeedRanking(){
     }
     allPosts=result;
     $('feed-note').textContent='V19 relationship ranking active · '+result.filter(p=>p.__feedSocial==='Following'||p.__feedSocial==='Reciprocal').length+' following · '+result.filter(p=>p.__feedSocial==='Friend').length+' friends · '+result.filter(p=>p.__feedSocial==='Friend of friend').length+' mutual-network · '+result.filter(p=>p.__feedSocial==='Discover').length+' discovery · '+new Set(result.map(p=>String(p.user_id||'')).filter(Boolean)).size+' authors.';
-    await applyRealtimeIntelligence();
   }catch(e){console.warn('[CrowSpace] relationship ranking unavailable',e);$('feed-note').textContent='Relationship ranking unavailable · showing latest posts.'}
 }
 async function loadPersonalizedFeed(){
@@ -424,7 +423,17 @@ async function boot(){
   await loadPosts();
   await loadHomePanels();
   try{
-    channel=db.channel('crowspace-home-feed').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},()=>loadPosts());
+    let refreshTimer=null;
+    const scheduleLiveRefresh=()=>{
+      clearTimeout(refreshTimer);
+      refreshTimer=setTimeout(async()=>{
+        await loadPosts();
+        await loadHomePanels();
+      },650);
+    };
+    channel=db.channel('crowspace-home-feed')
+      .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},scheduleLiveRefresh)
+      .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_feed_events'},scheduleLiveRefresh);
     await channel.subscribe();
   }catch(e){console.warn('[CrowSpace] realtime feed unavailable',e)}
 }
