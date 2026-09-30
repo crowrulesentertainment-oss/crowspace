@@ -75,7 +75,7 @@ async function badges(db,u){
  if(!u||!db)return;
  const [n,m]=await Promise.all([
   db.from('crowspace_notifications').select('id',{count:'exact',head:true}).eq('user_id',u.id).is('read_at',null),
-  db.from('crowspace_messages').select('id',{count:'exact',head:true}).eq('sender_id',u.id)
+  db.from('crowspace_conversation_members').select('conversation_id',{count:'exact',head:true}).eq('user_id',u.id).is('last_read_at',null)
  ]);
  setBadge('notifications.html',n.count||0);setBadge('messages.html',m.count||0);
 }
@@ -85,13 +85,14 @@ function setBadge(href,count){
  const b=document.createElement('span');b.className='cs-badge';b.textContent=count>99?'99+':count;a.style.position='relative';a.appendChild(b);
 }
 function accountMenu(u){
- const host=document.querySelector('.cs-account-wrap')||document.querySelector('.cs-account');if(!host)return;
+ const host=document.querySelector('.cs-account-wrap')||document.querySelector('.cs-account')||document.querySelector('.top-actions');if(!host)return;
+ host.classList.add('cs-account-wrap');
  if(host.querySelector('.cs-account-menu'))return;
  const m=document.createElement('div');m.className='cs-account-menu';
  m.innerHTML='<div class="cs-menu-label">YOUR CROWSPACE</div><a href="profile.html">◉ My Profile</a><a href="account.html">⚙ Account</a><a href="settings.html">◌ Settings</a><a href="friends.html">👥 Friends</a><a href="notifications.html">● Alerts</a><a href="messages.html">✉ Messages</a><button id="cs-signout">↪ Sign out</button>';
  host.appendChild(m);
- const trigger=host.querySelector('#cs-login')||host.querySelector('#cs-status-text');
- trigger?.addEventListener('click',e=>{if(u){e.preventDefault();m.classList.toggle('open')}});
+ const trigger=host.querySelector('#cs-login')||host.querySelector('.cs-status')||host.querySelector('a');
+ if(u)trigger?.addEventListener('click',e=>{e.preventDefault();m.classList.toggle('open')});
  document.addEventListener('click',e=>{if(!host.contains(e.target))m.classList.remove('open')});
  document.getElementById('cs-signout')?.addEventListener('click',async()=>{try{await window.CrowSpaceAuth.signOut();location.href='index.html'}catch(e){}});
 }
