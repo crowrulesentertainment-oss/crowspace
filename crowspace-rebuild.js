@@ -1,3 +1,8 @@
+/* V37 — Interest & Creator Affinity Engine */
+async function refreshAffinities(){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_refresh_affinities");if(r.error)throw r.error;window.CrowSpaceAffinity={profile:r.data||null,affinities:r.data?.affinities||{}};return window.CrowSpaceAffinity}catch(e){console.debug("CrowSpace affinity refresh skipped",e);return null}
+}
+window.CrowSpaceAffinity={refresh:refreshAffinities};
 /* V36 — Cross-Device Learning Sync */
 async function syncLearningProfile(){
  try{
