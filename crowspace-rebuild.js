@@ -424,3 +424,8 @@ window.CrowSpaceSelfCorrection={analyze:analyzeAlgorithmHealth,suggest:correctio
 function adaptiveThresholds(controls={},learning={}){const vals=Object.values(learning||{});let total=0,signals=0;for(const bucket of vals){if(bucket&&typeof bucket==="object")for(const v of Object.values(bucket)){const n=Math.abs(Number(v)||0);total+=n;if(n>0)signals++}}const activity=Math.min(1,signals/50),intensity=Math.min(1,total/100);return {engagementThreshold:Number((1.5-activity*.7).toFixed(2)),creatorThreshold:Number((2-activity*.8).toFixed(2)),explorationThreshold:Number((1.8-intensity*.5).toFixed(2)),freshnessThreshold:Number((1.5-(Number(controls.freshness_weight||1)-1)*.2).toFixed(2)),activity,signalVolume:signals,generated_at:new Date().toISOString()}}
 function adaptiveSignalGate(value,threshold=1){return Number(value||0)>=Number(threshold||1)}
 window.CrowSpaceAdaptiveThresholds={calculate:adaptiveThresholds,passes:adaptiveSignalGate};
+
+/* V58 — Signal Confidence Engine */
+function signalConfidence(value,occurrences=1,ageDays=0){const magnitude=Math.abs(Number(value)||0);const repeat=Math.min(1,Number(occurrences||1)/8);const freshness=Math.max(0,1-Math.max(0,Number(ageDays||0))/90);const confidence=Math.max(.05,Math.min(1,.2+magnitude/20*.35+repeat*.3+freshness*.15));return Number(confidence.toFixed(3))}
+function confidenceAdjustedSignal(value,occurrences=1,ageDays=0){return Number(value||0)*signalConfidence(value,occurrences,ageDays)}
+window.CrowSpaceSignalConfidence={score:signalConfidence,adjust:confidenceAdjustedSignal};
