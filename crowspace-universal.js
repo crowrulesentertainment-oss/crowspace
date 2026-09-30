@@ -11,22 +11,42 @@ const active=path=>{const p=location.pathname.split('/').pop()||'home.html';retu
 function makeLink(label,href,activeClass=''){const a=document.createElement('a');a.href=href;a.textContent=label;if(activeClass)a.className=activeClass;return a}
 function nav(){
  const old=document.querySelector('.navin'),oldNav=old?.closest('.nav'),top=document.querySelector('.topbar');
+ const groups=[
+  ['HOME',[['⌂ Home','home.html'],['✨ For You','recommendations.html'],['▣ Feed','feed.html']]],
+  ['SOCIAL',[['◉ Profile','profile.html'],['👥 Friends','friends.html'],['★ Members','members.html'],['✉ Messages','messages.html'],['● Alerts','notifications.html'],['◌ Circles','circles.html']]],
+  ['DISCOVER',[['⌕ Search','search.html'],['◇ Discover','discovery.html'],['⚡ Activity','activity.html'],['🏆 Rankings','rankings.html'],['🎂 Birthdays','birthdays.html']]],
+  ['CONTENT',[['▶ Caws','caws.html'],['▣ Groups','groups.html'],['📅 Events','events.html'],['📰 News','news.html']]],
+  ['CREATE',[['🎬 Creator Studio','creator-studio.html'],['◈ Caw Studio','caw-studio.html']]],
+  ['CROWRULES',[['🎉 Holiday Hub','holiday-hub.html'],['🤖 Holiday Bots','holiday-bots.html']]],
+  ['ACCOUNT',[['⚙ Settings','settings.html'],['◉ Account','account.html']]]
+ ];
+ const makeMenu=(label,items)=>{
+  const wrap=document.createElement('div');wrap.className='cs-nav-menu';
+  const btn=document.createElement('button');btn.className='cs-nav-menu-btn';btn.type='button';btn.setAttribute('aria-expanded','false');btn.innerHTML='<span>'+label+'</span><b>⌄</b>';
+  const panel=document.createElement('div');panel.className='cs-nav-dropdown';panel.setAttribute('role','menu');
+  items.forEach(([text,href])=>{const a=makeLink(text,href,active(href)?'cs-active':'');a.setAttribute('role','menuitem');panel.appendChild(a)});
+  btn.addEventListener('click',e=>{e.stopPropagation();document.querySelectorAll('.cs-nav-menu.is-open').forEach(x=>{if(x!==wrap){x.classList.remove('is-open');x.querySelector('button')?.setAttribute('aria-expanded','false')}});const open=wrap.classList.toggle('is-open');btn.setAttribute('aria-expanded',String(open))});
+  wrap.append(btn,panel);return wrap;
+ };
+ const build=(host)=>{
+  host.innerHTML='';
+  groups.forEach(([label,items])=>host.appendChild(makeMenu(label,items)));
+ };
  if(top){
-   const nav=top.querySelector('.global-nav');
-   if(nav){
-     const existing=new Set([...nav.querySelectorAll('a')].map(a=>a.getAttribute('href')));
-     links.forEach(([label,href])=>{if(!existing.has(href))nav.appendChild(makeLink(label,href,active(href)?'active':' '))});
-     injectTools(top);
-   }
-   return;
+  const nav=top.querySelector('.global-nav');
+  if(nav){build(nav);nav.classList.add('cs-organized-nav');injectTools(top);}
+  return;
  }
  const bar=document.createElement('header');bar.className='cs-globalbar';
  bar.innerHTML='<div class="cs-globalbar-inner"><a class="cs-brand" href="home.html">CROW<span>SPACE</span></a><nav class="cs-nav" aria-label="Universal CrowSpace navigation"></nav><div class="cs-universal-tools"><button class="cs-tool cs-desktop-search" id="cs-search-btn" aria-label="Search">⌕</button><button class="cs-tool cs-universal-mobile" id="cs-mobile-btn" aria-label="Menu">☰</button></div><div class="cs-account cs-account-wrap"><span class="cs-status"><i class="cs-dot"></i><span id="cs-status-text">CONNECTING</span></span><a href="login.html" id="cs-login">LOG IN</a><a class="cs-primary" href="signup.html" id="cs-join">JOIN</a></div></div><div class="cs-subbar"></div>';
  if(oldNav)oldNav.replaceWith(bar);else if(old)old.replaceWith(bar);else document.body.insertBefore(bar,document.body.firstChild);
- const n=bar.querySelector('.cs-nav');links.forEach(([label,href])=>n.appendChild(makeLink(label,href,active(href)?'cs-active':'')));
- const sb=bar.querySelector('.cs-subbar');sub.forEach(([label,href])=>sb.appendChild(makeLink(label,href)));
+ build(bar.querySelector('.cs-nav'));
+ const sb=bar.querySelector('.cs-subbar');
+ sub.forEach(([label,href])=>sb.appendChild(makeLink(label,href)));
  injectTools(bar);
  const community=document.querySelector('.community-links');if(community)community.style.display='none';
+ document.addEventListener('click',()=>document.querySelectorAll('.cs-nav-menu.is-open').forEach(x=>{x.classList.remove('is-open');x.querySelector('button')?.setAttribute('aria-expanded','false')}));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.cs-nav-menu.is-open').forEach(x=>x.classList.remove('is-open'))});
 }
 function injectTools(top){
  if(top.querySelector('#cs-search-btn'))return;
