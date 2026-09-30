@@ -109,6 +109,7 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
       <button id="refresh-feed" type="button" title="Refresh the feed">↻</button>
     </div>
     <input class="feed-search" id="feed-search" type="search" maxlength="80" placeholder="Search posts in this feed…">
+    <div class="tiny" id="feed-personalization" style="margin-top:7px">Personalized feed signals are ready when you sign in.</div>
     <div class="tiny" id="feed-note" style="margin-top:7px">Loading privacy-aware posts…</div>
     <div class="feeditems" id="live-feed"><div class="feed-empty"><span class="pulse">LOADING CROWSPACE…</span></div></div>
   </div>
@@ -290,6 +291,27 @@ async function safeRows(table,select,limit=8,order='created_at'){
     return q.error?[]:(q.data||[]);
   }catch(e){return[]}
 }
+async function loadPersonalizedFeed(){
+  if(!db||!user){$('feed-personalization').textContent='Sign in to personalize your CrowSpace feed.';return}
+  try{
+    const [settings,events,prefs]=await Promise.all([
+      db.from('crowspace_discovery_settings').select('personalization_enabled,adaptive_feed_enabled,recommendations_enabled,freshness_weight,familiarity_weight,exploration_weight,caw_weight,post_weight').eq('user_id',user.id).maybeSingle(),
+      db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100),
+      db.from('crowspace_content_preferences').select('target_id,target_type,preference,strength').eq('user_id',user.id).limit(100)
+    ]);
+    const s=settings.data;
+    if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false){
+      $('feed-personalization').textContent='Personalized ranking is turned off in your discovery settings. Showing latest posts.';
+      return;
+    }
+    const positive=(events.data||[]).filter(e=>['like','comment','follow','profile_visit','repeat_engagement','caw_view','caw_complete'].includes(e.event_type)).length;
+    const negative=(events.data||[]).filter(e=>['ignore'].includes(e.event_type)).length;
+    const hidden=(prefs.data||[]).filter(p=>['hidden','not_interested','less'].includes(p.preference)).length;
+    $('feed-personalization').textContent='Adaptive home active · '+positive+' positive signals · '+negative+' negative signals · '+hidden+' content preferences. Freshness, familiarity and exploration are used when available.';
+  }catch(e){
+    $('feed-personalization').textContent='Adaptive home is using the standard latest-post feed.';
+  }
+}
 async function loadHomePanels(){
   if(!db)return;
   const profiles=await safeRows('crowspace_profiles','user_id,display_name,username,avatar_url,bio,created_at',12,'created_at');
@@ -316,6 +338,7 @@ async function loadHomePanels(){
 async function refresh(){
   clearError();
   await loadPosts();
+  await loadPersonalizedFeed();
   await loadHomePanels();
 }
 async function boot(){
