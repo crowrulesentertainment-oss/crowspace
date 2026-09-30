@@ -66,7 +66,7 @@ async function loadSocial(){
  const [fo,fi,fr]=await Promise.all([
   safe(()=>db.from("crowspace_follows").select("follower_id,followed_user_id,created_at").eq("followed_user_id",uid)),
   safe(()=>db.from("crowspace_follows").select("follower_id,followed_user_id,created_at").eq("follower_id",uid)),
-  safe(()=>db.from("member_friendships").select("*").or("requester_id.eq."+uid+",addressee_id.eq."+uid))
+  safe(()=>db.from("crowspace_friendships").select("*").or("requester_id.eq."+uid+",addressee_id.eq."+uid))
  ]);
  followers=fo.data||[];following=fi.data||[];friends=(fr.data||[]).filter(x=>x.status==="accepted");
  if(me&&me.id!==uid){
@@ -74,7 +74,7 @@ async function loadSocial(){
    const [a,b,c]=await Promise.all([
     db.from("crowspace_follows").select("follower_id").eq("follower_id",me.id).eq("followed_user_id",uid).maybeSingle(),
     db.from("crowspace_follows").select("follower_id").eq("follower_id",uid).eq("followed_user_id",me.id).maybeSingle(),
-    db.from("member_friendships").select("*").or("and(requester_id.eq."+me.id+",addressee_id.eq."+uid+"),and(requester_id.eq."+uid+",addressee_id.eq."+me.id+")").maybeSingle()
+    db.from("crowspace_friendships").select("*").or("and(requester_id.eq."+me.id+",addressee_id.eq."+uid+"),and(requester_id.eq."+uid+",addressee_id.eq."+me.id+")").maybeSingle()
    ]);return {following:!!a.data,followsYou:!!b.data,friendship:c.data||null}
   },{following:false,followsYou:false,friendship:null});
  }
@@ -139,9 +139,9 @@ async function act(type,button){
  button.disabled=true;let r;
  if(type==="follow")r=await db.from("crowspace_follows").insert({follower_id:me.id,followed_user_id:target.user_id});
  if(type==="unfollow")r=await db.from("crowspace_follows").delete().eq("follower_id",me.id).eq("followed_user_id",target.user_id);
- if(type==="friend")r=await db.from("member_friendships").insert({requester_id:me.id,addressee_id:target.user_id,status:"pending"});
- if(type==="accept-friend"&&relationship?.friendship)r=await db.from("member_friendships").update({status:"accepted",accepted_at:new Date().toISOString()}).eq("id",relationship.friendship.id);
- if(type==="remove-friend"&&relationship?.friendship)r=await db.from("member_friendships").delete().eq("id",relationship.friendship.id);
+ if(type==="friend")r=await db.from("crowspace_friendships").insert({requester_id:me.id,addressee_id:target.user_id,status:"pending"});
+ if(type==="accept-friend"&&relationship?.friendship)r=await db.from("crowspace_friendships").update({status:"accepted",accepted_at:new Date().toISOString()}).eq("id",relationship.friendship.id);
+ if(type==="remove-friend"&&relationship?.friendship)r=await db.from("crowspace_friendships").delete().eq("id",relationship.friendship.id);
  if(type==="block")r=await db.from("member_blocks").insert({blocker_id:me.id,blocked_id:target.user_id});
  if(r?.error){toast(r.error.message);button.disabled=false;return}
  toast("CrowSpace connection updated");await load();
@@ -185,8 +185,8 @@ function startRealtime(){
     .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_profiles",filter:"user_id=eq."+uid},p=>{if(p.eventType==="UPDATE"){target=Object.assign({},target,p.new);queueRealtimeRefresh("profile")}})
     .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"followed_user_id=eq."+uid},()=>queueRealtimeRefresh("followers"))
     .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"follower_id=eq."+uid},()=>queueRealtimeRefresh("following"))
-    .on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"requester_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
-    .on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"addressee_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_friendships",filter:"requester_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_friendships",filter:"addressee_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
     .on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocker_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
     .on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocked_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
     .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("posts"))
