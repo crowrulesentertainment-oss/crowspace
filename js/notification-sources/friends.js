@@ -1,0 +1,1 @@
+window.CrowSpaceNotificationSources=window.CrowSpaceNotificationSources||{};window.CrowSpaceNotificationSources.friends=async function(){return []};
