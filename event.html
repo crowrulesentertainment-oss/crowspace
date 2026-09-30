@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CrowSpace event"><title>Event — CrowSpace</title>
+<link rel="stylesheet" href="crowspace-rebuild.css"><link rel="stylesheet" href="crowspace-universal.css">
+<script src="crowspace-auth.js"></script><script src="crowspace-universal.js" defer></script><script src="crowspace-pages.js" defer></script>
+<script src="js/crowspace-youtube-events.js" defer></script>
+</head><body data-page="event"><main class="cs-page-shell"><section id="event-detail"><div class="cs-card">Loading event…</div></section></main>
+<script>
+document.addEventListener('DOMContentLoaded',async()=>{
+ const db=window.CrowSpaceUniversal?.db||window.CrowSpaceAuth?.client; const id=new URLSearchParams(location.search).get('id');
+ const root=document.getElementById('event-detail'); if(!db||!id){root.innerHTML='<div class="cs-card"><h2>Event unavailable</h2><p class="cs-muted">A valid CrowSpace event ID is required.</p></div>';return}
+ try{
+  const r=await db.from('crowspace_events').select('*').eq('id',id).maybeSingle(); if(r.error)throw r.error;
+  const e=r.data;if(!e){root.innerHTML='<div class="cs-card"><h2>Event not found</h2></div>';return}
+  root.innerHTML='<article class="cs-card event-card" data-event-card data-youtube-url="'+String(e.youtube_url||e.youtube||e.video_url||e.youtube_video_id||e.video_id||'').replace(/"/g,'&quot;')+'" data-event-title="'+String(e.title||e.name||'CrowSpace Event').replace(/"/g,'&quot;')+'" data-live="'+(e.is_live===true?'true':'false')+'"><div class="cs-eyebrow">CROWSPACE // EVENT</div><h1>'+String(e.title||e.name||'CrowSpace Event').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))+'</h1><p class="cs-muted">'+String(e.description||e.body||'Community event').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))+'</p><small class="cs-muted">'+String(e.starts_at||e.event_at||e.created_at||'')+'</small></article>';
+  window.CrowSpaceYouTubeEvents?.scan();
+ }catch(err){root.innerHTML='<div class="cs-card"><h2>Event could not be loaded</h2><p class="cs-muted">'+String(err.message||err).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))+'</p></div>'}
+});
+</script></body></html>
