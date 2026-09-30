@@ -4,7 +4,7 @@
 const links=[
  ['⌂ Home','home.html'],['◉ Profile','profile.html'],['⌕ Search','search.html'],['▶ Caws','caws.html'],
  ['◌ Circles','circles.html'],['👥 Friends','friends.html'],['✉ Messages','messages.html'],['● Alerts','notifications.html'],
- ['◇ Discover','discovery.html'],['★ Members','members.html'],['▣ Groups','groups.html'],['📅 Events','events.html'],['⚙ Settings','settings.html']
+ ['◇ Discover','discovery.html'],['★ Members','members.html'],['🏆 Rankings','rankings.html'],['▣ Groups','groups.html'],['📅 Events','events.html'],['⚙ Settings','settings.html']
 ];
 const sub=[['Feed','feed.html'],['Explore','explore.html'],['Holiday Bots','holiday-bots.html'],['Account','account.html'],['Caw Studio','caw-studio.html']];
 const active=path=>{const p=location.pathname.split('/').pop()||'home.html';return p===path};
@@ -136,5 +136,81 @@ window.CrowSpaceUniversal={db,user:u,social};
  .subscribe();
  }catch(e){const st=document.getElementById('cs-status-text');if(st)st.textContent='OFFLINE';overlays();mobile()}
 }
-document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth()});
+
+function relationTargetFromHref(href){
+ try{const u=new URL(href,location.href),q=u.searchParams;return q.get('user')||q.get('u')||q.get('id')||null}catch(e){return null}
+}
+async function resolveRelationshipTarget(value){
+ const db=window.CrowSpaceUniversal?.db;if(!db||!value)return null;
+ if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))return value;
+ try{const r=await db.from('crowspace_profiles').select('user_id').eq('username',value).maybeSingle();return r.data?.user_id||null}catch(e){return null}
+}
+async function dbSafe(table,select,filter){
+ const db=window.CrowSpaceUniversal?.db;if(!db)return [];
+ try{let q=db.from(table).select(select);if(filter)q=q.or(filter);const r=await q.limit(500);return r.data||[]}catch(e){return []}
+}
+async function relationshipState(target){
+ const api=window.CrowSpaceUniversal?.social,me=window.CrowSpaceUniversal?.user;
+ if(!api||!me||!target||me.id===target)return {self:me?.id===target,following:false,followsYou:false,friendship:null,mutual:0};
+ const [state,mine,theirs]=await Promise.all([
+  api.relationships(target),
+  dbSafe('crowspace_friendships','id,requester_id,addressee_id,status','or(requester_id.eq.'+me.id+',addressee_id.eq.'+me.id+')'),
+  dbSafe('crowspace_friendships','id,requester_id,addressee_id,status','or(requester_id.eq.'+target+',addressee_id.eq.'+target+')')
+ ]);
+ const mineFriends=new Set((mine||[]).filter(x=>x.status==='accepted').map(x=>x.requester_id===me.id?x.addressee_id:x.requester_id));
+ const theirFriends=new Set((theirs||[]).filter(x=>x.status==='accepted').map(x=>x.requester_id===target?x.addressee_id:x.requester_id));
+ let mutual=0;mineFriends.forEach(x=>{if(theirFriends.has(x))mutual++});
+ return {...state,mutual};
+}
+function relationButton(target,state){
+ const me=window.CrowSpaceUniversal?.user;
+ if(!me)return '<a class="cs-rel-btn" href="login.html">Log in to connect</a>';
+ if(state.self)return '';
+ const f=state.friendship;let friendLabel='Add Friend',friendAction='friend';
+ if(f?.status==='accepted'){friendLabel='Remove Friend';friendAction='remove'}
+ else if(f?.status==='pending'&&f.addressee_id===me.id){friendLabel='Accept';friendAction='accept'}
+ else if(f?.status==='pending'){friendLabel='Request Sent';friendAction='cancel'}
+ const followLabel=state.following?'Following':'Follow',followAction=state.following?'unfollow':'follow';
+ return '<button class="cs-rel-btn '+(state.following?'is-on':'')+'" data-rel-action="'+followAction+'" data-rel-target="'+target+'">'+followLabel+'</button>'+
+ (friendLabel==='Request Sent'?'<button class="cs-rel-btn is-muted" data-rel-action="'+friendAction+'" data-rel-target="'+(f?.id||'')+'">'+friendLabel+'</button>':'<button class="cs-rel-btn '+(f?.status==='accepted'?'is-on':'')+'" data-rel-action="'+friendAction+'" data-rel-target="'+(f?.id||target)+'">'+friendLabel+'</button>');
+}
+async function mountRelationshipCard(host,target){
+ if(!host||!target||host.dataset.csRelationReady==='loading')return;
+ host.dataset.csRelationReady='loading';
+ const state=await relationshipState(target);
+ host.dataset.csTarget=target;
+ host.innerHTML='<div class="cs-rel-controls">'+relationButton(target,state)+'</div><div class="cs-rel-meta"><span>'+Number(state.mutual||0)+' mutual connections</span><span>'+(state.followsYou?'Follows you':'')+'</span></div>';
+ host.dataset.csRelationReady='1';
+ host.querySelectorAll('[data-rel-action]').forEach(btn=>btn.addEventListener('click',async()=>{
+  btn.disabled=true;const action=btn.dataset.relAction,value=btn.dataset.relTarget;let result;
+  try{
+   if(action==='follow')result=await window.CrowSpaceUniversal.social.follow(value);
+   else if(action==='unfollow')result=await window.CrowSpaceUniversal.social.unfollow(value);
+   else if(action==='friend')result=await window.CrowSpaceUniversal.social.friend(value);
+   else if(action==='accept')result=await window.CrowSpaceUniversal.social.respond(value,'accepted');
+   else if(action==='remove')result=await window.CrowSpaceUniversal.social.respond(value,'blocked');
+   else if(action==='cancel')result=await window.CrowSpaceUniversal.social.respond(value,'declined');
+  }catch(e){result={error:e}}
+  if(result?.error){btn.disabled=false;toast(result.error.message||'Connection update failed');return}
+  host.dataset.csRelationReady='';mountRelationshipCard(host,target);
+ });
+}
+function relationshipEnhance(){
+ const db=window.CrowSpaceUniversal?.db,me=window.CrowSpaceUniversal?.user;if(!db)return;
+ const urlTarget=relationTargetFromHref(location.href);
+ if(urlTarget&&me)resolveRelationshipTarget(urlTarget).then(t=>{
+  if(!t||t===me.id)return;
+  let dock=document.getElementById('cs-profile-relationship');
+  if(!dock){dock=document.createElement('section');dock.id='cs-profile-relationship';dock.className='cs-relationship-dock';const main=document.querySelector('main')||document.body;main.prepend(dock)}
+  mountRelationshipCard(dock,t);
+ });
+ document.querySelectorAll('a[href*="profile.html"]').forEach(a=>{
+  const value=relationTargetFromHref(a.href);if(!value||a.dataset.csRelationLink)return;a.dataset.csRelationLink='1';
+  const wrap=document.createElement('span');wrap.className='cs-rel-link-wrap';a.parentNode?.insertBefore(wrap,a);wrap.appendChild(a);
+  const controls=document.createElement('span');controls.className='cs-inline-relation';wrap.appendChild(controls);
+  resolveRelationshipTarget(value).then(t=>{if(t&&me&&t!==me.id)mountRelationshipCard(controls,t)});
+ });
+}
+document.addEventListener('crowspace-social-update',()=>{document.querySelectorAll('.cs-inline-relation,.cs-relationship-dock').forEach(x=>{x.dataset.csRelationReady='';});relationshipEnhance();});
+\ndocument.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(relationshipEnhance,250))});
 })();
