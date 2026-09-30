@@ -25,7 +25,7 @@
 <article class="g21-card"><div class="g21-kicker">DISCOVERY STATUS</div><div id="g21-status">GRAPH READY · WAITING FOR A SEARCH NODE</div></article>
 </div></section>
 </div>
-<script src="crowspace-auth.js"></script><script src="crowspace-rebuild.js"></script><script src="js/crowspace-search.js"></script><script src="js/crowspace-discovery-19.js"></script><script src="js/crowspace-content-graph-20.js"></script><script src="js/crowspace-graph-20-1.js"></script><script src="js/crowspace-graph-21.js"></script>
+<script src="crowspace-auth.js"></script><script src="crowspace-rebuild.js"></script><script src="js/crowspace-search.js"></script><script src="js/crowspace-discovery-19.js"></script><script src="js/crowspace-content-graph-20.js"></script><script src="js/crowspace-graph-20-1.js"></script><script src="js/crowspace-graph-21.js"></script><script src="js/crowspace-discovery-21-1.js"></script>
 <script>
 (async()=>{try{
 await CrowSpaceAuth.ready; const db=CrowSpaceAuth.client,u=CrowSpaceAuth.user;
@@ -47,5 +47,9 @@ async function render(){
 }
 input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(render,250)}); input.addEventListener('change',render);
 }catch(e){console.warn('CrowSpace 21.0',e)}})();
+</script>
+
+<script>
+(async()=>{try{await CrowSpaceAuth.ready;const db=CrowSpaceAuth.client,u=CrowSpaceAuth.user;if(!db||!u)return;const path=document.createElement('section');path.id='crow211';path.innerHTML='<div class="g21-card" style="margin:18px 0"><div class="g21-kicker">CROWRULES // PERSONALIZED PATH 21.1</div><h3>YOUR DISCOVERY PATH</h3><div id="g211-path" class="g21-path">BUILDING FROM YOUR NETWORK…</div><p id="g211-note" style="opacity:.65;font-size:12px;margin-top:10px">Recommendations use follows, recommendation activity, recency and graph connections available to your account.</p></div>';document.getElementById('crow21').after(path);const p=document.getElementById('g211-path'),n=document.getElementById('g211-note');const edges=await CrowSpaceDiscovery21_1.pathways(db,u,16);p.innerHTML=edges.length?edges.map(e=>'<span class="g21-node">'+String(e.source_type).replace(/[<>]/g,'')+'</span><span class="g21-arrow">→</span><span class="g21-node">'+String(e.relation).replace(/[<>]/g,'')+'</span><span class="g21-arrow">→</span><span class="g21-node">'+String(e.target_type).replace(/[<>]/g,'')+'</span>').join(''):'<span class="g21-node">YOU</span><span class="g21-arrow">→</span><span class="g21-node">CROWSPACE</span>';if(edges.length)n.textContent='CONNECTED TO '+edges.length+' DISCOVERY PATHS FROM PEOPLE YOU FOLLOW.';}catch(e){console.warn('CrowSpace 21.1',e)}})();
 </script>
 </body></html>
