@@ -104,7 +104,7 @@ async function v34PersonalFeedLearning(){
  if(!user||!db)return;
  try{
   const r=await db.rpc("crowspace_personal_feed_signals",{p_limit:200});
-  const signals=r.data||[];
+  const signals=r.data||[];v34Signals={};signals.forEach(x=>{v34Signals[(x.target_type||"event")+":"+x.target_id]=Number(x.signal)||0});
   const byType={};signals.forEach(x=>{byType[x.target_type]=(byType[x.target_type]||0)+1});
   const host=$("#v34-learning");if(host)host.innerHTML='<div class="v34-learning"><div class="v34-card"><b>FEED LEARNING</b><small>'+signals.length+' active interest signals are shaping your For You feed.</small></div><div class="v34-card"><b>BEHAVIOR SIGNALS</b><small>'+Object.entries(byType).map(([k,v])=>esc(k)+': '+v).join(' · ')+'</small></div><div class="v34-card"><b>PRIVACY FIRST</b><small>Learning events belong to your account and are protected by Supabase RLS.</small></div></div>';
  }catch(e){console.debug("V34 learning unavailable",e)}
