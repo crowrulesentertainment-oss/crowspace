@@ -215,5 +215,6 @@ function relationshipEnhance(){
  });
 }
 document.addEventListener('crowspace-social-update',()=>{document.querySelectorAll('.cs-inline-relation,.cs-relationship-dock').forEach(x=>{x.dataset.csRelationReady='';});relationshipEnhance();});
-\ndocument.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(relationshipEnhance,250))});
+
+document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(relationshipEnhance,250))});
 })();
