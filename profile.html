@@ -115,7 +115,11 @@
 .timeline-card small{display:block;margin-top:6px;color:var(--muted);font-size:9px}
 .timeline-empty{padding:18px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:11px}
 .timeline-load{display:flex;justify-content:center;margin-top:12px}
-</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><style id="crow-profile-v89">
+.profile-editor-footer{position:sticky;bottom:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;background:linear-gradient(180deg,transparent,rgba(5,10,20,.98) 30%);border-top:1px solid var(--line)}
+.profile-save-status{font-size:10px;color:var(--muted)}.profile-save-status.saving{color:var(--cyan)}.profile-save-status.saved{color:var(--green)}.profile-save-status.error{color:var(--danger)}
+@media(max-width:760px){.profile-editor-footer{align-items:stretch;flex-direction:column}.profile-editor-footer .actions{justify-content:flex-end}}
+</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -250,7 +254,7 @@ function studioHtml(){
  '</div>'+
  '<div class="appearance-grid" style="margin-top:14px"><div><div class="upload-note" style="margin-bottom:6px">Accent Theme</div><div class="appearance-choice"><button type="button" class="btn" data-theme-choice="cyan">Cyan</button><button type="button" class="btn" data-theme-choice="violet">Violet</button><button type="button" class="btn" data-theme-choice="rose">Rose</button><button type="button" class="btn" data-theme-choice="emerald">Emerald</button><button type="button" class="btn" data-theme-choice="gold">Gold</button></div></div><div><div class="upload-note" style="margin-bottom:6px">Layout</div><div class="appearance-choice"><button type="button" class="btn" data-layout-choice="standard">Standard</button><button type="button" class="btn" data-layout-choice="wide">Wide</button><button type="button" class="btn" data-layout-choice="compact">Compact</button><button type="button" class="btn" data-layout-choice="minimal">Minimal</button></div></div></div>'+
  '<div class="appearance-preview" style="margin-top:10px"><div class="mini-banner"></div><div><b>Live creator profile</b><div class="upload-note">Identity, creator role, social links, featured work and badge order save with the existing Supabase profile.</div></div></div>'+
- '<div class="actions" style="margin-top:12px"><button class="btn primary" id="saveProfile">Save Creator Profile</button></div></section></div></section></div>';
+ '<div class="profile-editor-footer"><span class="profile-save-status" id="profileSaveStatus">Ready to edit • changes are not saved until you press Save.</span><div class="actions"><button class="btn" type="button" data-profile-edit-close>Cancel</button><button class="btn primary" id="saveProfile">Save Creator Profile</button></div></div></section></div></section></div>';
 }
 function normalizeSocialLinks(value){
  if(!value)return [];
