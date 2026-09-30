@@ -46,7 +46,7 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
 #post-preview.active{animation:composerPreviewIn .2s ease-out}
 @keyframes composerPreviewIn{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.post-draft-status.syncing{animation:none}#post-preview.active{animation:none}}
-</style></head>
+</style><style id="crow-home-v108">.my-posts-list{display:grid;gap:7px}.my-post-row{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid #ffffff0c;border-radius:9px;background:#0002}.my-post-copy{min-width:0;flex:1}.my-post-copy b{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.my-post-copy small{display:block;color:var(--muted);font-size:7px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.my-post-actions{display:flex;gap:5px}.my-post-actions button{border:1px solid var(--line);border-radius:7px;background:#ffffff06;color:var(--text);padding:6px 8px;font:800 7px Montserrat;cursor:pointer}.my-post-actions .delete{border-color:#ff7d9c33;color:#ffb3c3}.editing-banner{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:0 0 8px;padding:7px 9px;border:1px solid #9c7bff33;border-radius:8px;background:#9c7bff08;color:#dcd2ff;font-size:7px}.editing-banner button{border:0;background:none;color:var(--cyan);font:800 7px Montserrat;cursor:pointer}@media(max-width:760px){.my-post-row{align-items:flex-start}.my-post-actions{flex-direction:column}}</style></head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
@@ -107,6 +107,8 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
     <div class="login-note" id="login-note">Sign in to post to the live CrowSpace feed.</div>
     <div id="post-error" style="display:none;margin-top:8px"></div>
   </div>
+
+  <div class="card my-posts-card" id="my-posts-card"><div class="ttl"><b>MY POSTS</b><small id="my-posts-count">0 POSTS</small></div><div id="my-posts-list" class="my-posts-list"><div class="empty-mini">Sign in to manage your posts.</div></div></div>
 
   <div class="card">
     <div class="feedhead">
@@ -226,7 +228,7 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-let db=null,user=null,allPosts=[],activeFilter='all',booted=false,channel=null,profilesCache={},feedQuery='';
+let db=null,user=null,allPosts=[],activeFilter='all',booted=false,channel=null,profilesCache={},feedQuery='',editingPostId=null;
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const initials=n=>String(n||'C').trim().slice(0,2).toUpperCase();
@@ -423,6 +425,7 @@ async function loadHomePanels(){
 async function refresh(){
   clearError();
   await loadPosts();
+  await loadMyPosts();
   await loadPersonalizedFeed();
   await loadHomePanels();
 }
@@ -455,6 +458,7 @@ async function boot(){
   const counts=await Promise.all([safeCount('crowspace_profiles'),safeCount('crowspace_posts'),safeCount('crowspace_caws')]);
   ['members','posts','caws'].forEach((id,i)=>$(id).textContent=counts[i]==null?'—':counts[i].toLocaleString());
   await loadPosts();
+  await loadMyPosts();
   await loadHomePanels();
   try{
     let refreshTimer=null;
@@ -521,15 +525,17 @@ function restorePostDraft(){
     }
   }catch(e){}
 }
+async function loadMyPosts(){const box=$('my-posts-list'),count=$('my-posts-count');if(!db||!user){box.innerHTML='<div class="empty-mini">Sign in to manage your posts.</div>';count.textContent='0 POSTS';return}try{const q=await db.from('crowspace_posts').select('id,title,body,created_at,like_count,comment_count').eq('user_id',user.id).order('created_at',{ascending:false}).limit(12);if(q.error)throw q.error;const rows=q.data||[];count.textContent=rows.length+' POST'+(rows.length===1?'':'S');box.innerHTML=rows.map(p=>'<div class="my-post-row"><div class="my-post-copy"><b>'+esc(p.title||'Untitled post')+'</b><small>'+esc(String(p.body||'').replace(/\s+/g,' ').trim().slice(0,110))+' · '+esc(ago(p.created_at))+'</small></div><div class="my-post-actions"><button type="button" data-post-action="edit" data-post-id="'+esc(p.id)+'">EDIT</button><button type="button" class="delete" data-post-action="delete" data-post-id="'+esc(p.id)+'">DELETE</button></div></div>').join('')||'<div class="empty-mini">You have not posted anything yet.</div>'}catch(e){box.innerHTML='<div class="empty-mini">Your posts could not be loaded right now.</div>';count.textContent='—'}}
+function cancelPostEdit(){editingPostId=null;resetComposer();$('post-btn').textContent='POST TO LIVE FEED';$('composer-status').textContent=user?'READY':'SIGN IN';const b=$('editing-banner');if(b)b.remove()}
+async function startPostEdit(id){if(!user||!id)return;let row=allPosts.find(x=>String(x.id)===String(id));if(!row){const q=await db.from('crowspace_posts').select('id,title,body').eq('id',id).eq('user_id',user.id).maybeSingle();if(q.error||!q.data)return showError('That post is no longer available.');row=q.data}editingPostId=String(row.id);$('post-title').value=String(row.title||'').slice(0,180);$('post-body').value=String(row.body||'').slice(0,5000);clearPostDraft();updatePostPreview();$('composer-status').textContent='EDITING';$('post-btn').textContent='SAVE EDIT';let b=$('editing-banner');if(!b){b=document.createElement('div');b.id='editing-banner';b.className='editing-banner';$('composer').prepend(b)}b.innerHTML='<span>EDITING YOUR POST</span><button type="button">CANCEL</button>';b.querySelector('button').onclick=cancelPostEdit;$('composer').scrollIntoView({behavior:'smooth',block:'center'});$('post-body').focus()}
+async function deletePost(id){if(!user||!id)return;const row=allPosts.find(x=>String(x.id)===String(id));if(!confirm('Delete '+(row?.title||'this post')+'? This cannot be undone.'))return;const q=await db.from('crowspace_posts').delete().eq('id',id).eq('user_id',user.id);if(q.error){showError(q.error.message||'Unable to delete that post.');return}allPosts=allPosts.filter(p=>String(p.id)!==String(id));if(editingPostId===String(id))cancelPostEdit();await renderFeed();await loadMyPosts();const n=Number($('posts').textContent);if(Number.isFinite(n)&&n>0)$('posts').textContent=(n-1).toLocaleString()}
 async function submit(){
   clearError();
   if(!user){location.href='login.html';return}
   const body=$('post-body').value.trim(),title=$('post-title').value.trim();
   if(!body){$('post-body').focus();showError('Write something before posting.');return}
   if(body.length>5000){$('post-body').focus();showError('Your post is over the 5,000 character limit.');return}
-  const btn=$('post-btn');btn.disabled=true;btn.textContent='POSTING…';setPostingState('syncing','SYNCING TO SUPABASE…');
-  let payload={user_id:user.id,body};if(title)payload.title=title;
-  const q=await db.from('crowspace_posts').insert(payload).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single();
+  const btn=$('post-btn');btn.disabled=true;btn.textContent=editingPostId?'SAVING…':'POSTING…';setPostingState('syncing',editingPostId?'SAVING EDIT…':'SYNCING TO SUPABASE…');let payload={body};if(title)payload.title=title;let q;if(editingPostId){q=await db.from('crowspace_posts').update(payload).eq('id',editingPostId).eq('user_id',user.id).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}else{payload.user_id=user.id;q=await db.from('crowspace_posts').insert(payload).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}
   if(q.error){
     console.error('[CrowSpace] post insert failed',q.error);
     const msg=String(q.error.message||'');
@@ -537,10 +543,7 @@ async function submit(){
     setPostingState('error','DRAFT KEPT');
     btn.disabled=false;btn.textContent='POST TO LIVE FEED';return;
   }
-  resetComposer();
-  setPostingState('live','POST LIVE ✓');btn.textContent='POSTED ✓';
-  if(q.data)allPosts=[q.data,...allPosts.filter(p=>String(p.id)!==String(q.data.id))];
-  await renderFeed();$('feed-status').textContent='READY';
+  const wasEditing=Boolean(editingPostId);editingPostId=null;resetComposer();setPostingState('live',wasEditing?'POST UPDATED ✓':'POST LIVE ✓');btn.textContent=wasEditing?'UPDATED ✓':'POSTED ✓';if(q.data)allPosts=wasEditing?allPosts.map(p=>String(p.id)===String(q.data.id)?q.data:p):[q.data,...allPosts.filter(p=>String(p.id)!==String(q.data.id))];await renderFeed();await loadMyPosts();$('feed-status').textContent='READY';
   setTimeout(()=>{btn.disabled=false;btn.textContent='POST TO LIVE FEED';$('post-draft-status').textContent='DRAFT READY'},1200);
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -548,6 +551,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const titleInput=$('post-title');ta.addEventListener('input',()=>{updatePostPreview();clearError()});titleInput.addEventListener('input',()=>{updatePostPreview();clearError()});
   $('feed-search').addEventListener('input',e=>{feedQuery=e.target.value.trim();renderFeed()});
   $('post-btn').addEventListener('click',submit);
+  $('my-posts-list').addEventListener('click',e=>{const b=e.target.closest('[data-post-action]');if(!b)return;const id=b.getAttribute('data-post-id');if(b.getAttribute('data-post-action')==='edit')startPostEdit(id);if(b.getAttribute('data-post-action')==='delete')deletePost(id)});
   $('refresh-feed').addEventListener('click',refresh);
   $('filter-all').addEventListener('click',()=>{activeFilter='all';$('filter-all').classList.add('active');$('filter-mine').classList.remove('active');renderFeed()});
   $('filter-mine').addEventListener('click',()=>{if(!user){location.href='login.html';return}activeFilter='mine';$('filter-mine').classList.add('active');$('filter-all').classList.remove('active');renderFeed()});
