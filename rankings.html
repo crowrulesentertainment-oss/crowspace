@@ -59,13 +59,14 @@ function entityRow(x,value,sub,i,href){
 function card(title,rows,label){return '<section class="rank-card"><div class="rank-title"><h2>'+title+'</h2><span>'+label+'</span></div><div class="rank-list">'+(rows||'<div class="rank-empty">No data yet.</div>')+'</div></section>'}
 async function loadRankings(){
  const db=window.CrowSpaceUniversal?.db;if(!db)return;
- const [profiles,posts,caws,follows,friends,likes,shares,points,events,groups,groupMembers,circles,circleMembers,podcasts]=await Promise.all([
+ const [profiles,posts,caws,follows,friends,likes,cawLikes,shares,points,events,groups,groupMembers,circles,circleMembers,podcasts]=await Promise.all([
   safe('crowspace_profiles','user_id,username,display_name,avatar_url,created_at',2000,'created_at'),
   safe('crowspace_posts','id,user_id,created_at,like_count,comment_count',3000,'created_at'),
   safe('crowspace_caws','id,user_id,created_at,views',3000,'created_at'),
   safe('crowspace_follows','follower_id,followed_user_id,created_at',5000,'created_at'),
   safe('crowspace_friendships','requester_id,addressee_id,status,created_at',5000,'created_at'),
   safe('crowspace_likes','user_id,post_id,created_at',5000,'created_at'),
+  safe('crowspace_caw_likes','user_id,caw_id,created_at',5000,'created_at'),
   safe('crowspace_social_interactions','user_id,target_type,target_id,interaction_type,created_at',5000,'created_at'),
   safe('crowspace_point_events','user_id,points,created_at',10000,'created_at'),
   safe('crowspace_events','id,title,description,starts_at,created_at',1000,'created_at'),
@@ -78,8 +79,18 @@ async function loadRankings(){
  const pm=new Map(profiles.map(p=>[p.user_id,p]));
  const accepted=friends.filter(f=>f.status==='accepted');
  const friendCount=new Map();accepted.forEach(f=>{friendCount.set(f.requester_id,(friendCount.get(f.requester_id)||0)+1);friendCount.set(f.addressee_id,(friendCount.get(f.addressee_id)||0)+1)});
- const followerCount=by(follows,'followed_user_id'), postCount=by(posts,'user_id'), cawCount=by(caws,'user_id'), likeCount=by(likes,'user_id');
- const shareCount=new Map();shares.filter(s=>String(s.interaction_type||'').toLowerCase()==='share').forEach(s=>shareCount.set(s.user_id,(shareCount.get(s.user_id)||0)+1));
+ const followerCount=by(follows,'followed_user_id'), postCount=by(posts,'user_id'), cawCount=by(caws,'user_id');
+ const likeCount=new Map();
+ posts.forEach(p=>likeCount.set(p.user_id,(likeCount.get(p.user_id)||0)+Number(p.like_count||0)));
+ cawLikes.forEach(l=>{const caw=caws.find(x=>x.id===l.caw_id);if(caw)likeCount.set(caw.user_id,(likeCount.get(caw.user_id)||0)+1)});
+ const shareCount=new Map();
+ shares.filter(s=>String(s.interaction_type||'').toLowerCase()==='share').forEach(s=>{
+   const targetType=String(s.target_type||'').toLowerCase(), id=s.target_id;
+   let owner=null;
+   if(targetType.includes('post'))owner=posts.find(x=>x.id===id)?.user_id;
+   if(targetType.includes('caw'))owner=caws.find(x=>x.id===id)?.user_id;
+   if(owner)shareCount.set(owner,(shareCount.get(owner)||0)+1);
+ });
  const pointsCount=new Map();points.forEach(x=>pointsCount.set(x.user_id,(pointsCount.get(x.user_id)||0)+Number(x.points||0)));
  const activity=new Map();const bump=(id,n=1)=>activity.set(id,(activity.get(id)||0)+n);
  posts.forEach(x=>bump(x.user_id,1));caws.forEach(x=>bump(x.user_id,2));likes.forEach(x=>bump(x.user_id,1));shares.forEach(x=>bump(x.user_id,2));points.forEach(x=>bump(x.user_id,1));accepted.forEach(x=>{bump(x.requester_id,1);bump(x.addressee_id,1)});
