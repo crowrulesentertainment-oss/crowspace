@@ -550,9 +550,9 @@ async function submit(){
   if(body.length>5000){$('post-body').focus();showError('Your post is over the 5,000 character limit.');return}
   const btn=$('post-btn');btn.disabled=true;btn.textContent=editingPostId?'SAVING…':'POSTING…';setPostingState('syncing',editingPostId?'SAVING EDIT…':'SYNCING TO SUPABASE…');let payload={body};if(title)payload.title=title;
   if(selectedPostMedia.length&&!editingPostId){
-    try{const media=await uploadPostMedia();if(media.length)payload.media_url=media.map(x=>x.url).join('\n')}catch(e){console.error('[CrowSpace] media upload failed',e);showError(e.message||'Unable to upload media.');setPostingState('error','MEDIA UPLOAD FAILED');btn.disabled=false;btn.textContent='POST TO LIVE FEED';return}
+    try{const media=await uploadPostMedia();if(media.length){payload.media_url=media.map(x=>x.url).join('\n');payload._media=media}}catch(e){console.error('[CrowSpace] media upload failed',e);showError(e.message||'Unable to upload media.');setPostingState('error','MEDIA UPLOAD FAILED');btn.disabled=false;btn.textContent='POST TO LIVE FEED';return}
   }
-  let q;if(editingPostId){q=await db.from('crowspace_posts').update(payload).eq('id',editingPostId).eq('user_id',user.id).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}else{payload.user_id=user.id;q=await db.from('crowspace_posts').insert(payload).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}
+  const mediaRecords=payload._media||[];delete payload._media;let q;if(editingPostId){q=await db.from('crowspace_posts').update(payload).eq('id',editingPostId).eq('user_id',user.id).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}else{payload.user_id=user.id;q=await db.from('crowspace_posts').insert(payload).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}
   if(q.error){
     console.error('[CrowSpace] post insert failed',q.error);
     if(payload.media_url&&!editingPostId)await cleanupPostMedia(postMediaUrls(payload.media_url));
@@ -561,7 +561,7 @@ async function submit(){
     setPostingState('error','DRAFT KEPT');
     btn.disabled=false;btn.textContent='POST TO LIVE FEED';return;
   }
-  const wasEditing=Boolean(editingPostId);editingPostId=null;resetComposer();clearPostMedia();setPostingState('live',wasEditing?'POST UPDATED ✓':'POST LIVE ✓');btn.textContent=wasEditing?'UPDATED ✓':'POSTED ✓';if(q.data)allPosts=wasEditing?allPosts.map(p=>String(p.id)===String(q.data.id)?q.data:p):[q.data,...allPosts.filter(p=>String(p.id)!==String(q.data.id))];await renderFeed();await loadMyPosts();$('feed-status').textContent='READY';
+  if(!wasEditingBefore){const mediaRecordsForInsert=mediaRecords.map((m,i)=>({post_id:q.data.id,user_id:user.id,media_url:m.url,storage_path:m.path,media_type:m.url.match(/\.(mp4|webm|mov)(\?|$)/i)?'video':'image',title:m.title||'',alt_text:m.alt||'',caption:m.caption||'',sort_order:i}));if(mediaRecordsForInsert.length){const mr=await db.from('crowspace_post_media').insert(mediaRecordsForInsert);if(mr.error)console.warn('[CrowSpace] media metadata save failed',mr.error)}}const wasEditingBefore=Boolean(editingPostId);editingPostId=null;resetComposer();clearPostMedia();setPostingState('live',wasEditing?'POST UPDATED ✓':'POST LIVE ✓');btn.textContent=wasEditing?'UPDATED ✓':'POSTED ✓';if(q.data)allPosts=wasEditing?allPosts.map(p=>String(p.id)===String(q.data.id)?q.data:p):[q.data,...allPosts.filter(p=>String(p.id)!==String(q.data.id))];await renderFeed();await loadMyPosts();$('feed-status').textContent='READY';
   setTimeout(()=>{btn.disabled=false;btn.textContent='POST TO LIVE FEED';$('post-draft-status').textContent='DRAFT READY'},1200);
 }
 document.addEventListener('DOMContentLoaded',()=>{
