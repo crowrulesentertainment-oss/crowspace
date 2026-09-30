@@ -29,7 +29,47 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
 @media(max-width:1100px){.layout{grid-template-columns:190px 1fr}.right{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.topbar-inner{align-items:flex-start}.brand{padding-top:7px}.global-nav{order:3;flex-basis:100%}.topbar-inner{flex-wrap:wrap}.layout{grid-template-columns:1fr}.right{grid-column:auto;grid-template-columns:1fr}.sectiongrid{grid-template-columns:1fr}.divisiongrid{grid-template-columns:repeat(2,1fr)}.feedhead{display:block}.live{display:inline-block;margin-top:8px}.metrics{grid-template-columns:repeat(2,1fr)}.composer-row{align-items:flex-start}.composer-avatar{width:36px;height:36px}.composer-foot{align-items:flex-end;flex-direction:column}.post-btn{width:100%}}@media(max-width:430px){.metrics{grid-template-columns:1fr 1fr}.divisiongrid{grid-template-columns:1fr}.shell{padding:10px}.hero{padding:20px}}
 
 .home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.home-card{padding:13px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff03;min-height:150px}.home-list{display:grid;gap:6px}.person,.story,.activity,.circle{display:flex;gap:9px;align-items:center;padding:8px;border:1px solid #ffffff08;border-radius:9px;background:#0002}.person-avatar,.story-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#087e98,#654bb3);font:800 9px Orbitron}.person-main,.story-main{min-width:0;flex:1}.person-main b,.story-main b{font-size:8px;display:block}.person-main small,.story-main small{font-size:7px;color:var(--muted);display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.follow-btn{border:1px solid var(--line);background:#ffffff06;color:var(--text);border-radius:7px;padding:5px 7px;font:800 7px Montserrat;cursor:pointer}.story-strip{display:flex;gap:9px;overflow:auto;padding:2px 0 4px}.story{min-width:108px;min-height:72px;display:block;position:relative;overflow:hidden}.story-avatar{margin-bottom:6px}.story b{font-size:7px}.story small{display:block;color:var(--muted);font-size:6px;margin-top:2px}.rank-num{font:800 10px Orbitron;color:var(--cyan);width:20px}.empty-mini{padding:14px;text-align:center;color:var(--muted);font-size:8px;border:1px dashed #ffffff12;border-radius:9px}.section-label{font:800 7px Orbitron;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase;margin:3px 0 8px}.today{border-left:2px solid var(--cyan)}.today b{font-size:9px}.today p{font-size:8px;line-height:1.5;color:var(--muted);margin:5px 0 0}.notice{padding:8px;border-radius:8px;background:#66e8ff08;border:1px solid #66e8ff15;font-size:7px;color:#b9cad8}.badge{display:inline-block;font-size:6px;padding:3px 5px;border-radius:99px;border:1px solid var(--line);color:var(--cyan);margin-left:5px}
-@media(max-width:760px){.home-grid{grid-template-columns:1fr}}
+.home-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+.layout{grid-template-columns:minmax(0,1fr) 330px;gap:16px;max-width:1420px;margin-top:16px}
+.left{display:none}
+.center{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:14px;align-content:start}
+.center>.card{margin:0}
+.center>.card:nth-child(1){grid-column:1/-1}
+.center>.card:nth-child(2){grid-column:1;grid-row:2 / span 4}
+.center>.card:nth-child(3){grid-column:2;grid-row:2}
+.center>.card:nth-child(4){grid-column:2;grid-row:3}
+.center>.card:nth-child(5){grid-column:2;grid-row:4}
+.center>.card:nth-child(6){grid-column:2;grid-row:5}
+.center>.card:nth-child(7){grid-column:2;grid-row:6}
+.center>.card:nth-child(8){grid-column:2;grid-row:7}
+.center>.card:nth-child(9){grid-column:1/-1;grid-row:8}
+.right{display:grid;gap:14px;align-content:start}
+.right .card{margin:0}
+.hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);gap:18px;align-items:center;padding:26px 30px}
+.hero .k,.hero h1,.hero p{grid-column:1}
+.hero .actions{grid-column:2;grid-row:1 / span 3;align-self:center;display:grid;grid-template-columns:1fr 1fr}
+.hero .actions .primary{grid-column:1/-1;text-align:center}
+.metrics{grid-template-columns:repeat(4,1fr)}
+.feedhead h2{font-size:22px}
+.center>.card:nth-child(2){min-height:720px}
+.center>.card:nth-child(n+3) .home-grid{grid-template-columns:1fr}
+@media(max-width:1100px){
+  .layout{grid-template-columns:1fr}
+  .center{grid-template-columns:minmax(0,1fr) minmax(260px,.7fr)}
+  .right{grid-column:1}
+  .right{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .hero{display:block;padding:20px}
+  .hero .actions{display:flex;margin-top:14px}
+  .layout{grid-template-columns:1fr}
+  .center{display:grid;grid-template-columns:1fr}
+  .center>.card{grid-column:1!important;grid-row:auto!important}
+  .center>.card:nth-child(2){min-height:0}
+  .right{grid-column:auto;grid-template-columns:1fr}
+  .home-grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 <link rel="stylesheet" href="crowspace-universal.css"><script src="crowspace-universal.js" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
