@@ -662,5 +662,8 @@ g.innerHTML=Object.keys(labels).map(k=>card(labels[k],surfaces[k]||[])).join('')
 const props=[['CrowSpace','/crowspace/'],['Dreamscapes','https://crowrulesentertainment-oss.github.io/dreamscapes/'],['Podcasting','/podcasting/'],['CrowRules TV','/crowrulestv/'],['Sports','/sports/'],['Memorials','/memorials/'],['Spectrum Awards','/spectrum/']];
 g.innerHTML+=card('EXPLORE BEYOND CROWSPACE',props.map(p=>({type:'property',id:p[0],reasons:['Part of the CrowRules universe']})).map(x=>({...x,title:x.id})));
 s.textContent='Personalized graph recommendations are active. Every recommendation includes a visible reason.';}catch(e){console.warn('CrowSpace 21.2',e);document.getElementById('crow212state').textContent='Personalized discovery is temporarily unavailable.'}})();
+</script><script src="js/crowspace-feedback-21-3.js"></script>
+<script>
+document.addEventListener("crowspace:recommendation-feedback",e=>{const d=e.detail||{};console.debug("CrowSpace 21.3 feedback",d);});
 </script></body>
 </html>
