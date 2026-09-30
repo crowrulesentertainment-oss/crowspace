@@ -83,7 +83,8 @@ function liveLayer(db,u){
  window.CrowSpaceLive={state,typing,stop:()=>state.channels.forEach(x=>db.removeChannel(x))};
  setStatus("CONNECTING");
 }
-\n
+
+
 /* V34 — Personal Feed Learning */
 async function recordFeedLearning(eventType,targetId=null,targetType=null,queryText=null,weight=1,metadata={}){
  try{const _u=await user();if(_u)learnLocal(_u.id,targetType||eventType,String(targetId||queryText||"unknown"),Number(weight)||1);const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return; await db.rpc("crowspace_record_feed_event",{p_event_type:eventType,p_target_id:targetId,p_target_type:targetType,p_query_text:queryText,p_weight:weight,p_metadata:metadata});}catch(e){console.debug("CrowSpace learning skipped",e)}
@@ -135,7 +136,8 @@ async function privacyProfileMap(db,rows,setting="profile"){
 }
 function privacyBanner(text="Some content is hidden by the owner's privacy settings."){return '<div class="card pad muted privacy-banner">🔒 '+esc(text)+'</div>'}
 
-async function universalSearch(db,q){\n const _u=await user(); if(_u&&String(q||"").trim().length>=2) recordFeedLearning("search",null,"search",String(q).trim(),1);
+async function universalSearch(db,q){
+ const _u=await user(); if(_u&&String(q||"").trim().length>=2) recordFeedLearning("search",null,"search",String(q).trim(),1);
  const term=String(q||"").trim();
  if(term.length<2)return {term,results:[]};
  const like="%"+term.replace(/[%_]/g,"\\$&")+"%";
@@ -177,11 +179,13 @@ function universalSearchUI(db){
  input.oninput=draw;
  input.onkeydown=e=>{if(e.key==="Enter"&&input.value.trim().length>=2)location.href="search.html?q="+encodeURIComponent(input.value.trim())};
  document.addEventListener("click",e=>{if(!wrap.contains(e.target))results.hidden=true});
-}\nfunction metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
+}
+function metric(label,value,detail){return '<div class="metric"><b>'+esc(value)+'</b><span>'+esc(label)+'</span><small>'+esc(detail)+'</small></div>'}
 async function page(){
  shell();const p=document.body.dataset.page,db=await auth();communityChrome(p);universalSearchUI(db);
  if(p==="index")return;
- if(p==="login"||p==="signup")return authPage(p,db);\n const liveUser=await guard();if(!liveUser)return;liveLayer(db,liveUser);
+ if(p==="login"||p==="signup")return authPage(p,db);
+ const liveUser=await guard();if(!liveUser)return;liveLayer(db,liveUser);
  if(p==="home"){const u=await guard();if(!u)return;const d=await dashboardData(db,u);$("#welcome").textContent="Welcome back, "+(u.user_metadata?.display_name||u.email?.split("@")[0]||"Crow")+".";$("#welcome").insertAdjacentHTML("afterend",'<div id="dashmetrics" class="metric-grid"></div>');$("#dashmetrics").innerHTML=metric("Community posts",d.posts,"CrowSpace-wide")+metric("Members",d.profiles,"Profiles")+metric("Your alerts",d.alerts,"Notifications")+metric("Your messages",d.messages,"Conversation records")+metric("Caws",d.caws,"Media library")+metric("Holiday Bots",d.bots,"Active automated accounts");document.querySelectorAll("[data-feed-filter]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-feed-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderFeed($("#feed"),b.dataset.feedFilter)});document.querySelectorAll("[data-personal-feed]").forEach(b=>b.onclick=async()=>{document.querySelectorAll("[data-personal-feed]").forEach(x=>x.classList.remove("active"));b.classList.add("active");await renderPersonalFeed($("#feed"),b.dataset.personalFeed)});
 $("#publish").onsubmit=async e=>{e.preventDefault();const body=$("#body").value.trim();if(!body)return;const r=await db.from("crowspace_posts").insert({user_id:u.id,body,title:$("#title").value.trim()||null});if(r.error){toast(r.error.message);return}$("#title").value="";$("#body").value="";toast("Posted to CrowSpace");await renderFeed($("#feed"))};await renderPersonalFeed($("#feed"),"for-you");return}
  if(p==="profile")return profilePage(db);
