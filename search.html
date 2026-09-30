@@ -13,5 +13,5 @@
 <div class="shell"><div id="search"></div></div>
 <script src="crowspace-auth.js"></script>
 <script src="crowspace-rebuild.js"></script>
-</body>
+<script>document.addEventListener('DOMContentLoaded',()=>{const run=window.CrowSpaceConsistency?.rank;if(!run)return;const host=document.querySelector('#results');if(!host)return;const obs=new MutationObserver(async()=>{const cards=[...host.querySelectorAll('[data-kind]')];if(!cards.length)return;const ranked=await run(cards.map((el,i)=>({id:el.dataset.id||String(i),kind:el.dataset.kind,score:Number(el.dataset.score||0),created_at:el.dataset.createdAt})), 'search','view');ranked.forEach((x,i)=>{const el=cards.find(e=>(e.dataset.id||'')===String(x.id));if(el)el.style.order=String(i)});});obs.observe(host,{childList:true,subtree:true});});</script></body>
 </html>
