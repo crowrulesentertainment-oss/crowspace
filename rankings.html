@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rankings — CrowSpace</title>
+<link rel="stylesheet" href="crowspace-rebuild.css">
+<link rel="stylesheet" href="crowspace-universal.css">
+<script src="crowspace-auth.js"></script>
+<script src="crowspace-universal.js" defer></script>
+<style>
+.rank-wrap{width:min(1440px,94vw);margin:0 auto;padding:26px 0 60px}
+.rank-hero{padding:28px;border:1px solid var(--cs-line);border-radius:20px;background:radial-gradient(circle at 80% 0,#34205a55,transparent 45%),linear-gradient(145deg,#10182c,#050812);box-shadow:0 20px 70px #0008}
+.rank-hero h1{margin:7px 0;font:900 clamp(30px,6vw,64px) Orbitron;letter-spacing:-.05em}
+.rank-hero p{max-width:800px;color:var(--cs-muted);line-height:1.65}
+.rank-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+.rank-card{border:1px solid var(--cs-line);border-radius:16px;background:var(--cs-panel);padding:15px;min-width:0}
+.rank-card.wide{grid-column:span 2}.rank-card.full{grid-column:1/-1}
+.rank-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.rank-title h2{margin:0;font:900 12px Orbitron;letter-spacing:.04em}
+.rank-title span{font-size:8px;color:var(--cs-muted)}
+.rank-list{display:grid;gap:7px}
+.rank-row{display:grid;grid-template-columns:28px 38px minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px;border:1px solid #ffffff0b;border-radius:11px;background:#ffffff03}
+.rank-num{font:900 10px Orbitron;color:var(--cs-cyan);text-align:center}
+.rank-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#087e98,#654bb3)}
+.rank-main{min-width:0}.rank-main b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-main small{display:block;color:var(--cs-muted);font-size:7px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-value{font:900 11px Orbitron;color:var(--cs-cyan);white-space:nowrap}
+.rank-link{color:inherit;text-decoration:none}
+.rank-empty{padding:16px;text-align:center;color:var(--cs-muted);border:1px dashed var(--cs-line);border-radius:10px;font-size:9px}
+.future{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.future div{padding:12px;border:1px dashed var(--cs-line);border-radius:10px;color:var(--cs-muted);font-size:9px}.future b{display:block;color:#fff;font:800 9px Orbitron;margin-bottom:4px}
+@media(max-width:980px){.rank-grid{grid-template-columns:1fr 1fr}.rank-card.wide{grid-column:span 2}}
+@media(max-width:650px){.rank-grid{grid-template-columns:1fr}.rank-card.wide{grid-column:auto}.rank-row{grid-template-columns:24px 34px minmax(0,1fr) auto}.rank-avatar{width:34px;height:34px}}
+</style>
+</head>
+<body data-page="rankings">
+<main class="rank-wrap">
+<section class="rank-hero">
+<div class="cs-eyebrow">CROWSPACE // UNIVERSAL RANKINGS</div>
+<h1>Rankings</h1>
+<p>A live snapshot of participation across CrowSpace. Rankings are calculated from the shared Supabase social graph and activity data, then refreshed automatically when social data changes.</p>
+</section>
+<div id="rankings" class="rank-grid"><section class="rank-card full"><div class="rank-empty">Loading CrowSpace rankings…</div></section></div>
+</main>
+<script>
+const esc=v=>String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const avatar=u=>u||'https://ui-avatars.com/api/?background=10172c&color=78efff&name=Crow';
+const fmt=n=>new Intl.NumberFormat().format(Number(n)||0);
+const safe=async(table,select='*',limit=2000,order=null)=>{
+ const db=window.CrowSpaceUniversal?.db;if(!db)return[];
+ try{let q=db.from(table).select(select).limit(limit);if(order)q=q.order(order,{ascending:false});const r=await q;return r.data||[]}catch(e){return[]}
+};
+const by=(arr,key)=>{const m=new Map();for(const x of arr)m.set(x[key],(m.get(x[key])||0)+1);return m};
+function personRow(p,value,sub='',i=0){
+ return '<a class="rank-row rank-link" href="profile.html?user='+encodeURIComponent(p.user_id)+'"><span class="rank-num">'+(i+1)+'</span><img class="rank-avatar" src="'+esc(avatar(p.avatar_url))+'"><span class="rank-main"><b>'+esc(p.display_name||p.username||'CrowSpace Member')+'</b><small>'+esc(sub||('@'+(p.username||'member')) )+'</small></span><span class="rank-value">'+fmt(value)+'</span></a>';
+}
+function entityRow(x,value,sub,i,href){
+ return '<a class="rank-row rank-link" href="'+esc(href||'#')+'"><span class="rank-num">'+(i+1)+'</span><span class="rank-avatar" style="display:grid;place-items:center">◆</span><span class="rank-main"><b>'+esc(x.title||x.name||'Untitled')+'</b><small>'+esc(sub||x.description||'CrowSpace')+'</small></span><span class="rank-value">'+fmt(value)+'</span></a>';
+}
+function card(title,rows,label){return '<section class="rank-card"><div class="rank-title"><h2>'+title+'</h2><span>'+label+'</span></div><div class="rank-list">'+(rows||'<div class="rank-empty">No data yet.</div>')+'</div></section>'}
+async function loadRankings(){
+ const db=window.CrowSpaceUniversal?.db;if(!db)return;
+ const [profiles,posts,caws,follows,friends,likes,shares,points,events,groups,groupMembers,circles,circleMembers,podcasts]=await Promise.all([
+  safe('crowspace_profiles','user_id,username,display_name,avatar_url,created_at',2000,'created_at'),
+  safe('crowspace_posts','id,user_id,created_at,like_count,comment_count',3000,'created_at'),
+  safe('crowspace_caws','id,user_id,created_at,views',3000,'created_at'),
+  safe('crowspace_follows','follower_id,followed_user_id,created_at',5000,'created_at'),
+  safe('crowspace_friendships','requester_id,addressee_id,status,created_at',5000,'created_at'),
+  safe('crowspace_likes','user_id,post_id,created_at',5000,'created_at'),
+  safe('crowspace_social_interactions','user_id,target_type,target_id,interaction_type,created_at',5000,'created_at'),
+  safe('crowspace_point_events','user_id,points,created_at',10000,'created_at'),
+  safe('crowspace_events','id,title,description,starts_at,created_at',1000,'created_at'),
+  safe('crowspace_groups','id,name,slug,description,created_by,created_at',1000,'created_at'),
+  safe('crowspace_group_members','group_id,user_id,created_at',5000,'created_at'),
+  safe('crowspace_circles','id,name,slug,description,created_by,created_at',1000,'created_at'),
+  safe('crowspace_circle_members','circle_id,user_id,created_at',5000,'created_at'),
+  safe('podcasts','id,title,slug,description,artwork_url,creator_id,created_at,status,listener_count,total_plays',1000,'created_at')
+ ]);
+ const pm=new Map(profiles.map(p=>[p.user_id,p]));
+ const accepted=friends.filter(f=>f.status==='accepted');
+ const friendCount=new Map();accepted.forEach(f=>{friendCount.set(f.requester_id,(friendCount.get(f.requester_id)||0)+1);friendCount.set(f.addressee_id,(friendCount.get(f.addressee_id)||0)+1)});
+ const followerCount=by(follows,'followed_user_id'), postCount=by(posts,'user_id'), cawCount=by(caws,'user_id'), likeCount=by(likes,'user_id');
+ const shareCount=new Map();shares.filter(s=>String(s.interaction_type||'').toLowerCase()==='share').forEach(s=>shareCount.set(s.user_id,(shareCount.get(s.user_id)||0)+1));
+ const pointsCount=new Map();points.forEach(x=>pointsCount.set(x.user_id,(pointsCount.get(x.user_id)||0)+Number(x.points||0)));
+ const activity=new Map();const bump=(id,n=1)=>activity.set(id,(activity.get(id)||0)+n);
+ posts.forEach(x=>bump(x.user_id,1));caws.forEach(x=>bump(x.user_id,2));likes.forEach(x=>bump(x.user_id,1));shares.forEach(x=>bump(x.user_id,2));points.forEach(x=>bump(x.user_id,1));accepted.forEach(x=>{bump(x.requester_id,1);bump(x.addressee_id,1)});
+ const sortPeople=(map,desc='')=>[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([id,v],i)=>personRow(pm.get(id)||{user_id:id},v,desc,i)).join('');
+ const newest=profiles.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map((p,i)=>personRow(p,0,'Joined '+new Date(p.created_at).toLocaleDateString(),i)).join('');
+ const newestEvents=events.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map((x,i)=>entityRow(x,new Date(x.starts_at||x.created_at).getTime()?1:0,'Created '+new Date(x.created_at).toLocaleDateString(),i,'events.html')).join('');
+ const newestGroups=groups.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map((x,i)=>entityRow(x,groupMembers.filter(m=>m.group_id===x.id).length,'New group',i,'groups.html')).join('');
+ const topGroups=groups.map(x=>({...x,__members:groupMembers.filter(m=>m.group_id===x.id).length})).sort((a,b)=>b.__members-a.__members).slice(0,10).map((x,i)=>entityRow(x,x.__members,'Members',i,'groups.html')).join('');
+ const newestCircles=circles.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map((x,i)=>entityRow(x,circleMembers.filter(m=>m.circle_id===x.id).length,'New circle',i,'circles.html')).join('');
+ const topCircles=circles.map(x=>({...x,__members:circleMembers.filter(m=>m.circle_id===x.id).length})).sort((a,b)=>b.__members-a.__members).slice(0,10).map((x,i)=>entityRow(x,x.__members,'Members',i,'circles.html')).join('');
+ const newestPodcasts=podcasts.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map((x,i)=>entityRow(x,Number(x.total_plays||x.listener_count||0),'Newest podcast · '+new Date(x.created_at).toLocaleDateString(),i,'https://github.com/crowrulesentertainment-oss/podcasting')).join('');
+ const future='<section class="rank-card full"><div class="rank-title"><h2>Future Ranks</h2><span>Ready for expansion</span></div><div class="future"><div><b>Top Caws</b>Views, likes, comments and shares.</div><div><b>Top Creators</b>Cross-division creator activity.</div><div><b>Top Circles</b>Conversation and member growth.</div><div><b>Top Groups</b>Membership and engagement.</div><div><b>Top Events</b>Attendance and activity.</div><div><b>Top Podcasts</b>Listeners, plays and episodes.</div><div><b>Top CrowPoints Earners</b>Lifetime and monthly point streams.</div><div><b>Universal CrowRules</b>Future cross-site rankings.</div></div></section>';
+ document.getElementById('rankings').innerHTML=
+ card('Newest Members',newest,'Latest joined')+
+ card('Most Active',sortPeople(activity,'Activity signals'),'Activity')+
+ card('Most Caws',sortPeople(cawCount,'Caws created'),'Caws')+
+ card('Most CrowPoints',sortPeople(pointsCount,'Lifetime point events'),'Points')+
+ card('Most Friends',sortPeople(friendCount,'Accepted friends'),'Friends')+
+ card('Most Posts',sortPeople(postCount,'Posts'),'Posts')+
+ card('Most Followers',sortPeople(followerCount,'Followers'),'Followers')+
+ card('Most Likes',sortPeople(likeCount,'Likes given'),'Likes')+
+ card('Most Shares',sortPeople(shareCount,'Shares'),'Shares')+
+ card('Newest Events',newestEvents,'Latest')+
+ card('Newest Podcasts',newestPodcasts,'Podcasting')+
+ card('Newest Groups',newestGroups,'Latest')+
+ card('Top Groups',topGroups,'Members')+
+ card('Newest Circles',newestCircles,'Latest')+
+ card('Top Circles',topCircles,'Members')+future;
+}
+document.addEventListener('crowspace-universal-ready',loadRankings);
+document.addEventListener('crowspace-social-update',()=>setTimeout(loadRankings,250));
+</script>
+</body>
+</html>
