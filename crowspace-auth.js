@@ -83,19 +83,27 @@
 
       const meta = u.user_metadata || {};
       const displayName = String(meta.display_name || meta.full_name || meta.name || u.email?.split('@')[0] || 'Crow Member').trim().slice(0, 80);
-      const usernameBase = displayName.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 24);
-      const username = usernameBase || ('crow' + u.id.replace(/-/g, '').slice(0, 10));
+      const base = (displayName.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20) || 'crow');
+      const suffix = u.id.replace(/-/g, '').slice(0, 8);
+      const candidates = [base, base + '_' + suffix, 'crow_' + suffix];
 
-      const result = await db.from('crowspace_profiles').upsert(
-        { user_id: u.id, username: username, display_name: displayName },
-        { onConflict: 'user_id' }
-      ).select('user_id,username,display_name').single();
+      for (const username of candidates) {
+        const result = await db.from('crowspace_profiles').upsert(
+          { user_id: u.id, username, display_name: displayName },
+          { onConflict: 'user_id' }
+        ).select('user_id,username,display_name').single();
 
-      if (result.error) {
-        console.error('[CrowSpace Auth] Profile bootstrap failed:', result.error);
-        return null;
+        if (!result.error) return result.data;
+        const msg = String(result.error.message || '').toLowerCase();
+        const conflict = result.error.code === '23505' || msg.includes('duplicate') || msg.includes('unique');
+        if (!conflict) {
+          console.error('[CrowSpace Auth] Profile bootstrap failed:', result.error);
+          return null;
+        }
       }
-      return result.data;
+
+      console.error('[CrowSpace Auth] Could not allocate a unique username for profile', u.id);
+      return null;
     };
 
     window.CrowSpaceAuth.signOut = function () { return db.auth.signOut(); };
