@@ -8,41 +8,82 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: crowrules-universal-navigation
+  cancel-in-progress: true
+
 jobs:
   inject-universal-navigation:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Inject Universal CrowRules navigation
+      - name: Validate CrowRules / Supabase configuration
         shell: bash
         run: |
-          set -e
-          SCRIPT='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=2'
-          changed=0
-          while IFS= read -r -d '' file; do
-            if grep -Fq "$SCRIPT" "$file" || grep -Fq 'crowrules-sitewide.js' "$file"; then
-              continue
-            fi
-            if grep -qi '</head>' "$file"; then
-              python3 - "$file" "$SCRIPT" <<'PY'
-import pathlib, sys
-p=pathlib.Path(sys.argv[1])
-s=sys.argv[2]
-t=p.read_text(encoding='utf-8')
-needle='</head>'
-insert=f'<script src="{s}" defer></script>\n'
-t=t.replace(needle, insert+needle, 1) if needle in t else t
-p.write_text(t, encoding='utf-8')
-PY
-              changed=1
-            fi
-          done < <(find . -type f -name '*.html' -not -path './.git/*' -print0)
-          if [ "$changed" -eq 1 ]; then
-            git config user.name 'CrowRules Universal Navigation'
-            git config user.email 'crowrulesentertainment@gmail.com'
-            git add '*.html' || true
-            git commit -m 'Add universal CrowRules membership navigation to all pages' || true
-            git push
+          set -euo pipefail
+          SUPABASE_URL='https://cevylpnoexugwgygvtgu.supabase.co'
+          NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=3'
+          test "${SUPABASE_URL#https://}" != "$SUPABASE_URL"
+          curl -fsSI --max-time 15 "$SUPABASE_URL/rest/v1/" >/dev/null
+          curl -fsSI --max-time 15 "$NAV_URL" >/dev/null
+          echo "Supabase endpoint and universal navigation asset are reachable."
+
+      - name: Sync Universal CrowRules navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          export NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=3'
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          nav = '<script src="' + __import__('os').environ['NAV_URL'] + '" defer></script>'
+          changed = []
+
+          for path in Path('.').rglob('*.html'):
+              if '.git' in path.parts:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              original = text
+
+              # Remove stale/duplicate CrowRules sitewide script tags.
+              text = re.sub(
+                  r'\s*<script\b[^>]*src=["\'][^"\']*crowrules-sitewide\.js[^"\']*["\'][^>]*>\s*</script>',
+                  '',
+                  text,
+                  flags=re.I
+              )
+
+              # Install exactly one canonical script before </head>.
+              if re.search(r'</head>', text, flags=re.I):
+                  text = re.sub(r'</head>', nav + '\n</head>', text, count=1, flags=re.I)
+
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  changed.append(str(path))
+
+          print(f"Updated {len(changed)} HTML files.")
+          for item in changed:
+              print(" -", item)
+          PY
+
+      - name: Commit navigation changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CrowRules Universal Navigation'
+          git config user.email 'crowrulesentertainment@gmail.com'
+          git add --all -- '*.html'
+
+          if git diff --cached --quiet; then
+            echo "No navigation changes required."
+            exit 0
           fi
+
+          git commit -m 'Sync universal CrowRules navigation'
+          git push origin HEAD:main
