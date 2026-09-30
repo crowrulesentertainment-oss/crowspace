@@ -665,27 +665,25 @@ s.textContent='Personalized graph recommendations are active. Every recommendati
 </script><script src="js/crowspace-feedback-21-3.js"></script>
 <script>
 document.addEventListener("crowspace:recommendation-feedback",e=>{const d=e.detail||{};console.debug("CrowSpace 21.3 feedback",d);});
-</script><script>
-/* CrowSpace 21.4 — Adaptive Feed Re-Ranking */
+</script><script src="js/crowspace-recommendation-ui-21-5.js"></script>
+<script>
 (async()=>{try{
-await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user,db=CrowSpaceAuth.client;if(!u)return;
-const root=document.getElementById('crow212grid');if(!root)return;
-const actionButtons=(x)=>'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">'+[['like','♥ Like'],['save','🔖 Save'],['more_like_this','✨ More Like This'],['not_interested','Not Interested'],['hide','Hide']].map(a=>'<button type="button" data-rank-action="'+a[0]+'" data-rank-type="'+x.type+'" data-rank-id="'+x.id+'" style="font-size:10px;padding:6px 8px;border:1px solid #ffffff18;border-radius:9px;background:#ffffff08;color:inherit;cursor:pointer">'+a[1]+'</button>').join('')+'</div>';
-const render=async()=>{const surfaces=await CrowSpaceRecommendations21_2.surfaces(db,u), all=[...surfaces.for_you], uniq=[...new Map(all.map(x=>[x.type+':'+x.id,x])).values()].slice(0,12);const old=root.innerHTML;const current=[...root.querySelectorAll('[data-rank-type]')].map(b=>b.dataset.rankType+':'+b.dataset.rankId);if(!uniq.length)return;
-root.querySelectorAll('[data-rank-card]').forEach(n=>n.remove());
-const holder=document.createElement('div');holder.style.display='contents';holder.innerHTML=uniq.map(x=>'<article data-rank-card="1" style="padding:13px;border:1px solid #ffffff12;border-radius:13px"><b>'+String(x.type).toUpperCase()+'</b><div style="color:#8995aa;font-size:11px;margin-top:5px">Score '+Math.round(x.score)+' · '+x.reasons.join(' · ')+'</div>'+actionButtons(x)+'</article>').join('');
-root.append(...holder.children);
-};
-await render();
-root.addEventListener('click',async ev=>{const b=ev.target.closest('[data-rank-action]');if(!b)return;const type=b.dataset.rankType,id=b.dataset.rankId,action=b.dataset.rankAction;b.disabled=true;const result=await CrowSpaceRecommendationRuntime21_5.record(db,u,type,id,action);if(result?.event?.error||result?.feedback?.error){b.disabled=false;return}
-if(action==='hide'||action==='not_interested'){b.closest('[data-rank-card]')?.remove();}
-else if(action==='more_like_this'){await render();}
-else {await render();}
-document.dispatchEvent(new CustomEvent('crowspace:recommendation-feedback',{detail:{type,id,action}}));
-});
-document.addEventListener('crowspace:graph-update',()=>render());
-window.addEventListener('beforeunload',()=>{});
-}catch(e){console.warn('CrowSpace 21.4',e)}})();
-</script><script src="js/crowspace-recommendation-runtime-21-5.js"></script>
+await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user,db=CrowSpaceAuth.client,root=document.getElementById('crow212grid'),state=document.getElementById('crow212state');
+if(!u||!root)return;
+const rt=CrowSpaceRecommendationRuntime21_5,ui=CrowSpaceRecommendationUI21_5;
+const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const buttons=x=>'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">'+[['like','♥ Like'],['save','🔖 Save'],['more_like_this','✨ More Like This'],['not_interested','Not Interested'],['hide','Hide']].map(a=>'<button type="button" data-rank-action="'+a[0]+'" data-rank-type="'+x.type+'" data-rank-id="'+x.id+'" style="font-size:10px;padding:6px 8px;border:1px solid #ffffff18;border-radius:9px;background:#ffffff08;color:inherit;cursor:pointer">'+a[1]+'</button>').join('')+'</div>';
+async function render(detail={}){
+const surfaces=detail.surfaces||await rt.refresh(db,u)||{};const all=[...(surfaces.for_you||[])],uniq=[...new Map(all.map(x=>[x.type+':'+x.id,x])).values()].slice(0,12);
+if(!uniq.length){state.textContent='Your recommendation universe is learning from your activity.';return}
+root.innerHTML=uniq.map(x=>'<article data-rank-card style="padding:13px;border:1px solid #ffffff12;border-radius:13px"><b>'+esc(String(x.type).toUpperCase())+'</b><div style="color:#8995aa;font-size:11px;margin-top:5px">Score '+Math.round(x.score||0)+' · '+esc((x.reasons||[]).join(' · '))+'</div>'+buttons(x)+'</article>').join('');
+state.textContent='Live personalized discovery · sync v'+rt.state.version;
+}
+ui.register('home-recommendations',render);
+root.addEventListener('click',async e=>{const b=e.target.closest('[data-rank-action]');if(!b)return;b.disabled=true;const r=await rt.record(db,u,b.dataset.rankType,b.dataset.rankId,b.dataset.rankAction);if(r?.error||r?.feedback?.error||r?.event?.error){b.disabled=false;return}if(['hide','not_interested'].includes(b.dataset.rankAction))b.closest('[data-rank-card]')?.remove();else await render();});
+rt.start(db,u,{refresh:true});await render();
+}catch(e){console.warn('CrowSpace 21.5 Home UI',e)}})();
+</script>
+pt src="js/crowspace-recommendation-runtime-21-5.js"></script>
 </body>
 </html>
