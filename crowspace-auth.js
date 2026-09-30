@@ -57,6 +57,10 @@
     const db = createClient(sdk);
 
     window.CrowSpaceAuth.client = db;
+    if (window.CrowRulesAuth) {
+      window.CrowRulesAuth.client = db;
+      window.CrowRulesAuth.ready = Promise.resolve(db);
+    }
     window.CrowSpaceAuth.supabase = db;
     window.CrowSpaceSupabase = db;
     window.supabaseClient = db;
