@@ -115,6 +115,7 @@ async function auth(){
  unfollow: async target => db.rpc('crowspace_unfollow',{target_user:target}),
  friend: async target => db.rpc('crowspace_friend_request',{target_user:target}),
  respond: async (id,status) => db.rpc('crowspace_friend_respond',{friendship:id,new_status:status}),
+ remove: async id => db.rpc('crowspace_friend_remove',{friendship:id}),
  relationships: async target => {
    const [fwd,rev,fr] = await Promise.all([
     db.from('crowspace_follows').select('follower_id,followed_user_id').eq('follower_id',u?.id||'00000000-0000-0000-0000-000000000000').eq('followed_user_id',target),
@@ -188,7 +189,7 @@ async function mountRelationshipCard(host,target){
    else if(action==='unfollow')result=await window.CrowSpaceUniversal.social.unfollow(value);
    else if(action==='friend')result=await window.CrowSpaceUniversal.social.friend(value);
    else if(action==='accept')result=await window.CrowSpaceUniversal.social.respond(value,'accepted');
-   else if(action==='remove')result=await window.CrowSpaceUniversal.social.respond(value,'blocked');
+   else if(action==='remove')result=await window.CrowSpaceUniversal.social.remove(value);
    else if(action==='cancel')result=await window.CrowSpaceUniversal.social.respond(value,'declined');
   }catch(e){result={error:e}}
   if(result?.error){btn.disabled=false;toast(result.error.message||'Connection update failed');return}
