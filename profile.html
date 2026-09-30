@@ -45,8 +45,7 @@
 <script src="crowspace-universal.js" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -97,8 +96,7 @@ async function loadSocial(){
    ]);return {following:!!a.data,followsYou:!!b.data,friendship:c.data||null}
   },{following:false,followsYou:false,friendship:null});
  }
- const ids=[...new Set([...followers.map(x=>x.follower_id),...following.map(x=>x.followed_user_id),...friends.flatMap(x=>[x.requester_id,x.addressee_id])])].filter(x=>x!==uid);
- if(ids.length){const r=await safe(()=>db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio").in("user_id",ids));(r.data||[]).forEach(p=>profiles.set(p.user_id,p))}
+ const ids=[...new Set([...followers.map(x=>x.follower_id),...following.map(x=>x.followed_user_id),...friends.flatMap(x=>[x.requester_id,x.addressee_id])])].filter(x=>x!==uid); if(ids.length){const r=await safe(()=>db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio").in("user_id",ids));(r.data||[]).forEach(p=>profiles.set(p.user_id,p))}
 }
 async function loadContent(){
  const uid=target.user_id;
@@ -128,8 +126,7 @@ function connectionButtons(){
 }
 function render(){
  const self=me?.id===target.user_id;
- $("app").innerHTML='<section class="hero"><div class="banner" id="banner"><div class="banner-tools" id="bannerTools"></div></div><div class="hero-body"><div class="identity"><img class="avatar" src="'+esc(avatar(target.avatar_url))+'"><div><h1>'+esc(target.display_name||target.username||"CrowSpace Member")+'</h1><div class="handle">@'+esc(target.username||"member")+' · '+esc(target.creator_category||"member")+'</div></div></div><p class="bio">'+esc(target.bio||target.portfolio_bio||"Welcome to my CrowSpace profile.")+'</p><div class="actions">'+connectionButtons()+'</div></div></section>'+
- '<section class="card" style="margin-top:16px"><div class="title">CROWSPACE CONNECTIONS</div><div class="stats"><div class="stat"><b>'+friends.length+'</b><span>Friends</span></div><div class="stat"><b>'+followers.length+'</b><span>Followers</span></div><div class="stat"><b>'+following.length+'</b><span>Following</span></div><div class="stat"><b>'+posts.length+'</b><span>Posts</span></div></div></section>'+
+ $("app").innerHTML='<section class="hero"><div class="banner" id="banner"><div class="banner-tools" id="bannerTools"></div></div><div class="hero-body"><div class="identity"><img class="avatar" src="'+esc(avatar(target.avatar_url))+'"><div><h1>'+esc(target.display_name||target.username||"CrowSpace Member")+'</h1><div class="handle">@'+esc(target.username||"member")+'</div><div class="identity-meta"><span class="creator-tag">'+esc(target.creator_category||"Creator")+'</span><span class="creator-tag">CROWSPACE MEMBER</span></div></div></div>'+(target.portfolio_tagline?'<div class="tagline">'+esc(target.portfolio_tagline)+'</div>':'')+'<p class="bio">'+esc(target.bio||target.portfolio_bio||"Welcome to my CrowSpace profile.")+'</p>'+(socialHtml()?'<div class="social-row">'+socialHtml()+'</div>':'')+'<div class="actions" style="margin-top:12px">'+connectionButtons()+'</div></div></section>'+'<section class="card" style="margin-top:16px"><div class="title">CROWSPACE CONNECTIONS</div><div class="stats"><div class="stat"><b>'+friends.length+'</b><span>Friends</span></div><div class="stat"><b>'+followers.length+'</b><span>Followers</span></div><div class="stat"><b>'+following.length+'</b><span>Following</span></div><div class="stat"><b>'+posts.length+'</b><span>Posts</span></div></div></section>'+
  (self?studioHtml():"")+
  (badges.length?'<section class="card" style="margin-top:16px"><div class="title">PROFILE BADGES</div><div class="badge-strip">'+badgeOrder().map(b=>'<span class="badge-chip" title="'+esc(b.description||"")+'"><b>'+esc(b.icon||"✦")+'</b>'+esc(b.name||"Badge")+'</span>').join("")+'</div></section>':"")+publicFeaturedHtml()+
  '<div class="grid"><div>'+
@@ -197,8 +194,7 @@ function publicFeaturedHtml(){
 function bind(){
  document.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.action,b)));
  document.querySelectorAll("[data-people]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-people]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showPeople(b.dataset.people)}));
- document.querySelectorAll("[data-wall]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-wall]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showWall(b.dataset.wall)}));
- $("saveProfile")?.addEventListener("click",saveProfile);
+ document.querySelectorAll("[data-wall]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-wall]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showWall(b.dataset.wall)})); $("saveProfile")?.addEventListener("click",saveProfile);
  $("addSocialLink")?.addEventListener("click",()=>{const box=$("socialLinksEditor");if(!box)return;const empty=box.querySelector(".empty");if(empty)empty.remove();const row=document.createElement("div");row.className="link-row";row.innerHTML='<input data-social-label placeholder="Label"><input data-social-url placeholder="https://..."><button class="btn danger" type="button" data-social-remove>×</button>';box.appendChild(row);row.querySelector("[data-social-remove]").onclick=()=>row.remove()});
  document.querySelectorAll("[data-social-remove]").forEach(b=>b.addEventListener("click",()=>b.closest(".link-row")?.remove()));
  document.querySelectorAll("[data-badge-up]").forEach(b=>b.addEventListener("click",()=>moveBadge(Number(b.dataset.badgeUp),-1)));
@@ -298,7 +294,6 @@ function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&db&&target&&!realtimeChannel)startRealtime()});
 window.addEventListener("online",()=>{if(db&&target&&!realtimeChannel)startRealtime()});
 window.addEventListener("offline",()=>{document.body.dataset.realtime="offline"});
-
 window.addEventListener("beforeunload",stopRealtime);
 
 
