@@ -138,6 +138,7 @@ window.CrowSpaceUniversal={db,user:u,social};
  }catch(e){const st=document.getElementById('cs-status-text');if(st)st.textContent='OFFLINE';overlays();mobile()}
 }
 
+function toast(message){const t=document.createElement('div');t.className='cs-toast';t.textContent=message;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 function relationTargetFromHref(href){
  try{const u=new URL(href,location.href),q=u.searchParams;return q.get('user')||q.get('u')||q.get('id')||null}catch(e){return null}
 }
