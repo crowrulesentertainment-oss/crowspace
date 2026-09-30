@@ -1,3 +1,8 @@
+/* V38 — Semantic Interest Graph */
+async function refreshInterestGraph(){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_refresh_interest_graph");if(r.error)throw r.error;window.CrowSpaceInterestGraph={profile:r.data||null,graph:r.data?.interest_graph||{}};return window.CrowSpaceInterestGraph}catch(e){console.debug("CrowSpace interest graph skipped",e);return null}
+}
+window.CrowSpaceInterestGraph={refresh:refreshInterestGraph};
 /* V37 — Interest & Creator Affinity Engine */
 async function refreshAffinities(){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_refresh_affinities");if(r.error)throw r.error;window.CrowSpaceAffinity={profile:r.data||null,affinities:r.data?.affinities||{}};return window.CrowSpaceAffinity}catch(e){console.debug("CrowSpace affinity refresh skipped",e);return null}
