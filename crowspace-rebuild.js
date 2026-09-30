@@ -1,3 +1,8 @@
+/* V39 — Interest-Aware Recommendations */
+async function interestRecommendations(limit=30){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return[];const r=await db.rpc("crowspace_interest_recommendations",{p_limit:limit});if(r.error)throw r.error;window.CrowSpaceRecommendations={items:r.data||[]};return r.data||[]}catch(e){console.debug("CrowSpace recommendations skipped",e);return[]}
+}
+window.CrowSpaceRecommendations={load:interestRecommendations};
 /* V38 — Semantic Interest Graph */
 async function refreshInterestGraph(){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_refresh_interest_graph");if(r.error)throw r.error;window.CrowSpaceInterestGraph={profile:r.data||null,graph:r.data?.interest_graph||{}};return window.CrowSpaceInterestGraph}catch(e){console.debug("CrowSpace interest graph skipped",e);return null}
