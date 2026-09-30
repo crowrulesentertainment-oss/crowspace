@@ -116,13 +116,13 @@ function render(){
 function studioHtml(){
  const val=x=>esc(target[x]||"");
  const opt=(x,d)=>["public","members","friends","private"].map(v=>'<option value="'+v+'" '+((target[x]||d)===v?"selected":"")+'>'+({public:"Everyone",members:"Members",friends:"Friends",private:"Only Me"}[v])+'</option>').join("");
- return '<section class="card" style="margin-top:16px"><div class="title">PROFILE STUDIO · SUPABASE</div><div class="studio"><div class="field"><label>Display Name</label><input id="sDisplay" value="'+val("display_name")+'"></div><div class="field"><label>Profile Avatar</label><div class="avatar-upload"><img class="avatar-preview" id="avatarPreview" src="'+esc(avatar(target.avatar_url))+'" alt="Avatar preview"><div><input id="sAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="upload-note">PNG, JPG, WEBP or GIF · max 5 MB</div></div></div><input id="sAvatar" type="hidden" value="'+val("avatar_url")+'"></div><div class="field wide"><label>Bio</label><textarea id="sBio">'+val("bio")+'</textarea></div><div class="field"><label>Profile Privacy</label><select id="sProfile">'+opt("privacy_profile","public")+'</select></div><div class="field"><label>Posts Privacy</label><select id="sPosts">'+opt("privacy_posts","public")+'</select></div><div class="field"><label>Media Privacy</label><select id="sMedia">'+opt("privacy_media","public")+'</select></div><div class="field"><label>Activity Privacy</label><select id="sActivity">'+opt("privacy_activity","friends")+'</select></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" id="saveProfile">Save Profile</button></div></section>';
+ return '<section class="card" style="margin-top:16px"><div class="title">PROFILE STUDIO · SUPABASE</div><div class="studio"><div class="field"><label>Display Name</label><input id="sDisplay" value="'+val("display_name")+'"></div><div class="field"><label>Avatar URL</label><input id="sAvatar" value="'+val("avatar_url")+'"></div><div class="field wide"><label>Bio</label><textarea id="sBio">'+val("bio")+'</textarea></div><div class="field"><label>Profile Privacy</label><select id="sProfile">'+opt("privacy_profile","public")+'</select></div><div class="field"><label>Posts Privacy</label><select id="sPosts">'+opt("privacy_posts","public")+'</select></div><div class="field"><label>Media Privacy</label><select id="sMedia">'+opt("privacy_media","public")+'</select></div><div class="field"><label>Activity Privacy</label><select id="sActivity">'+opt("privacy_activity","friends")+'</select></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" id="saveProfile">Save Profile</button></div></section>';
 }
 function bind(){
  document.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.action,b)));
  document.querySelectorAll("[data-people]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-people]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showPeople(b.dataset.people)}));
  document.querySelectorAll("[data-wall]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-wall]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showWall(b.dataset.wall)}));
- $("saveProfile")?.addEventListener("click",saveProfile);\n $("sAvatarFile")?.addEventListener("change",previewAvatar);
+ $("saveProfile")?.addEventListener("click",saveProfile);$("sAvatarFile")?.addEventListener("change",previewAvatar);
 }
 async function act(type,button){
  if(!me||!target||me.id===target.user_id)return;
@@ -137,24 +137,78 @@ async function act(type,button){
  toast("CrowSpace connection updated");await load();
 }
 function previewAvatar(){const f=$("sAvatarFile")?.files?.[0];if(!f)return;if(f.size>5*1024*1024){toast("Avatar must be 5 MB or smaller");$("sAvatarFile").value="";return}if(!["image/png","image/jpeg","image/webp","image/gif"].includes(f.type)){toast("Please choose PNG, JPG, WEBP, or GIF");$("sAvatarFile").value="";return}$("avatarPreview").src=URL.createObjectURL(f)}
-async function uploadAvatar(){
- const f=$("sAvatarFile")?.files?.[0];
- if(!f)return $("sAvatar")?.value||"";
- if(f.size>5*1024*1024)throw new Error("Avatar must be 5 MB or smaller.");
- const ext={"image/png":"png","image/jpeg":"jpg","image/webp":"webp","image/gif":"gif"}[f.type];
- if(!ext)throw new Error("Avatar must be PNG, JPG, WEBP, or GIF.");
- const path=me.id+"/avatar-"+Date.now()+"."+ext;
- const up=await db.storage.from("crowspace-media").upload(path,f,{contentType:f.type,upsert:false,cacheControl:"3600"});
- if(up.error)throw up.error;
- return db.storage.from("crowspace-media").getPublicUrl(up.data.path).data.publicUrl;
+async function uploadAvatar(){const f=$("sAvatarFile")?.files?.[0];if(!f)return $("sAvatar")?.value||"";if(f.size>5*1024*1024)throw new Error("Avatar must be 5 MB or smaller.");const ext={"image/png":"png","image/jpeg":"jpg","image/webp":"webp","image/gif":"gif"}[f.type];if(!ext)throw new Error("Avatar must be PNG, JPG, WEBP, or GIF.");const path=me.id+"/avatar-"+Date.now()+"."+ext;const up=await db.storage.from("crowspace-media").upload(path,f,{contentType:f.type,upsert:false,cacheControl:"3600"});if(up.error)throw up.error;return db.storage.from("crowspace-media").getPublicUrl(up.data.path).data.publicUrl}
+async function saveProfile(){const btn=$("saveProfile");if(btn)btn.disabled=true;try{const newAvatar=await uploadAvatar();const payload={display_name:$("sDisplay").value.trim(),avatar_url:newAvatar,bio:$("sBio").value,privacy_profile:$("sProfile").value,privacy_posts:$("sPosts").value,privacy_media:$("sMedia").value,privacy_activity:$("sActivity").value};const r=await db.from("crowspace_profiles").update(payload).eq("user_id",me.id);if(r.error)throw r.error;Object.assign(target,payload);toast("Profile saved to Supabase");render();}catch(e){toast(e.message||"Avatar upload failed");}finally{if(btn)btn.disabled=false}}
+function showPeople(kind){
+ const box=$("people");let ids=[];
+ if(kind==="friends")ids=friends.flatMap(x=>[x.requester_id,x.addressee_id]).filter(x=>x!==target.user_id);
+ if(kind==="followers")ids=followers.map(x=>x.follower_id);
+ if(kind==="following")ids=following.map(x=>x.followed_user_id);
+ ids=[...new Set(ids)];box.innerHTML=ids.length?'<div class="people">'+ids.map(id=>{const p=profiles.get(id);return p?'<a class="person" href="'+profileHref(p)+'"><img src="'+esc(avatar(p.avatar_url))+'"><div><b>'+esc(p.display_name||p.username||"Member")+'</b><small>@'+esc(p.username||"member")+'</small></div></a>':""}).join("")+'</div>':'<div class="empty">No connections to display.</div>';
 }
-async function saveProfile(){
- const btn=$("saveProfile");if(btn)btn.disabled=true;
- try{
-  const newAvatar=await uploadAvatar();
-  const payload={display_name:$("sDisplay").value.trim(),avatar_url:newAvatar,bio:$("sBio").value,privacy_profile:$("sProfile").value,privacy_posts:$("sPosts").value,privacy_media:$("sMedia").value,privacy_activity:$("sActivity").value};
-  const r=await db.from("crowspace_profiles").update(payload).eq("user_id",me.id);
-  if(r.error)throw r.error;
-  Object.assign(target,payload);toast("Profile saved to Supabase");render();
- }catch(e){toast(e.message||"Avatar upload failed");}finally{if(btn)btn.disabled=false}
-}>
+function showWall(kind){
+ const box=$("wall");
+ if(kind==="posts"){box.innerHTML=posts.length?'<div class="posts">'+posts.map(p=>'<article class="post"><b>'+esc(p.title||"CrowSpace Post")+'</b><small>'+new Date(p.created_at).toLocaleString()+'</small><div class="post-body">'+esc(p.body||"")+'</div></article>').join("")+'</div>':'<div class="empty">No posts yet.</div>'}
+ else {box.innerHTML=caws.length?'<div class="posts">'+caws.map(c=>'<article class="post"><b>'+esc(c.title||"Caw")+'</b><small>'+new Date(c.created_at).toLocaleString()+'</small></article>').join("")+'</div>':'<div class="empty">No Caws yet.</div>'}
+}
+function showGuestbook(){
+ const box=$("guestbook");if(!box)return;
+ const canWrite=me&&me.id!==target.user_id&&target.allow_guestbook!==false;
+ let form=canWrite?'<div class="field" style="margin-bottom:12px"><textarea id="guestText" placeholder="Leave a message…"></textarea><button class="btn primary" id="guestSend">Sign Guestbook</button></div>':"";
+ box.innerHTML=form+(guestbook.length?guestbook.map(g=>{const p=profiles.get(g.author_id)||{};return '<div class="guest" style="margin-top:8px"><img src="'+esc(avatar(p.avatar_url))+'"><div><b>'+esc(p.display_name||p.username||"Member")+'</b><small> · '+new Date(g.created_at).toLocaleString()+'</small><div class="guest-body">'+esc(g.body||g.message||"")+'</div></div></div>'}).join(""):'<div class="empty">No guestbook messages yet.</div>');
+ $("guestSend")?.addEventListener("click",async()=>{const body=$("guestText").value.trim();if(!body)return;const r=await db.from("crowspace_guestbook").insert({profile_id:target.user_id,author_id:me.id,body});if(r.error){toast(r.error.message);return}toast("Guestbook message posted");await load()});
+}
+let realtimeChannel=null,realtimeRefreshTimer=null;
+function queueRealtimeRefresh(reason){
+  clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer=setTimeout(async()=>{try{await load();toast("Live profile updated");}catch(e){console.warn("[CrowSpace realtime]",reason,e)}},180);
+}
+function startRealtime(){
+  if(!db||!target||realtimeChannel)return;
+  const uid=target.user_id;
+  realtimeChannel=db.channel("crowspace-profile-realtime-"+uid);
+  realtimeChannel
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_profiles",filter:"user_id=eq."+uid},p=>{if(p.eventType==="UPDATE"){target=Object.assign({},target,p.new);queueRealtimeRefresh("profile")}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"followed_user_id=eq."+uid},()=>queueRealtimeRefresh("followers"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"follower_id=eq."+uid},()=>queueRealtimeRefresh("following"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"requester_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"addressee_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocker_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocked_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("posts"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_caws",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("caws"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_guestbook",filter:"profile_id=eq."+uid},()=>queueRealtimeRefresh("guestbook"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},()=>{queueRealtimeRefresh("notifications");document.dispatchEvent(new CustomEvent("crowspace-notification-live"))})
+    .subscribe((status,error)=>{
+      if(status==="SUBSCRIBED") document.body.dataset.realtime="connected";
+      if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){document.body.dataset.realtime="error";console.error("[CrowSpace realtime]",status,error)}
+    });
+}
+function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel);realtimeChannel=null}}
+window.addEventListener("beforeunload",stopRealtime);
+
+let realtimeChannel=null,realtimeRefreshTimer=null;
+function queueRealtimeRefresh(reason){clearTimeout(realtimeRefreshTimer);realtimeRefreshTimer=setTimeout(async()=>{try{await load();toast("Live profile updated")}catch(e){console.warn("[CrowSpace realtime]",reason,e)}},180)}
+function startRealtime(){if(!db||!target||realtimeChannel)return;const uid=target.user_id;realtimeChannel=db.channel("crowspace-profile-realtime-"+uid)
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_profiles",filter:"user_id=eq."+uid},p=>{if(p.eventType==="UPDATE"){target=Object.assign({},target,p.new);queueRealtimeRefresh("profile")}})
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"followed_user_id=eq."+uid},()=>queueRealtimeRefresh("followers"))
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"follower_id=eq."+uid},()=>queueRealtimeRefresh("following"))
+.on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"requester_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+.on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"addressee_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+.on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocker_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
+.on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocked_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("posts"))
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_caws",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("caws"))
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_guestbook",filter:"profile_id=eq."+uid},()=>queueRealtimeRefresh("guestbook"))
+.on("postgres_changes",{event:"*",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},()=>{queueRealtimeRefresh("notifications");document.dispatchEvent(new CustomEvent("crowspace-notification-live"))})
+.subscribe((status,error)=>{if(status==="SUBSCRIBED")document.body.dataset.realtime="connected";if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){document.body.dataset.realtime="error";console.error("[CrowSpace realtime]",status,error)}});
+}
+function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel);realtimeChannel=null}}
+window.addEventListener("beforeunload",stopRealtime);
+
+window.addEventListener("crowspace:supabase-ready",load);
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load);else load();
+})();
+</script>
+</body>
+</html>
