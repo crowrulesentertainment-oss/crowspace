@@ -27,10 +27,11 @@ jobs:
         run: |
           set -euo pipefail
           SUPABASE_URL='https://cevylpnoexugwgygvtgu.supabase.co'
+          SUPABASE_KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-' 
           NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=3'
           test "${SUPABASE_URL#https://}" != "$SUPABASE_URL"
-          curl -fsSI --max-time 15 "$SUPABASE_URL/rest/v1/" >/dev/null
-          curl -fsSI --max-time 15 "$NAV_URL" >/dev/null
+          curl -fsS --max-time 15 -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY" "$SUPABASE_URL/rest/v1/" -o /dev/null
+          curl -fsS --max-time 15 "$NAV_URL" -o /dev/null
           echo "Supabase endpoint and universal navigation asset are reachable."
 
       - name: Sync Universal CrowRules navigation
