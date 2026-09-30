@@ -29,3 +29,7 @@
 
 /* V27 — Engagement Graph */
 .cs-engagement-strip{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.cs-engagement-chip{padding:7px 9px;border:1px solid var(--cs-line);border-radius:999px;color:var(--cs-muted);font:700 8px Orbitron;background:#fff2}.cs-engagement-chip b{color:var(--cs-cyan);margin-right:3px}
+
+/* V28 — Universal Recommendation Engine */
+.cs-recommendations{margin:18px 0}.cs-reco-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cs-reco-section{border:1px solid var(--cs-line);border-radius:16px;padding:14px;background:#fff3}.cs-reco-section h3{margin:0 0 10px;font:800 11px Orbitron;letter-spacing:.08em}.cs-reco-item{display:flex;gap:10px;align-items:center;padding:10px;border-top:1px solid var(--cs-line);text-decoration:none;color:inherit}.cs-reco-item:first-of-type{border-top:0}.cs-reco-icon{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--cs-line);border-radius:9px;color:var(--cs-cyan);font-weight:900}.cs-reco-item b,.cs-reco-item small{display:block}.cs-reco-item small{margin-top:3px;color:var(--cs-muted);font-size:10px}.cs-reco-empty{color:var(--cs-muted);font-size:10px;padding:7px 0}.cs-reco-section:nth-child(3n){background:linear-gradient(135deg,#ffffff08,#ffffff02)}
+@media(max-width:760px){.cs-reco-grid{grid-template-columns:1fr}}
