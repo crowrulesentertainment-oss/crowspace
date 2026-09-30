@@ -548,7 +548,7 @@ async function submit(){
   const body=$('post-body').value.trim(),title=$('post-title').value.trim();
   if(!body){$('post-body').focus();showError('Write something before posting.');return}
   if(body.length>5000){$('post-body').focus();showError('Your post is over the 5,000 character limit.');return}
-  const btn=$('post-btn');btn.disabled=true;btn.textContent=editingPostId?'SAVING…':'POSTING…';setPostingState('syncing',editingPostId?'SAVING EDIT…':'SYNCING TO SUPABASE…');let payload={body};if(title)payload.title=title;
+  const wasEditingBefore=Boolean(editingPostId);const btn=$('post-btn');btn.disabled=true;btn.textContent=editingPostId?'SAVING…':'POSTING…';setPostingState('syncing',editingPostId?'SAVING EDIT…':'SYNCING TO SUPABASE…');let payload={body};if(title)payload.title=title;
   if(selectedPostMedia.length&&!editingPostId){
     try{const media=await uploadPostMedia();if(media.length){payload.media_url=media.map(x=>x.url).join('\n');payload._media=media}}catch(e){console.error('[CrowSpace] media upload failed',e);showError(e.message||'Unable to upload media.');setPostingState('error','MEDIA UPLOAD FAILED');btn.disabled=false;btn.textContent='POST TO LIVE FEED';return}
   }
