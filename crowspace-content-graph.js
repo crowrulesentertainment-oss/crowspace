@@ -14,7 +14,7 @@ function link(type,x){
 async function build(){
  const host=document.getElementById('cs-v25-graph');if(!host||host.dataset.ready)return;
  host.dataset.ready='loading';
- const [profiles,posts,caws,follows,friends,groups,groupMembers,circles,circleMembers,events,podcasts,feedEvents,feedback]=await Promise.all([
+ const [profiles,posts,caws,follows,friends,groups,groupMembers,circles,circleMembers,events,podcasts,feedEvents,feedback,interactions]=await Promise.all([
   read('crowspace_profiles','user_id,username,display_name,created_at,avatar_url',300),
   read('crowspace_posts','id,user_id,title,body,created_at,like_count,comment_count',300),
   read('crowspace_caws','id,user_id,title,caption,created_at,views',300),
@@ -27,7 +27,8 @@ async function build(){
   read('crowspace_events','id,title,description,starts_at,created_at',150),
   read('podcasts','id,title,description,created_at,listener_count,total_plays,status',150),
   me()?read('crowspace_feed_events','user_id,event_type,target_id,target_type,weight,created_at',500):Promise.resolve([]),
-  me()?read('crowspace_recommendation_feedback','user_id,target_id,target_type,feedback_type,created_at',300):Promise.resolve([])
+  me()?read('crowspace_recommendation_feedback','user_id,target_id,target_type,feedback_type,created_at',300):Promise.resolve([]),
+  me()?read('crowspace_social_interactions','target_type,target_id,user_id,interaction_type,created_at',500):Promise.resolve([])
  ]);
  const uid=me()?.id;
  const following=new Set(follows.filter(x=>x.follower_id===uid).map(x=>x.followed_user_id));
@@ -41,10 +42,12 @@ async function build(){
  friends.filter(x=>x.status==='accepted').forEach(x=>{edge(x.requester_id,x.addressee_id,6);edge(x.addressee_id,x.requester_id,6)});
  feedEvents.forEach(x=>{if(x.user_id===uid&&x.target_id)edge(uid,x.target_id,Number(x.weight||1)*2)});
  const hidden=new Set(feedback.filter(x=>['hide','not_interested'].includes(String(x.feedback_type||'').toLowerCase())).map(x=>String(x.target_type)+':'+x.target_id));
+ const interactionWeight={like:1.5,comment:2.5,share:3,view:.25,save:2};
+ const targetEngagement=new Map();interactions.forEach(i=>{const k=String(i.target_type||'')+':'+i.target_id;targetEngagement.set(k,(targetEngagement.get(k)||0)+(interactionWeight[String(i.interaction_type||'').toLowerCase()]||1));});
  const creatorScore=new Map();posts.forEach(x=>creatorScore.set(x.user_id,(creatorScore.get(x.user_id)||0)+1+Number(x.like_count||0)*.1));caws.forEach(x=>creatorScore.set(x.user_id,(creatorScore.get(x.user_id)||0)+2+Number(x.views||0)*.02));
  const memberScore=profiles.filter(x=>x.user_id!==uid).map(x=>({x,s:(following.has(x.user_id)?8:0)+(friendsSet.has(x.user_id)?10:0)+(followers.has(x.user_id)?4:0)+(graph.get(x.user_id)||0)+age(x.created_at)*2+(creatorScore.get(x.user_id)||0)*.2})).sort((a,b)=>b.s-a.s);
- const trendingCaws=caws.map(x=>({x,s:age(x.created_at)*3+Number(x.views||0)*.03})).filter(x=>!hidden.has('caw:'+x.x.id)).sort((a,b)=>b.s-a.s);
- const trendingPosts=posts.map(x=>({x,s:age(x.created_at)*3+Number(x.like_count||0)*1.3+Number(x.comment_count||0)*1.7+(graph.get(x.user_id)||0)})).filter(x=>!hidden.has('post:'+x.x.id)).sort((a,b)=>b.s-a.s);
+ const trendingCaws=caws.map(x=>({x,s:age(x.created_at)*3+Number(x.views||0)*.03+(targetEngagement.get('caw:'+x.id)||0)})).filter(x=>!hidden.has('caw:'+x.x.id)).sort((a,b)=>b.s-a.s);
+ const trendingPosts=posts.map(x=>({x,s:age(x.created_at)*3+Number(x.like_count||0)*1.3+Number(x.comment_count||0)*1.7+(graph.get(x.user_id)||0)+(targetEngagement.get('post:'+x.id)||0)})).filter(x=>!hidden.has('post:'+x.x.id)).sort((a,b)=>b.s-a.s);
  const nearGroups=groups.map(x=>({x,s:(groupMembers.filter(m=>friendsSet.has(m.user_id)).length?2:0)+groupMembers.filter(m=>m.group_id===x.id).length*1.4+age(x.created_at)})).sort((a,b)=>b.s-a.s);
  const nearCircles=circles.map(x=>({x,s:circleMembers.filter(m=>friendsSet.has(m.user_id)&&m.circle_id===x.id).length*5+circleMembers.filter(m=>m.circle_id===x.id).length*1.2+age(x.created_at)})).sort((a,b)=>b.s-a.s);
  const upcoming=events.filter(x=>!x.starts_at||new Date(x.starts_at)>=new Date()).sort((a,b)=>new Date(a.starts_at||a.created_at)-new Date(b.starts_at||b.created_at));
