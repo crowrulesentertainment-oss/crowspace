@@ -69,4 +69,4 @@ document.addEventListener("crowspace:recommendation-update",async e=>{
  if(!rt||!cd||!d.action||!d.id||d.type!=="creator"||d.action!=="follow")return;
  try{await rt.refresh(CrowSpaceAuth.client,CrowSpaceAuth.user);window.dispatchEvent(new CustomEvent("crowspace:connected-universe-update",{detail:{creatorId:d.id}}))}catch(err){console.warn("CrowSpace 21.6",err)}
 });
-</script><script src="js/crowspace-connected-ui-21-7.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpaceConnectedUI21_7&&CrowSpaceConnectedUI21_7.start());</script><script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-graph-learning-21-9.js"></script></body></html>
+</script><script src="js/crowspace-connected-ui-21-7.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpaceConnectedUI21_7&&CrowSpaceConnectedUI21_7.start());</script><script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-graph-learning-21-9.js"></script><script src="js/crowspace-explainability-21-10.js"></script></body></html>
