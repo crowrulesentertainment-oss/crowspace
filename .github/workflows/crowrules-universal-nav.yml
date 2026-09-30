@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           SUPABASE_URL='https://cevylpnoexugwgygvtgu.supabase.co'
           SUPABASE_KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-' 
-          NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=3'
+          NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4'
           test "${SUPABASE_URL#https://}" != "$SUPABASE_URL"
           curl -fsS --max-time 15 -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY" "$SUPABASE_URL/rest/v1/" -o /dev/null
           curl -fsS --max-time 15 "$NAV_URL" -o /dev/null
@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=3'
+          export NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4'
           python3 <<'PY'
           from pathlib import Path
           import re
@@ -71,6 +71,33 @@ jobs:
           print(f"Updated {len(changed)} HTML files.")
           for item in changed:
               print(" -", item)
+          PY
+
+      - name: Validate generated HTML and JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          git diff --check
+          node --check crowspace-auth.js
+          node --check crowspace-universal.js
+          node --check crowspace-rebuild.js
+          python3 <<'PY'
+          from pathlib import Path
+          import re, sys
+          failures = []
+          canonical = 'https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4'
+          for path in Path('.').rglob('*.html'):
+              if '.git' in path.parts:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              refs = re.findall(r'<script\\b[^>]*src=["\\']([^"\\']*crowrules-sitewide\\.js[^"\\']*)["\\'][^>]*>', text, flags=re.I)
+              if refs != [canonical]:
+                  failures.append(f"{path}: expected exactly one canonical sitewide script, found {refs}")
+          if failures:
+              print("\\n".join(failures))
+              sys.exit(1)
+          print("HTML navigation and JavaScript validation passed.")
           PY
 
       - name: Commit navigation changes
