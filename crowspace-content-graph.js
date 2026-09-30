@@ -51,11 +51,13 @@ async function build(){
  const newPodcasts=podcasts.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
  const creators=[...creatorScore.entries()].map(([id,s])=>({x:profileBy.get(id)||{user_id:id,display_name:'Creator'},s})).sort((a,b)=>b.s-a.s);
  const render=(arr,type,n=5)=>arr.slice(0,n).map(o=>link(type,o.x||o)).join('')||'<div class="cs-graph-empty">Nothing connected yet.</div>';
+ const recentNetworkPosts=posts.filter(p=>following.has(p.user_id)||friendsSet.has(p.user_id)||followers.has(p.user_id)).map(x=>({x,s:age(x.created_at)*3+Number(x.like_count||0)*1.2+Number(x.comment_count||0)*1.6})).sort((a,b)=>b.s-a.s);
+ const activeCreators=creators.filter(o=>o.x?.user_id&&o.x.user_id!==uid).slice(0,5);
  host.innerHTML='<div class="cs-graph-head"><div><span class="cs-eyebrow">CROWSPACE // V25</span><h2>Universal Content Graph</h2><p>One graph connecting people, relationships, content, communities, events and audio through shared activity signals.</p></div><a href="rankings.html">Open Rankings →</a></div><div class="cs-graph-grid">'+
  '<section><h3>Because You Follow…</h3>'+render(memberScore.map(o=>o),'member')+'</section>'+
  '<section><h3>People You May Know</h3>'+render(memberScore.slice().sort((a,b)=>((b.x?.user_id&&graph.get(b.x.user_id)||0)-(a.x?.user_id&&graph.get(a.x.user_id)||0))),'member')+'</section>'+
- '<section><h3>Trending Near Your Network</h3>'+render(trendingPosts,'post')+'</section>'+
- '<section><h3>Creator Discovery</h3>'+render(creators,'member')+'</section>'+
+ '<section><h3>Trending Near Your Network</h3>'+render(recentNetworkPosts.length?recentNetworkPosts:trendingPosts,'post')+'</section>'+
+ '<section><h3>Creator Discovery</h3>'+render(activeCreators,'member')+'</section>'+
  '<section><h3>Trending Caws</h3>'+render(trendingCaws,'caw')+'</section>'+
  '<section><h3>Groups Connected to You</h3>'+render(nearGroups,'group')+'</section>'+
  '<section><h3>Circles Connected to You</h3>'+render(nearCircles,'circle')+'</section>'+
