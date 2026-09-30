@@ -27,7 +27,7 @@
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+</head>
 <body data-page="profile">
 <main class="profile-wrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -148,7 +148,26 @@ async function act(type,button){
 }
 function previewBanner(){const f=$("sBannerFile")?.files?.[0];if(!f)return;if(f.size>10*1024*1024){toast("Banner must be 10 MB or smaller");$("sBannerFile").value="";return}if(!["image/png","image/jpeg","image/webp","image/gif"].includes(f.type)){toast("Please choose PNG, JPG, WEBP or GIF");$("sBannerFile").value="";return}$("bannerPreview").style.backgroundImage="url('"+URL.createObjectURL(f)+"')";$("bannerPreview").style.backgroundSize="cover";$("bannerPreview").style.backgroundPosition="center"}
 let croppedBannerFile=null;
-function openBannerCropper(){const f=$("sBannerFile")?.files?.[0];if(!f){toast("Choose a banner image first");return}const url=URL.createObjectURL(f),wrap=document.createElement("div");wrap.className="cropper";wrap.innerHTML='<div class="crop-box"><div class="title">CROP & POSITION BANNER</div><div class="crop-stage banner-crop-stage" id="bannerCropStage"><img id="bannerCropImage" src="'+url+'" alt="Banner crop preview"></div><div class="crop-controls"><span class="upload-note">Zoom</span><input id="bannerCropZoom" type="range" min="1" max="3" step=".01" value="1"><button class="btn primary" id="applyBannerCrop" type="button">Apply</button><button class="btn" id="cancelBannerCrop" type="button">Cancel</button></div><div class="upload-note" style="margin-top:7px">Drag the image to choose the focal point. Use the slider to zoom. Output is 1600×500.</div></div>';document.body.appendChild(wrap);const stage=wrap.querySelector("#bannerCropStage"),img=wrap.querySelector("#bannerCropImage");let scale=1,x=0,y=0,drag=false,lx=0,ly=0;const paint=()=>img.style.transform="translate("+x+"px,"+y+"px) scale("+scale+")";wrap.querySelector("#bannerCropZoom").oninput=e=>{scale=Number(e.target.value);paint()};const down=e=>{e.preventDefault();drag=true;stage.classList.add("dragging");const p=e.touches?e.touches[0]:e;lx=p.clientX;ly=p.clientY};const move=e=>{if(!drag)return;e.preventDefault();const p=e.touches?e.touches[0]:e;x+=p.clientX-lx;y+=p.clientY-ly;lx=p.clientX;ly=p.clientY;paint()};const up=()=>{drag=false;stage.classList.remove("dragging")};stage.addEventListener("mousedown",down);window.addEventListener("mousemove",move);window.addEventListener("mouseup",up);stage.addEventListener("touchstart",down,{passive:false});window.addEventListener("touchmove",move,{passive:false});window.addEventListener("touchend",up);wrap.querySelector("#cancelBannerCrop").onclick=()=>{cleanup();URL.revokeObjectURL(url);wrap.remove()};wrap.querySelector("#applyBannerCrop").onclick=async()=>{try{croppedBannerFile=await makeCroppedBanner(img,scale,x,y);$("bannerPreview").style.backgroundImage="url('"+URL.createObjectURL(croppedBannerFile)+"')";$("sBannerFile").value="";cleanup();wrap.remove();toast("Banner crop ready — save your profile")}catch(e){toast("Could not crop banner: "+e.message)}};function cleanup(){window.removeEventListener("mousemove",move);window.removeEventListener("mouseup",up);window.removeEventListener("touchmove",move);window.removeEventListener("touchend",up)}}
+function openBannerCropper(){
+ const f=$("sBannerFile")?.files?.[0];if(!f){toast("Choose a banner image first");return}
+ const url=URL.createObjectURL(f),wrap=document.createElement("div");wrap.className="cropper";
+ wrap.innerHTML='<div class="crop-box"><div class="title">CROP & POSITION BANNER</div><div class="crop-stage banner-crop-stage" id="bannerCropStage"><img id="bannerCropImage" src="'+url+'" alt="Banner crop preview"></div><div class="crop-controls"><span class="upload-note">Zoom</span><input id="bannerCropZoom" type="range" min="1" max="3" step=".01" value="1"><button class="btn primary" id="applyBannerCrop" type="button">Apply</button><button class="btn" id="cancelBannerCrop" type="button">Cancel</button></div><div class="upload-note" style="margin-top:7px">Drag the image to choose the focal point. Movement is constrained so the crop never exposes blank edges. Output is 1600×500.</div></div>';
+ document.body.appendChild(wrap);
+ const stage=wrap.querySelector("#bannerCropStage"),img=wrap.querySelector("#bannerCropImage"),zoom=wrap.querySelector("#bannerCropZoom");
+ let scale=1,x=0,y=0,drag=false,lx=0,ly=0;
+ const clamp=()=>{const sw=stage.clientWidth,sh=stage.clientHeight,iw=img.offsetWidth*scale,ih=img.offsetHeight*scale;const maxX=Math.max(0,(iw-sw)/2),maxY=Math.max(0,(ih-sh)/2);x=Math.min(maxX,Math.max(-maxX,x));y=Math.min(maxY,Math.max(-maxY,y))};
+ const paint=()=>{clamp();img.style.transform="translate("+x+"px,"+y+"px) scale("+scale+")"};
+ zoom.oninput=e=>{scale=Number(e.target.value);paint()};
+ const down=e=>{e.preventDefault();drag=true;stage.classList.add("dragging");const p=e.touches?e.touches[0]:e;lx=p.clientX;ly=p.clientY};
+ const move=e=>{if(!drag)return;e.preventDefault();const p=e.touches?e.touches[0]:e;x+=p.clientX-lx;y+=p.clientY-ly;lx=p.clientX;ly=p.clientY;paint()};
+ const up=()=>{drag=false;stage.classList.remove("dragging")};
+ stage.addEventListener("mousedown",down);window.addEventListener("mousemove",move);window.addEventListener("mouseup",up);
+ stage.addEventListener("touchstart",down,{passive:false});window.addEventListener("touchmove",move,{passive:false});window.addEventListener("touchend",up);
+ img.onload=paint;
+ const cleanup=()=>{window.removeEventListener("mousemove",move);window.removeEventListener("mouseup",up);window.removeEventListener("touchmove",move);window.removeEventListener("touchend",up);URL.revokeObjectURL(url)};
+ wrap.querySelector("#cancelBannerCrop").onclick=()=>{cleanup();wrap.remove()};
+ wrap.querySelector("#applyBannerCrop").onclick=async()=>{try{paint();croppedBannerFile=await makeCroppedBanner(img,scale,x,y);const preview=URL.createObjectURL(croppedBannerFile);$("bannerPreview").style.backgroundImage="url('"+preview+"')";$("bannerPreview").style.backgroundSize="cover";$("bannerPreview").style.backgroundPosition="center";$("sBannerFile").value="";cleanup();wrap.remove();toast("Banner crop ready — save your profile")}catch(e){toast("Could not crop banner: "+e.message)}};
+}
 async function makeCroppedBanner(img,scale,offsetX=0,offsetY=0){const src=new Image();src.src=img.src;await new Promise((res,rej)=>{src.onload=res;src.onerror=rej});const outW=1600,outH=500;const cover=Math.max(outW/src.naturalWidth,outH/src.naturalHeight)*scale;const dw=src.naturalWidth*cover,dh=src.naturalHeight*cover;const stageW=Math.max(1,img.parentElement.clientWidth),stageH=Math.max(1,img.parentElement.clientHeight);const ratio=outW/stageW;const dx=offsetX*ratio,dy=offsetY*ratio;const canvas=document.createElement("canvas");canvas.width=outW;canvas.height=outH;const ctx=canvas.getContext("2d");ctx.imageSmoothingQuality="high";const x0=(outW-dw)/2+dx,y0=(outH-dh)/2+dy;ctx.drawImage(src,x0,y0,dw,dh);return await new Promise((res,rej)=>canvas.toBlob(b=>b?res(new File([b],"banner.jpg",{type:"image/jpeg"})):rej(new Error("Canvas failed")),"image/jpeg",.9))}
 function previewAvatar(){const f=$("sAvatarFile")?.files?.[0];if(!f)return;if(f.size>5*1024*1024){toast("Avatar must be 5 MB or smaller");$("sAvatarFile").value="";return}if(!["image/png","image/jpeg","image/webp","image/gif"].includes(f.type)){toast("Please choose PNG, JPG, WEBP or GIF");$("sAvatarFile").value="";return}$("avatarPreview").src=URL.createObjectURL(f)}
 let croppedAvatarFile=null;
@@ -204,7 +223,11 @@ function startRealtime(){
       if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){document.body.dataset.realtime="error";console.error("[CrowSpace realtime]",status,error)}
     });
 }
-function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel);realtimeChannel=null}}
+function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel);realtimeChannel=null}clearTimeout(realtimeRefreshTimer)}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&db&&target&&!realtimeChannel)startRealtime()});
+window.addEventListener("online",()=>{if(db&&target&&!realtimeChannel)startRealtime()});
+window.addEventListener("offline",()=>{document.body.dataset.realtime="offline"});
+
 window.addEventListener("beforeunload",stopRealtime);
 
 
