@@ -1,3 +1,173 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Events — CrowSpace"><title>Events — CrowSpace</title><link rel="stylesheet" href="crowspace-rebuild.css"><link rel="stylesheet" href="crowspace-universal.css"><script src="crowspace-auth.js"></script><script src="crowspace-universal.js" defer></script><script src="crowspace-pages.js" defer></script><script src="js/crowspace-youtube-events.js" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CrowSpace Events — discover upcoming events, live broadcasts, and community gatherings.">
+<meta name="theme-color" content="#03040a">
+<title>Events — CrowSpace</title>
+<link rel="stylesheet" href="crowspace-rebuild.css">
+<link rel="stylesheet" href="crowspace-universal.css">
+<script src="crowspace-auth.js"></script>
+<script src="crowspace-universal.js" defer></script>
+<script src="crowspace-pages.js" defer></script>
+<script src="js/crowspace-youtube-events.js" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<style>.event-list-card{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.event-list-card:hover,.event-list-card:focus-visible{transform:translateY(-3px);box-shadow:0 18px 50px #0008;border-color:#78efff55;outline:none}.event-list-card:focus-visible{box-shadow:0 0 0 2px #78efff66,0 18px 50px #0008}.event-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}</style></head><body data-page="events"><main class="cs-page-shell"><section class="cs-page-hero"><div class="cs-eyebrow">CROWSPACE // COMMUNITY</div><h1>Events</h1><p>Discover community events, watch broadcasts, and join live conversations.</p><p><a class="cs-btn primary" href="create-event.html">＋ CREATE EVENT</a></p></section><section id="page-data"><div class="cs-card" style="margin-top:14px">Loading CrowSpace…</div></section></main></body></html>
+<style>
+:root{--ev-cyan:#78efff;--ev-purple:#a779ff;--ev-pink:#ff68c7;--ev-green:#78ffbf;--ev-red:#ff6585}
+.events-hub{padding-bottom:80px}
+.events-command{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;margin:18px 0}
+.events-search,.events-select{min-height:44px;border:1px solid var(--line);border-radius:11px;background:#050914;color:#fff;padding:0 13px;outline:0}
+.events-search:focus,.events-select:focus{border-color:var(--ev-cyan);box-shadow:0 0 0 3px #78efff12}
+.events-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.events-tab{border:1px solid var(--line);background:#070d1b;color:#9eabc0;border-radius:999px;padding:9px 13px;font:800 9px Orbitron;letter-spacing:.08em;cursor:pointer}
+.events-tab.active{color:var(--ev-cyan);border-color:#78efff66;background:#78efff0b;box-shadow:0 0 18px #78efff0b}
+.events-feature{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:0;overflow:hidden;border:1px solid #78efff22;border-radius:20px;background:linear-gradient(145deg,#0b1225,#050811);box-shadow:0 25px 80px #0008;margin-bottom:22px}
+.events-feature-copy{padding:28px;display:flex;flex-direction:column;justify-content:center}
+.events-feature-media{min-height:310px;background:radial-gradient(circle at 50% 35%,#153a4b,#080b15 55%,#03040a);position:relative;display:grid;place-items:center;overflow:hidden}
+.events-feature-media:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#78efff12,transparent 45%,#a779ff16)}
+.feature-orbit{width:150px;height:150px;border:1px solid #78efff55;border-radius:50%;box-shadow:0 0 50px #78efff20,inset 0 0 35px #a779ff12;animation:evSpin 12s linear infinite}
+.feature-orbit:after{content:"LIVE";display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#ff658522;border:1px solid #ff658566;color:#ff9caf;font:900 9px Orbitron;position:absolute;top:calc(50% - 24px);left:calc(50% - 24px)}
+@keyframes evSpin{to{transform:rotate(360deg)}}
+.events-feature h2{font:900 clamp(24px,4vw,42px) Orbitron;margin:7px 0 12px;letter-spacing:-.04em}
+.events-feature p{color:#aab7ca;line-height:1.65}
+.feature-badge{display:inline-flex;align-items:center;width:max-content;padding:7px 10px;border-radius:999px;border:1px solid #78ffbf55;background:#78ffbf0b;color:var(--ev-green);font:900 9px Orbitron;letter-spacing:.1em}
+.feature-meta{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;color:#aebbd0;font-size:11px}
+.feature-meta span{padding:7px 9px;border:1px solid #ffffff10;border-radius:8px;background:#ffffff04}
+.event-section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:24px 0 12px}
+.event-section-head h2{margin:0}
+.event-count{color:#78879e;font-size:11px}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:14px}
+.event-card{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,rgba(12,18,35,.96),rgba(5,8,17,.98));transition:.2s;cursor:pointer}
+.event-card:hover{transform:translateY(-3px);border-color:#78efff55;box-shadow:0 18px 55px #0008}
+.event-card-top{min-height:120px;padding:17px;background:radial-gradient(circle at 85% 10%,#78efff10,transparent 30%),linear-gradient(135deg,#0b1223,#070a14);position:relative}
+.event-type{color:#78efff;font:900 8px Orbitron;letter-spacing:.13em}
+.event-live{position:absolute;right:14px;top:14px;color:#ff9caf;font:900 8px Orbitron}
+.event-card h3{margin:10px 0 7px;font-size:15px}
+.event-card-body{padding:15px}
+.event-desc{color:#9eabc0;font-size:11px;line-height:1.55;min-height:35px}
+.event-time{margin-top:11px;color:#d8e3f0;font-size:11px}
+.event-card-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:13px;padding-top:12px;border-top:1px solid #ffffff0d}
+.event-card-foot span{color:#718097;font-size:9px}
+.event-card-foot a{font:800 8px Orbitron;color:#78efff}
+.event-empty{padding:50px 20px;text-align:center;border:1px dashed #ffffff18;border-radius:15px;color:#718097}
+.event-empty strong{display:block;color:#cbd7e7;font:800 13px Orbitron;margin-bottom:7px}
+.event-loading{padding:55px;text-align:center;color:#7c8ba0;font:800 10px Orbitron;letter-spacing:.12em}
+.event-error{padding:25px;color:#ff9caf;border:1px solid #ff658533;border-radius:12px;background:#ff658508}
+@media(max-width:800px){.events-command{grid-template-columns:1fr}.events-feature{grid-template-columns:1fr}.events-feature-media{min-height:190px;order:-1}.events-feature-copy{padding:22px}.events-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.feature-orbit{animation:none}.event-card{transition:none}}
+</style>
+</head>
+<body data-page="events">
+<main class="cs-page-shell events-hub">
+<section class="cs-page-hero">
+<div class="cs-eyebrow">CROWSPACE // COMMUNITY CALENDAR</div>
+<h1>Events</h1>
+<p>Discover gatherings, creator events, CrowRules broadcasts, and live YouTube conversations.</p>
+<div class="events-command">
+<input id="event-search" class="events-search" type="search" placeholder="Search events, creators, descriptions…">
+<select id="event-type" class="events-select" aria-label="Filter by event type">
+<option value="all">ALL TYPES</option><option value="community">COMMUNITY</option><option value="meetup">MEETUP</option><option value="creator">CREATOR</option><option value="crowrules">CROWRULES</option><option value="dreamscapes">DREAMSCAPES</option><option value="memorials">MEMORIALS</option><option value="other">OTHER</option>
+</select>
+<a class="cs-btn primary" href="create-event.html">＋ CREATE EVENT</a>
+</div>
+</section>
+
+<section class="events-tabs" aria-label="Event filters">
+<button class="events-tab active" data-filter="upcoming">UPCOMING</button>
+<button class="events-tab" data-filter="live">LIVE NOW</button>
+<button class="events-tab" data-filter="all">ALL EVENTS</button>
+<button class="events-tab" data-filter="past">PAST</button>
+</section>
+
+<section id="featured"></section>
+<section>
+<div class="event-section-head"><div><div class="cs-eyebrow">DISCOVER</div><h2>Event Feed</h2></div><span id="event-count" class="event-count">Loading…</span></div>
+<div id="events-list"><div class="event-loading">LOADING CROWSPACE EVENTS…</div></div>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+let db=null,allEvents=[],filter='upcoming',query='',type='all';
+
+function ready(){
+ return new Promise(resolve=>{
+  if(window.CrowSpaceUniversal?.db||window.CrowSpaceAuth?.client){resolve();return}
+  let done=false;const finish=()=>{if(done)return;done=true;resolve()};
+  document.addEventListener('crowspace-universal-ready',finish,{once:true});
+  window.addEventListener('crowspace:supabase-ready',finish,{once:true});
+  setTimeout(finish,3000);
+ });
+}
+function live(e){return e.is_live===true||e.live===true||['live','live_now','broadcasting','streaming','on_air'].includes(String(e.status||e.event_status||'').toLowerCase())}
+function date(v){if(!v)return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d}
+function ended(e,now){const end=date(e.ends_at);const start=date(e.starts_at);return end?end.getTime()<now:(start?start.getTime()<now&&!live(e):false)}
+function when(v){const d=date(v);return d?d.toLocaleString([],{weekday:'short',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):String(v||'Time TBD')}
+function youtubeId(e){return window.CrowSpaceYouTubeEvents?.videoId(e.youtube_url||e.youtube||e.video_url||e.youtube_video_id||e.video_id)||''}
+function filtered(){
+ const now=Date.now(),q=query.toLowerCase();
+ return allEvents.filter(e=>{
+  const l=live(e),past=ended(e,now),start=date(e.starts_at);
+  const bucket=filter==='live'?l:filter==='past'?past:filter==='upcoming'?(!past&&!l):true;
+  if(!bucket)return false;
+  if(type!=='all'&&String(e.event_type||'other').toLowerCase()!==type)return false;
+  if(q&&![(e.title||''),(e.description||''),(e.event_type||''),(e.location||'')].join(' ').toLowerCase().includes(q))return false;
+  return true;
+ }).sort((a,b)=>(date(a.starts_at)?.getTime()||0)-(date(b.starts_at)?.getTime()||0));
+}
+function card(e){
+ const id=youtubeId(e),l=live(e),p=ended(e,Date.now());
+ return '<article class="event-card" tabindex="0" data-id="'+esc(e.id)+'">'+
+ '<div class="event-card-top"><div class="event-type">CROWSPACE // '+esc(String(e.event_type||'EVENT').toUpperCase())+'</div>'+(l?'<div class="event-live">● LIVE NOW</div>':'')+
+ '<h3>'+esc(e.title||'CrowSpace Event')+'</h3></div><div class="event-card-body"><div class="event-desc">'+esc(e.description||'Community event')+'</div>'+
+ '<div class="event-time">◷ '+esc(when(e.starts_at))+'</div><div class="event-card-foot"><span>'+(p?'ENDED':l?'LIVE':'UPCOMING')+(e.is_online?' · ONLINE':'')+'</span><a href="event.html?id='+encodeURIComponent(e.id)+'">VIEW EVENT →</a></div>'+
+ (id?'<div style="margin-top:10px;color:#78efff;font:800 8px Orbitron">▶ YOUTUBE ENABLED</div>':'')+'</div></article>';
+}
+function renderFeatured(items){
+ const host=$('featured');
+ const l=items.find(live)||items.find(e=>!ended(e,Date.now()));
+ if(!l){host.innerHTML='';return}
+ host.innerHTML='<article class="events-feature"><div class="events-feature-copy"><span class="feature-badge">'+(live(l)?'● LIVE NOW':'NEXT UP')+'</span><h2>'+esc(l.title||'CrowSpace Event')+'</h2><p>'+esc(l.description||'Join the CrowSpace community.')+'</p><div class="feature-meta"><span>◷ '+esc(when(l.starts_at))+'</span>'+(l.location?'<span>📍 '+esc(l.location)+'</span>':'')+(l.is_online?'<span>ONLINE</span>':'')+'</div><div><a class="cs-btn primary" href="event.html?id='+encodeURIComponent(l.id)+'">OPEN EVENT →</a>'+(youtubeId(l)?'<a class="cs-btn" style="margin-left:8px" href="event.html?id='+encodeURIComponent(l.id)+'">WATCH + CHAT</a>':'')+'</div></div><div class="events-feature-media"><div class="feature-orbit"></div></div></article>';
+}
+function render(){
+ const items=filtered();$('event-count').textContent=items.length+' EVENT'+(items.length===1?'':'S');
+ renderFeatured(items);
+ const root=$('events-list');
+ if(!items.length){root.innerHTML='<div class="event-empty"><strong>NO EVENTS FOUND</strong>Try another filter or search term.</div>';return}
+ root.innerHTML='<div class="events-grid">'+items.map(card).join('')+'</div>';
+ root.querySelectorAll('.event-card').forEach(c=>{
+  const go=()=>location.href='event.html?id='+encodeURIComponent(c.dataset.id);
+  c.addEventListener('click',e=>{if(e.target.closest('a'))return;go()});
+  c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+ });
+}
+async function load(){
+ db=window.CrowSpaceUniversal?.db||window.CrowSpaceAuth?.client;
+ if(!db){$('events-list').innerHTML='<div class="event-error">CrowSpace could not initialize the event database. Please refresh and try again.</div>';return}
+ try{
+  const r=await db.from('crowspace_events').select('*').order('starts_at',{ascending:true}).limit(100);
+  if(r.error)throw r.error;
+  allEvents=r.data||[];
+  render();
+ }catch(e){
+  console.error('[CrowSpace Events]',e);
+  $('events-list').innerHTML='<div class="event-error">Unable to load events right now. '+esc(e.message||'Database request failed.')+'</div>';
+  $('event-count').textContent='UNAVAILABLE';
+ }
+}
+document.addEventListener('DOMContentLoaded',async()=>{
+ $('event-search').addEventListener('input',e=>{query=e.target.value.trim();render()});
+ $('event-type').addEventListener('change',e=>{type=e.target.value;render()});
+ document.querySelectorAll('.events-tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.events-tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()}));
+ await ready();load();
+});
+})();
+</script>
+</body>
+</html>
