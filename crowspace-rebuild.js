@@ -1,3 +1,7 @@
+/* V48 — Learning Recovery Center */
+async function clearLearningType(type){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_clear_learning_type",{p_event_type:type});if(r.error)throw r.error;return r.data}catch(e){return null}}
+async function restoreLearningProfile(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_restore_learning_profile");if(r.error)throw r.error;return r.data}catch(e){return null}}
+window.CrowSpaceLearningRecovery={clearType:clearLearningType,restore:restoreLearningProfile};
 /* V47 — Interest & Creator Management */
 async function manageDiscoverySignal(key,delta=0,mode="adjust"){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_manage_discovery_signal",{p_key:key,p_delta:delta,p_mode:mode});if(r.error)throw r.error;window.CrowSpaceDiscoveryDashboard=r.data;return r.data}catch(e){console.debug("Discovery signal management unavailable",e);return null}}
 window.CrowSpaceDiscoveryManager={adjust:manageDiscoverySignal,remove:(key)=>manageDiscoverySignal(key,0,"remove"),reset:()=>manageDiscoverySignal("",0,"reset_all")};
