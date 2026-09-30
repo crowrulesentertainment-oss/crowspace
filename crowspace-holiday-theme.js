@@ -22,7 +22,7 @@ const s=document.createElement('style');s.id='cs-v37-theme-css';s.textContent=[
 '@media(max-width:700px){.cs-ask-form{grid-template-columns:1fr}.cs-ask-head{align-items:start;flex-direction:column}}'
 ].join('');document.head.appendChild(s);
 }
-async function ask(h){
+async async function ask(h){
 let host=document.getElementById('holiday-bots-ask');
 if(!host){host=document.createElement('section');host.id='holiday-bots-ask';host.className='cs-ask-bots';document.getElementById('holiday-network')?.after(host)}
 const c=db();let bots=[];
