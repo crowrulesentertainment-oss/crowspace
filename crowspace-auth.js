@@ -37,6 +37,8 @@
   }
 
   function createClient(sdk) {
+    const existing = window.CrowRulesAuth?.client;
+    if (existing && typeof existing.from === 'function' && existing.auth) return existing;
     return sdk.createClient(URL, KEY, {
       auth: {
         autoRefreshToken: true,
