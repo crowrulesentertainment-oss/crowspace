@@ -110,10 +110,30 @@ async function auth(){
   if(st)st.textContent=u?'SIGNED IN':'GUEST';
   const login=document.getElementById('cs-login'),join=document.getElementById('cs-join');
   if(u){if(login){login.textContent='ACCOUNT';login.href='#cs-account'}if(join){join.textContent='PROFILE';join.href='profile.html'}}
-  window.CrowSpaceUniversal={db,user:u};
+  const social={
+ follow: async target => db.rpc('crowspace_follow',{target_user:target}),
+ unfollow: async target => db.rpc('crowspace_unfollow',{target_user:target}),
+ friend: async target => db.rpc('crowspace_friend_request',{target_user:target}),
+ respond: async (id,status) => db.rpc('crowspace_friend_respond',{friendship:id,new_status:status}),
+ relationships: async target => {
+   const [fwd,rev,fr] = await Promise.all([
+    db.from('crowspace_follows').select('follower_id,followed_user_id').eq('follower_id',u?.id||'00000000-0000-0000-0000-000000000000').eq('followed_user_id',target),
+    db.from('crowspace_follows').select('follower_id,followed_user_id').eq('follower_id',target).eq('followed_user_id',u?.id||'00000000-0000-0000-0000-000000000000'),
+    db.from('crowspace_friendships').select('id,requester_id,addressee_id,status').or('requester_id.eq.'+(u?.id||'00000000-0000-0000-0000-000000000000')+',addressee_id.eq.'+(u?.id||'00000000-0000-0000-0000-000000000000'))
+   ]);
+   const friendship=(fr.data||[]).find(x=>x.requester_id===target||x.addressee_id===target)||null;
+   return {following:!!fwd.data?.length, followsYou:!!rev.data?.length, friendship};
+  }
+};
+window.CrowSpaceUniversal={db,user:u,social};
   accountMenu(u);badges(db,u);overlays();mobile();
   document.dispatchEvent(new CustomEvent('crowspace-universal-ready',{detail:{db,user:u}}));
-  db.channel('crowspace-universal-live').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_notifications',filter:'user_id=eq.'+(u?.id||'00000000-0000-0000-0000-000000000000')},()=>badges(db,u)).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_messages'},()=>badges(db,u)).subscribe();
+  db.channel('crowspace-universal-live')
+ .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_notifications',filter:'user_id=eq.'+(u?.id||'00000000-0000-0000-0000-000000000000')},()=>{badges(db,u);document.dispatchEvent(new CustomEvent('crowspace-social-update'))})
+ .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_messages'},()=>badges(db,u))
+ .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_follows'},()=>document.dispatchEvent(new CustomEvent('crowspace-social-update')))
+ .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_friendships'},()=>document.dispatchEvent(new CustomEvent('crowspace-social-update')))
+ .subscribe();
  }catch(e){const st=document.getElementById('cs-status-text');if(st)st.textContent='OFFLINE';overlays();mobile()}
 }
 document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth()});
