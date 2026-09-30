@@ -24,6 +24,10 @@ window.CrowSpaceRecommendations21_2={
   edges.filter(e=>e.source_type==="creator"&&e.target_type==="creator"&&e.relation==="similar_creator").forEach(e=>{if(followed.has(e.source_id))add("creator",e.target_id,8,"similar to a creator you follow")});
   c.events.slice(0,50).forEach(e=>{if(["open","save","complete","follow"].includes(e.action)){edges.filter(x=>x.source_type===e.item_type&&x.source_id===String(e.item_id)).forEach(x=>add(x.target_type,x.target_id,4,"connected to something you interacted with"))}});
   c.events.slice(0,50).forEach(e=>{if(e.action==="save")add(e.item_type,String(e.item_id),3,"based on your saved activity")});
+  if(window.CrowSpaceConnectedDiscovery21_6){
+   const connected=await window.CrowSpaceConnectedDiscovery21_6.forFollowedCreator(db,user,[...followed],Math.max(limit,60));
+   connected.forEach(x=>add(x.type,x.id,x.score,x.reasons[0]));
+  }
   return [...scores.entries()].map(([k,score])=>{const [type,id]=k.split(":");return{type,id,score,reasons:[...reasons.get(k)].slice(0,3)}}).sort((a,b)=>b.score-a.score).slice(0,limit);
  },
  async surfaces(db,user){
