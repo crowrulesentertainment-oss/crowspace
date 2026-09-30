@@ -195,7 +195,7 @@ async function mountRelationshipCard(host,target){
   }catch(e){result={error:e}}
   if(result?.error){btn.disabled=false;toast(result.error.message||'Connection update failed');return}
   host.dataset.csRelationReady='';mountRelationshipCard(host,target);
- });
+  }));
 }
 function relationshipEnhance(){
  const db=window.CrowSpaceUniversal?.db,me=window.CrowSpaceUniversal?.user;if(!db)return;
