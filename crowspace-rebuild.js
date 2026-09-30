@@ -1,3 +1,7 @@
+/* V45 — Personal Discovery Controls */
+async function getDiscoverySettings(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_get_discovery_settings");if(r.error)throw r.error;window.CrowSpaceDiscoverySettings=r.data;return r.data}catch(e){return null}}
+async function updateDiscoverySettings(s){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_update_discovery_settings",{p_personalization:!!s.personalization_enabled,p_adaptive:!!s.adaptive_feed_enabled,p_recommendations:!!s.recommendations_enabled,p_retention:Number(s.learning_retention_days)||90});if(r.error)throw r.error;window.CrowSpaceDiscoverySettings=r.data;return r.data}catch(e){return null}}
+window.CrowSpaceDiscovery={get:getDiscoverySettings,update:updateDiscoverySettings};
 /* V44 — Recommendation Explanation Center */
 async function recommendationWhy(targetId,targetType="content"){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db||!targetId)return[];const r=await db.rpc("crowspace_recommendation_explanations_for",{p_target:targetId,p_type:targetType});if(r.error)throw r.error;return r.data||[]}catch(e){return[]}
