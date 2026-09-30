@@ -83,7 +83,7 @@ function liveLayer(db,u){
  window.CrowSpaceLive={state,typing,stop:()=>state.channels.forEach(x=>db.removeChannel(x))};
  setStatus("CONNECTING");
 }
-\nfunction shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();
+\n\n/* V34 — Personal Feed Learning */\nasync function recordFeedLearning(eventType,targetId=null,targetType=null,queryText=null,weight=1,metadata={}){\n try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return; await db.rpc("crowspace_record_feed_event",{p_event_type:eventType,p_target_id:targetId,p_target_type:targetType,p_query_text:queryText,p_weight:weight,p_metadata:metadata});}catch(e){console.debug("CrowSpace learning skipped",e)}\n}\nfunction learnLocal(userId,type,id,weight=1){try{const k="crowspace_learning_"+userId,s=JSON.parse(localStorage.getItem(k)||"{}");s[type]=s[type]||{};s[type][id]=(s[type][id]||0)+weight;localStorage.setItem(k,JSON.stringify(s));}catch(e){}}\nwindow.CrowSpaceLearning={record:recordFeedLearning,signal:(u,t,i,w)=>{learnLocal(u,t,i,w);return recordFeedLearning(t,i,t,null,w)}};\n\nfunction shell(){document.documentElement.dataset.crowspace="cinematic";nav();appShell();commandPalette();
  const year=document.querySelector("[data-year]");if(year)year.textContent=new Date().getFullYear();
  window.CrowSpaceUI={esc,toast,auth,user,profile,avatar,guard,privacyCan,privacyBanner}; window.CrowSpacePrivacy={can:privacyCan,banner:privacyBanner};
 }
@@ -127,7 +127,7 @@ async function privacyProfileMap(db,rows,setting="profile"){
 }
 function privacyBanner(text="Some content is hidden by the owner's privacy settings."){return '<div class="card pad muted privacy-banner">🔒 '+esc(text)+'</div>'}
 
-async function universalSearch(db,q){
+async function universalSearch(db,q){\n const _u=await user(); if(_u&&String(q||"").trim().length>=2) recordFeedLearning("search",null,"search",String(q).trim(),1);
  const term=String(q||"").trim();
  if(term.length<2)return {term,results:[]};
  const like="%"+term.replace(/[%_]/g,"\\$&")+"%";
