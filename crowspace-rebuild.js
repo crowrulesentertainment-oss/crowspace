@@ -1,4 +1,35 @@
-/* V49 — Personal Algorithm Laboratory */
+/* V52 — Algorithm Decision Transparency */
+async function decisionSignals(targetId,targetType="content",item={}){
+ const ctx=await crossSurfaceContext();
+ const controls=ctx.controls||{}; const local=ctx.local||{};
+ const key=(targetType||"content")+":"+targetId;
+ const signal=Number(local.interactions?.[key]||0);
+ const likes=Number(item.like_count||0),comments=Number(item.comment_count||0),views=Number(item.views||0);
+ const reasons=[];
+ const add=(code,label,detail,weight)=>{if(weight!==0)reasons.push({code,label,detail,weight:Number(weight.toFixed?weight.toFixed(2):weight)})};
+ const age=Math.max(0,(Date.now()-new Date(item.created_at||Date.now()).getTime())/3600000);
+ if(age<48) add("freshness","Fresh content","Recently published content gets a freshness signal.",Number(controls.freshness_weight||1)*Math.max(0,2-age/24));
+ if(signal>0) add("engagement","Your activity","You've interacted with this content or target before.",signal*Number(controls.positive_signal_multiplier||1));
+ if(likes||comments) add("engagement","Community activity","Likes and comments contribute to relevance.",(likes*0.02+comments*0.04)*Number(controls.positive_signal_multiplier||1));
+ if(item.following) add("network","You follow this creator","Content from creators you follow receives a familiarity signal.",45*Number(controls.familiarity_weight||1));
+ if(item.friend) add("network","Connection","Content from a friend receives a connection signal.",25*Number(controls.familiarity_weight||1));
+ const creatorSignal=Number(ctx.local.creators?.[String(item.user_id)]||ctx.local.interactions?.["profile:"+item.user_id]||0);
+ if(creatorSignal>0) add("creator_affinity","Creator affinity","Your past activity with this creator influences discovery.",creatorSignal*Number(controls.creator_affinity_weight||1));
+ if(targetType==="caw") add("format","Caw preference","Caw discovery is included in your cross-surface ranking.",Number(controls.caw_weight||1));
+ if(targetType==="post") add("format","Post preference","Posts are included in your cross-surface ranking.",Number(controls.post_weight||1));
+ if(!signal&&!item.following&&!item.friend) add("exploration","Exploration","CrowSpace includes new content so you can discover beyond your usual activity.",Number(controls.exploration_weight||1));
+ const neg=Number(window.CrowSpaceContentPreferences?.[key]||0)+Number(window.CrowSpaceLiveSignals?.[key]||0);
+ if(neg<0) add("suppression","Your feedback","Your previous feedback lowers this item's recommendation signal.",neg*Number(controls.negative_signal_multiplier||1));
+ return reasons.sort((a,b)=>Math.abs(b.weight)-Math.abs(a.weight));
+}
+function decisionExplainUI(targetId,targetType,item={}){
+ const id="crow-decision-modal";
+ let modal=document.getElementById(id);
+ if(!modal){modal=document.createElement("div");modal.id=id;modal.className="decision-modal";modal.innerHTML='<div class="decision-backdrop" data-close-decision></div><section class="decision-panel"><div class="decision-head"><div><span class="eyebrow">ALGORITHM TRANSPARENCY</span><h2>WHY AM I SEEING THIS?</h2></div><button class="btn" data-close-decision>Close</button></div><div class="decision-note">These are the ranking signals CrowSpace used. They describe your experience without revealing another member's private information.</div><div id="decision-reasons" class="decision-reasons"></div></section>';document.body.appendChild(modal);modal.querySelectorAll("[data-close-decision]").forEach(x=>x.onclick=()=>modal.classList.remove("open"))}
+ const box=modal.querySelector("#decision-reasons");box.innerHTML='<div class="muted">Calculating signals…</div>';modal.classList.add("open");const rows=await decisionSignals(targetId,targetType,item);box.innerHTML=rows.length?rows.map(x=>'<article class="decision-reason"><div><b>'+esc(x.label)+'</b><span>'+esc(x.detail)+'</span></div><strong>'+esc(x.weight>0?"+"+x.weight:x.weight)+'</strong></article>').join(""):'<div class="muted">No single dominant signal was found. This item may be part of normal discovery rotation.</div>';
+}
+window.CrowSpaceDecision={signals:decisionSignals,explain:decisionExplainUI};
+\n/* V49 — Personal Algorithm Laboratory */
 async function loadAlgorithmLab(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_algorithm_laboratory");if(r.error)throw r.error;window.CrowSpaceAlgorithmLab=r.data;return r.data}catch(e){return null}}
 window.CrowSpaceAlgorithm={load:loadAlgorithmLab};
 /* V48 — Learning Recovery Center */
