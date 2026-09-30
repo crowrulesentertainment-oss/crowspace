@@ -21,7 +21,7 @@ async function load(){
  let q=db.from("crowspace_profiles").select("user_id,username,display_name,bio,avatar_url,banner_url,creator_category,profile_theme,portfolio_tagline,portfolio_bio,portfolio_work_title,portfolio_collections_title,featured_caw_id,privacy_profile,privacy_posts,privacy_media,privacy_activity,privacy_connections,privacy_guestbook,privacy_messages,allow_guestbook,created_at");
  if(requested) q=q.eq("username",requested);
  else if(user) q=q.eq("user_id",user.id);
- const pr=await q.limit(1).maybeSingle(); target=pr.data;
+ const pr=await q.limit(1).maybeSingle(); target=pr.data; if(user&&target.user_id!==user.id&&window.CrowSpaceLearning?.record) window.CrowSpaceLearning.record("profile_visit",target.user_id,"profile",null,2);
  if(!target){$("#profile").innerHTML='<div class="notice">Profile not found.</div>';return}
  const [fr,fo,tf,bl,posts,caws,likesMade,commentsMade,guest]=await Promise.all([
   db.from("member_friendships").select("*").or("requester_id.eq."+target.user_id+",addressee_id.eq."+target.user_id),
@@ -51,7 +51,7 @@ async function action(type){
  if(type==="remove"&&f?.status==="accepted")r=await db.from("member_friendships").delete().eq("id",f.id);
  if(type==="block"){r=await db.from("member_blocks").insert({blocker_id:user.id,blocked_id:target.user_id})}
  if(type==="unblock"){const b=blocks.find(x=>x.blocker_id===user.id&&x.blocked_id===target.user_id);if(b)r=await db.from("member_blocks").delete().eq("id",b.id)}
- if(type==="follow"){r=await db.from("crowspace_follows").insert({follower_id:user.id,followed_user_id:target.user_id})}
+ if(type==="follow"){r=await db.from("crowspace_follows").insert({follower_id:user.id,followed_user_id:target.user_id});if(!r.error)window.CrowSpaceLearning?.record?.("follow",target.user_id,"profile",null,5)}
  if(type==="unfollow"){r=await db.from("crowspace_follows").delete().eq("follower_id",user.id).eq("followed_user_id",target.user_id)}
  if(r?.error)alert(r.error.message);else load();
 }
