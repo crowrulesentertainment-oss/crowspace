@@ -97,8 +97,7 @@ async function loadSocial(){
  followers=fo.data||[];following=fi.data||[];friends=(fr.data||[]).filter(x=>x.status==="accepted");
  if(me&&me.id!==uid){
   relationship=await safe(async()=>{
-   const [a,b,c]=await Promise.all([
-    db.from("crowspace_follows").select("follower_id").eq("follower_id",me.id).eq("followed_user_id",uid).maybeSingle(),
+   const [a,b,c]=await Promise.all([    db.from("crowspace_follows").select("follower_id").eq("follower_id",me.id).eq("followed_user_id",uid).maybeSingle(),
     db.from("crowspace_follows").select("follower_id").eq("follower_id",uid).eq("followed_user_id",me.id).maybeSingle(),
     db.from("crowspace_friendships").select("*").or("and(requester_id.eq."+me.id+",addressee_id.eq."+uid+"),and(requester_id.eq."+uid+",addressee_id.eq."+me.id+")").maybeSingle()
    ]);return {following:!!a.data,followsYou:!!b.data,friendship:c.data||null}
@@ -197,8 +196,7 @@ function publicFeaturedHtml(){
  const desc=target?.portfolio_bio||"";
  const c=target?.featured_caw_id?caws.find(x=>String(x.id)===String(target.featured_caw_id)):null;
  return '<section class="card" style="margin-top:16px"><div class="title">CREATOR SHOWCASE</div><div class="featured-hero"><div class="featured-copy"><b>'+esc(title)+'</b><p>'+esc(desc||"This creator has not added a featured-work description yet.")+'</p></div><div class="featured-copy"><b>'+esc(c?.title||target?.portfolio_collections_title||"Collections")+'</b><p>'+(c?'Featured Caw selected from this creator’s profile.':esc("A space for this creator’s collections and projects."))+'</p></div></div></section>';
-}
-function bind(){
+}function bind(){
  document.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.action,b)));
  document.querySelectorAll("[data-people]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-people]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showPeople(b.dataset.people)}));
  document.querySelectorAll("[data-wall]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-wall]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showWall(b.dataset.wall)})); $("saveProfile")?.addEventListener("click",saveProfile);
@@ -297,14 +295,16 @@ function startRealtime(){
     });
 }
 function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel);realtimeChannel=null}clearTimeout(realtimeRefreshTimer)}
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&db&&target&&!realtimeChannel)startRealtime()});
-window.addEventListener("online",()=>{if(db&&target&&!realtimeChannel)startRealtime()});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&db&&target&&!realtimeChannel)startRealtime()});window.addEventListener("online",()=>{if(db&&target&&!realtimeChannel)startRealtime()});
 window.addEventListener("offline",()=>{document.body.dataset.realtime="offline"});
 window.addEventListener("beforeunload",stopRealtime);
 
 
-window.addEventListener("crowspace:supabase-ready",load);
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load);else load();
+let profileStarted=false;
+function startProfile(){if(profileStarted)return;profileStarted=true;load();}
+window.addEventListener("crowspace:supabase-ready",startProfile,{once:true});
+window.addEventListener("crowspace-auth-ready",startProfile,{once:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startProfile,{once:true});else startProfile();
 })();
 </script>
 </body>
