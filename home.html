@@ -27,6 +27,9 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
 .sectiongrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.feature{min-height:125px;padding:15px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#101a2b,#090e1a);position:relative;overflow:hidden}.feature:before{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-35px;top:-35px;background:radial-gradient(circle,#66e8ff2b,transparent 68%)}.feature h3{font:800 12px Orbitron;margin:0 0 6px;position:relative}.feature p{font-size:8px;color:var(--muted);line-height:1.5;margin:0 0 10px}.feature a{font-size:8px;color:var(--cyan);text-decoration:none}.divisiongrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.division{padding:10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--text);font-size:8px;background:#ffffff03}.division span{display:block;color:var(--muted);font-size:7px;margin-top:3px}
 .pulse{animation:pulse 1.8s ease-in-out infinite}@keyframes pulse{50%{opacity:.55}}.tiny{font-size:7px;color:var(--muted);line-height:1.5}.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px #6dffc8;margin-right:5px}
 @media(max-width:1100px){.layout{grid-template-columns:190px 1fr}.right{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.topbar-inner{align-items:flex-start}.brand{padding-top:7px}.global-nav{order:3;flex-basis:100%}.topbar-inner{flex-wrap:wrap}.layout{grid-template-columns:1fr}.right{grid-column:auto;grid-template-columns:1fr}.sectiongrid{grid-template-columns:1fr}.divisiongrid{grid-template-columns:repeat(2,1fr)}.feedhead{display:block}.live{display:inline-block;margin-top:8px}.metrics{grid-template-columns:repeat(2,1fr)}.composer-row{align-items:flex-start}.composer-avatar{width:36px;height:36px}.composer-foot{align-items:flex-end;flex-direction:column}.post-btn{width:100%}}@media(max-width:430px){.metrics{grid-template-columns:1fr 1fr}.divisiongrid{grid-template-columns:1fr}.shell{padding:10px}.hero{padding:20px}}
+
+.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.home-card{padding:13px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff03;min-height:150px}.home-list{display:grid;gap:6px}.person,.story,.activity,.circle{display:flex;gap:9px;align-items:center;padding:8px;border:1px solid #ffffff08;border-radius:9px;background:#0002}.person-avatar,.story-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#087e98,#654bb3);font:800 9px Orbitron}.person-main,.story-main{min-width:0;flex:1}.person-main b,.story-main b{font-size:8px;display:block}.person-main small,.story-main small{font-size:7px;color:var(--muted);display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.follow-btn{border:1px solid var(--line);background:#ffffff06;color:var(--text);border-radius:7px;padding:5px 7px;font:800 7px Montserrat;cursor:pointer}.story-strip{display:flex;gap:9px;overflow:auto;padding:2px 0 4px}.story{min-width:108px;min-height:72px;display:block;position:relative;overflow:hidden}.story-avatar{margin-bottom:6px}.story b{font-size:7px}.story small{display:block;color:var(--muted);font-size:6px;margin-top:2px}.rank-num{font:800 10px Orbitron;color:var(--cyan);width:20px}.empty-mini{padding:14px;text-align:center;color:var(--muted);font-size:8px;border:1px dashed #ffffff12;border-radius:9px}.section-label{font:800 7px Orbitron;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase;margin:3px 0 8px}.today{border-left:2px solid var(--cyan)}.today b{font-size:9px}.today p{font-size:8px;line-height:1.5;color:var(--muted);margin:5px 0 0}.notice{padding:8px;border-radius:8px;background:#66e8ff08;border:1px solid #66e8ff15;font-size:7px;color:#b9cad8}.badge{display:inline-block;font-size:6px;padding:3px 5px;border-radius:99px;border:1px solid var(--line);color:var(--cyan);margin-left:5px}
+@media(max-width:760px){.home-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -119,6 +122,42 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
     </div>
   </div>
 
+
+  <div class="card">
+    <div class="ttl"><b>YOUR CROWSPACE</b><small>PERSONALIZED</small></div>
+    <div class="notice" id="personal-note">Building your personalized home from your CrowSpace account, social graph and community activity.</div>
+    <div class="home-grid">
+      <section class="home-card today"><div class="section-label">TODAY IN CROWSPACE</div><b id="today-title">Welcome to your community.</b><p id="today-copy">Your home will surface people, posts, Caws and community activity as your CrowSpace grows.</p></section>
+      <section class="home-card"><div class="section-label">NOTIFICATIONS</div><div id="notifications-preview" class="home-list"><div class="empty-mini">No notification preview available yet.</div></div></section>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ttl"><b>STORIES</b><small>COMMUNITY NOW</small></div>
+    <div class="story-strip" id="stories"><div class="empty-mini">Stories will appear here as members share them.</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ttl"><b>PEOPLE TO CONNECT WITH</b><small>DISCOVERY</small></div>
+    <div class="home-grid">
+      <section class="home-card"><div class="section-label">FRIEND SUGGESTIONS</div><div id="suggestions" class="home-list"><div class="empty-mini">Finding members…</div></div></section>
+      <section class="home-card"><div class="section-label">ACTIVE MEMBERS</div><div id="active-members" class="home-list"><div class="empty-mini">Loading community activity…</div></div></section>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ttl"><b>TRENDING & COMMUNITY</b><small>RIGHT NOW</small></div>
+    <div class="home-grid">
+      <section class="home-card"><div class="section-label">TRENDING CAWS</div><div id="trending-caws" class="home-list"><div class="empty-mini">Loading Caws…</div></div></section>
+      <section class="home-card"><div class="section-label">RECOMMENDED CIRCLES</div><div id="recommended-circles" class="home-list"><div class="empty-mini">Explore Circles to build recommendations.</div></div></section>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ttl"><b>RECENT ACTIVITY</b><small>LIVE SNAPSHOT</small></div>
+    <div id="recent-activity" class="home-list"><div class="empty-mini">Loading recent community activity…</div></div>
+  </div>
+
   <div class="card">
     <div class="ttl"><b>CROWRULES UNIVERSE</b><small>CONNECTED DIVISIONS</small></div>
     <div class="divisiongrid">
@@ -168,7 +207,7 @@ a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-let db=null,user=null,allPosts=[],activeFilter='all',booted=false,channel=null;
+let db=null,user=null,allPosts=[],activeFilter='all',booted=false,channel=null,profilesCache={};
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const initials=n=>String(n||'C').trim().slice(0,2).toUpperCase();
@@ -240,9 +279,41 @@ async function renderFeed(){
       '<div class="post-stats"><span>♥ '+Number(p.like_count||0)+'</span><span>💬 '+Number(p.comment_count||0)+'</span></div></article>';
   }).join('');
 }
+async function safeRows(table,select,limit=8,order='created_at'){
+  try{
+    let q=db.from(table).select(select);
+    if(order)q=q.order(order,{ascending:false});
+    q=await q.limit(limit);
+    return q.error?[]:(q.data||[]);
+  }catch(e){return[]}
+}
+async function loadHomePanels(){
+  if(!db)return;
+  const profiles=await safeRows('crowspace_profiles','user_id,display_name,username,avatar_url,bio,created_at',12,'created_at');
+  profiles.forEach(p=>profilesCache[p.user_id]=p);
+  const others=profiles.filter(p=>p.user_id!==user?.id);
+  const nameOf=p=>p.display_name||p.username||'CrowSpace Member';
+  const avatarOf=p=>p.avatar_url?'<img class="person-avatar" src="'+esc(p.avatar_url)+'" alt="" loading="lazy">':'<div class="person-avatar">'+esc(initials(nameOf(p)))+'</div>';
+  $('suggestions').innerHTML=others.slice(0,5).map(p=>'<div class="person">'+avatarOf(p)+'<div class="person-main"><b>'+esc(nameOf(p))+' <span class="badge">MEMBER</span></b><small>'+esc(p.bio||'Connect on CrowSpace')+'</small></div><a class="follow-btn" href="profile.html?user='+encodeURIComponent(p.user_id)+'">VIEW</a></div>').join('')||'<div class="empty-mini">No new member suggestions yet.</div>';
+  $('active-members').innerHTML=others.slice(0,5).map((p,i)=>'<div class="person"><span class="rank-num">'+(i+1)+'</span>'+avatarOf(p)+'<div class="person-main"><b>'+esc(nameOf(p))+'</b><small><span class="online-dot"></span>Community member</small></div></div>').join('')||'<div class="empty-mini">No members to display.</div>';
+  const caws=await safeRows('crowspace_caws','id,user_id,body,created_at,like_count',8,'created_at');
+  $('trending-caws').innerHTML=caws.slice(0,5).map((p,i)=>'<div class="activity"><span class="rank-num">'+(i+1)+'</span><div class="person-main"><b>'+esc((profilesCache[p.user_id]&&nameOf(profilesCache[p.user_id]))||'CrowSpace Member')+'</b><small>'+esc(p.body||'A new Caw is trending.')+'</small></div></div>').join('')||'<div class="empty-mini">No Caws available yet.</div>';
+  let circles=await safeRows('crowspace_circles','id,name,description,created_at',5,'created_at');
+  $('recommended-circles').innerHTML=circles.map(c=>'<a class="circle" href="circles.html?id='+encodeURIComponent(c.id)+'"><div class="person-main"><b>'+esc(c.name||'CrowSpace Circle')+'</b><small>'+esc(c.description||'Community conversation')+'</small></div>›</a>').join('')||'<div class="empty-mini">No Circles are available yet. <a href="circles.html">Explore Circles →</a></div>';
+  const recent=allPosts.slice(0,5);
+  $('recent-activity').innerHTML=recent.map(p=>'<div class="activity"><span>◉</span><div class="person-main"><b>'+(profilesCache[p.user_id]?esc(nameOf(profilesCache[p.user_id])):'CrowSpace Member')+' posted</b><small>'+esc((p.body||'').slice(0,150))+' · '+esc(ago(p.created_at))+'</small></div></div>').join('')||'<div class="empty-mini">Your community activity will appear here.</div>';
+  const today=new Date();
+  $('today-title').textContent=user?'Your CrowSpace, '+(user.user_metadata?.display_name||user.user_metadata?.full_name||user.email?.split('@')[0]||'Member')+'.':'Your CrowSpace is open.';
+  $('today-copy').textContent=(caws.length||recent.length)?'Fresh activity is moving through the community. Check the feed, discover new Caws and connect with members.':'Start the conversation by creating your first post.';
+  $('personal-note').textContent=user?'Your home is personalized around your account and the community data available to CrowSpace.':'Sign in to unlock a more personalized CrowSpace home.';
+  $('notifications-preview').innerHTML='<div class="activity"><span>●</span><div class="person-main"><b>Community updates</b><small>'+recent.length+' recent posts are visible in your home feed.</small></div></div><div class="activity"><span>◇</span><div class="person-main"><b>Discovery</b><small>'+others.length+' other members are available to explore.</small></div></div>';
+  const stories=others.slice(0,6);
+  $('stories').innerHTML=stories.map(p=>'<a class="story" href="profile.html?user='+encodeURIComponent(p.user_id)+'">'+avatarOf(p)+'<b>'+esc(nameOf(p))+'</b><small>View profile</small></a>').join('')||'<div class="empty-mini">No community stories yet.</div>';
+}
 async function refresh(){
   clearError();
   await loadPosts();
+  await loadHomePanels();
 }
 async function boot(){
   if(booted)return;
@@ -269,6 +340,7 @@ async function boot(){
   const counts=await Promise.all([safeCount('crowspace_profiles'),safeCount('crowspace_posts'),safeCount('crowspace_caws')]);
   ['members','posts','caws'].forEach((id,i)=>$(id).textContent=counts[i]==null?'—':counts[i].toLocaleString());
   await loadPosts();
+  await loadHomePanels();
   try{
     channel=db.channel('crowspace-home-feed').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},()=>loadPosts());
     await channel.subscribe();
