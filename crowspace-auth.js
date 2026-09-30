@@ -217,6 +217,14 @@
         'Crow Member'
       ).trim().slice(0, 80);
 
+      // creator_category is NOT NULL in crowspace_profiles.
+      // Always provide a safe category during universal profile bootstrap.
+      const creatorCategory = String(
+        meta.creator_category ||
+        meta.creatorCategory ||
+        'Creator'
+      ).trim().slice(0, 80) || 'Creator';
+
       const base =
         displayName.toLowerCase()
           .replace(/[^a-z0-9_]/g, '')
@@ -236,7 +244,8 @@
               {
                 user_id: u.id,
                 username: username,
-                display_name: displayName
+                display_name: displayName,
+                creator_category: creatorCategory
               },
               { onConflict: 'user_id' }
             )
