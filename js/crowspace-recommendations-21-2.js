@@ -24,6 +24,10 @@ window.CrowSpaceRecommendations21_2={
   edges.filter(e=>e.source_type==="creator"&&e.target_type==="creator"&&e.relation==="similar_creator").forEach(e=>{if(followed.has(e.source_id))add("creator",e.target_id,8,"similar to a creator you follow")});
   c.events.slice(0,50).forEach(e=>{if(["open","save","complete","follow"].includes(e.action)){edges.filter(x=>x.source_type===e.item_type&&x.source_id===String(e.item_id)).forEach(x=>add(x.target_type,x.target_id,4,"connected to something you interacted with"))}});
   c.events.slice(0,50).forEach(e=>{if(e.action==="save")add(e.item_type,String(e.item_id),3,"based on your saved activity")});
+  if(window.CrowSpaceGraphLearning21_9){
+   const learned=await window.CrowSpaceGraphLearning21_9.recommend(db,user,Math.max(limit,80));
+   learned.forEach(x=>add(x.type,x.id,x.score,x.reasons[0]));
+  }
   if(window.CrowSpacePersistentGraph21_8&&window.CrowSpaceConnectedDiscovery21_6){
    await window.CrowSpacePersistentGraph21_8.syncFollowed(db,user,[...followed],window.CrowSpaceConnectedDiscovery21_6.expand.bind(window.CrowSpaceConnectedDiscovery21_6));
    const persistent=await window.CrowSpacePersistentGraph21_8.recommend(db,user,Math.max(limit,60));
