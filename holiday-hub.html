@@ -6,16 +6,26 @@
 <link rel="stylesheet" href="crowspace-rebuild.css"><link rel="stylesheet" href="crowspace-universal.css">
 <script src="crowspace-auth.js"></script><script src="crowspace-universal.js" defer></script>
 <style>
-.cs-holiday-hub{margin:18px 0}.cs-holiday-intro{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:14px}.cs-holiday-intro h2{margin:4px 0;font:900 26px Orbitron}.cs-holiday-intro p{margin:0;color:var(--cs-muted);font-size:11px}.cs-holiday-clock{font:800 9px Orbitron;color:var(--cs-cyan);white-space:nowrap}
-.cs-holiday-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.cs-holiday-card{position:relative;overflow:hidden;border:1px solid var(--cs-line);border-radius:18px;padding:18px;background:linear-gradient(145deg,rgba(14,20,40,.98),rgba(4,7,16,.98));box-shadow:0 18px 55px #0006}.cs-holiday-card.next{grid-column:1/-1}.cs-holiday-card:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 0,#78efff12,transparent 42%);pointer-events:none}.cs-holiday-top{position:relative;display:flex;justify-content:space-between;gap:12px}.cs-holiday-name{font:900 18px Orbitron}.cs-holiday-date{color:var(--cs-muted);font-size:10px;margin-top:5px}.cs-countdown{margin:15px 0;font:900 30px Orbitron;letter-spacing:-.04em}.cs-countdown small{display:block;color:var(--cs-muted);font:700 8px Orbitron;letter-spacing:.08em;margin-top:4px}.cs-facts{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.cs-fact{padding:10px;border:1px solid #ffffff0b;border-radius:11px;background:#ffffff04}.cs-fact b{display:block;color:var(--cs-cyan);font:900 15px Orbitron}.cs-fact span{display:block;color:var(--cs-muted);font-size:8px;margin-top:3px}.cs-holiday-note{position:relative;margin:13px 0 0;color:var(--cs-muted);font-size:9px;line-height:1.55}.cs-holiday-updated{margin-top:10px;color:#ffffff66;font-size:7px}.cs-holiday-badges{display:flex;gap:6px;flex-wrap:wrap}.cs-holiday-badge{padding:5px 7px;border:1px solid var(--cs-line);border-radius:999px;color:var(--cs-muted);font:700 7px Orbitron}
-@media(max-width:700px){.cs-holiday-grid{grid-template-columns:1fr}.cs-holiday-card.next{grid-column:auto}.cs-holiday-intro{align-items:start;flex-direction:column}.cs-facts{grid-template-columns:1fr 1fr}.cs-countdown{font-size:24px}}
+.cs-holiday-intel{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;margin-top:14px}
+.cs-holiday-feature,.cs-holiday-side{border:1px solid var(--cs-line);border-radius:20px;background:linear-gradient(145deg,rgba(14,20,40,.98),rgba(4,7,16,.98));box-shadow:0 18px 55px #0006;overflow:hidden}
+.cs-holiday-feature{padding:24px;position:relative}.cs-holiday-feature:after{content:'';position:absolute;inset:auto -20% -45% 25%;height:240px;background:radial-gradient(circle,#78efff18,transparent 68%);pointer-events:none}
+.cs-holiday-kicker{font:800 9px Orbitron;color:var(--cs-cyan);letter-spacing:.14em}.cs-holiday-feature h2{font:900 32px Orbitron;margin:8px 0 4px}.cs-holiday-feature .date{color:var(--cs-muted);font-size:11px}.cs-live-count{font:900 42px Orbitron;margin:22px 0 5px;letter-spacing:-.05em}.cs-live-count small{display:block;font:700 8px Orbitron;color:var(--cs-muted);letter-spacing:.12em;margin-top:5px}
+.cs-holiday-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.cs-holiday-fact{padding:11px;border:1px solid #ffffff0b;border-radius:12px;background:#ffffff04}.cs-holiday-fact b{display:block;color:var(--cs-cyan);font:900 14px Orbitron}.cs-holiday-fact span{display:block;color:var(--cs-muted);font-size:8px;margin-top:4px}
+.cs-holiday-description{position:relative;color:var(--cs-muted);font-size:10px;line-height:1.65;margin:17px 0 0;max-width:850px}
+.cs-holiday-side{padding:18px}.cs-holiday-side h3{font:900 15px Orbitron;margin:2px 0 12px}.cs-holiday-status{padding:12px;border:1px solid var(--cs-line);border-radius:13px;background:#ffffff04;color:var(--cs-muted);font-size:9px;line-height:1.6}.cs-holiday-status strong{color:#fff}
+.cs-holiday-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cs-holiday-actions a,.cs-holiday-actions button{border:1px solid var(--cs-line);background:#ffffff06;color:#fff;border-radius:999px;padding:8px 11px;text-decoration:none;font:800 8px Orbitron;cursor:pointer}.cs-holiday-actions a:hover,.cs-holiday-actions button:hover{border-color:var(--cs-cyan)}
+.cs-holiday-timeline{margin-top:14px;border:1px solid var(--cs-line);border-radius:20px;padding:18px;background:#050914}.cs-holiday-timeline h3{font:900 16px Orbitron;margin:0 0 12px}.cs-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.cs-tile{padding:12px;border:1px solid #ffffff0b;border-radius:13px;background:#ffffff03}.cs-tile strong{display:block;font:900 11px Orbitron}.cs-tile span{display:block;color:var(--cs-muted);font-size:8px;margin-top:5px}.cs-tile em{display:block;color:var(--cs-cyan);font:800 8px Orbitron;font-style:normal;margin-top:9px}
+.cs-holiday-footnote{margin-top:10px;color:#ffffff55;font-size:7px;line-height:1.5}
+@media(max-width:850px){.cs-holiday-intel{grid-template-columns:1fr}.cs-holiday-facts{grid-template-columns:repeat(2,1fr)}.cs-timeline{grid-template-columns:repeat(2,1fr)}.cs-live-count{font-size:32px}}
+@media(max-width:520px){.cs-timeline{grid-template-columns:1fr}.cs-holiday-feature{padding:18px}}
 </style>
 </head>
 <body data-page="holiday-hub">
 <main class="cs-page-shell">
-<section class="cs-page-hero"><div class="cs-eyebrow">CROWSPACE // HOLIDAY HUB // V29</div><h1>Holiday Hub</h1><p>Your year-round holiday calendar with live countdowns, automatically calculated dates, and updated holiday facts.</p></section>
+<section class="cs-page-hero"><div class="cs-eyebrow">CROWSPACE // HOLIDAY HUB // V31</div><h1>Holiday Hub</h1><p>Your year-round holiday calendar with live countdowns, automatic date calculations, live holiday intelligence, and a rolling 12-month timeline.</p></section>
 <section id="holiday-app" class="cs-holiday-hub" aria-live="polite"></section>
 </main>
+
 <script>
 (function(){
 'use strict';
@@ -24,41 +34,71 @@ const nth=(y,m,d)=>new Date(y,m-1,d);
 const thanksgiving=y=>{const d=new Date(y,10,1);while(d.getDay()!==4)d.setDate(d.getDate()+1);d.setDate(d.getDate()+21);return d};
 const laborDay=y=>{const d=new Date(y,8,1);while(d.getDay()!==1)d.setDate(d.getDate()+1);return d};
 const memorialDay=y=>{const d=new Date(y,4,31);while(d.getDay()!==1)d.setDate(d.getDate()-1);return d};
-const easter=y=>{const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);return new Date(y,m-1,Math.floor((h+l-7*m+114)/31),Math.floor((h+l-7*m+114)%31)+1)};
+const easter=y=>{const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;return new Date(y,month-1,day)};
 function holidays(y){
- const e=easter(y), em=new Date(e);em.setDate(e.getDate()-2);
+ const e=easter(y);
  return [
-  {key:'new-year',name:'New Year’s Day',date:nth(y,1,1),emoji:'🎆',type:'Federal holiday',facts:['January 1','365 days','First day of the year'],note:'New Year’s Day marks the beginning of the Gregorian calendar year.'},
-  {key:'mlk',name:'Martin Luther King Jr. Day',date:nth(y,1,1),emoji:'✊',type:'Federal holiday',facts:['3rd Monday','January','Since 1986'],note:'A U.S. federal holiday honoring Martin Luther King Jr. and his legacy of civil rights advocacy.'},
-  {key:'valentines',name:'Valentine’s Day',date:nth(y,2,14),emoji:'❤️',type:'Observance',facts:['February 14','Love & friendship','Annual'],note:'Valentine’s Day is widely observed on February 14 as a celebration associated with love, affection and friendship.'},
-  {key:'easter',name:'Easter Sunday',date:e,emoji:'🐣',type:'Christian holiday',facts:['Sunday','Variable date','Spring'],note:'Easter is observed on a Sunday and its date varies from year to year.'},
-  {key:'memorial',name:'Memorial Day',date:memorialDay(y),emoji:'🇺🇸',type:'Federal holiday',facts:['Last Monday','May','Since 1971'],note:'Memorial Day is observed on the last Monday in May to honor U.S. military personnel who died while serving.'},
-  {key:'juneteenth',name:'Juneteenth',date:nth(y,6,19),emoji:'🟥',type:'Federal holiday',facts:['June 19','Since 2021','Texas 1865'],note:'Juneteenth commemorates June 19, 1865, when news of the Emancipation Proclamation reached Galveston, Texas.'},
-  {key:'july4',name:'Independence Day',date:nth(y,7,4),emoji:'🇺🇸',type:'Federal holiday',facts:['July 4','1776','Annual'],note:'Independence Day commemorates the adoption of the Declaration of Independence in 1776.'},
-  {key:'labor',name:'Labor Day',date:laborDay(y),emoji:'🛠️',type:'Federal holiday',facts:['1st Monday','September','Since 1894'],note:'Labor Day is observed on the first Monday in September and recognizes the contributions of American workers.'},
-  {key:'halloween',name:'Halloween',date:nth(y,10,31),emoji:'🎃',type:'Observance',facts:['October 31','Costumes & candy','Annual'],note:'Halloween is observed every October 31 and is associated with costumes, trick-or-treating and seasonal traditions.'},
-  {key:'veterans',name:'Veterans Day',date:nth(y,11,11),emoji:'🎖️',type:'Federal holiday',facts:['November 11','Since 1954','Veterans'],note:'Veterans Day honors people who have served in the U.S. Armed Forces.'},
-  {key:'thanksgiving',name:'Thanksgiving Day',date:thanksgiving(y),emoji:'🦃',type:'Federal holiday',facts:['4th Thursday','November','Annual'],note:'U.S. Thanksgiving is observed on the fourth Thursday of November.'},
-  {key:'christmas',name:'Christmas Day',date:nth(y,12,25),emoji:'🎄',type:'Federal holiday',facts:['December 25','Christian holiday','Annual'],note:'Christmas Day is observed on December 25 and is associated with the celebration of the birth of Jesus in Christianity.'}
+  {name:'New Year’s Day',date:nth(y,1,1),emoji:'🎆',type:'Federal holiday',facts:['Jan 1','1st day','365/366 days','Annual'],note:'Marks the first day of the Gregorian calendar year.'},
+  {name:'Martin Luther King Jr. Day',date:nth(y,1,1),emoji:'✊',type:'Federal holiday',facts:['3rd Monday','January','Since 1986','Annual'],note:'A U.S. federal holiday honoring Martin Luther King Jr. and his civil-rights legacy.' ,move:(d)=>{while(d.getDay()!==1)d.setDate(d.getDate()+1);d.setDate(d.getDate()+14);return d}},
+  {name:'Valentine’s Day',date:nth(y,2,14),emoji:'❤️',type:'Observance',facts:['Feb 14','Love','Friendship','Annual'],note:'Widely observed as a celebration associated with love, affection and friendship.'},
+  {name:'Easter Sunday',date:e,emoji:'🐣',type:'Christian holiday',facts:['Sunday','Variable','Spring','Annual'],note:'A major Christian holiday whose date varies from year to year.'},
+  {name:'Memorial Day',date:memorialDay(y),emoji:'🇺🇸',type:'Federal holiday',facts:['Last Monday','May','Since 1971','Annual'],note:'Observed on the last Monday in May to honor U.S. military personnel who died while serving.'},
+  {name:'Juneteenth',date:nth(y,6,19),emoji:'🟥',type:'Federal holiday',facts:['June 19','Since 2021','Texas 1865','Annual'],note:'Commemorates June 19, 1865, when news of emancipation reached Galveston, Texas.'},
+  {name:'Independence Day',date:nth(y,7,4),emoji:'🇺🇸',type:'Federal holiday',facts:['July 4','1776','Annual','U.S.'],note:'Commemorates adoption of the Declaration of Independence in 1776.'},
+  {name:'Labor Day',date:laborDay(y),emoji:'🛠️',type:'Federal holiday',facts:['1st Monday','September','Since 1894','Annual'],note:'Observed on the first Monday in September and recognizes American workers.'},
+  {name:'Halloween',date:nth(y,10,31),emoji:'🎃',type:'Observance',facts:['Oct 31','Costumes','Candy','Annual'],note:'Observed every October 31 with costumes, trick-or-treating and other seasonal traditions.'},
+  {name:'Veterans Day',date:nth(y,11,11),emoji:'🎖️',type:'Federal holiday',facts:['Nov 11','Since 1954','Veterans','Annual'],note:'Honors people who have served in the U.S. Armed Forces.'},
+  {name:'Thanksgiving Day',date:thanksgiving(y),emoji:'🦃',type:'Federal holiday',facts:['4th Thursday','November','Annual','U.S.'],note:'U.S. Thanksgiving is observed on the fourth Thursday of November.'},
+  {name:'Christmas Day',date:nth(y,12,25),emoji:'🎄',type:'Federal holiday',facts:['Dec 25','Christian holiday','Annual','Winter'],note:'Observed on December 25 and associated in Christianity with the birth of Jesus.'}
  ];
 }
-function nextHoliday(now){
- const all=[...holidays(now.getFullYear()),...holidays(now.getFullYear()+1)].sort((a,b)=>a.date-b.date);
- return all.find(h=>h.date.getTime()>=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime())||all[0];
+function normalize(list){
+ return list.map(h=>{
+  if(h.name==='Martin Luther King Jr. Day') h.date=h.move(new Date(h.date));
+  return h;
+ });
 }
-function diff(ms){const total=Math.max(0,ms),sec=Math.floor(total/1000),days=Math.floor(sec/86400),hrs=Math.floor(sec%86400/3600),mins=Math.floor(sec%3600/60),secs=sec%60;return {days,hrs,mins,secs}}
+function pad(n){return String(n).padStart(2,'0')}
+function diff(ms){const s=Math.max(0,Math.floor(ms/1000));return{days:Math.floor(s/86400),hours:Math.floor(s%86400/3600),mins:Math.floor(s%3600/60),secs:s%60}}
+function dateKey(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()}
 function dateText(d){return d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'})}
-function card(h,now,isNext){
- const d=diff(h.date-now),past=h.date<new Date(now.getFullYear(),now.getMonth(),now.getDate());
- const years=new Date(now).getFullYear()-h.date.getFullYear();
- return '<article class="cs-holiday-card '+(isNext?'next':'')+'"><div class="cs-holiday-top"><div><div class="cs-holiday-name">'+h.emoji+' '+esc(h.name)+'</div><div class="cs-holiday-date">'+dateText(h.date)+'</div></div><div class="cs-holiday-badges"><span class="cs-holiday-badge">'+esc(h.type)+'</span></div></div><div class="cs-countdown" data-date="'+h.date.toISOString()+'">'+(past?'TODAY':d.days+'d '+String(d.hrs).padStart(2,'0')+'h '+String(d.mins).padStart(2,'0')+'m '+String(d.secs).padStart(2,'0')+'s')+'<small>'+ (isNext?'NEXT HOLIDAY':'COUNTDOWN') +'</small></div><div class="cs-facts">'+h.facts.map((x,i)=>'<div class="cs-fact"><b>'+esc(x)+'</b><span>Holiday fact</span></div>').join('')+'</div><p class="cs-holiday-note">'+esc(h.note)+'</p><div class="cs-holiday-updated">Facts/date calculations automatically refreshed from the current date · '+new Date(now).toLocaleTimeString()+'</div></article>';
+function nextHoliday(now){
+ const today=dateKey(now), pool=normalize([...holidays(now.getFullYear()),...holidays(now.getFullYear()+1)]).sort((a,b)=>a.date-b.date);
+ return pool.find(h=>dateKey(h.date)>=today)||pool[0];
 }
+function calendar(now){
+ return normalize([...holidays(now.getFullYear()),...holidays(now.getFullYear()+1)])
+  .filter(h=>dateKey(h.date)>=dateKey(now))
+  .sort((a,b)=>a.date-b.date);
+}
+function currentSeason(d){const m=d.getMonth()+1;return m<=2?'WINTER':m<=5?'SPRING':m<=8?'SUMMER':'AUTUMN'}
 function render(){
- const host=document.getElementById('holiday-app'),now=new Date(),next=nextHoliday(now),all=[...holidays(now.getFullYear()),...holidays(now.getFullYear()+1)].filter(h=>h.date>=new Date(now.getFullYear(),now.getMonth(),now.getDate())).sort((a,b)=>a.date-b.date);
- host.innerHTML='<div class="cs-holiday-intro"><div><span class="cs-eyebrow">LIVE HOLIDAY CALENDAR</span><h2>What’s Coming Next</h2><p>Countdowns update automatically in real time. Holiday dates recalculate each year.</p></div><div class="cs-holiday-clock">LOCAL TIME · '+now.toLocaleString()+'</div></div><div class="cs-holiday-grid">'+card(next,now,true)+all.slice(1,9).map(h=>card(h,now,false)).join('')+'</div>';
-}
+ const host=document.getElementById('holiday-app'),now=new Date(),next=nextHoliday(now),up=calendar(now),d=diff(next.date-now);
+ const today=dateKey(next.date)===dateKey(now),yearDays=new Date(now.getFullYear()+1,0,1)-new Date(now.getFullYear(),0,1),yearStart=new Date(now.getFullYear(),0,1),dayOfYear=Math.floor((dateKey(now)-dateKey(yearStart))/86400000)+1,remaining=Math.max(0,Math.ceil((dateKey(new Date(now.getFullYear()+1,0,1))-dateKey(now))/86400000));
+ const status=today?'TODAY · '+next.name+' is here.':d.days===1?'TOMORROW · '+next.name+' arrives tomorrow.':d.days<7?'THIS WEEK · '+next.name+' is less than a week away.':d.days<31?'THIS MONTH · '+next.name+' is coming up soon.':'UPCOMING · '+next.name+' is the next holiday on the calendar.';
+ host.innerHTML=`
+ <div class="cs-holiday-intel">
+  <article class="cs-holiday-feature">
+   <div class="cs-holiday-kicker">V31 // HOLIDAY INTELLIGENCE</div>
+   <h2>${next.emoji} ${esc(next.name)}</h2>
+   <div class="date">${dateText(next.date)} · ${esc(next.type)}</div>
+   <div class="cs-live-count" data-live-date="${next.date.toISOString()}">${today?'TODAY':d.days+'d '+pad(d.hours)+'h '+pad(d.mins)+'m '+pad(d.secs)+'s'}<small>${today?'HOLIDAY TODAY':'TIME UNTIL NEXT HOLIDAY'}</small></div>
+   <div class="cs-holiday-facts">${next.facts.map((f,i)=>'<div class="cs-holiday-fact"><b>'+esc(f)+'</b><span>Auto-updated fact</span></div>').join('')}</div>
+   <p class="cs-holiday-description">${esc(next.note)}</p>
+  </article>
+  <aside class="cs-holiday-side">
+   <h3>LIVE CALENDAR STATUS</h3>
+   <div class="cs-holiday-status"><strong>${status}</strong><br>Season: ${currentSeason(now)} · Day ${dayOfYear} of ${yearDays/86400000}<br>${remaining} calendar days remain in ${now.getFullYear()}.</div>
+   <div class="cs-holiday-actions"><a href="holiday-bots.html">HOLIDAY BOTS</a><a href="events.html">EVENTS</a><button id="cs-holiday-share" type="button">SHARE</button></div>
+   <div class="cs-holiday-footnote">Dates are calculated in the visitor’s local browser time. Moveable holidays recalculate automatically each year.</div>
+  </aside>
+ </div>
+ <section class="cs-holiday-timeline"><h3>UPCOMING HOLIDAY TIMELINE</h3><div class="cs-timeline">${up.slice(0,12).map(h=>{const x=diff(h.date-now);return '<div class="cs-tile"><strong>'+h.emoji+' '+esc(h.name)+'</strong><span>'+dateText(h.date)+'</span><em>'+((dateKey(h.date)===dateKey(now))?'TODAY':x.days+' DAYS')+'</em></div>'}).join('')}</div></section>`;
+ const share=document.getElementById('cs-holiday-share'); if(share) share.onclick=async()=>{const txt='CrowSpace Holiday Hub: '+next.name+' · '+dateText(next.date);try{await navigator.clipboard.writeText(txt);share.textContent='COPIED'}catch(e){share.textContent='READY'}}};
 function tick(){
- document.querySelectorAll('.cs-countdown[data-date]').forEach(el=>{const d=new Date(el.dataset.date),now=new Date(),x=diff(d-now);el.firstChild.nodeValue=(d.toDateString()===now.toDateString()?'TODAY':x.days+'d '+String(x.hrs).padStart(2,'0')+'h '+String(x.mins).padStart(2,'0')+'m '+String(x.secs).padStart(2,'0')+'s')});
+ const el=document.querySelector('[data-live-date]');if(!el)return;
+ const target=new Date(el.dataset.liveDate),now=new Date(),x=diff(target-now);
+ el.firstChild.nodeValue=dateKey(target)===dateKey(now)?'TODAY':x.days+'d '+pad(x.hours)+'h '+pad(x.mins)+'m '+pad(x.secs)+'s';
 }
 render();setInterval(()=>{tick();const n=new Date();if(n.getHours()===0&&n.getMinutes()===0&&n.getSeconds()<2)render()},1000);
 })();
