@@ -45,7 +45,8 @@
 <script src="crowspace-universal.js" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
+</head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -299,11 +300,46 @@ window.addEventListener("offline",()=>{document.body.dataset.realtime="offline"}
 window.addEventListener("beforeunload",stopRealtime);
 
 
-let profileStarted=false;
-function startProfile(){if(profileStarted)return;profileStarted=true;load();}
-window.addEventListener("crowspace:supabase-ready",startProfile,{once:true});
-window.addEventListener("crowspace-auth-ready",startProfile,{once:true});
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startProfile,{once:true});else startProfile();
+let profileStarted=false, profileRetryTimer=null, profileWatchdog=null;
+function setConnectionState(mode,message){
+  document.body.dataset.profileConnection=mode;
+  const app=$("app"); if(!app)return;
+  if(mode==="connecting"){
+    app.innerHTML='<div class="state"><div style="font:800 15px Orbitron;color:var(--cyan);letter-spacing:.08em">CONNECTING TO CROWSPACE</div><div style="margin-top:9px">'+esc(message||"Initializing your profile…")+'</div><div style="margin-top:12px;font-size:10px;color:var(--muted)">Secure universal account connection • Please wait</div></div>';
+  }else if(mode==="offline"){
+    app.innerHTML='<div class="state"><div style="font:800 15px Orbitron;color:var(--danger)">CROWSPACE CONNECTION INTERRUPTED</div><div style="margin-top:9px">'+esc(message||"The profile could not be initialized.")+'</div><div class="actions" style="justify-content:center;margin-top:15px"><button class="btn primary" id="retryProfile">Retry Connection</button><a class="btn" href="index.html">Back to CrowSpace</a></div></div>';
+    $("retryProfile")?.addEventListener("click",()=>{profileStarted=false;startProfile(true)});
+  }
+}
+async function startProfile(force){
+  if(profileStarted&&!force)return;
+  profileStarted=true;
+  clearTimeout(profileRetryTimer); clearTimeout(profileWatchdog);
+  setConnectionState("connecting","Connecting to your universal CrowRules account…");
+  profileWatchdog=setTimeout(()=>{if(document.body.dataset.profileConnection==="connecting"){console.warn("[CrowSpace profile] startup watchdog fired");profileStarted=false;setConnectionState("offline","The connection took too long. Your data was not changed. Try again.");}},12000);
+  try{
+    if(!window.CrowSpaceAuth?.ready)throw new Error("CrowSpace authentication service is unavailable.");
+    await Promise.race([
+      window.CrowSpaceAuth.ready,
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Authentication service timed out.")),10000))
+    ]);
+    if(!window.CrowSpaceAuth.client)throw new Error("Supabase client was not initialized.");
+    await load();
+    clearTimeout(profileWatchdog);
+    document.body.dataset.profileConnection="connected";
+  }catch(e){
+    clearTimeout(profileWatchdog);
+    console.error("[CrowSpace profile startup]",e);
+    profileStarted=false;
+    setConnectionState("offline",e?.message||"Unable to connect to CrowSpace.");
+  }
+}
+window.addEventListener("crowspace:supabase-ready",()=>startProfile(true));
+window.addEventListener("crowspace-auth-ready",()=>startProfile(true));
+window.addEventListener("crowspace-auth-error",e=>{if(document.body.dataset.profileConnection!=="connected"){profileStarted=false;setConnectionState("offline",e.detail?.message||"Supabase authentication failed.")}});
+window.addEventListener("online",()=>{if(document.body.dataset.profileConnection!=="connected")startProfile(true)});
+window.addEventListener("offline",()=>setConnectionState("offline","Your browser is offline. Reconnect and try again."));
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>startProfile(),{once:true});else startProfile();
 })();
 </script>
 </body>
