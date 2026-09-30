@@ -366,7 +366,8 @@ if(item.created_at){const age=Math.max(0,(Date.now()-new Date(item.created_at).g
 return s}
 async function rankCrossSurface(items,kind){const ctx=await crossSurfaceContext();return (items||[]).map((x,i)=>({...x,_crossScore:crossSurfaceScore({...x,kind},ctx),_crossIndex:i})).sort((a,b)=>b._crossScore-a._crossScore||a._crossIndex-b._crossIndex)}
 window.CrowSpaceCrossSurface={context:crossSurfaceContext,score:crossSurfaceScore,rank:rankCrossSurface};
-\n/* V50 — Algorithm Controls & Signal Tuning */
+
+/* V50 — Algorithm Controls & Signal Tuning */
 async function getAlgorithmControls(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_get_algorithm_controls");if(r.error)throw r.error;window.CrowSpaceAlgorithmControls={...(r.data||{})};return r.data||null}catch(e){return null}}
 async function updateAlgorithmControls(s){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_update_algorithm_controls",{p_freshness:Number(s.freshness_weight),p_familiarity:Number(s.familiarity_weight),p_exploration:Number(s.exploration_weight),p_caw:Number(s.caw_weight),p_post:Number(s.post_weight),p_positive:Number(s.positive_signal_multiplier),p_negative:Number(s.negative_signal_multiplier),p_creator:Number(s.creator_affinity_weight)});if(r.error)throw r.error;window.CrowSpaceAlgorithmControls={...(r.data||{})};return r.data||null}catch(e){console.debug("Algorithm controls unavailable",e);return null}}
 async function rebuildPersonalFeed(){try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return null;const r=await db.rpc("crowspace_rebuild_personal_feed");if(r.error)throw r.error;return r.data||null}catch(e){console.debug("Feed rebuild unavailable",e);return null}}
