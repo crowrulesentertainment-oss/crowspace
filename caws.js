@@ -28,4 +28,4 @@ function observe(){const io=new IntersectionObserver(es=>es.forEach(e=>{const v=
 document.getElementById("soundButton")?.addEventListener("click",()=>{const b=document.getElementById("soundButton");b.classList.toggle("enabled");b.textContent=b.classList.contains("enabled")?"🔊":"🔇";document.querySelectorAll("video").forEach(v=>v.muted=!b.classList.contains("enabled"));document.querySelector(".reel.active video")?.play().catch(()=>{})});
 document.addEventListener("keydown",e=>{if(e.key==="ArrowDown"||e.key==="j"){e.preventDefault();document.querySelectorAll(".reel")[Math.min(active+1,caws.length-1)]?.scrollIntoView({behavior:"smooth"})}if(e.key==="ArrowUp"||e.key==="k"){e.preventDefault();document.querySelectorAll(".reel")[Math.max(active-1,0)]?.scrollIntoView({behavior:"smooth"})}});
 await load().catch(e=>{console.error("[CrowSpace Caws]",e);feed.innerHTML='<div class="card" style="padding:24px">Caws are temporarily unavailable.</div>'});
-})();<script>window.CrowSpaceSurfaceLearning=window.CrowSpaceInstrumentation?.surface?.("caws");</script>
+})();
