@@ -1,0 +1,1 @@
+window.CrowSpaceNotificationSources=window.CrowSpaceNotificationSources||{};window.CrowSpaceNotificationSources.circles=async function(){return []};
