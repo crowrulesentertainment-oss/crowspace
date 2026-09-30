@@ -67,7 +67,20 @@
 .profile-statusline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(102,255,178,.7)}
 @media(max-width:760px){.profile-commandbar{top:60px}.profile-quickgrid{grid-template-columns:1fr 1fr}}
-</style><style>.profile-commandbar{box-shadow:0 8px 35px #0008}.presence-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:#050a14;color:var(--muted);font-size:10px}</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+</style><style>.profile-commandbar{box-shadow:0 8px 35px #0008}.presence-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:#050a14;color:var(--muted);font-size:10px}</style><style id="crow-profile-v83">
+.creator-hub{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:18px}
+.creator-hub-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:linear-gradient(145deg,#08101f,#050913)}
+.creator-hub-card h3{margin:0 0 7px;font:800 12px Orbitron;color:var(--cyan);letter-spacing:.08em}
+.creator-hub-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.creator-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}
+.creator-metric{padding:10px;border:1px solid var(--line);border-radius:10px;text-align:center;background:#030711}
+.creator-metric b{display:block;font:800 16px Orbitron;color:var(--text)}
+.creator-metric span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.creator-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.identity-ribbon{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.identity-ribbon span{padding:5px 8px;border:1px solid rgba(85,239,255,.2);border-radius:999px;background:#55efff08;color:#a9c3d8;font-size:9px}
+@media(max-width:760px){.creator-hub{grid-template-columns:1fr}.creator-metrics{grid-template-columns:repeat(3,1fr)}}
+</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -346,6 +359,13 @@ window.addEventListener("beforeunload",stopRealtime);
     bar.className='profile-commandbar';
     bar.innerHTML='<button class="btn" type="button" data-profile-cmd="refresh">↻ Refresh</button><button class="btn" type="button" data-profile-cmd="share">Share Profile</button><button class="btn" type="button" data-profile-cmd="copy">Copy Link</button><span class="command-status" data-live="1">● LIVE PROFILE</span>';
     app.insertBefore(bar,hero);
+if(!app.querySelector('.creator-hub')){
+      const hub=document.createElement('section'); hub.className='creator-hub'; hub.id='creatorIdentityHub';
+      const followerCount=typeof followers!=='undefined'?followers.length:0, followingCount=typeof following!=='undefined'?following.length:0, postCount=typeof posts!=='undefined'?posts.length:0;
+      hub.innerHTML='<div class="creator-hub-card"><h3>CREATOR IDENTITY HUB</h3><p>A focused snapshot of this CrowSpace identity — built around the person, their work, their community and their live activity.</p><div class="identity-ribbon"><span>UNIVERSAL CROWRULES MEMBER</span><span>LIVE PROFILE</span><span>'+((target&&target.creator_category)?esc(target.creator_category.toUpperCase()):'CREATOR PROFILE')+'</span></div><div class="creator-actions"><button class="btn" type="button" data-hub="top">Back to Top</button><button class="btn" type="button" data-hub="activity">View Activity</button></div></div><div class="creator-hub-card"><h3>COMMUNITY SIGNAL</h3><div class="creator-metrics"><div class="creator-metric"><b>'+followerCount+'</b><span>Followers</span></div><div class="creator-metric"><b>'+followingCount+'</b><span>Following</span></div><div class="creator-metric"><b>'+postCount+'</b><span>Posts</span></div></div><p style="margin-top:10px">Counts update with the profile data layer and realtime refreshes.</p></div>';
+      const hero=app.querySelector('.hero'); if(hero)hero.insertAdjacentElement('afterend',hub);
+      hub.addEventListener('click',e=>{const b=e.target.closest('[data-hub]');if(!b)return;if(b.dataset.hub==='top')window.scrollTo({top:0,behavior:'smooth'});if(b.dataset.hub==='activity')document.getElementById('activity')?.scrollIntoView({behavior:'smooth',block:'start'});});
+    }
     if(!app.querySelector('.profile-quickgrid')){
       const q=document.createElement('div');
       q.className='profile-quickgrid';
