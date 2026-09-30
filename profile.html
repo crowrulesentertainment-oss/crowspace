@@ -80,7 +80,20 @@
 .identity-ribbon{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .identity-ribbon span{padding:5px 8px;border:1px solid rgba(85,239,255,.2);border-radius:999px;background:#55efff08;color:#a9c3d8;font-size:9px}
 @media(max-width:760px){.creator-hub{grid-template-columns:1fr}.creator-metrics{grid-template-columns:repeat(3,1fr)}}
-</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+</style><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><style id="crow-profile-v84">
+.profile-pulse{margin-top:18px;padding:16px;border:1px solid rgba(168,121,255,.22);border-radius:16px;background:linear-gradient(145deg,#0a0d1d,#050812);box-shadow:0 18px 55px #0008}
+.profile-pulse-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.profile-pulse-head h3{margin:0;font:800 12px Orbitron;color:var(--violet);letter-spacing:.1em}
+.profile-pulse-head span{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.pulse-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+.pulse-card{padding:12px;border:1px solid var(--line);border-radius:12px;background:#030711}
+.pulse-card b{display:block;font:800 17px Orbitron;color:var(--text)}
+.pulse-card span{display:block;margin-top:4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
+.pulse-track{height:6px;margin-top:9px;border-radius:999px;background:#0a1020;overflow:hidden;border:1px solid var(--line)}
+.pulse-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet));transition:width .6s ease}
+.pulse-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:760px){.pulse-grid{grid-template-columns:1fr 1fr}}
+</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -366,7 +379,20 @@ if(!app.querySelector('.creator-hub')){
       const hero=app.querySelector('.hero'); if(hero)hero.insertAdjacentElement('afterend',hub);
       hub.addEventListener('click',e=>{const b=e.target.closest('[data-hub]');if(!b)return;if(b.dataset.hub==='top')window.scrollTo({top:0,behavior:'smooth'});if(b.dataset.hub==='activity')document.getElementById('activity')?.scrollIntoView({behavior:'smooth',block:'start'});});
     }
-    if(!app.querySelector('.profile-quickgrid')){
+
+    if(!app.querySelector('.profile-pulse')){
+      const pulse=document.createElement('section');
+      pulse.className='profile-pulse';
+      const activityCount=(posts?.length||0)+(caws?.length||0)+(guestbook?.length||0);
+      const followerCount=followers?.length||0;
+      const followingCount=following?.length||0;
+      const completeness=typeof profileCompleteness==='function'?Math.round(profileCompleteness(target)):0;
+      const pulseWidth=Math.max(4,Math.min(100,completeness));
+      pulse.innerHTML='<div class="profile-pulse-head"><h3>PROFILE PULSE</h3><span>Live creator readiness</span></div><div class="pulse-grid"><div class="pulse-card"><b>'+activityCount+'</b><span>Visible activity</span></div><div class="pulse-card"><b>'+followerCount+'</b><span>Community reach</span></div><div class="pulse-card"><b>'+followingCount+'</b><span>Connections</span></div><div class="pulse-card"><b>'+completeness+'%</b><span>Profile readiness</span><div class="pulse-track"><i style="width:'+pulseWidth+'%"></i></div></div></div><div class="pulse-actions"><button class="btn" type="button" data-pulse="activity">Open Activity</button><button class="btn" type="button" data-pulse="studio">Open Creator Studio</button></div>';
+      const hub=app.querySelector('.creator-hub');
+      if(hub)hub.insertAdjacentElement('afterend',pulse); else hero.insertAdjacentElement('afterend',pulse);
+      pulse.addEventListener('click',e=>{const b=e.target.closest('[data-pulse]');if(!b)return;if(b.dataset.pulse==='activity')document.getElementById('activity')?.scrollIntoView({behavior:'smooth',block:'start'});if(b.dataset.pulse==='studio')document.getElementById('creatorStudio')?.scrollIntoView({behavior:'smooth',block:'start'});});
+    }\n    if(!app.querySelector('.profile-quickgrid')){
       const q=document.createElement('div');
       q.className='profile-quickgrid';
       q.innerHTML='<a class="quick-card" href="#creatorStudio"><b>CREATOR STUDIO</b><span>Edit identity, portfolio, links and featured work.</span></a><a class="quick-card" href="#socialGraph"><b>SOCIAL GRAPH</b><span>Manage followers, following and connections.</span></a><a class="quick-card" href="#guestbook"><b>GUESTBOOK</b><span>See messages and profile activity.</span></a><a class="quick-card" href="#activity"><b>ACTIVITY</b><span>Jump into your latest profile activity.</span></a>';
