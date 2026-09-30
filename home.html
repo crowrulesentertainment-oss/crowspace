@@ -240,56 +240,53 @@ async function safeCount(table){
 async function loadPosts(){
   if(!db)return;
   $('feed-status').textContent='LOADING';
-  let q=await db.from('crowspace_posts').select('id,user_id,title,body,media_url,created_at,like_count,comment_count').order('created_at',{ascending:false}).limit(50);
+  let q=await db.from('crowspace_posts').select('id,user_id,title,body,media_url,created_at,like_count,comment_count').order('created_at',{ascending:false}).limit(100);
+  if(q.error)q=await db.from('crowspace_posts').select('id,user_id,title,body,media_url,created_at').order('created_at',{ascending:false}).limit(100);
+  if(q.error)q=await db.from('crowspace_posts').select('id,user_id,body,created_at').order('created_at',{ascending:false}).limit(100);
   if(q.error){
-    // Compatibility fallback: older schemas may not have optional counters/media/title.
-    q=await db.from('crowspace_posts').select('id,user_id,body,created_at').order('created_at',{ascending:false}).limit(50);
-  }
-  if(q.error){
-    $('feed-status').textContent='ERROR';
-    $('feed-note').textContent='The feed is unavailable. Check the Supabase table permissions/RLS for crowspace_posts.';
-    $('live-feed').innerHTML='<div class="error-box">The live feed could not be loaded. Your account is still connected, but the posts table did not return data.</div>';
-    $('visible').textContent='0';
-    return;
+    $('feed-status').textContent='ERROR'; $('feed-note').textContent='The feed is unavailable. Check Supabase permissions/RLS for crowspace_posts.';
+    $('live-feed').innerHTML='<div class="error-box">The live feed could not be loaded.</div>'; $('visible').textContent='0'; return;
   }
   allPosts=q.data||[];
+  await applyFeedRanking();
   await renderFeed();
   $('feed-status').textContent='READY';
 }
-async function renderFeed(){
-  let rows=allPosts;
-  if(activeFilter==='mine'&&user)rows=rows.filter(p=>p.user_id===user.id);
-  if(feedQuery)rows=rows.filter(p=>(String(p.title||'')+' '+String(p.body||'')).toLowerCase().includes(feedQuery.toLowerCase()));
-  $('visible').textContent=rows.length.toLocaleString();
-  if(!rows.length){
-    $('live-feed').innerHTML='<div class="feed-empty">'+(activeFilter==='mine'?'You have not posted yet. Your posts will appear here.':'No posts yet. Be the first person to post on CrowSpace.')+'</div>';
-    return;
-  }
-  const ids=[...new Set(rows.map(p=>p.user_id).filter(Boolean))];
-  let profiles={};
-  if(ids.length){
-    const pr=await db.from('crowspace_profiles').select('user_id,display_name,username,avatar_url').in('user_id',ids);
-    if(!pr.error)(pr.data||[]).forEach(x=>profiles[x.user_id]=x);
-  }
-  $('live-feed').innerHTML=rows.map(p=>{
-    const u=profiles[p.user_id]||{};
-    const name=u.display_name||u.username||'CrowSpace Member';
-    const avatar=u.avatar_url?'<img class="post-avatar" src="'+esc(u.avatar_url)+'" alt="" loading="lazy">':'<div class="post-avatar">'+esc(initials(name))+'</div>';
-    const authorLink=p.user_id?'profile.html?user='+encodeURIComponent(p.user_id):'profile.html';
-    const media=p.media_url&&/^https?:\/\//i.test(p.media_url)?'<img class="post-media" src="'+esc(p.media_url)+'" alt="" loading="lazy">':'';
-    return '<article class="feed-post"><div class="post-head">'+avatar+'<div class="post-meta"><b><a href="'+authorLink+'" style="text-decoration:none;color:inherit">'+esc(name)+'</a></b><small>'+esc(ago(p.created_at))+'</small></div></div>'+
-      (p.title?'<div class="post-title">'+esc(p.title)+'</div>':'')+
-      '<div class="post-body">'+esc(p.body||'')+'</div>'+media+
-      '<div class="post-stats"><span>♥ '+Number(p.like_count||0)+'</span><span>💬 '+Number(p.comment_count||0)+'</span></div></article>';
-  }).join('');
-}
-async function safeRows(table,select,limit=8,order='created_at'){
+async function applyFeedRanking(){
+  if(!user||!allPosts.length)return;
   try{
-    let q=db.from(table).select(select);
-    if(order)q=q.order(order,{ascending:false});
-    q=await q.limit(limit);
-    return q.error?[]:(q.data||[]);
-  }catch(e){return[]}
+    const [settings,events,prefs]=await Promise.all([
+      db.from('crowspace_discovery_settings').select('personalization_enabled,adaptive_feed_enabled,freshness_weight,familiarity_weight,exploration_weight,post_weight').eq('user_id',user.id).maybeSingle(),
+      db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(250),
+      db.from('crowspace_content_preferences').select('target_id,target_type,preference,strength').eq('user_id',user.id).limit(250)
+    ]);
+    const s=settings.data;
+    if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false)return;
+    const ev=events.data||[], pref=prefs.data||[];
+    const author={};
+    ev.forEach(e=>{if(e.target_type==='profile'&&e.target_id){
+      const w=Number(e.weight||1);
+      const base={like:1,comment:1.5,follow:2,profile_visit:1,repeat_engagement:2,caw_view:.7,caw_complete:1.5,ignore:-1}[e.event_type]||0;
+      author[e.target_id]=(author[e.target_id]||0)+base*w;
+    }});
+    const blocked=new Set(pref.filter(p=>['hidden','not_interested'].includes(p.preference)).map(p=>String(p.target_id)));
+    const freshness=Number(s?.freshness_weight??1), familiarity=Number(s?.familiarity_weight??1), exploration=Number(s?.exploration_weight??1), postWeight=Number(s?.post_weight??1);
+    const now=Date.now();
+    allPosts=allPosts.map((p,i)=>{
+      const ageHours=Math.max(0,(now-new Date(p.created_at).getTime())/36e5);
+      const fresh=1/(1+ageHours/12);
+      const likes=Number(p.like_count||0), comments=Number(p.comment_count||0);
+      const engagement=Math.log1p(likes+comments*1.5);
+      const familiar=author[p.user_id]||0;
+      const blockedScore=blocked.has(String(p.id))?-1000:0;
+      const explorationBoost=(i%7===0?1:0);
+      return {...p,__feedScore:(freshness*fresh)+(familiarity*familiar)+(postWeight*engagement)+(exploration*explorationBoost)+blockedScore};
+    }).sort((a,b)=>b.__feedScore-a.__feedScore);
+    const personalized=allPosts.some(p=>p.__feedScore!==undefined);
+    $('feed-note').textContent=personalized?'Personalized ranking active · freshness + engagement + your interaction signals.':'Showing latest posts.';
+  }catch(e){
+    $('feed-note').textContent='Personalized ranking unavailable · showing latest posts.';
+  }
 }
 async function loadPersonalizedFeed(){
   if(!db||!user){$('feed-personalization').textContent='Sign in to personalize your CrowSpace feed.';return}
