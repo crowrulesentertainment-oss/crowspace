@@ -116,7 +116,7 @@ function startCelebration(h){
  modal.classList.add('show');const close=modal.querySelector('.cs-celebration-close');if(close)close.onclick=()=>modal.classList.remove('show');
 }
 
-function notifyCommunity(h){window.__holidayCommunityState=h;if(window.CrowSpaceHolidayCommunity?.load)window.CrowSpaceHolidayCommunity.load(h)}
+function notifyCommunity(h){window.__holidayCommunityState=h;if(window.CrowSpaceHolidayCommunity?.load)window.CrowSpaceHolidayCommunity.load(h);if(window.CrowSpaceHolidayLive?.load)window.CrowSpaceHolidayLive.load(h);if(window.CrowSpaceHolidayNetwork?.load)window.CrowSpaceHolidayNetwork.load(h)}
 function render(){
  const host=document.getElementById('holiday-app'),now=new Date(),next=nextHoliday(now),up=calendar(now),d=diff(next.date-now);
  const today=dateKey(next.date)===dateKey(now),yearDays=new Date(now.getFullYear()+1,0,1)-new Date(now.getFullYear(),0,1),yearStart=new Date(now.getFullYear(),0,1),dayOfYear=Math.floor((dateKey(now)-dateKey(yearStart))/86400000)+1,remaining=Math.max(0,Math.ceil((dateKey(new Date(now.getFullYear()+1,0,1))-dateKey(now))/86400000));
