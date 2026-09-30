@@ -232,8 +232,21 @@ const showError=(message)=>{
 };
 const clearError=()=>{const box=$('post-error');box.style.display='none';box.textContent='';};
 async function getClient(){
-  if(window.CrowSpaceSupabase)return window.CrowSpaceSupabase;
-  if(window.CrowSpaceSupabaseReady)try{return await window.CrowSpaceSupabaseReady}catch(e){return null}
+  try{
+    if(window.CrowSpaceAuth?.client)return window.CrowSpaceAuth.client;
+    if(window.CrowSpaceAuth?.ready){
+      await Promise.race([
+        window.CrowSpaceAuth.ready,
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error('CrowSpace connection timed out.')),12000))
+      ]);
+      if(window.CrowSpaceAuth.client)return window.CrowSpaceAuth.client;
+    }
+    if(window.CrowSpaceSupabase)return window.CrowSpaceSupabase;
+    if(window.CrowSpaceSupabaseReady)return await window.CrowSpaceSupabaseReady;
+  }catch(e){
+    console.warn('[CrowSpace] client initialization failed',e);
+    return null;
+  }
   return null;
 }
 async function safeCount(table){
@@ -404,8 +417,10 @@ async function refresh(){
 async function boot(){
   if(booted)return;
   booted=true;
+  $('feed-status').textContent='CONNECTING';
+  $('feed-note').textContent='Connecting to CrowSpace…';
   db=await getClient();
-  if(!db){$('db').textContent='OFFLINE';$('account').textContent='UNKNOWN';$('feed-status').textContent='OFFLINE';$('feed-note').textContent='Supabase could not be initialized in this browser.';return}
+  if(!db){$('db').textContent='OFFLINE';$('account').textContent='UNKNOWN';$('feed-status').textContent='OFFLINE';$('feed-note').textContent='CrowSpace could not connect. Please refresh and try again.';booted=false;return}
   $('db').textContent='CONNECTED';
   try{
     const au=await db.auth.getUser();
