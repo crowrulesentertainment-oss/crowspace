@@ -216,5 +216,10 @@ function relationshipEnhance(){
 }
 document.addEventListener('crowspace-social-update',()=>{document.querySelectorAll('.cs-inline-relation,.cs-relationship-dock').forEach(x=>{x.dataset.csRelationReady='';});relationshipEnhance();});
 
-document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(relationshipEnhance,250))});
+function loadV24Discovery(){
+ if(location.pathname.split('/').pop()==='index.html')return;
+ if(document.querySelector('script[data-crowspace-v24]'))return;
+ const s=document.createElement('script');s.src='crowspace-discovery.js';s.dataset.crowspaceV24='1';document.body.appendChild(s);
+}
+document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(()=>{relationshipEnhance();loadV24Discovery()},250))});
 })();
