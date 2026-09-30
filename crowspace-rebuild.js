@@ -130,7 +130,24 @@ function privacyBanner(text="Some content is hidden by the owner's privacy setti
 async function universalSearch(db,q){
  const term=String(q||"").trim();
  if(term.length<2)return {term,results:[]};
- const like="%"+term.replace(/[%_]/g,"\\async function discoveryIntel(db){
+ const like="%"+term.replace(/[%_]/g,"\\function personalizationState(userId){
+ const key="crowspace_personalization_"+userId;
+ let s={interactions:{},searches:[],recent:[]};
+ try{s={...s,...JSON.parse(localStorage.getItem(key)||"{}")}}catch(e){}
+ return s;
+}
+function savePersonalization(userId,s){try{localStorage.setItem("crowspace_personalization_"+userId,JSON.stringify(s))}catch(e){}}
+function personalizationSignal(userId,type,id,weight=1){
+ if(!userId||!id)return;
+ const s=personalizationState(userId);s.interactions=s.interactions||{};
+ const k=type+":"+id;s.interactions[k]=(s.interactions[k]||0)+weight;
+ s.recent=[{type,id,at:Date.now()},...(s.recent||[])].slice(0,50);savePersonalization(userId,s);
+}
+function personalizationScore(item,s){
+ const k=(item.kind||"item")+":"+item.id;
+ return (s.interactions?.[k]||0)*10+(Number(item.like_count||0)+Number(item.comment_count||0))*2+Number(item.views||0)*.1;
+}
+async function discoveryIntel(db){
  const u=await guard();if(!u)return;
  const root=$("#discovery-intel");if(!root)return;
  const [p,fv,fo,fr,caws,posts,circles,bots]=await Promise.all([
