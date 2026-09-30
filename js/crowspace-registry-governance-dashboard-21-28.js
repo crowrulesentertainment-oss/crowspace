@@ -81,5 +81,5 @@ window.CrowSpacePreventionTimeline21_50_20=(()=>{const e=v=>String(v??"").replac
 
 if(window.CrowSpacePreventionTimeline21_50_20){window.CrowSpacePreventionTimeline21_50_20.mount(document.body)}
 
-(function(){const s=document.createElement("script");s.src="js/crowspace-governance-validation-21-50-24.js";s.async=true;document.head.appendChild(s);})();
+(function(){const s=document.createElement("script");s.src="js/crowspace-governance-validation-21-50-24.js";s.async=true;document.head.appendChild(s);const c=document.createElement("script");c.src="js/crowspace-governance-validation-cleanup-21-50-24.js";c.async=true;document.head.appendChild(c);})();
 
