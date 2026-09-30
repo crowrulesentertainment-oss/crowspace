@@ -671,5 +671,15 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 })();
 </script>
 <script src="js/crowspace-recommendation-runtime-21-5.js"></script>
-<script src="js/crowspace-recommendation-ui-21-5.js"></script></body>
+<script src="js/crowspace-recommendation-ui-21-5.js"></script><script src="js/crowspace-adaptive-21-5.js"></script><script>
+(async()=>{try{
+ await CrowSpaceAuth.ready;
+ const rt=window.CrowSpaceRecommendationRuntime21_5,ad=window.CrowSpaceAdaptive21_5;
+ if(!rt||!ad)return;
+ rt.subscribe(d=>{
+   if(d.action) ad.apply(d.action,d.type,d.id);
+   window.dispatchEvent(new CustomEvent("crowspace:recommendation-rerank",{detail:d}));
+ });
+}catch(e){console.warn("CrowSpace 21.5 adaptive bridge",e)}})();
+</script></body>
 </html>
