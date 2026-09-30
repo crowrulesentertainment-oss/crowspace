@@ -55,7 +55,19 @@
 <script src="crowspace-universal.js" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
+<style id="crow-profile-v81">
+.profile-commandbar{position:sticky;top:76px;z-index:30;padding:8px;border:1px solid rgba(85,239,255,.12);border-radius:14px;background:rgba(4,8,17,.86);backdrop-filter:blur(18px)}
+.profile-commandbar .command-status{font-weight:800}
+.profile-quickgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.quick-card{border:1px solid var(--line);border-radius:13px;padding:12px;background:linear-gradient(145deg,#091120,#050914);text-decoration:none;color:var(--text);transition:.2s}
+.quick-card:hover{transform:translateY(-2px);border-color:var(--cyan);box-shadow:0 0 22px rgba(85,239,255,.1)}
+.quick-card b{display:block;font:800 11px Orbitron;color:var(--cyan);margin-bottom:4px}
+.quick-card span{font-size:10px;color:var(--muted);line-height:1.35}
+.profile-statusline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(102,255,178,.7)}
+@media(max-width:760px){.profile-commandbar{top:60px}.profile-quickgrid{grid-template-columns:1fr 1fr}}
+</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -334,6 +346,12 @@ window.addEventListener("beforeunload",stopRealtime);
     bar.className='profile-commandbar';
     bar.innerHTML='<button class="btn" type="button" data-profile-cmd="refresh">↻ Refresh</button><button class="btn" type="button" data-profile-cmd="share">Share Profile</button><button class="btn" type="button" data-profile-cmd="copy">Copy Link</button><span class="command-status" data-live="1">● LIVE PROFILE</span>';
     app.insertBefore(bar,hero);
+    if(!app.querySelector('.profile-quickgrid')){
+      const q=document.createElement('div');
+      q.className='profile-quickgrid';
+      q.innerHTML='<a class="quick-card" href="#creatorStudio"><b>CREATOR STUDIO</b><span>Edit identity, portfolio, links and featured work.</span></a><a class="quick-card" href="#socialGraph"><b>SOCIAL GRAPH</b><span>Manage followers, following and connections.</span></a><a class="quick-card" href="#guestbook"><b>GUESTBOOK</b><span>See messages and profile activity.</span></a><a class="quick-card" href="#activity"><b>ACTIVITY</b><span>Jump into your latest profile activity.</span></a>';
+      bar.insertAdjacentElement('afterend',q);
+    }
     bar.addEventListener('click',async e=>{
       const b=e.target.closest('[data-profile-cmd]'); if(!b)return;
       const cmd=b.dataset.profileCmd;
@@ -357,6 +375,10 @@ window.addEventListener("beforeunload",stopRealtime);
 
 let profileStarted=false, profileRetryTimer=null, profileWatchdog=null;
 function setConnectionState(mode,message){
+  const app=document.getElementById("app");
+  if(mode==="connecting" && app){
+    app.setAttribute("aria-live","polite");
+  }
   document.body.dataset.profileConnection=mode;
   const app=$("app"); if(!app)return;
   if(mode==="connecting"){
