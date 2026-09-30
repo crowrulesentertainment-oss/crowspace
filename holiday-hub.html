@@ -18,12 +18,20 @@
 .cs-holiday-footnote{margin-top:10px;color:#ffffff55;font-size:7px;line-height:1.5}
 @media(max-width:850px){.cs-holiday-intel{grid-template-columns:1fr}.cs-holiday-facts{grid-template-columns:repeat(2,1fr)}.cs-timeline{grid-template-columns:repeat(2,1fr)}.cs-live-count{font-size:32px}}
 @media(max-width:520px){.cs-timeline{grid-template-columns:1fr}.cs-holiday-feature{padding:18px}}
-</style>
+
+.cs-experience{margin-top:14px;border:1px solid var(--cs-line);border-radius:20px;padding:20px;background:linear-gradient(145deg,rgba(14,20,40,.98),rgba(4,7,16,.98));box-shadow:0 18px 55px #0006}
+.cs-experience-head{display:flex;justify-content:space-between;gap:15px;align-items:end}.cs-experience h3{font:900 18px Orbitron;margin:4px 0}.cs-experience-sub{color:var(--cs-muted);font-size:9px}
+.cs-exp-tabs{display:flex;gap:7px;overflow:auto;padding:12px 0}.cs-exp-tab{white-space:nowrap;border:1px solid var(--cs-line);border-radius:999px;background:#ffffff04;color:#fff;padding:8px 11px;font:800 8px Orbitron;cursor:pointer}.cs-exp-tab.active{border-color:var(--cs-cyan);color:var(--cs-cyan);background:#78efff0b}
+.cs-exp-body{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.cs-exp-panel{padding:15px;border:1px solid #ffffff0b;border-radius:15px;background:#ffffff03}.cs-exp-panel h4{font:900 11px Orbitron;margin:0 0 9px;color:var(--cs-cyan)}.cs-exp-panel p,.cs-exp-panel li{color:var(--cs-muted);font-size:9px;line-height:1.65}.cs-exp-panel ul{padding-left:17px;margin:7px 0}
+.cs-celebrate{margin-top:12px;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:13px;border:1px solid var(--cs-line);border-radius:14px;background:radial-gradient(circle at 80% 0,#78efff12,transparent 45%),#ffffff03}.cs-celebrate strong{font:900 10px Orbitron}.cs-celebrate button{border:1px solid var(--cs-cyan);background:#78efff0d;color:#fff;border-radius:999px;padding:8px 12px;font:800 8px Orbitron;cursor:pointer}
+.cs-celebration-mode{position:fixed;inset:0;z-index:99999;display:none;place-items:center;background:radial-gradient(circle at 50% 20%,#ffffff18,transparent 30%),#02030bf2;text-align:center}.cs-celebration-mode.show{display:grid}.cs-celebration-inner{max-width:800px;padding:30px}.cs-celebration-inner .big{font-size:72px}.cs-celebration-inner h2{font:900 clamp(30px,7vw,72px) Orbitron;margin:12px 0}.cs-celebration-inner p{color:var(--cs-muted);font-size:11px;line-height:1.7}.cs-celebration-close{margin-top:18px;border:1px solid var(--cs-line);background:#ffffff0a;color:#fff;border-radius:999px;padding:10px 16px;font:800 8px Orbitron;cursor:pointer}
+@media(max-width:760px){.cs-exp-body{grid-template-columns:1fr}.cs-experience-head{align-items:start;flex-direction:column}.cs-celebration-inner .big{font-size:52px}}
+
 </head>
 <body data-page="holiday-hub">
 <main class="cs-page-shell">
 <section class="cs-page-hero"><div class="cs-eyebrow">CROWSPACE // HOLIDAY HUB // V31</div><h1>Holiday Hub</h1><p>Your year-round holiday calendar with live countdowns, automatic date calculations, live holiday intelligence, and a rolling 12-month timeline.</p></section>
-<section id="holiday-app" class="cs-holiday-hub" aria-live="polite"></section>
+<section id="holiday-app" class="cs-holiday-hub" aria-live="polite"></section><section id="holiday-experience" class="cs-experience" aria-live="polite"></section><div id="cs-celebration-mode" class="cs-celebration-mode" role="dialog" aria-modal="true"></div>
 </main>
 
 <script>
@@ -49,7 +57,8 @@ function holidays(y){
   {name:'Halloween',date:nth(y,10,31),emoji:'🎃',type:'Observance',facts:['Oct 31','Costumes','Candy','Annual'],note:'Observed every October 31 with costumes, trick-or-treating and other seasonal traditions.'},
   {name:'Veterans Day',date:nth(y,11,11),emoji:'🎖️',type:'Federal holiday',facts:['Nov 11','Since 1954','Veterans','Annual'],note:'Honors people who have served in the U.S. Armed Forces.'},
   {name:'Thanksgiving Day',date:thanksgiving(y),emoji:'🦃',type:'Federal holiday',facts:['4th Thursday','November','Annual','U.S.'],note:'U.S. Thanksgiving is observed on the fourth Thursday of November.'},
-  {name:'Christmas Day',date:nth(y,12,25),emoji:'🎄',type:'Federal holiday',facts:['Dec 25','Christian holiday','Annual','Winter'],note:'Observed on December 25 and associated in Christianity with the birth of Jesus.'}
+  {name:'Christmas Day',date:nth(y,12,25),emoji:'🎄',type:'Federal holiday',facts:['Dec 25','Christian holiday','Annual','Winter'],note:'Observed on December 25 and associated in Christianity with the birth of Jesus.'},
+  {name:'New Year’s Eve',date:nth(y,12,31),emoji:'🥂',type:'Observance',facts:['Dec 31','Final day','Countdown','Annual'],note:'New Year’s Eve is observed on December 31 as people mark the end of one calendar year and anticipate the next.'}
  ];
 }
 function normalize(list){
@@ -72,6 +81,35 @@ function calendar(now){
   .sort((a,b)=>a.date-b.date);
 }
 function currentSeason(d){const m=d.getMonth()+1;return m<=2?'WINTER':m<=5?'SPRING':m<=8?'SUMMER':'AUTUMN'}
+const experiences={
+ 'New Year’s Eve':{history:'A year-end observance centered on saying farewell to the current year and welcoming the next.',traditions:['Midnight countdowns','Fireworks and light displays','Gathering with friends and family','Making resolutions for the new year'],food:['Appetizers and party snacks','Sparkling beverages','Celebration desserts'],music:['Countdown playlists','Party music','Songs associated with new beginnings'],activities:['Host a countdown','Share a year-in-review','Create goals for the new year','Watch a local or televised celebration']},
+ 'New Year’s Day':{history:'The first day of the new Gregorian calendar year.',traditions:['New Year greetings','Resolutions','Family gatherings','Parades and seasonal celebrations'],food:['Brunch','Black-eyed peas and greens in some U.S. traditions','Celebration meals'],music:['New beginnings playlists','Festive music'],activities:['Set goals','Rest and recharge','Send greetings']},
+ 'Valentine’s Day':{history:'An annual observance associated with love, affection and friendship.',traditions:['Cards','Flowers','Gifts','Shared meals'],food:['Chocolate','Desserts','Special dinners'],music:['Love songs','Romantic playlists'],activities:['Send a message','Plan a meal','Celebrate friendship']},
+ 'Easter Sunday':{history:'A major Christian holiday commemorating the resurrection of Jesus.',traditions:['Religious services','Egg traditions','Family gatherings','Community events'],food:['Easter meals','Egg dishes','Seasonal desserts'],music:['Hymns','Spring playlists'],activities:['Attend a service','Egg hunt','Family gathering']},
+ 'Memorial Day':{history:'A U.S. federal holiday observed to honor military personnel who died while serving.',traditions:['Memorial observances','Flags and ceremonies','Community gatherings'],food:['Cookouts','Picnic foods'],music:['Memorial and patriotic programming'],activities:['Attend a remembrance event','Visit a memorial','Spend time with family']},
+ 'Juneteenth':{history:'A U.S. holiday commemorating the end of slavery in the United States, especially the June 19, 1865 announcement in Galveston, Texas.',traditions:['Community celebrations','Educational programs','Music and cultural events'],food:['Barbecue','Red foods and drinks','Community meals'],music:['Gospel','Blues','Soul','Contemporary Black music'],activities:['Learn local history','Attend cultural events','Support community programs']},
+ 'Independence Day':{history:'A U.S. holiday commemorating the adoption of the Declaration of Independence in 1776.',traditions:['Fireworks','Parades','Flags','Community gatherings'],food:['Barbecue','Picnic foods','Summer desserts'],music:['Patriotic music','Summer playlists'],activities:['Watch fireworks','Attend a parade','Host a cookout']},
+ 'Labor Day':{history:'A U.S. federal holiday observed on the first Monday in September and associated with workers and the labor movement.',traditions:['Parades','Community gatherings','End-of-summer events'],food:['Cookouts','Picnic foods'],music:['Outdoor party music'],activities:['Attend a community event','Enjoy a final summer gathering']},
+ 'Halloween':{history:'An October 31 observance shaped by centuries of autumn and remembrance traditions.',traditions:['Costumes','Trick-or-treating','Decorations','Parties'],food:['Candy','Pumpkin treats','Seasonal drinks'],music:['Halloween playlists','Spooky soundtracks'],activities:['Decorate','Carve pumpkins','Host a costume event']},
+ 'Veterans Day':{history:'A U.S. federal holiday honoring people who have served in the U.S. Armed Forces.',traditions:['Ceremonies','Parades','Veterans recognition'],food:['Community meals'],music:['Ceremonial and patriotic music'],activities:['Thank a veteran','Attend a local ceremony','Learn about veterans in your community']},
+ 'Thanksgiving Day':{history:'A U.S. federal holiday observed on the fourth Thursday of November and associated with gratitude, gathering and shared meals.',traditions:['Family gatherings','Gratitude','Parades','Football'],food:['Turkey','Stuffing','Cranberry dishes','Pie'],music:['Holiday playlists'],activities:['Share gratitude','Cook together','Volunteer']},
+ 'Christmas Day':{history:'December 25 is associated in Christianity with the celebration of the birth of Jesus and is also observed culturally in many communities.',traditions:['Gift giving','Decorations','Family gatherings','Religious services'],food:['Holiday meals','Cookies','Seasonal desserts'],music:['Christmas music','Carols'],activities:['Gather with family','Exchange gifts','Watch holiday programs']}
+};
+function renderExperience(now){
+ const host=document.getElementById('holiday-experience');if(!host)return;
+ const list=normalize([...holidays(now.getFullYear()),...holidays(now.getFullYear()+1)]).sort((a,b)=>a.date-b.date);
+ const current=window.__holidayExperience||nextHoliday(now).name;
+ const h=list.find(x=>x.name===current)||list[0],x=experiences[h.name]||{history:h.note,traditions:[],food:[],music:[],activities:[]};
+ host.innerHTML='<div class="cs-experience-head"><div><span class="cs-holiday-kicker">V32 // HOLIDAY EXPERIENCES</span><h3>'+h.emoji+' '+esc(h.name)+'</h3><div class="cs-experience-sub">'+dateText(h.date)+' · '+esc(h.type)+'</div></div><div class="cs-experience-sub">DYNAMIC CELEBRATION STATE</div></div><div class="cs-exp-tabs">'+list.map(z=>'<button class="cs-exp-tab '+(z.name===h.name?'active':'')+'" data-exp="'+esc(z.name)+'">'+z.emoji+' '+esc(z.name)+'</button>').join('')+'</div><div class="cs-exp-body"><article class="cs-exp-panel"><h4>HISTORY & TRADITIONS</h4><p>'+esc(x.history)+'</p><ul>'+x.traditions.map(v=>'<li>'+esc(v)+'</li>').join('')+'</ul></article><article class="cs-exp-panel"><h4>FOOD · MUSIC · ACTIVITIES</h4><p><b>FOOD:</b> '+x.food.map(esc).join(' · ')+'</p><p><b>MUSIC:</b> '+x.music.map(esc).join(' · ')+'</p><p><b>ACTIVITIES:</b> '+x.activities.map(esc).join(' · ')+'</p></article></div><div class="cs-celebrate"><div><strong>LIVE HOLIDAY CELEBRATION MODE</strong><div class="cs-experience-sub">Turn the current experience into a full-screen CrowSpace celebration.</div></div><button id="cs-start-celebration" type="button">START CELEBRATION</button></div>';
+ host.querySelectorAll('[data-exp]').forEach(b=>b.onclick=()=>{window.__holidayExperience=b.dataset.exp;renderExperience(new Date())});
+ const btn=document.getElementById('cs-start-celebration');if(btn)btn.onclick=()=>startCelebration(h);
+}
+function startCelebration(h){
+ const modal=document.getElementById('cs-celebration-mode');if(!modal)return;
+ modal.innerHTML='<div class="cs-celebration-inner"><div class="big">'+h.emoji+'</div><h2>'+esc(h.name)+'</h2><p>'+esc((experiences[h.name]||{}).history||h.note)+'</p><p>WELCOME TO THE CROWSPACE HOLIDAY EXPERIENCE</p><button class="cs-celebration-close" type="button">EXIT CELEBRATION</button></div>';
+ modal.classList.add('show');const close=modal.querySelector('.cs-celebration-close');if(close)close.onclick=()=>modal.classList.remove('show');
+}
+
 function render(){
  const host=document.getElementById('holiday-app'),now=new Date(),next=nextHoliday(now),up=calendar(now),d=diff(next.date-now);
  const today=dateKey(next.date)===dateKey(now),yearDays=new Date(now.getFullYear()+1,0,1)-new Date(now.getFullYear(),0,1),yearStart=new Date(now.getFullYear(),0,1),dayOfYear=Math.floor((dateKey(now)-dateKey(yearStart))/86400000)+1,remaining=Math.max(0,Math.ceil((dateKey(new Date(now.getFullYear()+1,0,1))-dateKey(now))/86400000));
@@ -100,7 +138,7 @@ function tick(){
  const target=new Date(el.dataset.liveDate),now=new Date(),x=diff(target-now);
  el.firstChild.nodeValue=dateKey(target)===dateKey(now)?'TODAY':x.days+'d '+pad(x.hours)+'h '+pad(x.mins)+'m '+pad(x.secs)+'s';
 }
-render();setInterval(()=>{tick();const n=new Date();if(n.getHours()===0&&n.getMinutes()===0&&n.getSeconds()<2)render()},1000);
+render();renderExperience(new Date());setInterval(()=>{tick();const n=new Date();if(n.getHours()===0&&n.getMinutes()===0&&n.getSeconds()<2){render();renderExperience(n)}},1000);
 })();
 </script>
 </body></html>
