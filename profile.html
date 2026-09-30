@@ -43,9 +43,10 @@
 <script src="crowspace-auth.js"></script>
 <script src="crowspace-rebuild.js" defer></script>
 <script src="crowspace-universal.js" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
+</head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -66,7 +67,7 @@ async function getProfile(){
  else if(me) q=q.eq("user_id",me.id); else return null;
  return (await q.limit(1).maybeSingle()).data||null;
 }
-async function load(){
+async function loadProfileData(){
  try{
   await window.CrowSpaceAuth.ready;
   db=window.CrowSpaceAuth.client; me=window.CrowSpaceAuth.user;
@@ -78,6 +79,13 @@ async function load(){
   render();
   startRealtime();
  }catch(e){console.error(e);$("app").innerHTML='<div class="state">CrowSpace could not connect to Supabase.<br><br><small>'+esc(e.message||e)+'</small></div>'}
+}
+let profileLoadInFlight=null;
+async function load(){
+ if(profileLoadInFlight) return profileLoadInFlight;
+ profileLoadInFlight=(async()=>{await Promise.race([loadProfileData(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("CrowSpace authentication timed out. Please refresh and try again.")),15000))])})();
+ try{return await profileLoadInFlight}
+ finally{profileLoadInFlight=null}
 }
 async function loadSocial(){
  const uid=target.user_id;
@@ -97,8 +105,7 @@ async function loadSocial(){
   },{following:false,followsYou:false,friendship:null});
  }
  const ids=[...new Set([...followers.map(x=>x.follower_id),...following.map(x=>x.followed_user_id),...friends.flatMap(x=>[x.requester_id,x.addressee_id])])].filter(x=>x!==uid); if(ids.length){const r=await safe(()=>db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url,bio").in("user_id",ids));(r.data||[]).forEach(p=>profiles.set(p.user_id,p))}
-}
-async function loadContent(){
+}async function loadContent(){
  const uid=target.user_id;
  const [p,c]=await Promise.all([
   safe(()=>db.from("crowspace_posts").select("id,user_id,title,body,media_url,created_at,like_count,comment_count").eq("user_id",uid).order("created_at",{ascending:false}).limit(50)),
@@ -197,8 +204,7 @@ function bind(){
  document.querySelectorAll("[data-wall]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-wall]").forEach(x=>x.classList.remove("active"));b.classList.add("active");showWall(b.dataset.wall)})); $("saveProfile")?.addEventListener("click",saveProfile);
  $("addSocialLink")?.addEventListener("click",()=>{const box=$("socialLinksEditor");if(!box)return;const empty=box.querySelector(".empty");if(empty)empty.remove();const row=document.createElement("div");row.className="link-row";row.innerHTML='<input data-social-label placeholder="Label"><input data-social-url placeholder="https://..."><button class="btn danger" type="button" data-social-remove>×</button>';box.appendChild(row);row.querySelector("[data-social-remove]").onclick=()=>row.remove()});
  document.querySelectorAll("[data-social-remove]").forEach(b=>b.addEventListener("click",()=>b.closest(".link-row")?.remove()));
- document.querySelectorAll("[data-badge-up]").forEach(b=>b.addEventListener("click",()=>moveBadge(Number(b.dataset.badgeUp),-1)));
- document.querySelectorAll("[data-badge-down]").forEach(b=>b.addEventListener("click",()=>moveBadge(Number(b.dataset.badgeDown),1)));
+ document.querySelectorAll("[data-badge-up]").forEach(b=>b.addEventListener("click",()=>moveBadge(Number(b.dataset.badgeUp),-1))); document.querySelectorAll("[data-badge-down]").forEach(b=>b.addEventListener("click",()=>moveBadge(Number(b.dataset.badgeDown),1)));
  function moveBadge(index,delta){const arr=badgeOrder().map(b=>b.id),to=index+delta;if(to<0||to>=arr.length)return;[arr[index],arr[to]]=[arr[to],arr[index]];target.profile_sections=Object.assign({},target.profile_sections||{},{badges:arr});render()}
  document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>{target.profile_theme=b.dataset.themeChoice;document.body.dataset.theme=b.dataset.themeChoice;document.querySelectorAll("[data-theme-choice]").forEach(x=>x.classList.toggle("active",x===b))})); document.querySelectorAll("[data-layout-choice]").forEach(b=>b.addEventListener("click",()=>{target.profile_sections=Object.assign({},target.profile_sections||{},{layout:b.dataset.layoutChoice});$("profileWrap").dataset.layout=b.dataset.layoutChoice;document.querySelectorAll("[data-layout-choice]").forEach(x=>x.classList.toggle("active",x===b))}));$("sAvatarFile")?.addEventListener("change",previewAvatar);$("cropAvatar")?.addEventListener("click",openCropper);$("removeAvatar")?.addEventListener("click",removeAvatar);$("sBannerFile")?.addEventListener("change",previewBanner);$("cropBanner")?.addEventListener("click",openBannerCropper);$("removeBanner")?.addEventListener("click",removeBanner);
 }
@@ -295,7 +301,6 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("online",()=>{if(db&&target&&!realtimeChannel)startRealtime()});
 window.addEventListener("offline",()=>{document.body.dataset.realtime="offline"});
 window.addEventListener("beforeunload",stopRealtime);
-
 
 
 window.addEventListener("crowspace:supabase-ready",load);
