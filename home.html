@@ -244,13 +244,60 @@ async function loadPosts(){
   if(q.error)q=await db.from('crowspace_posts').select('id,user_id,title,body,media_url,created_at').order('created_at',{ascending:false}).limit(100);
   if(q.error)q=await db.from('crowspace_posts').select('id,user_id,body,created_at').order('created_at',{ascending:false}).limit(100);
   if(q.error){
-    $('feed-status').textContent='ERROR'; $('feed-note').textContent='The feed is unavailable. Check Supabase permissions/RLS for crowspace_posts.';
-    $('live-feed').innerHTML='<div class="error-box">The live feed could not be loaded.</div>'; $('visible').textContent='0'; return;
+    $('feed-status').textContent='ERROR';$('feed-note').textContent='The feed is unavailable. Check Supabase permissions/RLS for crowspace_posts.';
+    $('live-feed').innerHTML='<div class="error-box">The live feed could not be loaded.</div>';$('visible').textContent='0';return;
   }
   allPosts=q.data||[];
   await applyFeedRanking();
+  await applyRealtimeIntelligence();
   await renderFeed();
   $('feed-status').textContent='READY';
+}
+function feedPostActivityScore(p,now){
+  const created=new Date(p.created_at).getTime(),ageHours=Math.max(0,(now-created)/36e5);
+  const likes=Number(p.like_count||0),comments=Number(p.comment_count||0);
+  const engagement=likes+(comments*2);
+  const decay=1/(1+ageHours/8);
+  return {ageHours,engagement,velocity:engagement/(Math.max(ageHours,.25)),decay};
+}
+async function applyRealtimeIntelligence(){
+  if(!user||!allPosts.length)return;
+  try{
+    const now=Date.now();
+    const eventsQ=await db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(300);
+    const activity={};
+    (eventsQ.data||[]).forEach(e=>{
+      const id=String(e.target_id||'');if(!id)return;
+      const type=String(e.target_type||'').toLowerCase();
+      const w=Number(e.weight??1);
+      if(['post','feed_post','caw'].includes(type))activity[id]=(activity[id]||0)+w;
+    });
+    const scored=allPosts.map(p=>{
+      const a=feedPostActivityScore(p,now);
+      const liveSignal=Number(activity[String(p.id)]||0);
+      const conversation=Number(p.comment_count||0)*2;
+      const authorId=String(p.user_id||'');
+      const authorRecent=allPosts.filter(x=>String(x.user_id||'')===authorId && (now-new Date(x.created_at).getTime())<86400000).length;
+      const velocityBoost=Math.min(8,a.velocity*.75);
+      const conversationBoost=Math.min(5,conversation*.35);
+      const authorBoost=Math.min(3,authorRecent*.25);
+      const liveBoost=Math.min(6,liveSignal*.6);
+      const realtimeScore=(a.decay*3)+velocityBoost+conversationBoost+authorBoost+liveBoost;
+      return {...p,__realtimeScore:realtimeScore};
+    }).sort((a,b)=>(b.__realtimeScore||0)-(a.__realtimeScore||0));
+    // Keep V19 relationship order as the primary ordering, but allow genuinely active posts to rise.
+    const rank=new Map(scored.map((p,i)=>[String(p.id),i]));
+    allPosts=[...allPosts].sort((a,b)=>{
+      const ra=rank.get(String(a.id))??999,rb=rank.get(String(b.id))??999;
+      const sa=(a.__feedScore||0)+(100-ra)*.08+(a.__realtimeScore||0)*1.5;
+      const sb=(b.__feedScore||0)+(100-rb)*.08+(b.__realtimeScore||0)*1.5;
+      return sb-sa;
+    });
+    const hot=allPosts.filter(p=>(p.__realtimeScore||0)>=4).length;
+    $('feed-note').textContent='V20 real-time intelligence active · '+hot+' live-moving posts · engagement velocity + freshness decay + conversation activity.';
+  }catch(e){
+    console.warn('[CrowSpace] realtime intelligence unavailable',e);
+  }
 }
 async function applyFeedRanking(){
   if(!user||!allPosts.length)return;
@@ -265,106 +312,40 @@ async function applyFeedRanking(){
       db.from('crowspace_recommendation_feedback').select('target_id,target_type,feedback_type,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(250),
       db.from('crowspace_follows').select('follower_id').eq('followed_user_id',user.id).limit(500)
     ]);
-    const s=settings.data;
-    if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false)return;
-    const ev=events.data||[], pref=prefs.data||[], followRows=follows.data||[], friendshipRows=friends.data||[], feedbackRows=feedback.data||[];
-    const following=new Set(followRows.map(x=>String(x.followed_user_id)).filter(Boolean));
-    const followers=new Set((incoming.data||[]).map(x=>String(x.follower_id)).filter(Boolean));
-    const connected=new Set(), friendsOfFriends=new Set();
-    friendshipRows.forEach(f=>{
-      if(f.status!=='accepted')return;
-      const other=String(f.requester_id)===String(user.id)?f.addressee_id:f.requester_id;
-      if(other)connected.add(String(other));
-    });
-    const affinity={}, weights=profile.data?.weights&&typeof profile.data.weights==='object'?profile.data.weights:{};
-    const eventBase={like:1,comment:1.5,follow:2,profile_visit:1,repeat_engagement:2,caw_view:.7,caw_complete:1.5,ignore:-1,search:.5};
-    ev.forEach(e=>{
-      if(!e.target_id)return;
-      const type=String(e.target_type||'').toLowerCase();
-      if(!['profile','user','member'].includes(type))return;
-      const w=Number(e.weight??1),base=Number(weights[e.event_type]??eventBase[e.event_type]??0);
-      affinity[String(e.target_id)]=(affinity[String(e.target_id)]||0)+base*w;
-    });
-    // Reciprocal follows are a stronger relationship signal than a one-way follow.
+    const s=settings.data;if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false)return;
+    const ev=events.data||[],pref=prefs.data||[],following=new Set((follows.data||[]).map(x=>String(x.followed_user_id)).filter(Boolean));
+    const followers=new Set((incoming.data||[]).map(x=>String(x.follower_id)).filter(Boolean)),connected=new Set(),friendsOfFriends=new Set();
+    (friends.data||[]).forEach(f=>{if(f.status!=='accepted')return;const other=String(f.requester_id)===String(user.id)?f.addressee_id:f.requester_id;if(other)connected.add(String(other))});
     const reciprocal=new Set([...following].filter(id=>followers.has(id)));
-    // Pull the social graph one hop beyond the people the user follows.
     if(following.size){
       const fof=await db.from('crowspace_follows').select('follower_id,followed_user_id').in('follower_id',[...following]).limit(1500);
-      (fof.data||[]).forEach(row=>{
-        const candidate=String(row.followed_user_id||'');
-        if(candidate&&candidate!==String(user.id)&&!following.has(candidate)&&!connected.has(candidate))friendsOfFriends.add(candidate);
-      });
+      (fof.data||[]).forEach(row=>{const id=String(row.followed_user_id||'');if(id&&id!==String(user.id)&&!following.has(id)&&!connected.has(id))friendsOfFriends.add(id)});
     }
+    const affinity={},weights=profile.data?.weights&&typeof profile.data.weights==='object'?profile.data.weights:{};
+    const base={like:1,comment:1.5,follow:2,profile_visit:1,repeat_engagement:2,caw_view:.7,caw_complete:1.5,ignore:-1};
+    ev.forEach(e=>{const type=String(e.target_type||'').toLowerCase();if(!e.target_id||!['profile','user','member'].includes(type))return;const w=Number(e.weight??1);affinity[String(e.target_id)]=(affinity[String(e.target_id)]||0)+Number(weights[e.event_type]??base[e.event_type]??0)*w});
     const hiddenPosts=new Set(),hiddenAuthors=new Set();
-    pref.forEach(p=>{
-      const id=String(p.target_id||''); if(!id)return;
-      const t=String(p.target_type||'').toLowerCase();
-      if(!['hidden','not_interested'].includes(p.preference))return;
-      if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id); else hiddenPosts.add(id);
-    });
-    feedbackRows.forEach(f=>{
-      const id=String(f.target_id||''); if(!id)return;
-      const t=String(f.target_type||'').toLowerCase();
-      if(['hidden','not_interested','less_like_this'].includes(f.feedback_type)){
-        if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id); else hiddenPosts.add(id);
-      }
-    });
-    const mutualCounts={};
-    if(friendsOfFriends.size){
-      // Count how many followed people connect to each discovery candidate.
-      const candidateIds=[...friendsOfFriends];
-      const mutualRows=await db.from('crowspace_follows').select('follower_id,followed_user_id').in('followed_user_id',candidateIds).in('follower_id',[...following]).limit(2500);
-      (mutualRows.data||[]).forEach(row=>{
-        const id=String(row.followed_user_id||'');
-        mutualCounts[id]=(mutualCounts[id]||0)+1;
-      });
-    }
-    const freshness=Number(s?.freshness_weight??1), familiarity=Number(s?.familiarity_weight??1), exploration=Number(s?.exploration_weight??1), postWeight=Number(s?.post_weight??1), positive=Number(s?.positive_signal_multiplier??1), negative=Number(s?.negative_signal_multiplier??1);
-    const now=Date.now();
+    pref.forEach(p=>{const id=String(p.target_id||'');if(!id||!['hidden','not_interested'].includes(p.preference))return;const t=String(p.target_type||'').toLowerCase();if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id);else hiddenPosts.add(id)});
+    feedback.data?.forEach(f=>{const id=String(f.target_id||'');if(!id||!['hidden','not_interested','less_like_this'].includes(f.feedback_type))return;const t=String(f.target_type||'').toLowerCase();if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id);else hiddenPosts.add(id)});
+    const freshness=Number(s?.freshness_weight??1),familiarity=Number(s?.familiarity_weight??1),exploration=Number(s?.exploration_weight??1),postWeight=Number(s?.post_weight??1),positive=Number(s?.positive_signal_multiplier??1),negative=Number(s?.negative_signal_multiplier??1),now=Date.now();
     const scored=allPosts.map(p=>{
-      const authorId=String(p.user_id||'');
-      const ageHours=Math.max(0,(now-new Date(p.created_at).getTime())/36e5);
-      const fresh=1/(1+ageHours/12);
-      const engagement=Math.log1p(Number(p.like_count||0)+Number(p.comment_count||0)*1.5);
-      const familiar=Number(affinity[authorId]||0);
-      const mutual=Number(mutualCounts[authorId]||0);
-      const social=(following.has(authorId)?3:0)+(reciprocal.has(authorId)?2:0)+(connected.has(authorId)?2:0)+(mutual?Math.min(3,mutual*.75):0)+(friendsOfFriends.has(authorId)?1:0);
-      const discovery=following.has(authorId)||connected.has(authorId)?0:friendsOfFriends.has(authorId)?1.25:1;
-      const blocked=(hiddenPosts.has(String(p.id))||hiddenAuthors.has(authorId))?-1000:0;
-      const signal=familiar>=0?familiar*positive:familiar*negative;
-      const score=(freshness*fresh)+(familiarity*signal)+(postWeight*engagement)+(exploration*discovery)+social+blocked;
-      const relationship=following.has(authorId)?(reciprocal.has(authorId)?'Reciprocal':'Following'):connected.has(authorId)?'Friend':friendsOfFriends.has(authorId)?'Friend of friend':'Discover';
-      return {...p,__feedScore:score,__feedSocial:relationship,__mutualCount:mutual};
+      const id=String(p.user_id||''),age=Math.max(0,(now-new Date(p.created_at).getTime())/36e5),fresh=1/(1+age/12),engagement=Math.log1p(Number(p.like_count||0)+Number(p.comment_count||0)*1.5),familiar=Number(affinity[id]||0),mutual=0;
+      const social=(following.has(id)?3:0)+(reciprocal.has(id)?2:0)+(connected.has(id)?2:0)+(friendsOfFriends.has(id)?1:0),discovery=(following.has(id)||connected.has(id))?0:friendsOfFriends.has(id)?1.25:1,blocked=(hiddenPosts.has(String(p.id))||hiddenAuthors.has(id))?-1000:0,signal=familiar>=0?familiar*positive:familiar*negative;
+      const relationship=following.has(id)?(reciprocal.has(id)?'Reciprocal':'Following'):connected.has(id)?'Friend':friendsOfFriends.has(id)?'Friend of friend':'Discover';
+      return {...p,__feedScore:(freshness*fresh)+(familiarity*signal)+(postWeight*engagement)+(exploration*discovery)+social+blocked,__feedSocial:relationship,__mutualCount:mutual};
     }).sort((a,b)=>b.__feedScore-a.__feedScore);
-    // Diversity pass: cap repeated authors and reserve room for discovery.
     const result=[],remaining=[...scored],counts={};
-    const limits=[2,2,3];
     while(remaining.length&&result.length<scored.length){
-      const position=result.length, cap=position<10?2:position<20?3:4;
-      let pickIndex=remaining.findIndex(p=>(counts[String(p.user_id)]||0)<cap);
-      if(pickIndex<0)pickIndex=0;
-      // Every 5th slot, prefer a new author/discovery candidate when available.
-      if(position>=4&&position%5===4){
-        const diversityIndex=remaining.findIndex(p=>(counts[String(p.user_id)]||0)===0 && p.__feedSocial==='Discover');
-        const fofIndex=remaining.findIndex(p=>(counts[String(p.user_id)]||0)===0 && p.__feedSocial==='Friend of friend');
-        if(diversityIndex>=0)pickIndex=diversityIndex;
-        else if(fofIndex>=0)pickIndex=fofIndex;
-      }
-      const pick=remaining.splice(pickIndex,1)[0],id=String(pick.user_id||'');
-      counts[id]=(counts[id]||0)+1;
-      result.push(pick);
+      const pos=result.length,cap=pos<10?2:pos<20?3:4;
+      let idx=remaining.findIndex(p=>(counts[String(p.user_id)]||0)<cap);
+      if(idx<0)idx=0;
+      if(pos>=4&&pos%5===4){const di=remaining.findIndex(p=>(counts[String(p.user_id)]||0)===0&&p.__feedSocial==='Discover');const fi=remaining.findIndex(p=>(counts[String(p.user_id)]||0)===0&&p.__feedSocial==='Friend of friend');if(di>=0)idx=di;else if(fi>=0)idx=fi}
+      const pick=remaining.splice(idx,1)[0],id=String(pick.user_id||'');counts[id]=(counts[id]||0)+1;result.push(pick);
     }
     allPosts=result;
-    const followedCount=result.filter(p=>p.__feedSocial==='Following'||p.__feedSocial==='Reciprocal').length;
-    const friendCount=result.filter(p=>p.__feedSocial==='Friend').length;
-    const fofCount=result.filter(p=>p.__feedSocial==='Friend of friend').length;
-    const discoveryCount=result.filter(p=>p.__feedSocial==='Discover').length;
-    const uniqueAuthors=new Set(result.map(p=>String(p.user_id||'')).filter(Boolean)).size;
-    $('feed-note').textContent='V19 relationship ranking active · '+followedCount+' following · '+friendCount+' friends · '+fofCount+' mutual-network · '+discoveryCount+' discovery · '+uniqueAuthors+' authors.';
-  }catch(e){
-    console.warn('[CrowSpace] relationship ranking unavailable',e);
-    $('feed-note').textContent='Relationship ranking unavailable · showing latest posts.';
-  }
+    $('feed-note').textContent='V19 relationship ranking active · '+result.filter(p=>p.__feedSocial==='Following'||p.__feedSocial==='Reciprocal').length+' following · '+result.filter(p=>p.__feedSocial==='Friend').length+' friends · '+result.filter(p=>p.__feedSocial==='Friend of friend').length+' mutual-network · '+result.filter(p=>p.__feedSocial==='Discover').length+' discovery · '+new Set(result.map(p=>String(p.user_id||'')).filter(Boolean)).size+' authors.';
+    await applyRealtimeIntelligence();
+  }catch(e){console.warn('[CrowSpace] relationship ranking unavailable',e);$('feed-note').textContent='Relationship ranking unavailable · showing latest posts.'}
 }
 async function loadPersonalizedFeed(){
   if(!db||!user){$('feed-personalization').textContent='Sign in to personalize your CrowSpace feed.';return}
