@@ -187,7 +187,43 @@ body.profile-edit-lock{overflow:hidden!important}
 #socialLinksEditor .link-row input{min-width:0}
 #socialLinksEditor .link-row [data-social-remove]{min-width:40px}
 @media(max-width:620px){#socialLinksEditor .link-row{grid-template-columns:1fr auto}#socialLinksEditor .link-row [data-social-url]{grid-column:1/-1}#socialLinksEditor .link-row [data-social-remove]{grid-column:2;grid-row:1;align-self:center}}
-</style></head>
+</style><style id="crow-profile-v104">
+/* V104 — FUTURE NODE UI */
+:root{--node-cyan:#55efff;--node-violet:#a879ff;--node-pink:#ff5bd6}
+body{background:radial-gradient(circle at 50% 0%,#16284c 0,#050913 38%,#02040a 100%)}
+body:before{opacity:.3;background-size:36px 36px;mask-image:linear-gradient(to bottom,#000 0%,transparent 82%)}
+.profile-wrap{max-width:1320px;padding-top:24px}
+.profile-commandbar{border:1px solid rgba(85,239,255,.25);box-shadow:0 0 35px rgba(85,239,255,.08),inset 0 0 30px rgba(168,121,255,.025)}
+.profile-commandbar:before{content:"CROWSPACE // PROFILE NODE";font:800 9px Orbitron;letter-spacing:.16em;color:var(--cyan);margin-right:6px}
+.hero{border-color:rgba(85,239,255,.28);box-shadow:0 25px 90px #000b,0 0 55px rgba(85,239,255,.07)}
+.banner{height:340px}
+.banner:after{content:"PROFILE NODE // ONLINE";color:var(--cyan);text-shadow:0 0 18px rgba(85,239,255,.7)}
+.identity h1{font-size:34px;letter-spacing:.03em}
+.identity h1:after{content:"";display:inline-block;width:7px;height:7px;margin-left:10px;border-radius:50%;background:var(--green);box-shadow:0 0 16px var(--green);vertical-align:middle;animation:nodePulse 1.8s infinite}
+.creator-hub,.profile-pulse,.creator-timeline{border:1px solid rgba(85,239,255,.12);border-radius:20px;position:relative;overflow:hidden}
+.creator-hub:before,.profile-pulse:before,.creator-timeline:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(85,239,255,.035),transparent 45%,rgba(168,121,255,.045))}
+.creator-hub-card,.pulse-card,.timeline-card{background:linear-gradient(145deg,rgba(10,18,35,.9),rgba(3,7,15,.92));border-color:rgba(85,239,255,.14)}
+.quick-card{position:relative;overflow:hidden}
+.quick-card:after{content:"↗";position:absolute;right:10px;top:8px;color:var(--cyan);opacity:.35}
+.profile-edit-modal{background:rgba(0,2,8,.35)}
+.profile-edit-dialog{width:min(1240px,97vw);height:min(94vh,1000px);border-color:rgba(85,239,255,.35);box-shadow:0 40px 140px #000,0 0 80px rgba(85,239,255,.12)}
+.profile-edit-header{background:linear-gradient(90deg,rgba(5,10,20,.98),rgba(10,7,25,.96));}
+.profile-edit-header .title:after{content:" // CREATOR CONTROL";color:var(--violet)}
+.profile-editor-tab{position:relative}
+.profile-editor-tab.active:after{content:"";position:absolute;left:10%;right:10%;bottom:-1px;height:2px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.profile-editor-footer{box-shadow:0 -10px 35px rgba(0,0,0,.28)}
+.profile-live-preview{border-color:rgba(85,239,255,.28);box-shadow:inset 0 0 35px rgba(85,239,255,.025),0 0 25px rgba(85,239,255,.04)}
+.live-preview-state{color:var(--green)!important}
+.field input,.field textarea,.field select{transition:border-color .18s,box-shadow .18s,transform .18s}
+.field input:focus,.field textarea:focus,.field select:focus{transform:translateY(-1px);box-shadow:0 0 0 2px rgba(85,239,255,.08),0 0 22px rgba(85,239,255,.06)}
+.btn{position:relative;overflow:hidden}
+.btn:before{content:"";position:absolute;top:0;left:-120%;width:70%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transform:skewX(-18deg);transition:left .45s}
+.btn:hover:before{left:140%}
+.profile-statusline .status-dot{animation:nodePulse 1.8s infinite}
+@keyframes nodePulse{0%,100%{opacity:.65;box-shadow:0 0 8px var(--green)}50%{opacity:1;box-shadow:0 0 22px var(--green)}}
+@media(max-width:760px){.profile-commandbar:before{width:100%;margin-bottom:3px}.banner{height:250px}.identity h1{font-size:25px}.profile-edit-dialog{height:97vh;max-height:97vh}}
+@media(prefers-reduced-motion:reduce){.identity h1:after,.profile-statusline .status-dot{animation:none}.btn:before{display:none}}
+</style><style id="crow-profile-v104b">.profile-future-badge{display:inline-flex;align-items:center;gap:7px;margin:0 0 8px;padding:6px 10px;border:1px solid rgba(85,239,255,.18);border-radius:999px;background:rgba(5,10,20,.7);font:800 9px Orbitron;letter-spacing:.14em;color:var(--muted)}.profile-future-badge span{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
