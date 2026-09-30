@@ -31,6 +31,36 @@
 
 
 .cs-holiday-network{margin-top:14px;border:1px solid var(--cs-line);border-radius:20px;padding:20px;background:#050914;box-shadow:0 18px 55px #0006}.cs-network-head{display:flex;justify-content:space-between;gap:15px;align-items:end}.cs-network-head h3{font:900 18px Orbitron;margin:4px 0}.cs-network-sub{color:var(--cs-muted);font-size:9px;line-height:1.6}.cs-network-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.cs-network-actions button{border:1px solid var(--cs-line);background:#ffffff06;color:#fff;border-radius:999px;padding:8px 11px;font:800 8px Orbitron;cursor:pointer}.cs-network-actions button.active{border-color:var(--cs-cyan);color:var(--cs-cyan)}.cs-network-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cs-network-card{border:1px solid #ffffff0b;border-radius:15px;padding:14px;background:#ffffff03}.cs-network-card h4{font:900 10px Orbitron;color:var(--cs-cyan);margin:0 0 10px}.cs-network-list{display:grid;gap:7px}.cs-network-item{padding:9px;border-radius:10px;background:#ffffff04;border:1px solid #ffffff08}.cs-network-item b{font:800 9px Orbitron}.cs-network-item span{display:block;color:#ffffff66;font-size:8px;margin-top:4px}.cs-network-item p{color:var(--cs-muted);font-size:9px;line-height:1.5;margin:5px 0 0}.cs-network-stat{font:900 24px Orbitron}.cs-network-stat-label{color:#ffffff66;font-size:8px}.cs-network-memory{display:flex;justify-content:space-between;gap:8px;align-items:center}.cs-network-memory button{border:1px solid var(--cs-line);background:#ffffff05;color:#fff;border-radius:999px;padding:6px 9px;font:800 7px Orbitron;cursor:pointer}.cs-network-empty{color:#ffffff66;font-size:9px;padding:10px;border:1px dashed #ffffff12;border-radius:10px}@media(max-width:850px){.cs-network-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.cs-network-grid{grid-template-columns:1fr}.cs-network-head{align-items:start;flex-direction:column}}
+
+/* V38 Holiday-specific animated layouts */
+body.cs-holiday-layout{overflow-x:hidden;transition:background .8s ease}
+body.cs-holiday-layout .cs-page-hero,body.cs-holiday-layout .cs-holiday-feature,body.cs-holiday-layout .cs-holiday-side,body.cs-holiday-layout .cs-holiday-timeline,body.cs-holiday-layout .cs-experience,body.cs-holiday-layout .cs-live-center,body.cs-holiday-layout .cs-holiday-network,body.cs-holiday-layout .cs-community,body.cs-holiday-layout .cs-holiday-planner{transition:border-color .8s,box-shadow .8s,transform .5s,background .8s}
+body.cs-holiday-layout .cs-page-hero{position:relative;overflow:hidden;border-radius:24px}
+body.cs-holiday-layout .cs-page-hero:before{content:'';position:absolute;inset:-50%;background:radial-gradient(circle at 30% 40%,var(--holiday-a,#78efff)22,transparent 22%),radial-gradient(circle at 70% 60%,var(--holiday-b,#8b5cf6)20,transparent 22%);opacity:.13;animation:csHolidayAura 10s linear infinite}
+body.cs-holiday-layout .cs-page-hero>*{position:relative}
+body.cs-holiday-layout .cs-holiday-feature{border-color:color-mix(in srgb,var(--holiday-a,#78efff) 45%,var(--cs-line));box-shadow:0 18px 70px color-mix(in srgb,var(--holiday-a,#78efff) 13%,transparent)}
+body.cs-holiday-layout .cs-holiday-feature:after{background:radial-gradient(circle,var(--holiday-a,#78efff)25,transparent 68%);animation:csHolidayGlow 5s ease-in-out infinite alternate}
+body.cs-holiday-layout .cs-live-count{color:var(--holiday-a,#78efff);text-shadow:0 0 28px color-mix(in srgb,var(--holiday-a,#78efff) 45%,transparent)}
+body.cs-holiday-layout .cs-holiday-fact b,body.cs-holiday-layout .cs-holiday-kicker,body.cs-holiday-layout .cs-exp-panel h4,body.cs-holiday-layout .cs-community-grid article h4,body.cs-holiday-layout .cs-live-grid h4{color:var(--holiday-a,#78efff)}
+body.cs-holiday-layout .cs-tile:hover,body.cs-holiday-layout .cs-network-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--holiday-a,#78effff) 45%,var(--cs-line))}
+body.cs-holiday-layout .cs-tile em{color:var(--holiday-a,#78effff)}
+body.cs-holiday-layout .cs-exp-select select{border-color:color-mix(in srgb,var(--holiday-a,#78effff) 40%,var(--cs-line))}
+body.cs-holiday-layout .cs-celebrate{background:radial-gradient(circle at 80% 0,color-mix(in srgb,var(--holiday-a,#78effff) 15%,transparent),transparent 48%),#ffffff03}
+body.halloween.cs-holiday-layout{--holiday-a:#ff8a3d;--holiday-b:#9b5cff;background:radial-gradient(circle at 10% 20%,#ff8a3d0c,transparent 30%),#03040b}
+body.christmas.cs-holiday-layout{--holiday-a:#ff6b6b;--holiday-b:#68e0a0;background:radial-gradient(circle at 20% 10%,#68e0a012,transparent 30%),#03090a}
+body.nye.cs-holiday-layout{--holiday-a:#ffd166;--holiday-b:#8b5cf6;background:radial-gradient(circle at 50% 0%,#ffd16612,transparent 35%),#05030b}
+body.valentine.cs-holiday-layout{--holiday-a:#ff6b9d;--holiday-b:#ffb3d1;background:radial-gradient(circle at 50% 10%,#ff6b9d12,transparent 35%),#080309}
+body.easter.cs-holiday-layout{--holiday-a:#b58cff;--holiday-b:#8de9d4;background:radial-gradient(circle at 25% 10%,#8de9d412,transparent 30%),#05070a}
+body.thanksgiving.cs-holiday-layout{--holiday-a:#ffad66;--holiday-b:#d97706;background:radial-gradient(circle at 20% 10%,#ffad6612,transparent 30%),#080503}
+body.independence.cs-holiday-layout,body.memorial.cs-holiday-layout,body.veterans.cs-holiday-layout{--holiday-a:#ff7182;--holiday-b:#78a7ff;background:radial-gradient(circle at 50% 0%,#78a7ff10,transparent 32%),#03050a}
+body.juneteenth.cs-holiday-layout{--holiday-a:#ef4444;--holiday-b:#ffd166;background:radial-gradient(circle at 50% 0%,#ffd1660d,transparent 32%),#080303}
+body.mlk.cs-holiday-layout,body.labor.cs-holiday-layout,body.newyear.cs-holiday-layout{--holiday-a:#78efff;--holiday-b:#ffd166;background:radial-gradient(circle at 50% 0%,#78efff0c,transparent 32%),#03070a}
+.cs-holiday-scenery{display:flex;justify-content:center;gap:14px;margin-top:12px;min-height:28px;overflow:hidden;pointer-events:none;font-size:20px;opacity:.9}
+.cs-holiday-scenery i{font-style:normal;display:inline-block;animation:csSceneryFloat 3s ease-in-out infinite}
+.cs-holiday-scenery i:nth-child(2){animation-delay:.4s}.cs-holiday-scenery i:nth-child(3){animation-delay:.8s}.cs-holiday-scenery i:nth-child(4){animation-delay:1.2s}.cs-holiday-scenery i:nth-child(5){animation-delay:1.6s}
+.cs-holiday-special{margin-top:12px;padding:10px 14px;border:1px solid color-mix(in srgb,var(--holiday-a,#78efff) 35%,var(--cs-line));border-radius:999px;text-align:center;color:var(--holiday-a,#78efff);font:800 8px Orbitron;letter-spacing:.12em}
+@keyframes csHolidayAura{to{transform:rotate(360deg)}}@keyframes csHolidayGlow{to{transform:scale(1.15);opacity:.8}}@keyframes csSceneryFloat{50%{transform:translateY(-8px) rotate(4deg)}}
+@media(max-width:600px){.cs-holiday-scenery{gap:7px;font-size:16px}}
 </style>
 </head>
 <body data-page="holiday-hub">
@@ -116,7 +146,15 @@ function startCelebration(h){
  modal.classList.add('show');const close=modal.querySelector('.cs-celebration-close');if(close)close.onclick=()=>modal.classList.remove('show');
 }
 
-function notifyCommunity(h){window.__holidayCommunityState=h;if(window.CrowSpaceHolidayCommunity?.load)window.CrowSpaceHolidayCommunity.load(h);if(window.CrowSpaceHolidayLive?.load)window.CrowSpaceHolidayLive.load(h);if(window.CrowSpaceHolidayNetwork?.load)window.CrowSpaceHolidayNetwork.load(h)}
+function holidayLayout(h){
+ const map={'New Year’s Eve':['nye','🥂✨🎆✨🥂','COUNTDOWN LAYOUT · MIDNIGHT MODE'],'New Year’s Day':['newyear','🎆✨🌅✨🎆','NEW BEGINNINGS LAYOUT'],'Martin Luther King Jr. Day':['mlk','✊📖🕊️📖✊','REMEMBRANCE & SERVICE LAYOUT'],'Valentine’s Day':['valentine','❤️💌🌹💌❤️','LOVE & FRIENDSHIP LAYOUT'],'Easter Sunday':['easter','🐣🌷🥚🌷🐣','SPRING CELEBRATION LAYOUT'],'Memorial Day':['memorial','🇺🇸🕊️🇺🇸🕊️🇺🇸','REMEMBRANCE LAYOUT'],'Juneteenth':['juneteenth','🟥⭐🟥⭐🟥','FREEDOM & COMMUNITY LAYOUT'],'Independence Day':['independence','🇺🇸✨🎆✨🇺🇸','CELEBRATION LAYOUT'],'Labor Day':['labor','🛠️⚙️👷⚙️🛠️','WORK & COMMUNITY LAYOUT'],'Halloween':['halloween','🎃👻🕷️🕸️🎃','SPOOKY NIGHT LAYOUT'],'Veterans Day':['veterans','🎖️🇺🇸🕊️🇺🇸🎖️','HONOR & SERVICE LAYOUT'],'Thanksgiving Day':['thanksgiving','🦃🍂🥧🍁🦃','HARVEST & GRATITUDE LAYOUT'],'Christmas Day':['christmas','🎄❄️🎁❄️🎄','WINTER CELEBRATION LAYOUT']};
+ const old=['halloween','christmas','nye','newyear','valentine','easter','mlk','memorial','juneteenth','independence','labor','veterans','thanksgiving'];document.body.classList.remove(...old);document.body.classList.add('cs-holiday-layout');
+ const x=map[h.name]||['newyear','✨🎉✨','HOLIDAY EXPERIENCE LAYOUT'];document.body.classList.add(x[0]);
+ let s=document.getElementById('cs-holiday-scenery');if(!s){s=document.createElement('div');s.id='cs-holiday-scenery';s.className='cs-holiday-scenery';document.querySelector('.cs-page-shell')?.append(s)}s.innerHTML=x[1].split('').map(ch=>'<i>'+ch+'</i>').join('');
+ let sp=document.getElementById('cs-holiday-special');if(!sp){sp=document.createElement('div');sp.id='cs-holiday-special';sp.className='cs-holiday-special';document.getElementById('holiday-app')?.before(sp)}sp.textContent=x[2];
+ if(window.CrowSpaceHolidayTheme?.apply)window.CrowSpaceHolidayTheme.apply(h);
+}
+function notifyCommunity(h){window.__holidayCommunityState=h;holidayLayout(h);if(window.CrowSpaceHolidayCommunity?.load)window.CrowSpaceHolidayCommunity.load(h);if(window.CrowSpaceHolidayLive?.load)window.CrowSpaceHolidayLive.load(h);if(window.CrowSpaceHolidayNetwork?.load)window.CrowSpaceHolidayNetwork.load(h)}
 function render(){
  const host=document.getElementById('holiday-app'),now=new Date(),next=nextHoliday(now),up=calendar(now),d=diff(next.date-now);
  const today=dateKey(next.date)===dateKey(now),yearDays=new Date(now.getFullYear()+1,0,1)-new Date(now.getFullYear(),0,1),yearStart=new Date(now.getFullYear(),0,1),dayOfYear=Math.floor((dateKey(now)-dateKey(yearStart))/86400000)+1,remaining=Math.max(0,Math.ceil((dateKey(new Date(now.getFullYear()+1,0,1))-dateKey(now))/86400000));
@@ -145,7 +183,7 @@ function tick(){
  const target=new Date(el.dataset.liveDate),now=new Date(),x=diff(target-now);
  el.firstChild.nodeValue=dateKey(target)===dateKey(now)?'TODAY':x.days+'d '+pad(x.hours)+'h '+pad(x.mins)+'m '+pad(x.secs)+'s';
 }
-render();renderExperience(new Date());setTimeout(()=>notifyCommunity(nextHoliday(new Date())),700);setInterval(()=>{tick();const n=new Date();if(n.getHours()===0&&n.getMinutes()===0&&n.getSeconds()<2){render();renderExperience(n);notifyCommunity(nextHoliday(n))}},1000);
+render();renderExperience(new Date());holidayLayout(nextHoliday(new Date()));setTimeout(()=>notifyCommunity(nextHoliday(new Date())),700);setInterval(()=>{tick();const n=new Date();if(n.getHours()===0&&n.getMinutes()===0&&n.getSeconds()<2){render();renderExperience(n);notifyCommunity(nextHoliday(n))}},1000);
 })();
 </script>
 </body></html>
