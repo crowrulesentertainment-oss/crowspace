@@ -285,7 +285,7 @@ async function loadPosts(){
     $('feed-status').textContent='ERROR';$('feed-note').textContent='The feed is unavailable. Check Supabase permissions/RLS for crowspace_posts.';
     $('live-feed').innerHTML='<div class="error-box">The live feed could not be loaded.</div>';$('visible').textContent='0';return;
   }
-  allPosts=q.data||[];
+  allPosts=q.data||[];try{if(allPosts.length){const ids=allPosts.map(p=>p.id).filter(Boolean);const mr=await db.from('crowspace_post_media').select('post_id,media_url,media_type,title,alt_text,caption,sort_order').in('post_id',ids).order('sort_order',{ascending:true});if(!mr.error){const by=new Map();(mr.data||[]).forEach(m=>{const k=String(m.post_id);if(!by.has(k))by.set(k,[]);by.get(k).push(m)});allPosts=allPosts.map(p=>({...p,media_metadata:by.get(String(p.id))||[]}))}}}catch(e){console.warn('[CrowSpace] persistent media metadata unavailable',e)}
   await applyFeedRanking();
   await applyRealtimeIntelligence();
   await renderFeed();
