@@ -10,7 +10,7 @@ const links=[
 const sub=[['Feed','home.html#feed'],['Explore','explore.html'],['Holiday Bots','holiday-bots.html'],['Account','account.html'],['Caw Studio','caw-studio.html']];
 function active(path){const p=location.pathname.split('/').pop()||'home.html';return p===path}
 function nav(){
- const old=document.querySelector('.navin'),top=document.querySelector('.topbar');
+ const old=document.querySelector('.navin'),oldNav=old?.closest('.nav'),top=document.querySelector('.topbar');
  if(top){
    const nav=top.querySelector('.global-nav');
    if(nav){
@@ -21,7 +21,7 @@ function nav(){
  }
  const bar=document.createElement('header');bar.className='cs-globalbar';
  bar.innerHTML='<div class="cs-globalbar-inner"><a class="cs-brand" href="home.html">CROW<span>SPACE</span></a><nav class="cs-nav" aria-label="Universal CrowSpace navigation"></nav><div class="cs-account"><span class="cs-status"><i class="cs-dot"></i><span id="cs-status-text">CONNECTING</span></span><a href="login.html" id="cs-login">LOG IN</a><a class="cs-primary" href="signup.html" id="cs-join">JOIN</a></div></div><div class="cs-subbar"></div>';
- document.body.insertBefore(bar,document.body.firstChild);
+ if(oldNav) oldNav.replaceWith(bar); else if(old) old.replaceWith(bar); else document.body.insertBefore(bar,document.body.firstChild);
  const n=bar.querySelector('.cs-nav');links.forEach(([label,href])=>{const a=document.createElement('a');a.href=href;a.textContent=label;if(active(href))a.className='cs-active';n.appendChild(a)});
  const sb=bar.querySelector('.cs-subbar');sub.forEach(([label,href])=>{const a=document.createElement('a');a.href=href;a.textContent=label;sb.appendChild(a)});
  const community=document.querySelector('.community-links');if(community)community.style.display='none';
