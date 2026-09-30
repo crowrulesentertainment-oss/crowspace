@@ -49,7 +49,7 @@
 .profile-count{padding:6px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px}
 .profile-count b{color:var(--text)}
 .profile-note{font-size:10px;color:var(--muted);line-height:1.5}
-</style>
+.profile-insights{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.insight{padding:14px;border:1px solid var(--line);border-radius:13px;background:#050a14}.insight b{display:block;font:800 11px Orbitron;color:var(--cyan);margin-bottom:5px}.insight span{font-size:10px;color:var(--muted);line-height:1.45}.profile-jump{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.profile-jump a{text-decoration:none}.activity-line{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #172338}.activity-line:last-child{border-bottom:0}.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px #55efff55;margin-top:5px;flex:0 0 auto}.activity-line b{font-size:11px}.activity-line small{display:block;color:var(--muted);margin-top:2px}@media(max-width:760px){.profile-insights{grid-template-columns:1fr 1fr}}</style>
 <script src="crowspace-auth.js"></script>
 <script src="crowspace-rebuild.js" defer></script>
 <script src="crowspace-universal.js" defer></script>
@@ -144,6 +144,12 @@ function render(){
  const self=me?.id===target.user_id;
  $("app").innerHTML='<section class="hero"><div class="banner" id="banner"><div class="banner-tools" id="bannerTools"></div></div><div class="hero-body"><div class="identity"><img class="avatar" src="'+esc(avatar(target.avatar_url))+'"><div><h1>'+esc(target.display_name||target.username||"CrowSpace Member")+'</h1><div class="handle">@'+esc(target.username||"member")+'</div><div class="identity-meta"><span class="creator-tag">'+esc(target.creator_category||"Creator")+'</span><span class="creator-tag">CROWSPACE MEMBER</span></div></div></div>'+(target.portfolio_tagline?'<div class="tagline">'+esc(target.portfolio_tagline)+'</div>':'')+'<p class="bio">'+esc(target.bio||target.portfolio_bio||"Welcome to my CrowSpace profile.")+'</p>'+(socialHtml()?'<div class="social-row">'+socialHtml()+'</div>':'')+'<div class="actions" style="margin-top:12px">'+connectionButtons()+'</div></div></section>'+'<section class="card" style="margin-top:16px"><div class="title">CROWSPACE CONNECTIONS</div><div class="stats"><div class="stat"><b>'+friends.length+'</b><span>Friends</span></div><div class="stat"><b>'+followers.length+'</b><span>Followers</span></div><div class="stat"><b>'+following.length+'</b><span>Following</span></div><div class="stat"><b>'+posts.length+'</b><span>Posts</span></div></div></section>'+
  (self?studioHtml():"")+
+ '<section class="card" style="margin-top:16px"><div class="title">PROFILE INSIGHTS</div><div class="profile-insights">'+
+ '<div class="insight"><b>CONTENT</b><span>'+posts.length+' posts • '+caws.length+' Caws</span></div>'+
+ '<div class="insight"><b>NETWORK</b><span>'+followers.length+' followers • '+following.length+' following</span></div>'+
+ '<div class="insight"><b>COMMUNITY</b><span>'+friends.length+' friends • '+guestbook.length+' guestbook messages</span></div>'+
+ '<div class="insight"><b>IDENTITY</b><span>'+esc(target.creator_category||"Creator")+' • '+(target.portfolio_work_title?esc(target.portfolio_work_title):"No featured work")+'</span></div>'+
+ '</div></section>
  (badges.length?'<section class="card" style="margin-top:16px"><div class="title">PROFILE BADGES</div><div class="badge-strip">'+badgeOrder().map(b=>'<span class="badge-chip" title="'+esc(b.description||"")+'"><b>'+esc(b.icon||"✦")+'</b>'+esc(b.name||"Badge")+'</span>').join("")+'</div></section>':"")+publicFeaturedHtml()+
  '<div class="grid"><div>'+
  '<section class="card"><div class="title">PEOPLE & CONNECTIONS</div><div class="tabs"><span class="pill active" data-people="friends">Friends</span><span class="pill" data-people="followers">Followers</span><span class="pill" data-people="following">Following</span></div><div id="people"></div></section>'+
