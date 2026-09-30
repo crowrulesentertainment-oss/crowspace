@@ -17,7 +17,19 @@ function nav(){
   ['DISCOVER',[['⌕ Search','search.html'],['◇ Discover','discovery.html'],['⚡ Activity','activity.html'],['🏆 Rankings','rankings.html'],['🎂 Birthdays','birthdays.html']]],
   ['CONTENT',[['▶ Caws','caws.html'],['▣ Groups','groups.html'],['📅 Events','events.html'],['📰 News','news.html']]],
   ['CREATE',[['🎬 Creator Studio','creator-studio.html'],['◈ Caw Studio','caw-studio.html']]],
-  ['CROWRULES',[['🎉 Holiday Hub','holiday-hub.html'],['🤖 Holiday Bots','holiday-bots.html']]],
+  ['CROWRULES',[
+   ['🎉 Holiday Hub','holiday-hub.html'],['🤖 Holiday Bots','holiday-bots.html'],
+   ['◈ CrowRules Home','https://crowrulesentertainment-oss.github.io/crowrulesentertainment/'],
+   ['📺 CrowRules TV','https://crowrulesentertainment-oss.github.io/crowrulestv/'],
+   ['🏟 Sports','https://crowrulesentertainment-oss.github.io/sports/'],
+   ['🎙 Podcasting','https://crowrulesentertainment-oss.github.io/podcasting/'],
+   ['✨ Dreamscapes','https://crowrulesentertainment-oss.github.io/dreamscapes/'],
+   ['🕯 Memorials','https://crowrulesentertainment-oss.github.io/memorials/'],
+   ['🏆 Spectrum Awards','https://crowrulesentertainment-oss.github.io/spectrum/'],
+   ['📚 Yearbooks','https://crowrulesentertainment-oss.github.io/yearbooks/'],
+   ['💿 Records','https://crowrulesentertainment-oss.github.io/records/'],
+   ['👤 Membership','https://crowrulesentertainment-oss.github.io/members/']
+ ]],
   ['ACCOUNT',[['⚙ Settings','settings.html'],['◉ Account','account.html']]]
  ];
  const makeMenu=(label,items)=>{
@@ -129,7 +141,10 @@ async function auth(){
   const db=await ready,u=window.CrowSpaceAuth?.user||null,st=document.getElementById('cs-status-text');
   if(st)st.textContent=u?'SIGNED IN':'GUEST';
   const login=document.getElementById('cs-login'),join=document.getElementById('cs-join');
-  if(u){if(login){login.textContent='ACCOUNT';login.href='#cs-account'}if(join){join.textContent='PROFILE';join.href='profile.html'}}
+  if(u){
+    if(login){login.textContent='ACCOUNT';login.href='#cs-account'}
+    if(join){join.textContent='PROFILE';join.href='profile.html'}
+  }
   const social={
  follow: async target => db.rpc('crowspace_follow',{target_user:target}),
  unfollow: async target => db.rpc('crowspace_unfollow',{target_user:target}),
@@ -147,7 +162,7 @@ async function auth(){
   }
 };
 window.CrowSpaceUniversal={db,user:u,social};
-  accountMenu(u);badges(db,u);overlays();mobile();
+  accountMenu(u);badges(db,u);overlays();mobile();guardAuthPages(u);
   document.dispatchEvent(new CustomEvent('crowspace-universal-ready',{detail:{db,user:u}}));
   db.channel('crowspace-universal-live')
  .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_notifications',filter:'user_id=eq.'+(u?.id||'00000000-0000-0000-0000-000000000000')},()=>{badges(db,u);document.dispatchEvent(new CustomEvent('crowspace-social-update'))})
@@ -158,6 +173,15 @@ window.CrowSpaceUniversal={db,user:u,social};
  }catch(e){const st=document.getElementById('cs-status-text');if(st)st.textContent='OFFLINE';overlays();mobile()}
 }
 
+
+function guardAuthPages(u){
+ const page=location.pathname.split('/').pop()||'home.html';
+ if(!u||!['login.html','signup.html'].includes(page))return;
+ const q=new URLSearchParams(location.search);
+ if(q.get('switch')==='1')return;
+ const next=q.get('next');
+ location.replace(next?next:'home.html');
+}
 function toast(message){const t=document.createElement('div');t.className='cs-toast';t.textContent=message;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 function relationTargetFromHref(href){
  try{const u=new URL(href,location.href),q=u.searchParams;return q.get('user')||q.get('u')||q.get('id')||null}catch(e){return null}
