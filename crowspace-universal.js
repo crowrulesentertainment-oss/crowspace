@@ -266,11 +266,16 @@ function loadV28Recommendations(){
   const s=document.createElement('script');s.src='crowspace-recommendations.js';s.dataset.crowspaceV28='1';s.onload=()=>window.CrowSpaceRecommendations?.refresh?.();document.body.appendChild(s);
  }else window.CrowSpaceRecommendations?.refresh?.();
 }
-function loadV24Discovery(){
+function loadV25ContentGraph(){
  const page=location.pathname.split('/').pop()||'home.html';
  if(page==='index.html'||page==='holiday-hub.html')return;
- if(!document.querySelector('script[data-crowspace-v24]')){const s=document.createElement('script');s.src='crowspace-discovery.js';s.dataset.crowspaceV24='1';s.onload=()=>window.CrowSpaceDiscovery?.refresh?.();document.body.appendChild(s)}else window.CrowSpaceDiscovery?.refresh?.();
- if(!document.querySelector('script[data-crowspace-v25]')){const s=document.createElement('script');s.src='crowspace-content-graph.js';s.dataset.crowspaceV25='1';s.onload=()=>window.CrowSpaceContentGraph?.refresh?.();document.body.appendChild(s)}else window.CrowSpaceContentGraph?.refresh?.();
+ if(!document.querySelector('script[data-crowspace-v25]')){
+  const s=document.createElement('script');
+  s.src='crowspace-content-graph.js';
+  s.dataset.crowspaceV25='1';
+  s.onload=()=>window.CrowSpaceContentGraph?.refresh?.();
+  document.body.appendChild(s);
+ }else window.CrowSpaceContentGraph?.refresh?.();
 }
-document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(()=>{relationshipEnhance();loadV24Discovery();loadV28Recommendations()},250))});
+document.addEventListener('DOMContentLoaded',()=>{nav();footer();auth().then(()=>setTimeout(()=>{relationshipEnhance();loadV25ContentGraph();loadV28Recommendations()},250))});
 })();
