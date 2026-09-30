@@ -48,6 +48,7 @@ async function load(){
   if(!target){$("app").innerHTML='<div class="state">Profile not found.</div>';return}
   await Promise.all([loadSocial(),loadContent(),loadGuestbook()]);
   render();
+  startRealtime();
  }catch(e){console.error(e);$("app").innerHTML='<div class="state">CrowSpace could not connect to Supabase.<br><br><small>'+esc(e.message||e)+'</small></div>'}
 }
 async function loadSocial(){
@@ -79,7 +80,7 @@ async function loadContent(){
  posts=p.data||[];caws=c.data||[];
 }
 async function loadGuestbook(){
- const r=await safe(()=>db.from("crowspace_guestbook").select("*").eq("profile_user_id",target.user_id).order("created_at",{ascending:false}).limit(50));
+ const r=await safe(()=>db.from("crowspace_guestbook").select("*").eq("profile_id",target.user_id).order("created_at",{ascending:false}).limit(50));
  guestbook=r.data||[];
  const ids=[...new Set(guestbook.map(x=>x.author_user_id).filter(Boolean))];
  if(ids.length){const p=await safe(()=>db.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids));(p.data||[]).forEach(x=>profiles.set(x.user_id,x))}
@@ -156,9 +157,37 @@ function showGuestbook(){
  const box=$("guestbook");if(!box)return;
  const canWrite=me&&me.id!==target.user_id&&target.allow_guestbook!==false;
  let form=canWrite?'<div class="field" style="margin-bottom:12px"><textarea id="guestText" placeholder="Leave a message…"></textarea><button class="btn primary" id="guestSend">Sign Guestbook</button></div>':"";
- box.innerHTML=form+(guestbook.length?guestbook.map(g=>{const p=profiles.get(g.author_user_id)||{};return '<div class="guest" style="margin-top:8px"><img src="'+esc(avatar(p.avatar_url))+'"><div><b>'+esc(p.display_name||p.username||"Member")+'</b><small> · '+new Date(g.created_at).toLocaleString()+'</small><div class="guest-body">'+esc(g.body||g.message||"")+'</div></div></div>'}).join(""):'<div class="empty">No guestbook messages yet.</div>');
- $("guestSend")?.addEventListener("click",async()=>{const body=$("guestText").value.trim();if(!body)return;const r=await db.from("crowspace_guestbook").insert({profile_user_id:target.user_id,author_user_id:me.id,body});if(r.error){toast(r.error.message);return}toast("Guestbook message posted");await load()});
+ box.innerHTML=form+(guestbook.length?guestbook.map(g=>{const p=profiles.get(g.author_id)||{};return '<div class="guest" style="margin-top:8px"><img src="'+esc(avatar(p.avatar_url))+'"><div><b>'+esc(p.display_name||p.username||"Member")+'</b><small> · '+new Date(g.created_at).toLocaleString()+'</small><div class="guest-body">'+esc(g.body||g.message||"")+'</div></div></div>'}).join(""):'<div class="empty">No guestbook messages yet.</div>');
+ $("guestSend")?.addEventListener("click",async()=>{const body=$("guestText").value.trim();if(!body)return;const r=await db.from("crowspace_guestbook").insert({profile_user_id:target.user_id,author_id:me.id,body});if(r.error){toast(r.error.message);return}toast("Guestbook message posted");await load()});
 }
+let realtimeChannel=null,realtimeRefreshTimer=null;
+function queueRealtimeRefresh(reason){
+  clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer=setTimeout(async()=>{try{await load();toast("Live profile updated");}catch(e){console.warn("[CrowSpace realtime]",reason,e)}},180);
+}
+function startRealtime(){
+  if(!db||!target||realtimeChannel)return;
+  const uid=target.user_id;
+  realtimeChannel=db.channel("crowspace-profile-realtime-"+uid);
+  realtimeChannel
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_profiles",filter:"user_id=eq."+uid},p=>{if(p.eventType==="UPDATE"){target=Object.assign({},target,p.new);queueRealtimeRefresh("profile")}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"followed_user_id=eq."+uid},()=>queueRealtimeRefresh("followers"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_follows",filter:"follower_id=eq."+uid},()=>queueRealtimeRefresh("following"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"requester_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_friendships",filter:"addressee_id=eq."+uid},()=>queueRealtimeRefresh("friendships"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocker_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"member_blocks",filter:"blocked_id=eq."+uid},()=>queueRealtimeRefresh("blocks"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_posts",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("posts"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_caws",filter:"user_id=eq."+uid},()=>queueRealtimeRefresh("caws"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_guestbook",filter:"profile_id=eq."+uid},()=>queueRealtimeRefresh("guestbook"))
+    .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_notifications",filter:"user_id=eq."+uid},()=>{queueRealtimeRefresh("notifications");document.dispatchEvent(new CustomEvent("crowspace-notification-live"))})
+    .subscribe((status,error)=>{
+      if(status==="SUBSCRIBED") document.body.dataset.realtime="connected";
+      if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){document.body.dataset.realtime="error";console.error("[CrowSpace realtime]",status,error)}
+    });
+}
+function stopRealtime(){if(realtimeChannel&&db){db.removeChannel(realtimeChannel);realtimeChannel=null}}
+window.addEventListener("beforeunload",stopRealtime);
 window.addEventListener("crowspace:supabase-ready",load);
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load);else load();
 })();
