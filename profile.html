@@ -39,14 +39,23 @@
 .badge-order-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;background:#050a14}
 .badge-order-row button{min-width:34px;padding:7px}
 @media(max-width:760px){.featured-hero,.creator-studio-grid{grid-template-columns:1fr}.creator-studio-grid .wide{grid-column:auto}.link-row{grid-template-columns:1fr}.badge-order-row{grid-template-columns:1fr auto auto}}body[data-theme="violet"]{--cyan:#b994ff;--violet:#55efff;--pink:#ff78e5}body[data-theme="rose"]{--cyan:#ff8bd8;--violet:#9d8cff;--pink:#ff557d}body[data-theme="emerald"]{--cyan:#66ffb2;--violet:#55efff;--pink:#a7ffcf}body[data-theme="gold"]{--cyan:#ffd36b;--violet:#ff9b5c;--pink:#ffe7a8}.profile-wrap[data-layout="wide"]{max-width:1400px}.profile-wrap[data-layout="compact"]{max-width:980px}.profile-wrap[data-layout="compact"] .banner{height:240px}.profile-wrap[data-layout="minimal"] .card{box-shadow:none;background:rgba(7,11,23,.65)}@media(max-width:760px){.appearance-grid{grid-template-columns:1fr}.appearance-choice{grid-template-columns:repeat(2,1fr)}}
+
+.profile-commandbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.profile-commandbar .command-status{margin-left:auto;color:var(--muted);font-size:10px;letter-spacing:.08em}
+.profile-commandbar .command-status[data-live="1"]{color:var(--green)}
+.profile-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.profile-actions .btn{font-size:11px}
+.profile-counts{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.profile-count{padding:6px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px}
+.profile-count b{color:var(--text)}
+.profile-note{font-size:10px;color:var(--muted);line-height:1.5}
 </style>
 <script src="crowspace-auth.js"></script>
 <script src="crowspace-rebuild.js" defer></script>
 <script src="crowspace-universal.js" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script></head>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -300,6 +309,36 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("offline",()=>{document.body.dataset.realtime="offline"});
 window.addEventListener("beforeunload",stopRealtime);
 
+
+
+(function(){
+  const originalRender = window.__crowProfileRender;
+  function enhance(){
+    const app=document.getElementById('app');
+    if(!app || app.querySelector('.profile-commandbar')) return;
+    const hero=app.querySelector('.hero');
+    if(!hero) return;
+    const bar=document.createElement('div');
+    bar.className='profile-commandbar';
+    bar.innerHTML='<button class="btn" type="button" data-profile-cmd="refresh">↻ Refresh</button><button class="btn" type="button" data-profile-cmd="share">Share Profile</button><button class="btn" type="button" data-profile-cmd="copy">Copy Link</button><span class="command-status" data-live="1">● LIVE PROFILE</span>';
+    app.insertBefore(bar,hero);
+    bar.addEventListener('click',async e=>{
+      const b=e.target.closest('[data-profile-cmd]'); if(!b)return;
+      const cmd=b.dataset.profileCmd;
+      try{
+        if(cmd==='refresh'){b.disabled=true;await load();toast('Profile refreshed');b.disabled=false}
+        if(cmd==='copy'){await navigator.clipboard.writeText(location.href);toast('Profile link copied')}
+        if(cmd==='share'){
+          if(navigator.share) await navigator.share({title:target?.display_name||'CrowSpace Profile',url:location.href});
+          else {await navigator.clipboard.writeText(location.href);toast('Profile link copied')}
+        }
+      }catch(err){b.disabled=false;toast(err.message||'Action unavailable')}
+    });
+  }
+  const oldRender = render;
+  window.render=function(){oldRender();enhance()};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance,{once:true});else enhance();
+})();
 
 let profileStarted=false, profileRetryTimer=null, profileWatchdog=null;
 function setConnectionState(mode,message){
