@@ -1,3 +1,9 @@
+/* V42 — Real-Time Recommendation Re-Ranking */
+async function refreshLiveRecommendationSignals(){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return{};const r=await db.rpc("crowspace_live_recommendation_signals");if(r.error)throw r.error;const m={};(r.data||[]).forEach(x=>m[(x.target_type||"content")+":"+x.target_id]=Number(x.signal)||0);window.CrowSpaceLiveSignals=m;return m}catch(e){return window.CrowSpaceLiveSignals||{}}
+}
+window.CrowSpaceLiveSignals={};
+window.CrowSpaceLiveRecommendations={refresh:refreshLiveRecommendationSignals};
 /* V41 — Recommendation Feedback Loop */
 async function recommendationFeedback(targetId,targetType,feedback){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db||!targetId)return null;const r=await db.rpc("crowspace_record_recommendation_feedback",{p_target:targetId,p_type:targetType||"content",p_feedback:feedback});if(r.error)throw r.error;return r.data}catch(e){console.debug("CrowSpace recommendation feedback skipped",e);return null}
