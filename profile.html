@@ -414,7 +414,7 @@ if(!app.querySelector('.creator-hub')){
       const hub=app.querySelector('.creator-hub');
       if(hub)hub.insertAdjacentElement('afterend',pulse); else hero.insertAdjacentElement('afterend',pulse);
       pulse.addEventListener('click',e=>{const b=e.target.closest('[data-pulse]');if(!b)return;if(b.dataset.pulse==='activity')document.getElementById('activity')?.scrollIntoView({behavior:'smooth',block:'start'});if(b.dataset.pulse==='studio')document.getElementById('creatorStudio')?.scrollIntoView({behavior:'smooth',block:'start'});});
-    }\n
+    }
     if(!app.querySelector('.creator-timeline')){
       const timeline=document.createElement('section');
       timeline.className='creator-timeline'; timeline.id='creatorTimeline';
