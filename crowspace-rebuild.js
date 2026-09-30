@@ -443,3 +443,8 @@ window.CrowSpaceUnifiedPersonalization={score:unifiedPersonalizationScore,rank:r
 /* V62 — Cross-Surface Ranking Consistency */
 async function rankConsistently(items,surface="home",eventType="view"){const ctx=await crossSurfaceContext();return rankUnifiedPersonalization(items,{...ctx,surface,eventType,confidence:1,threshold:0})}
 window.CrowSpaceConsistency={rank:rankConsistently};
+
+/* V63 — Personalization Event Instrumentation */
+async function instrumentPersonalizationEvent(surface,eventType,targetId,targetType="content",weight=1,metadata={}){try{const id=targetId||null;return await recordFeedLearning(eventType,id,targetType,null,Number(weight)||1,{...metadata,surface:String(surface||"unknown"),instrumented:true})}catch(e){return null}}
+function instrumentSurface(surface){const s=String(surface||"unknown");return {view:(id,type="content")=>instrumentPersonalizationEvent(s,"caw_view",id,type,1),like:(id,type="content")=>instrumentPersonalizationEvent(s,"like",id,type,3),comment:(id,type="content")=>instrumentPersonalizationEvent(s,"comment",id,type,4),follow:(id,type="profile")=>instrumentPersonalizationEvent(s,"follow",id,type,5),visit:(id,type="profile")=>instrumentPersonalizationEvent(s,"profile_visit",id,type,2),search:q=>instrumentPersonalizationEvent(s,"search",null,"search",1,{query_text:String(q||"").slice(0,200)})}}
+window.CrowSpaceInstrumentation={record:instrumentPersonalizationEvent,surface:instrumentSurface};
