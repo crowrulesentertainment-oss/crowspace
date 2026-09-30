@@ -1,3 +1,12 @@
+/* V43 — Content Suppression & Recovery Engine */
+async function setContentPreference(targetId,targetType,preference){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db||!targetId)return null;const r=await db.rpc("crowspace_set_content_preference",{p_target:targetId,p_type:targetType||"content",p_preference:preference});if(r.error)throw r.error;await loadContentPreferences();return r.data}catch(e){console.debug("CrowSpace content preference skipped",e);return null}
+}
+async function loadContentPreferences(){
+ try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return{};const r=await db.rpc("crowspace_content_preference_signals");if(r.error)throw r.error;const m={};(r.data||[]).forEach(x=>m[(x.target_type||"content")+":"+x.target_id]=Number(x.signal)||0);window.CrowSpaceContentPreferences=m;return m}catch(e){return window.CrowSpaceContentPreferences||{}}
+}
+window.CrowSpaceContentPreferences={};
+window.CrowSpaceSuppression={set:setContentPreference,load:loadContentPreferences};
 /* V42 — Real-Time Recommendation Re-Ranking */
 async function refreshLiveRecommendationSignals(){
  try{const db=window.CrowSpaceAuth?.client||window.CrowSpaceDB;if(!db)return{};const r=await db.rpc("crowspace_live_recommendation_signals");if(r.error)throw r.error;const m={};(r.data||[]).forEach(x=>m[(x.target_type||"content")+":"+x.target_id]=Number(x.signal)||0);window.CrowSpaceLiveSignals=m;return m}catch(e){return window.CrowSpaceLiveSignals||{}}
