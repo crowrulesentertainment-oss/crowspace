@@ -93,7 +93,7 @@ h1{font:900 clamp(4.5rem,12vw,11.5rem)/.78 Orbitron;letter-spacing:-.095em;margi
 
 <section class="section" id="universe-feed">
 <div class="section-head"><div><div class="section-k">THE LIVING FEED</div><h2>WHAT'S HAPPENING</h2></div><p id="feedDescription">Loading the latest moments directly from the CrowSpace universe.</p></div>
-<div class="data-bar"><span><strong id="dataStatus">CHECKING</strong> · <span id="dataCounts">0 POSTS · 0 EVENTS · 0 CAWS</span></span><span id="syncTime">WAITING FOR SUPABASE</span><button id="retryBtn">CHECK CONNECTION</button></div>
+<div class="data-bar"><span><strong id="dataStatus">CHECKING</strong> · <span id="dataCounts">0 POSTS · 0 EVENTS · 0 CAWS</span></span><span id="syncTime">PULLING DATA FROM SUPABASE…</span><button id="retryBtn">CHECK CONNECTION</button></div>
 <div class="search"><input id="searchInput" placeholder="Search the current CrowSpace universe…"><button id="searchBtn">SEARCH</button></div>
 <div class="filters">
 <button class="filter active" data-filter="all">FOR YOU</button><button class="filter" data-filter="following">FOLLOWING</button><button class="filter" data-filter="post">CONVERSATIONS</button><button class="filter" data-filter="event">EVENTS</button><button class="filter" data-filter="caw">CAWS</button>
@@ -146,7 +146,7 @@ function rail(container,data,type){
 }
 async function load(){
  if(loading)return;loading=true;
- $('dbStatus').textContent='CHECKING';$('networkStatus').textContent='CHECKING';$('rtStatus').textContent='CHECKING';$('dataStatus').textContent='CHECKING';$('syncTime').textContent='QUERYING SUPABASE';
+ $('dbStatus').textContent='CHECKING';$('networkStatus').textContent='CHECKING';$('rtStatus').textContent='CHECKING';$('dataStatus').textContent='CHECKING';$('syncTime').textContent='PULLING DATA FROM SUPABASE…';
  try{
   db=await waitForClient();
   const session=await db.auth.getSession();user=session.data?.session?.user||null;
