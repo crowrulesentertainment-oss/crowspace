@@ -124,21 +124,27 @@ const DIAG={sdk:'CHECKING',network:'CHECKING',posts:'CHECKING',events:'CHECKING'
 function diagText(){return Object.entries(DIAG).map(([k,v])=>k.toUpperCase()+': '+v).join(' · ')}
 function setDiag(k,v){DIAG[k]=v;const el=$('syncTime');if(el)el.textContent='SUPABASE DIAGNOSTICS · '+diagText()}
 function restHeaders(){return {apikey:CONFIG.key,Authorization:'Bearer '+CONFIG.key,Accept:'application/json'}}
-async function restProbe(table,params='select=*%26limit=1'){
- const url=CONFIG.url+'/rest/v1/'+table+'?'+params;
+async function restProbe(table,params={select:'*',limit:'1'}){
+ const qs=new URLSearchParams(params).toString();
+ const url=CONFIG.url+'/rest/v1/'+table+'?'+qs;
  const started=performance.now();
  try{const r=await fetch(url,{headers:restHeaders(),cache:'no-store'});let body=null;try{body=await r.json()}catch(_){}
  if(!r.ok){const msg=body?.message||body?.hint||body?.details||r.statusText;throw Error('HTTP '+r.status+' — '+msg)}
- return {ok:true,ms:Math.round(performance.now()-started),rows:Array.isArray(body)?body.length:0}
- }catch(e){return {ok:false,error:e.message||String(e)}}
+ return {ok:true,ms:Math.round(performance.now()-started),rows:Array.isArray(body)?body.length:0,data:Array.isArray(body)?body:[]}
+ }catch(e){return {ok:false,error:e.message||String(e),data:[]}}
+}
+async function restSelect(table,params){
+ const r=await restProbe(table,params);
+ if(!r.ok)throw Error(table+' REST FAILED: '+r.error);
+ return r.data||[];
 }
 async function runDiagnostics(){
  setDiag('network','CHECKING');
- const net=await restProbe('crowspace_posts','select=id%26limit=1');
+ const net=await restProbe('crowspace_posts',{select:'id',limit:'1'});
  if(net.ok)setDiag('network','OK '+net.ms+'ms');else setDiag('network','FAILED · '+net.error);
  for(const table of ['posts','events','caws','profiles']){
   const actual='crowspace_'+table;setDiag(table,'CHECKING');
-  const r=await restProbe(actual,'select=*&limit=1');
+  const r=await restProbe(actual,{select:'*',limit:'1'});
   setDiag(table,r.ok?'OK'+(r.rows?' · DATA':' · EMPTY'):'FAILED · '+r.error);
  }
  const sdk=!!window.supabase?.createClient||!!window.CrowSpaceAuth?.client;
@@ -176,27 +182,57 @@ async function load(){
  try{
   const diagnostics=await runDiagnostics();
   db=await waitForClient();
-  if(!db){
-   $('dbStatus').textContent='REST DIAGNOSTICS';$('networkStatus').textContent=diagnostics.net.ok?'CONNECTED':'FAILED';
-   $('dataStatus').textContent='SDK FAILED · REST TESTED';
-   throw Error('Supabase JavaScript SDK failed to load. REST diagnostics completed above.');
+  let dataSource='SDK';
+  if(db){
+   try{const session=await db.auth.getSession();user=session.data?.session?.user||null}catch(e){console.warn('[CrowSpace Auth]',e);user=null}
+  }else{
+   dataSource='REST';
+   user=null;
+   $('dbStatus').textContent='REST RECOVERY';
+   $('networkStatus').textContent=diagnostics.net.ok?'CONNECTED':'FAILED';
+   $('dataStatus').textContent='RECOVERING VIA REST';
   }
-  const session=await db.auth.getSession();user=session.data?.session?.user||null;
+  $('memberStatus').textContent=user?'MEMBER':'GUEST';
   $('memberStatus').textContent=user?'MEMBER':'GUEST';$('networkStatus').textContent='CONNECTED';
-  const [p,e,c]=await Promise.allSettled([
-   db.from('crowspace_posts').select('*').order('created_at',{ascending:false}).limit(30),
-   db.from('crowspace_events').select('*').order('starts_at',{ascending:false}).limit(20),
-   db.from('crowspace_caws').select('*').order('created_at',{ascending:false}).limit(20)
-  ]);
-  const result=(r)=>r.status==='fulfilled'?r.value:{data:[],error:r.reason};
-  const pr=result(p),er=result(e),cr=result(c);
-  if(pr.error){setDiag('posts','FAILED · '+(pr.error.message||pr.error));}else setDiag('posts',posts?.length?'OK · DATA':'OK · EMPTY');
-  if(er.error){setDiag('events','FAILED · '+(er.error.message||er.error));}else setDiag('events',events?.length?'OK · DATA':'OK · EMPTY');
-  if(cr.error){setDiag('caws','FAILED · '+(cr.error.message||cr.error));}else setDiag('caws',caws?.length?'OK · DATA':'OK · EMPTY');
-  const posts=pr.data||[],events=er.data||[],caws=cr.data||[];
+  let posts=[],events=[],caws=[];
+  if(dataSource==='SDK'){
+   const [p,e,cq]=await Promise.allSettled([
+    db.from('crowspace_posts').select('*').order('created_at',{ascending:false}).limit(30),
+    db.from('crowspace_events').select('*').order('starts_at',{ascending:false}).limit(20),
+    db.from('crowspace_caws').select('*').order('created_at',{ascending:false}).limit(20)
+   ]);
+   const result=r=>r.status==='fulfilled'?r.value:{data:[],error:r.reason};
+   const pr=result(p),er=result(e),cr=result(cq);
+   posts=pr.data||[];events=er.data||[];caws=cr.data||[];
+   if(pr.error){setDiag('posts','FAILED · '+(pr.error.message||pr.error));}else setDiag('posts',posts.length?'OK · DATA':'OK · EMPTY');
+   if(er.error){setDiag('events','FAILED · '+(er.error.message||er.error));}else setDiag('events',events.length?'OK · DATA':'OK · EMPTY');
+   if(cr.error){setDiag('caws','FAILED · '+(cr.error.message||cr.error));}else setDiag('caws',caws.length?'OK · DATA':'OK · EMPTY');
+  }else{
+   const [p,e,cq]=await Promise.allSettled([
+    restSelect('crowspace_posts',{select:'*',order:'created_at.desc',limit:'30'}),
+    restSelect('crowspace_events',{select:'*',order:'starts_at.desc',limit:'20'}),
+    restSelect('crowspace_caws',{select:'*',order:'created_at.desc',limit:'20'})
+   ]);
+   const restResult=r=>r.status==='fulfilled'?r.value:[];
+   posts=restResult(p);events=restResult(e);caws=restResult(cq);
+   setDiag('posts',p.status==='fulfilled'?(posts.length?'REST OK · DATA':'REST OK · EMPTY'):'REST FAILED · '+(p.reason?.message||p.reason));
+   setDiag('events',e.status==='fulfilled'?(events.length?'REST OK · DATA':'REST OK · EMPTY'):'REST FAILED · '+(e.reason?.message||e.reason));
+   setDiag('caws',cq.status==='fulfilled'?(caws.length?'REST OK · DATA':'REST OK · EMPTY'):'REST FAILED · '+(cq.reason?.message||cq.reason));
+  }
   const ids=[...posts.map(x=>x.user_id),...events.map(x=>x.created_by||x.user_id),...caws.map(x=>x.user_id||x.creator_id)].filter(Boolean);
   let pm=new Map();
-  if(ids.length){const pr=await db.from('crowspace_profiles').select('user_id,username,display_name,avatar_url,is_verified,verification_label').in('user_id',[...new Set(ids.map(String))]);if(!pr.error){(pr.data||[]).forEach(x=>pm.set(String(x.user_id),x));setDiag('profiles',pr.data?.length?'OK · DATA':'OK · EMPTY')}else setDiag('profiles','FAILED · '+pr.error.message)}else setDiag('profiles','SKIPPED · NO IDS');
+  if(ids.length){
+   const unique=[...new Set(ids.map(String))];
+   if(dataSource==='SDK'){
+    const pr=await db.from('crowspace_profiles').select('user_id,username,display_name,avatar_url,is_verified,verification_label').in('user_id',unique);
+    if(!pr.error){(pr.data||[]).forEach(x=>pm.set(String(x.user_id),x));setDiag('profiles',pr.data?.length?'OK · DATA':'OK · EMPTY')}else setDiag('profiles','FAILED · '+pr.error.message);
+   }else{
+    try{
+     const pr=await restSelect('crowspace_profiles',{select:'user_id,username,display_name,avatar_url,is_verified,verification_label',user_id:'in.('+unique.join(',')+')'});
+     (pr||[]).forEach(x=>pm.set(String(x.user_id),x));setDiag('profiles',pr.length?'REST OK · DATA':'REST OK · EMPTY');
+    }catch(e){setDiag('profiles','REST FAILED · '+e.message)}
+   }
+  }else setDiag('profiles','SKIPPED · NO IDS');
   rows=[
    ...posts.map(x=>{const p=pm.get(String(x.user_id))||{};return{id:String(x.id),kind:'post',tag:'COMMUNITY CONVERSATION',title:x.title||'New conversation',body:x.body||'',author:p.display_name||p.username||'Creator',avatar:p.avatar_url,date:x.created_at,authorId:x.user_id,followed:false,verified:!!p.is_verified,metric=(x.like_count||0)+' LIKES'};}),
    ...events.map(x=>{const id=x.created_by||x.user_id,p=pm.get(String(id))||{};return{id:String(x.id),kind:'event',tag:x.is_live?'LIVE BROADCAST':'EVENT HORIZON',title:x.title||'CrowSpace Event',body:x.description||'A new event in the universe.',author:p.display_name||p.username||'Host',avatar:p.avatar_url,date:x.starts_at||x.created_at,authorId:id,verified:!!p.is_verified,live:!!x.is_live,link:x.link_url||x.youtube_url,media:x.image_url||x.cover_url||x.thumbnail_url,metric:x.is_live?'LIVE':'UPCOMING'};}),
@@ -204,7 +240,7 @@ async function load(){
   ].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(user){try{const f=await db.from('crowspace_follows').select('followed_user_id').eq('follower_id',user.id);const fs=new Set((f.data||[]).map(x=>String(x.followed_user_id)));rows.forEach(x=>x.followed=fs.has(String(x.authorId)))}catch(e){}}
   $('dataCounts').textContent=posts.length+' POSTS · '+events.length+' EVENTS · '+caws.length+' CAWS';
-  $('dataStatus').textContent=(pr.error||er.error||cr.error)?'PARTIAL':'CONNECTED';$('dbStatus').textContent='CONNECTED · SDK';$('syncTime').textContent='SUPABASE · '+new Date().toLocaleTimeString([], {hour12:false});
+  $('dataStatus').textContent='CONNECTED';$('dbStatus').textContent=dataSource==='REST'?'REST RECOVERY':'CONNECTED · SDK';$('syncTime').textContent=dataSource==='REST'?'SUPABASE REST RECOVERY · '+new Date().toLocaleTimeString([], {hour12:false}):'SUPABASE · '+new Date().toLocaleTimeString([], {hour12:false});
   $('coreCount').textContent='LIVE';
   rail('eventRail',rows.filter(x=>x.kind==='event'),'event');rail('cawRail',rows.filter(x=>x.kind==='caw'),'caw');$('cawStatus').textContent=cr.error?'CAWS SYNC FAILED: '+(cr.error.message||cr.error):(caws.length?'CAWS LOADED FROM SUPABASE':'NO CAWS FOUND IN SUPABASE');render();
   if(!channel){channel=db.channel('crowspace-home-universe').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_events'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_caws'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_profiles'},()=>load()).subscribe(s=>{DIAG.realtime=s==='SUBSCRIBED'?'CONNECTED':'FAILED · '+s;$('rtStatus').textContent=s==='SUBSCRIBED'?'CONNECTED':'CHECKING';setDiag('realtime',DIAG.realtime)})}
