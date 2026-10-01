@@ -2,740 +2,85 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050711">
-<meta name="description" content="CrowSpace — the connected social home of CrowRules.">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#02030a">
+<meta name="description" content="CrowSpace — the social universe of CrowRules.">
 <title>CrowSpace — Home</title>
-<link rel="stylesheet" href="crowspace-rebuild.css">
-<style>
-:root{--bg:#050711;--panel:rgba(9,14,27,.9);--panel2:#0c1323;--line:rgba(100,230,255,.15);--cyan:#66e8ff;--violet:#9c7bff;--pink:#ff61c7;--green:#6dffc8;--text:#effbff;--muted:#8da0b6;--danger:#ff7d9c;--shadow:0 18px 55px #0006}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 50% -10%,#10243c,transparent 35%),radial-gradient(circle at 90% 40%,#1b1230,transparent 25%),var(--bg)!important;color:var(--text);font-family:Montserrat,system-ui,sans-serif}
-body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(102,232,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(156,123,255,.018) 1px,transparent 1px);background-size:42px 42px;pointer-events:none}
-a{color:inherit}.topbar{position:sticky;top:0;z-index:100;background:rgba(5,7,17,.9);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}
-.topbar-inner{max-width:1480px;margin:auto;padding:9px 18px;display:flex;align-items:center;gap:10px}.brand{font:900 13px Orbitron;letter-spacing:.05em;text-decoration:none;white-space:nowrap}.brand span{color:var(--cyan)}.global-nav{display:flex;gap:4px;overflow:auto;flex:1}.global-nav a{padding:8px 9px;border-radius:8px;text-decoration:none;font-size:8px;color:#b9cad8;white-space:nowrap}.global-nav a:hover,.global-nav a.active{background:#66e8ff0b;color:#fff}.nav-drop{position:relative;flex:none}.nav-drop-btn{padding:8px 9px;border:0;border-radius:8px;background:transparent;color:#b9cad8;font:inherit;font-size:8px;white-space:nowrap;cursor:pointer}.nav-drop-btn:hover,.nav-drop.open .nav-drop-btn{background:#66e8ff0b;color:#fff}.nav-drop-menu{display:none;position:absolute;top:calc(100% + 7px);right:0;min-width:185px;padding:7px;background:rgba(5,7,17,.98);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 45px #0008;backdrop-filter:blur(18px)}.nav-drop.open .nav-drop-menu{display:grid;gap:3px}.nav-drop-menu a{display:block!important;padding:9px 10px!important;border-radius:8px;color:#b9cad8!important;font-size:8px!important}.nav-drop-menu a:hover{background:#66e8ff0b!important;color:#fff!important}.top-actions{display:flex;gap:5px}.top-actions a{padding:8px 9px;border:1px solid var(--line);border-radius:8px;text-decoration:none;font-size:8px;font-weight:800}.top-actions .primary{background:linear-gradient(135deg,#087e98,#654bb3);border:0}
-.shell{max-width:1480px;margin:auto;padding:18px}.hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);backdrop-filter:blur(15px)}
-.hero{padding:0;position:relative;overflow:hidden;min-height:520px;display:grid;grid-template-columns:1fr;align-items:center;justify-items:center;background:linear-gradient(135deg,rgba(10,19,38,.98),rgba(7,9,22,.96));}.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 45%,rgba(102,232,255,.18),transparent 22%),radial-gradient(circle at 90% 70%,rgba(156,123,255,.2),transparent 30%);pointer-events:none}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(102,232,255,.05),transparent);transform:translateX(-100%);animation:sweep 8s linear infinite}@keyframes sweep{to{transform:translateX(100%)}}}
-.k{font:800 9px Orbitron;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase}.hero-logo img{display:block;width:min(420px,62vw);height:auto;max-height:420px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(102,232,255,.28));transition:transform .3s ease,filter .3s ease}.hero-logo img:hover{transform:scale(1.025);filter:drop-shadow(0 0 42px rgba(156,123,255,.35))}.hero-copy{padding:34px 42px 42px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;z-index:2;width:min(980px,100%);box-sizing:border-box}.hero-copy .k{width:100%}.hero-copy h1,.hero-copy p{margin-left:auto;margin-right:auto}.hero-copy p{max-width:720px}.hero-copy .actions{justify-content:center}.hero h1{font:900 clamp(2.7rem,5vw,5.8rem)/.92 Orbitron;letter-spacing:-.07em;margin:12px 0 16px;position:relative;z-index:1}.hero h1 span{color:var(--cyan)}.hero p{color:var(--muted);max-width:720px;line-height:1.7;font-size:12px;position:relative;z-index:1}.actions{display:flex;flex-wrap:wrap;gap:7px;position:relative;z-index:2}.actions a{padding:9px 12px;border:1px solid var(--line);border-radius:9px;color:var(--text);text-decoration:none;font-size:9px;font-weight:800;background:#ffffff06}.actions .primary{background:linear-gradient(135deg,#087e98,#654bb3);border:0}
-.layout{display:grid;grid-template-columns:215px minmax(0,1fr) 270px;gap:12px;margin-top:12px}.col{display:grid;gap:12px;align-content:start}.card{padding:14px}.ttl{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.ttl b{font:800 10px Orbitron;letter-spacing:.08em}.ttl small{font-size:8px;color:var(--muted)}
-.navlist{display:grid;gap:4px}.navlist a{padding:9px;border-radius:8px;color:#b9cad8;text-decoration:none;font-size:9px}.navlist a:hover,.navlist a.active{background:#66e8ff08;color:#fff}
-.status{display:grid;gap:7px}.status div{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);border-bottom:1px solid #fff1;padding-bottom:6px}.status strong{color:var(--cyan)}.authbar{display:flex;gap:7px;flex-wrap:wrap}.authbar a{padding:8px 10px;border-radius:8px;text-decoration:none;font-size:8px;font-weight:800;border:1px solid var(--line);color:var(--text)}.authbar .join{background:linear-gradient(135deg,#087e98,#654bb3);border:0}
-.composer{margin-bottom:12px}.composer-row{display:flex;gap:10px}.composer-avatar,.post-avatar{flex:none;display:grid;place-items:center;border-radius:50%;font:800 12px Orbitron}.composer-avatar{width:42px;height:42px;background:linear-gradient(135deg,#087e98,#654bb3);color:#fff}.composer-main{flex:1}.composer input,.composer textarea{width:100%;border:1px solid var(--line);background:#050913;color:var(--text);border-radius:10px;padding:10px;font:9px Montserrat,system-ui;margin-bottom:7px;outline:none}.composer textarea{min-height:92px;resize:vertical;line-height:1.5}.composer input:focus,.composer textarea:focus{border-color:#66e8ff66;box-shadow:0 0 0 3px #66e8ff0b}.composer-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:7px}.post-btn,.toolbar button{border:1px solid var(--line);border-radius:8px;background:linear-gradient(135deg,#087e98,#654bb3);color:#fff;padding:9px 12px;font:800 8px Montserrat;cursor:pointer}.post-btn:disabled{opacity:.45;cursor:not-allowed}.login-note{margin-top:8px;color:var(--muted);font-size:8px}.post-preview{display:none;margin-top:10px;padding:11px;border:1px solid #66e8ff18;border-radius:10px;background:linear-gradient(145deg,#07101d,#050912)}.post-preview.active{display:block}.post-preview>span{display:block;font:800 7px Orbitron;letter-spacing:.13em;color:var(--cyan);margin-bottom:6px}.post-preview b{display:block;font:800 11px Orbitron;margin-bottom:5px}.post-preview p{margin:0;color:#cdd6e8;font-size:9px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.post-draft-status{color:var(--cyan)}
-.feedhead{display:flex;justify-content:space-between;gap:10px}.feedhead h2{font:800 19px Orbitron;margin:5px 0}.feedhead p{font-size:9px;color:var(--muted);margin:0}.live{font-size:8px;color:var(--green);border:1px solid #6dffc833;border-radius:99px;padding:6px 9px;white-space:nowrap;height:max-content}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}.metric{padding:11px;border:1px solid var(--line);border-radius:10px;background:#0002}.metric strong{display:block;font:800 19px Orbitron;color:var(--cyan)}.metric span{font-size:7px;color:var(--muted);text-transform:uppercase}
-.feed-search{margin-top:9px;width:100%;border:1px solid var(--line);background:#050913;color:var(--text);border-radius:8px;padding:8px;font:8px Montserrat;outline:none}.feed-search:focus{border-color:#66e8ff66}.toolbar{display:flex;align-items:center;gap:7px;margin-top:12px;padding-top:10px;border-top:1px solid #ffffff10}.toolbar b{font-size:9px;margin-right:auto}.toolbar button{background:#ffffff06;color:var(--text);padding:6px 9px}.toolbar button.active{border-color:#66e8ff55;background:#66e8ff0b}.feeditems{display:grid;gap:8px;margin-top:10px}.feed-post{padding:13px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff03}.post-head{display:flex;align-items:center;gap:9px}.post-avatar{width:38px;height:38px;background:linear-gradient(135deg,#12253b,#37205b);border:1px solid var(--line);color:var(--cyan)}.post-meta b{font-size:10px}.post-meta small{display:block;color:var(--muted);font-size:7px;margin-top:3px}.post-title{font:800 12px Orbitron;margin:11px 0 6px}.post-body{white-space:pre-wrap;color:#cdd6e8;font-size:10px;line-height:1.55;overflow-wrap:anywhere}.post-media{max-width:100%;max-height:360px;border-radius:10px;margin-top:10px;display:block}.post-stats{display:flex;gap:14px;color:var(--muted);font-size:7px;margin-top:10px;padding-top:8px;border-top:1px solid #ffffff08}.feed-empty{padding:24px;text-align:center;border:1px dashed #ffffff15;border-radius:11px;color:var(--muted);font-size:9px}.error-box{padding:11px;border:1px solid #ff7d9c33;background:#ff7d9c08;border-radius:10px;color:#ffc3d1;font-size:8px;line-height:1.5}
-.side-link{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid #ffffff08;border-radius:9px;color:var(--text);text-decoration:none;margin-top:6px;background:#ffffff03}.side-link>span{flex:1}.side-link b{display:block;font-size:8px}.side-link small{display:block;color:var(--muted);font-size:7px;margin-top:2px}.side-link>span+*{color:var(--muted)}.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.mini-grid a{padding:9px;border:1px solid #ffffff0c;border-radius:8px;color:#b9cad8;text-decoration:none;font-size:8px;background:#ffffff03}.mini-grid a:hover{color:#fff;border-color:var(--line)}
-.sectiongrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.feature{min-height:125px;padding:15px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#101a2b,#090e1a);position:relative;overflow:hidden}.feature:before{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-35px;top:-35px;background:radial-gradient(circle,#66e8ff2b,transparent 68%)}.feature h3{font:800 12px Orbitron;margin:0 0 6px;position:relative}.feature p{font-size:8px;color:var(--muted);line-height:1.5;margin:0 0 10px}.feature a{font-size:8px;color:var(--cyan);text-decoration:none}.divisiongrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.division{padding:10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--text);font-size:8px;background:#ffffff03}.division span{display:block;color:var(--muted);font-size:7px;margin-top:3px}
-.pulse{animation:pulse 1.8s ease-in-out infinite}@keyframes pulse{50%{opacity:.55}}.tiny{font-size:7px;color:var(--muted);line-height:1.5}.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px #6dffc8;margin-right:5px}
-@media(max-width:1100px){.layout{grid-template-columns:190px 1fr}.right{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}}@keyframes logoSpin{to{transform:rotate(360deg)}}
-@media(max-width:760px){.hero{grid-template-columns:1fr;min-height:auto}.hero-copy{padding:28px!important}.hero-logo{padding:10px 20px 28px!important}.hero-logo{padding:12px 20px 0!important}.hero-logo img{width:min(360px,78vw)!important;max-height:360px}.topbar-inner{align-items:flex-start}.brand{padding-top:7px}.global-nav{order:3;flex-basis:100%}.topbar-inner{flex-wrap:wrap}.layout{grid-template-columns:1fr}.right{grid-column:auto;grid-template-columns:1fr}.sectiongrid{grid-template-columns:1fr}.divisiongrid{grid-template-columns:repeat(2,1fr)}.feedhead{display:block}.live{display:inline-block;margin-top:8px}.metrics{grid-template-columns:repeat(2,1fr)}.composer-row{align-items:flex-start}.composer-avatar{width:36px;height:36px}.composer-foot{align-items:flex-end;flex-direction:column}.post-btn{width:100%}}@media(max-width:430px){.metrics{grid-template-columns:1fr 1fr}.divisiongrid{grid-template-columns:1fr}.shell{padding:10px}.hero{padding:20px}}
-
-.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.home-card{padding:13px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff03;min-height:150px}.home-list{display:grid;gap:6px}.person,.story,.activity,.circle{display:flex;gap:9px;align-items:center;padding:8px;border:1px solid #ffffff08;border-radius:9px;background:#0002}.person-avatar,.story-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#087e98,#654bb3);font:800 9px Orbitron}.person-main,.story-main{min-width:0;flex:1}.person-main b,.story-main b{font-size:8px;display:block}.person-main small,.story-main small{font-size:7px;color:var(--muted);display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.follow-btn{border:1px solid var(--line);background:#ffffff06;color:var(--text);border-radius:7px;padding:5px 7px;font:800 7px Montserrat;cursor:pointer}.story-strip{display:flex;gap:9px;overflow:auto;padding:2px 0 4px}.story{min-width:108px;min-height:72px;display:block;position:relative;overflow:hidden}.story-avatar{margin-bottom:6px}.story b{font-size:7px}.story small{display:block;color:var(--muted);font-size:6px;margin-top:2px}.rank-num{font:800 10px Orbitron;color:var(--cyan);width:20px}.empty-mini{padding:14px;text-align:center;color:var(--muted);font-size:8px;border:1px dashed #ffffff12;border-radius:9px}.section-label{font:800 7px Orbitron;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase;margin:3px 0 8px}.today{border-left:2px solid var(--cyan)}.today b{font-size:9px}.today p{font-size:8px;line-height:1.5;color:var(--muted);margin:5px 0 0}.notice{padding:8px;border-radius:8px;background:#66e8ff08;border:1px solid #66e8ff15;font-size:7px;color:#b9cad8}.badge{display:inline-block;font-size:6px;padding:3px 5px;border-radius:99px;border:1px solid var(--line);color:var(--cyan);margin-left:5px}
-@media(max-width:760px){.home-grid{grid-template-columns:1fr}}
-</style>
-<link rel="stylesheet" href="crowspace-universal.css"><script src="crowspace-universal.js" defer></script>
-<script src="js/crowspace-notification-badges.js" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="crowspace-universal.css">
+<script src="crowspace-auth.js" defer></script>
+<script src="crowspace-universal.js" defer></script>
+<script src="js/crowspace-notification-badges.js" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><style id="crow-home-v107">
-/* V107 — FEED POSTING STATE / COMPOSER UX */
-.post-draft-status{font-weight:800;letter-spacing:.05em}
-.post-draft-status.syncing{color:var(--cyan);animation:pulse 1.1s ease-in-out infinite}
-.post-draft-status.live{color:var(--green)}
-.post-draft-status.error{color:#ff9bb3}
-.post-draft-status.restored{color:var(--violet)}
-.composer input:disabled,.composer textarea:disabled{opacity:.55;cursor:not-allowed}
-#post-preview{transition:opacity .18s,transform .18s}
-#post-preview.active{animation:composerPreviewIn .2s ease-out}
-@keyframes composerPreviewIn{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.post-draft-status.syncing{animation:none}#post-preview.active{animation:none}}
-</style><style id="crow-home-v108">.my-posts-list{display:grid;gap:7px}.my-post-row{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid #ffffff0c;border-radius:9px;background:#0002}.my-post-copy{min-width:0;flex:1}.my-post-copy b{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.my-post-copy small{display:block;color:var(--muted);font-size:7px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.my-post-actions{display:flex;gap:5px}.my-post-actions button{border:1px solid var(--line);border-radius:7px;background:#ffffff06;color:var(--text);padding:6px 8px;font:800 7px Montserrat;cursor:pointer}.my-post-actions .delete{border-color:#ff7d9c33;color:#ffb3c3}.editing-banner{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:0 0 8px;padding:7px 9px;border:1px solid #9c7bff33;border-radius:8px;background:#9c7bff08;color:#dcd2ff;font-size:7px}.editing-banner button{border:0;background:none;color:var(--cyan);font:800 7px Montserrat;cursor:pointer}@media(max-width:760px){.my-post-row{align-items:flex-start}.my-post-actions{flex-direction:column}}</style><style id="crow-home-v109">.post-media-tools{display:flex;align-items:center;gap:7px;margin:2px 0 8px}.post-media-tools button{border:1px solid var(--line);border-radius:8px;background:#ffffff06;color:var(--text);padding:7px 9px;font:800 7px Montserrat;cursor:pointer}.post-media-tools button:hover{border-color:#66e8ff55;background:#66e8ff0b}.post-media-tools span{font-size:7px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.post-media-preview{margin:2px 0 9px;padding:7px;border:1px solid var(--line);border-radius:10px;background:#0003}.post-media-preview img,.post-media-preview video{display:block;max-width:100%;max-height:280px;border-radius:7px}.post-media-preview .media-remove{margin-top:6px;border:0;background:none;color:#ffb3c3;font:800 7px Montserrat;cursor:pointer}@media(max-width:760px){.post-media-tools button{flex:0 0 auto}.post-media-preview img,.post-media-preview video{max-height:220px}}</style><style id="crow-home-v110">.media-dragover{outline:2px dashed #55efff55;outline-offset:4px}.media-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.media-tile{position:relative;min-width:0}.media-tile img,.media-tile video{width:100%;height:130px;object-fit:cover;border-radius:7px;background:#000;display:block}.media-tile .media-remove{width:100%;margin-top:4px;border:0;background:none;color:#ffb3c3;font:800 7px Montserrat;cursor:pointer}@media(max-width:760px){.media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-tile img,.media-tile video{height:105px}}</style><style id="crowspace-v113-media">.media-progress{display:inline-block;width:80px;height:4px;border-radius:99px;background:#ffffff12;overflow:hidden;vertical-align:middle}.media-progress i{display:block;width:0;height:100%;background:#55efff;transition:width .2s}.media-tile{cursor:grab}.media-tile.dragging{opacity:.45;transform:scale(.98)}.media-order{position:absolute;top:5px;left:5px;padding:3px 5px;border-radius:5px;background:#050711dd;color:#fff;font:800 7px Montserrat;pointer-events:none}</style><style id="crowspace-v114-media">.media-meta{display:flex;justify-content:space-between;gap:5px;margin-top:5px;color:var(--muted);font:800 6px Montserrat}.media-meta b{color:#55efff}.media-state{display:block;margin-top:3px;font:800 6px Montserrat;color:var(--muted)}.media-state-done .media-state{color:#8fffb0}.media-state-uploading .media-state{color:#55efff}.media-state-error .media-state{color:#ff9db4}.media-state-cancelled .media-state{color:#ffcf8b}.media-state-uploading{outline:1px solid #55efff44}.media-tile{overflow:hidden}.post-media-tools #post-media-cancel{border-color:#ff7f9a55;color:#ffb3c3}.media-remove{position:relative;z-index:2}</style><style id="crowspace-v115-media">.media-fields{display:grid;gap:5px;margin-top:6px}.media-fields input,.media-fields textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.3);color:inherit;border-radius:7px;padding:7px;font:600 8px Montserrat;outline:none}.media-fields textarea{min-height:48px;resize:vertical}.media-fields input:focus,.media-fields textarea:focus{border-color:#55efff66}.media-fields textarea::placeholder,.media-fields input::placeholder{color:rgba(255,255,255,.42)}</style><style id="crowspace-v118-media">.media-manager-modal{position:fixed;inset:0;z-index:100010;display:grid;place-items:center;padding:18px}.media-manager-modal[hidden]{display:none}.media-manager-backdrop{position:absolute;inset:0;background:#000b;backdrop-filter:blur(10px)}.media-manager-dialog{position:relative;width:min(980px,100%);max-height:88vh;overflow:hidden;display:flex;flex-direction:column;background:#070b16;border:1px solid #55efff33;border-radius:16px;box-shadow:0 30px 100px #000e}.media-manager-head{display:flex;justify-content:space-between;gap:15px;padding:16px 18px;border-bottom:1px solid #ffffff10}.media-manager-head small{color:#55efff;font:800 8px Montserrat;letter-spacing:.14em}.media-manager-head h2{margin:5px 0 3px;color:#fff;font-size:20px}.media-manager-head p{margin:0;color:var(--muted);font-size:8px}.media-manager-close{border:1px solid #ffffff16;background:#ffffff05;color:#fff;border-radius:9px;width:34px;height:34px;cursor:pointer}.media-manager-list{padding:12px 18px;overflow:auto}.media-manager-item{display:grid;grid-template-columns:145px minmax(0,1fr) 30px;gap:12px;padding:10px;margin-bottom:8px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff03}.media-manager-thumb img,.media-manager-thumb video{width:145px;height:105px;object-fit:cover;border-radius:8px;background:#000}.media-manager-fields{display:grid;gap:6px}.media-manager-fields input,.media-manager-fields textarea{width:100%;box-sizing:border-box;background:#0006;border:1px solid #ffffff12;color:#fff;border-radius:7px;padding:7px 8px;font:700 8px Montserrat}.media-manager-fields textarea{min-height:55px;resize:vertical}.media-manager-order{display:flex;flex-direction:column;gap:5px}.media-manager-order button{border:1px solid #ffffff12;background:#ffffff06;color:#55efff;border-radius:6px;cursor:pointer}.media-manager-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid #ffffff10}.media-manager-foot span{font:800 7px Montserrat;color:#8fa2b8}.media-manager-foot button{border:1px solid #55efff33;background:#55efff0b;color:#fff;border-radius:8px;padding:8px 10px;font:800 7px Montserrat;cursor:pointer}.media-manager-foot #media-manager-save{background:linear-gradient(135deg,#087e98,#654bb3)}@media(max-width:700px){.media-manager-item{grid-template-columns:85px minmax(0,1fr) 26px}.media-manager-thumb img,.media-manager-thumb video{width:85px;height:75px}.media-manager-foot{flex-direction:column;align-items:stretch}.media-manager-foot div{display:flex;gap:6px}.media-manager-foot button{flex:1}}</style><script src="js/crowspace-youtube-events.js" defer></script></head>
+<style>
+:root{--bg:#02030a;--cyan:#63edff;--violet:#9b72ff;--pink:#ff55c8;--green:#57f4b1;--text:#f4f8ff;--muted:#8290a6;--line:#ffffff14;--panel:rgba(7,10,20,.82)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}body{overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;z-index:-5;background:radial-gradient(circle at 20% 15%,#16355b55,transparent 28%),radial-gradient(circle at 80% 35%,#5b1b6b44,transparent 27%),radial-gradient(circle at 50% 90%,#004a6650,transparent 32%),#02030a}
+body:after{content:"";position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.035;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff 4px),linear-gradient(90deg,transparent 49.8%,#63edff 50%,transparent 50.2%);mix-blend-mode:screen}
+a{color:inherit}.home{min-height:calc(100vh - 58px);position:relative}.grid{position:fixed;inset:0;z-index:-3;perspective:600px;overflow:hidden;pointer-events:none}.grid:after{content:"";position:absolute;left:-20%;right:-20%;bottom:-30%;height:70%;background:linear-gradient(#63edff10 1px,transparent 1px),linear-gradient(90deg,#9b72ff0d 1px,transparent 1px);background-size:52px 52px;transform:rotateX(62deg);transform-origin:bottom;animation:gridMove 10s linear infinite}@keyframes gridMove{to{background-position:0 52px,52px 0}}
+.orb{position:absolute;width:42vw;height:42vw;border-radius:50%;filter:blur(1px);opacity:.18;border:1px solid #63edff33;box-shadow:0 0 120px #63edff16,inset 0 0 100px #9b72ff12;animation:float 14s ease-in-out infinite}.orb.one{left:-18vw;top:10vh}.orb.two{right:-17vw;top:35vh;width:36vw;height:36vw;animation-delay:-5s}@keyframes float{50%{transform:translate(2vw,-2vh) scale(1.06)}}
+.arrival{min-height:calc(100vh - 58px);display:grid;grid-template-rows:1fr auto;align-items:center;padding:clamp(34px,6vh,78px) clamp(18px,5vw,80px) 28px;position:relative;overflow:hidden}.arrival-inner{width:min(1500px,100%);margin:auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:clamp(28px,6vw,100px);align-items:center}
+.eyebrow{display:flex;align-items:center;gap:10px;color:var(--cyan);font:800 9px Orbitron;letter-spacing:.24em}.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 18px var(--green);animation:pulse 1.4s infinite}@keyframes pulse{50%{opacity:.3;transform:scale(.65)}}
+h1{font:900 clamp(4.2rem,11vw,11rem)/.82 Orbitron;letter-spacing:-.09em;margin:18px 0 22px;max-width:1000px}h1 span{display:block;color:transparent;background:linear-gradient(100deg,#fff 15%,var(--cyan) 48%,var(--violet) 78%,var(--pink));background-clip:text;-webkit-background-clip:text;text-shadow:0 0 55px #63edff22}.lead{font-size:clamp(13px,1.3vw,18px);line-height:1.75;color:#aab6c8;max-width:720px;margin:0}
+.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}.hero-actions a,.hero-actions button{padding:12px 16px;border:1px solid #63edff35;border-radius:10px;background:#ffffff06;color:#fff;text-decoration:none;font:800 9px Montserrat;letter-spacing:.08em;cursor:pointer}.hero-actions .primary{background:linear-gradient(110deg,#1bb7d4,#7755d9);border:0;box-shadow:0 0 30px #63edff18}
+.portal{position:relative;min-height:420px;border:1px solid #63edff26;border-radius:26px;background:linear-gradient(145deg,#0b1120d9,#04060ddf);box-shadow:0 30px 100px #0009,inset 0 0 60px #63edff06;overflow:hidden;padding:20px;transform:translateZ(0)}.portal:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,#63edff08 50%,transparent 65%);animation:sweep 7s linear infinite}@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.portal-ring{position:absolute;inset:13%;border:1px solid #63edff20;border-radius:50%;animation:spin 22s linear infinite}.portal-ring:before,.portal-ring:after{content:"";position:absolute;border:1px solid #9b72ff22;border-radius:50%;inset:12%}.portal-ring:after{inset:25%;border-color:#ff55c822}@keyframes spin{to{transform:rotate(360deg)}}
+.signal{position:absolute;inset:22px;display:flex;flex-direction:column;justify-content:space-between}.signal-top{display:flex;justify-content:space-between;color:#6f8199;font:700 7px Orbitron;letter-spacing:.16em}.core{margin:auto;width:160px;height:160px;border-radius:50%;display:grid;place-items:center;text-align:center;border:1px solid #63edff55;background:radial-gradient(circle,#63edff18,#9b72ff0b 45%,transparent 70%);box-shadow:0 0 80px #63edff18}.core b{font:900 25px Orbitron;letter-spacing:-.06em}.core small{display:block;color:var(--cyan);font:700 7px Inter;margin-top:7px;letter-spacing:.2em}.readout{display:grid;gap:7px}.readout div{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid #ffffff0b;color:#73829a;font:700 7px Inter}.readout b{color:#cdd7e5}
+.live-strip{width:min(1500px,100%);margin:0 auto;border-top:1px solid #ffffff12;padding-top:15px;display:flex;justify-content:space-between;gap:12px;align-items:center;color:#718096;font:700 7px Orbitron;letter-spacing:.12em}.live-strip span{color:var(--cyan)}.ticker{overflow:hidden;white-space:nowrap;flex:1}.ticker b{display:inline-block;animation:ticker 18s linear infinite}@keyframes ticker{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.feed-zone{width:min(1500px,94vw);margin:0 auto;padding:40px 0 80px}.section-head{display:flex;justify-content:space-between;gap:15px;align-items:end;margin-bottom:14px}.section-head .k{font:800 8px Orbitron;letter-spacing:.18em;color:var(--cyan)}.section-head h2{font:900 clamp(25px,4vw,46px) Orbitron;letter-spacing:-.06em;margin:7px 0}.section-head p{margin:0;color:var(--muted);font-size:10px;line-height:1.6}.section-head a{color:var(--cyan);text-decoration:none;font:800 8px Orbitron;white-space:nowrap}
+.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:12px}.tabs button{white-space:nowrap;border:1px solid #ffffff10;border-radius:999px;background:#ffffff04;color:#8795a9;padding:9px 13px;font:800 8px Montserrat;cursor:pointer}.tabs button.active{border-color:#63edff45;background:#63edff0c;color:var(--cyan)}
+.feed{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.card{grid-column:span 4;min-height:320px;position:relative;overflow:hidden;border:1px solid #ffffff10;border-radius:18px;background:#070a12;box-shadow:0 20px 60px #0006;animation:in .5s ease both}.card.featured{grid-column:span 8;min-height:420px}.card:nth-child(4n){grid-column:span 4}@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.media{position:absolute;inset:0;background-position:center;background-size:cover;background-color:#0b1020}.card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#02030a08 20%,#02030a35 48%,#02030af5 100%)}.content{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:22px}.tag{font:800 7px Orbitron;color:var(--cyan);letter-spacing:.17em}.content h3{font:800 clamp(16px,2vw,24px) Orbitron;margin:8px 0}.body{font-size:10px;line-height:1.65;color:#9aa8ba;max-width:760px}.meta{display:flex;align-items:center;gap:8px;margin-top:13px;color:#75849a;font-size:8px}.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#117e98,#6949b4);font:900 8px Orbitron;overflow:hidden;background-position:center;background-size:cover}.actions{margin-left:auto;display:flex;gap:5px}.actions button{border:1px solid #ffffff14;background:#ffffff08;color:#d6e1ed;border-radius:7px;padding:7px 9px;font:800 7px Montserrat;cursor:pointer}.actions .live{color:var(--green);border-color:#57f4b133}
+.composer{margin:16px 0;padding:15px;border:1px solid #63edff18;border-radius:16px;background:linear-gradient(145deg,#080d18,#050710)}.compose-row{display:flex;gap:10px}.compose-avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#63edff,#8c5cff);font:900 10px Orbitron}.compose-main{flex:1}.compose-main textarea{width:100%;min-height:70px;resize:vertical;border:1px solid #ffffff12;border-radius:10px;background:#02040a;color:#fff;padding:11px;outline:none;font:500 10px Inter}.compose-main textarea:focus{border-color:#63edff44}.compose-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:8px;color:var(--muted);font-size:8px}.compose-foot button{border:0;border-radius:9px;background:linear-gradient(110deg,#1bb7d4,#7755d9);color:#fff;padding:9px 13px;font:800 8px Montserrat;cursor:pointer}
+.empty{grid-column:1/-1;padding:45px;border:1px dashed #ffffff15;border-radius:15px;text-align:center;color:var(--muted);font-size:10px}.status{color:var(--cyan);font:800 7px Orbitron;letter-spacing:.12em}
+@media(max-width:1000px){.arrival-inner{grid-template-columns:1fr}.portal{min-height:340px}.card,.card.featured{grid-column:span 6}}
+@media(max-width:650px){.arrival{padding-top:28px}.arrival-inner{gap:35px}h1{font-size:clamp(3.5rem,17vw,6rem)}.portal{min-height:300px}.feed{grid-template-columns:1fr}.card,.card.featured{grid-column:1;min-height:300px}.live-strip{align-items:flex-start;flex-direction:column}.section-head{align-items:flex-start;flex-direction:column}.feed-zone{width:calc(100% - 22px)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
 <body>
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="home.html">CROW<span>SPACE</span></a>
-    <nav class="global-nav" aria-label="CrowSpace navigation">
-      <a class="active" href="home.html">⌂ Home</a><a href="profile.html">◉ Profile</a><a href="search.html">⌕ Search</a><a href="caws.html">▶ Caws</a><a href="circles.html">◌ Circles</a><a href="messages.html">✉ Messages</a><a href="notifications.html">● Alerts</a><div class="nav-drop"><button class="nav-drop-btn" type="button" aria-haspopup="true" aria-expanded="false">◇ Explore ▾</button><div class="nav-drop-menu" role="menu"><a href="rankings.html">Rankings</a><a href="birthdays.html">Birthdays</a><a href="events.html">Events</a><a href="groups.html">Groups</a><a href="holiday-bots.html">Holiday Hub</a><a href="news.html">News</a></div></div>
-    </nav>
-    <div class="top-actions"><a href="login.html">LOG IN</a><a class="primary" href="signup.html">JOIN</a></div>
-  </div>
-</header>
-
-<main class="shell">
-<section class="hero">
-  <div class="hero-copy">
-  <div class="k">CROWRULES // CROWSPACE // ONE ACCOUNT // ONE UNIVERSE</div>
-  <h1>WELCOME TO <span>CROWSPACE.</span></h1>
-  <p>Your connected social home for live conversations, Caws, people, Circles, events, groups, rankings and the wider CrowRules universe — organized into one place and designed to grow with the community.</p>
-  <div class="actions"><a class="primary" href="#feed">ENTER CROWSPACE</a><a href="profile.html">MY PROFILE</a><a href="search.html">SEARCH</a><a href="caws.html">CAWS</a></div>
-  </div>
+<div class="grid"></div><div class="orb one"></div><div class="orb two"></div>
+<main class="home">
+<section class="arrival">
+<div class="arrival-inner">
+<div>
+<div class="eyebrow"><i></i> CROWRULES SOCIAL NETWORK · LIVE UNIVERSE</div>
+<h1>THIS IS<br><span>CROWSPACE.</span></h1>
+<p class="lead">A full-screen social home built around people, conversations, creators, Caws, events and everything happening across the CrowRules universe.</p>
+<div class="hero-actions"><a class="primary" href="#feed">ENTER THE FEED</a><a href="explore.html">EXPLORE</a><a href="profile.html">YOUR PROFILE</a></div>
+</div>
+<div class="portal">
+<div class="portal-ring"></div>
+<div class="signal"><div class="signal-top"><span>NODE // CROWSPACE</span><span id="clock">--:--:--</span></div><div class="core"><div><b>CS</b><small>ONLINE</small></div></div><div class="readout"><div><span>NETWORK</span><b id="network">CONNECTING</b></div><div><span>MEMBERS</span><b id="members">LIVE</b></div><div><span>YOUR STATUS</span><b id="memberStatus">GUEST</b></div></div></div>
+</div>
+</div>
+<div class="live-strip"><span>● LIVE</span><div class="ticker"><b id="ticker">Synchronizing the CrowSpace social universe · conversations · creators · events · Caws · connections</b></div><span id="sync">SYNCING</span></div>
 </section>
 
-<section class="layout" id="feed">
-<aside class="col left">
-  <div class="card">
-    <div class="ttl"><b>CROWSPACE</b><small>NAV</small></div>
-    <nav class="navlist">
-      <a class="active" href="home.html">⌂ Home</a><a href="profile.html">◉ My Profile</a><a href="search.html">⌕ Search</a><a href="caws.html">▶ Caws</a><a href="circles.html">◌ Circles</a><a href="messages.html">✉ Messages</a><a href="notifications.html">● Notifications</a>
-    </nav>
-  </div>
-  <div class="card">
-    <div class="ttl"><b>ACCOUNT</b><small>STATUS</small></div>
-    <div class="status">
-      <div><span>Supabase</span><strong id="db">CONNECTING</strong></div>
-      <div><span>Account</span><strong id="account">CHECKING</strong></div>
-      <div><span>Feed</span><strong id="feed-status">STARTING</strong></div>
-      <div><span>Privacy</span><strong>RLS</strong></div>
-    </div>
-    <div class="authbar" style="margin-top:12px"><a class="join" href="signup.html">SIGN UP</a><a href="login.html">LOG IN</a></div>
-  </div>
-  <div class="card">
-    <div class="ttl"><b>LIVE SYSTEM</b><small>NOW</small></div>
-    <div class="tiny"><span class="online-dot"></span>Feed refresh is automatic after posting.</div>
-    <div class="tiny" style="margin-top:8px">CrowSpace is built to connect people, projects and communities across CrowRules.</div>
-  </div>
-</aside>
-
-<section class="col center">
-  <div class="card composer" id="composer">
-    <div class="ttl"><b>SHARE WITH CROWSPACE</b><small id="composer-status">LIVE</small></div>
-    <div class="composer-row">
-      <div class="composer-avatar" id="composer-avatar">C</div>
-      <div class="composer-main">
-        <input id="post-title" maxlength="180" placeholder="Post title (optional)" autocomplete="off">
-        <textarea id="post-body" maxlength="5000" placeholder="What's happening in your CrowSpace?" aria-label="Post body"></textarea>
-        <div class="post-media-tools">
-          <input id="post-media-file" type="file" accept="image/*,video/*" multiple hidden>
-          <button id="post-media-btn" type="button">＋ MEDIA</button>
-          <span id="post-media-status">NO MEDIA</span><button id="post-media-cancel" type="button" hidden>CANCEL UPLOAD</button><span id="post-media-progress" class="media-progress" hidden><i></i></span>
-        </div>
-        <div id="post-media-preview" class="post-media-preview" hidden></div>
-        <div class="composer-foot"><span><span id="char-count">0 / 5000</span> · <span id="post-draft-status">DRAFT READY</span></span><button class="post-btn" id="post-btn" type="button">POST TO LIVE FEED</button></div><div id="post-preview" class="post-preview" aria-live="polite"><span>LIVE PREVIEW</span><b id="preview-title"></b><p id="preview-body">Your post preview will appear here.</p></div>
-      </div>
-    </div>
-    <div class="login-note" id="login-note">Sign in to post to the live CrowSpace feed.</div>
-    <div id="post-error" style="display:none;margin-top:8px"></div>
-  </div>
-
-  <div class="card my-posts-card" id="my-posts-card"><div class="ttl"><b>MY POSTS</b><small id="my-posts-count">0 POSTS</small></div><div id="my-posts-list" class="my-posts-list"><div class="empty-mini">Sign in to manage your posts.</div></div></div>
-
-  <div id="media-manager-modal" class="media-manager-modal" hidden aria-hidden="true"><div class="media-manager-backdrop" data-media-manager-close></div><section class="media-manager-dialog" role="dialog" aria-modal="true" aria-labelledby="media-manager-title"><div class="media-manager-head"><div><small>MEDIA CONTROL</small><h2 id="media-manager-title">Manage Post Media</h2><p id="media-manager-subtitle">Edit titles, accessibility text, captions and order.</p></div><button type="button" class="media-manager-close" data-media-manager-close>×</button></div><div id="media-manager-list" class="media-manager-list"><div class="empty-mini">Select a post to manage its media.</div></div><div class="media-manager-foot"><span id="media-manager-status">READY</span><div><button type="button" id="media-manager-cancel">CANCEL</button><button type="button" id="media-manager-save">SAVE MEDIA CHANGES</button></div></div></section></div>
-
-  <div class="card">
-    <div class="feedhead">
-      <div><div class="k">PERSONAL HOME</div><h2 id="welcome">Your Live CrowSpace</h2><p id="copy">Your connected social universe is loading.</p></div>
-      <span class="live"><span class="online-dot"></span>LIVE FEED</span>
-    </div>
-    <div class="metrics">
-      <div class="metric"><strong id="members">—</strong><span>Members</span></div>
-      <div class="metric"><strong id="posts">—</strong><span>Posts</span></div>
-      <div class="metric"><strong id="caws">—</strong><span>Caws</span></div>
-      <div class="metric"><strong id="visible">—</strong><span>Shown</span></div>
-    </div>
-    <div class="toolbar">
-      <b>Latest from CrowSpace</b>
-      <button id="filter-all" class="active" type="button">ALL</button>
-      <button id="filter-mine" type="button">MINE</button>
-      <button id="refresh-feed" type="button" title="Refresh the feed">↻</button>
-    </div>
-    <input class="feed-search" id="feed-search" type="search" maxlength="80" placeholder="Search posts in this feed…">
-    <div class="tiny" id="feed-personalization" style="margin-top:7px">Personalized feed signals are ready when you sign in.</div>
-    <div class="tiny" id="feed-note" style="margin-top:7px">Loading privacy-aware posts…</div>
-    <div class="feeditems" id="live-feed"><div class="feed-empty"><span class="pulse">LOADING CROWSPACE…</span></div></div>
-  </div>
-
-  <div class="card">
-    <div class="ttl"><b>WHAT'S HAPPENING</b><small>JUMP IN</small></div>
-    <div class="sectiongrid">
-      <div class="feature"><h3>🐦 Caws</h3><p>Browse short-form community posts and discover what members are sharing.</p><a href="caws.html">OPEN CAWS →</a></div>
-      <div class="feature"><h3>◌ Circles</h3><p>Find communities and conversations organized around shared interests.</p><a href="circles.html">EXPLORE CIRCLES →</a></div>
-      
-      <div class="feature"><h3>📅 Events</h3><p>Keep up with community events, celebrations and CrowRules activity.</p><a href="events.html">VIEW EVENTS →</a></div>
-    </div>
-  </div>
-
-
-  <div class="card">
-    <div class="ttl"><b>YOUR CROWSPACE</b><small>PERSONALIZED</small></div>
-    <div class="notice" id="personal-note">Building your personalized home from your CrowSpace account, social graph and community activity.</div>
-    <div class="home-grid">
-      <section class="home-card today"><div class="section-label">TODAY IN CROWSPACE</div><b id="today-title">Welcome to your community.</b><p id="today-copy">Your home will surface people, posts, Caws and community activity as your CrowSpace grows.</p></section>
-      <section class="home-card"><div class="section-label">NOTIFICATIONS</div><div id="notifications-preview" class="home-list"><div class="empty-mini">No notification preview available yet.</div></div></section>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ttl"><b>STORIES</b><small>COMMUNITY NOW</small></div>
-    <div class="story-strip" id="stories"><div class="empty-mini">Stories will appear here as members share them.</div></div>
-  </div>
-
-  <div class="card">
-    <div class="ttl"><b>PEOPLE TO CONNECT WITH</b><small>DISCOVERY</small></div>
-    <div class="home-grid">
-      <section class="home-card"><div class="section-label">FRIEND SUGGESTIONS</div><div id="suggestions" class="home-list"><div class="empty-mini">Finding members…</div></div></section>
-      <section class="home-card"><div class="section-label">ACTIVE MEMBERS</div><div id="active-members" class="home-list"><div class="empty-mini">Loading community activity…</div></div></section>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ttl"><b>TRENDING & COMMUNITY</b><small>RIGHT NOW</small></div>
-    <div class="home-grid">
-      <section class="home-card"><div class="section-label">TRENDING CAWS</div><div id="trending-caws" class="home-list"><div class="empty-mini">Loading Caws…</div></div></section>
-      <section class="home-card"><div class="section-label">RECOMMENDED CIRCLES</div><div id="recommended-circles" class="home-list"><div class="empty-mini">Explore Circles to build recommendations.</div></div></section>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="ttl"><b>RECENT ACTIVITY</b><small>LIVE SNAPSHOT</small></div>
-    <div id="recent-activity" class="home-list"><div class="empty-mini">Loading recent community activity…</div></div>
-  </div>
-
-  <div class="card">
-    <div class="ttl"><b>CROWRULES UNIVERSE</b><small>CONNECTED DIVISIONS</small></div>
-    <div class="divisiongrid">
-      <a class="division" href="https://crowrulesentertainment-oss.github.io/dreamscapes/">🎬 Dreamscapes<span>Stories & productions</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">🏟 Sports<span>Sports universe</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">🎙 Podcasting<span>Audio & shows</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">📚 Yearbooks<span>Community history</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">🏆 Spectrum<span>Awards & recognition</span></a>
-      <a class="division" href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/">🖤 CrowRules Entertainment<span>Main universe</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">📺 CrowRules TV<span>Television & live content</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">🎵 Records<span>Music & recordings</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss/memorials">🕯 Memorials<span>Memorial archive</span></a>
-      <a class="division" href="https://github.com/crowrulesentertainment-oss">＋ Future Divisions<span>More CrowRules worlds</span></a>
-    </div>
-  </div>
-</section>
-
-<aside class="col right">
-  <div class="card">
-    <div class="ttl"><b>EXPLORE CROWSPACE</b><small>DISCOVER</small></div>
-    <a class="side-link" href="rankings.html">🏆 <span><b>Rankings</b><small>Top active members & trends</small></span>›</a>
-    <a class="side-link" href="birthdays.html">🎂 <span><b>Birthdays</b><small>Celebrate the community</small></span>›</a>
-    <a class="side-link" href="events.html">📅 <span><b>Events</b><small>What's happening next</small></span>›</a>
-    <a class="side-link" href="groups.html">👥 <span><b>Groups</b><small>Find your communities</small></span>›</a>
-    <a class="side-link" href="holiday-bots.html">🎄 <span><b>Holiday Hub</b><small>Seasonal bots & posts</small></span>›</a>
-    <a class="side-link" href="news.html">📰 <span><b>News</b><small>CrowRules updates</small></span>›</a>
-  </div>
-  <div class="card">
-    <div class="ttl"><b>QUICK START</b><small>NEW HERE?</small></div>
-    <div class="tiny">One account. One universe. Connect your CrowRules identity and join the conversation.</div>
-    <div class="authbar" style="margin-top:10px"><a class="join" href="signup.html">CREATE ACCOUNT</a><a href="login.html">LOG IN</a></div>
-  </div>
-  <div class="card">
-    <div class="ttl"><b>YOUR SHORTCUTS</b><small>EXPLORE</small></div>
-    <div class="mini-grid"><a href="caws.html">🐦 Caws</a><a href="circles.html">◌ Circles</a><a href="messages.html">✉ Messages</a><a href="notifications.html">🔔 Alerts</a><a href="profile.html">◉ Profile</a><a href="search.html">⌕ Search</a></div>
-  </div>
-  <div class="card">
-    <div class="ttl"><b>BUILDING CROWSPACE</b><small>IN PUBLIC</small></div>
-    <div class="tiny">CrowSpace is growing from a simple social feed into a connected community platform. New features can be added without replacing the core account and feed experience.</div>
-  </div>
-</aside>
+<section id="feed" class="feed-zone">
+<header class="section-head"><div><div class="k">THE SOCIAL HOME</div><h2>WHAT'S HAPPENING.</h2><p id="feedCopy">Live community activity from CrowSpace.</p></div><a href="feed.html">OPEN FULL FEED →</a></header>
+<div class="tabs" aria-label="Feed filters"><button class="active" data-filter="all">FOR YOU</button><button data-filter="following">FOLLOWING</button><button data-filter="post">CONVERSATIONS</button><button data-filter="event">LIVE & EVENTS</button><button data-filter="caw">CAWS</button></div>
+<div id="feedList" class="feed"><div class="empty">Connecting to the CrowSpace network…</div></div>
 </section>
 </main>
-
-<script src="js/crowspace-supabase.js"></script>
 <script>
-(function(){
-'use strict';
-const $=id=>document.getElementById(id);
-let db=null,user=null,allPosts=[],activeFilter='all',booted=false,channel=null,profilesCache={},feedQuery='',editingPostId=null;
-
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const initials=n=>String(n||'C').trim().slice(0,2).toUpperCase();
-const ago=d=>{
-  const time=new Date(d).getTime();
-  if(!Number.isFinite(time))return'just now';
-  const m=Math.max(0,Math.floor((Date.now()-time)/60000));
-  if(m<1)return'just now'; if(m<60)return m+'m ago';
-  const h=Math.floor(m/60); if(h<24)return h+'h ago';
-  const days=Math.floor(h/24); if(days<7)return days+'d ago';
-  return new Date(d).toLocaleDateString();
-};
-const showError=(message)=>{
-  const box=$('post-error'); box.style.display='block'; box.className='error-box'; box.textContent=message;
-};
-const clearError=()=>{const box=$('post-error');box.style.display='none';box.textContent='';};
-async function getClient(){
-  try{
-    if(window.CrowSpaceAuth?.client)return window.CrowSpaceAuth.client;
-    if(window.CrowSpaceAuth?.ready){
-      await Promise.race([
-        window.CrowSpaceAuth.ready,
-        new Promise((_,reject)=>setTimeout(()=>reject(new Error('CrowSpace connection timed out.')),12000))
-      ]);
-      if(window.CrowSpaceAuth.client)return window.CrowSpaceAuth.client;
-    }
-    if(window.CrowSpaceSupabase)return window.CrowSpaceSupabase;
-    if(window.CrowSpaceSupabaseReady)return await window.CrowSpaceSupabaseReady;
-  }catch(e){
-    console.warn('[CrowSpace] client initialization failed',e);
-    return null;
-  }
-  return null;
-}
-async function safeCount(table){
-  try{
-    const q=await db.from(table).select('*',{count:'exact',head:true});
-    return q.error?null:q.count;
-  }catch(e){return null}
-}
-async function loadPosts(){
-  if(!db)return;
-  $('feed-status').textContent='LOADING';
-  let q=await db.from('crowspace_posts').select('id,user_id,title,body,media_url,created_at,like_count,comment_count').order('created_at',{ascending:false}).limit(100);
-  if(q.error)q=await db.from('crowspace_posts').select('id,user_id,title,body,media_url,created_at').order('created_at',{ascending:false}).limit(100);
-  if(q.error)q=await db.from('crowspace_posts').select('id,user_id,body,created_at').order('created_at',{ascending:false}).limit(100);
-  if(q.error){
-    $('feed-status').textContent='ERROR';$('feed-note').textContent='The feed is unavailable. Check Supabase permissions/RLS for crowspace_posts.';
-    $('live-feed').innerHTML='<div class="error-box">The live feed could not be loaded.</div>';$('visible').textContent='0';return;
-  }
-  allPosts=q.data||[];try{if(allPosts.length){const ids=allPosts.map(p=>p.id).filter(Boolean);const mr=await db.from('crowspace_post_media').select('post_id,media_url,media_type,title,alt_text,caption,sort_order').in('post_id',ids).order('sort_order',{ascending:true});if(!mr.error){const by=new Map();(mr.data||[]).forEach(m=>{const k=String(m.post_id);if(!by.has(k))by.set(k,[]);by.get(k).push(m)});allPosts=allPosts.map(p=>({...p,media_metadata:by.get(String(p.id))||[]}))}}}catch(e){console.warn('[CrowSpace] persistent media metadata unavailable',e)}
-  await applyFeedRanking();
-  await applyRealtimeIntelligence();
-  await renderFeed();
-  $('feed-status').textContent='READY';
-}
-function feedPostActivityScore(p,now){
-  const created=new Date(p.created_at).getTime(),ageHours=Math.max(0,(now-created)/36e5);
-  const likes=Number(p.like_count||0),comments=Number(p.comment_count||0);
-  const engagement=likes+(comments*2);
-  const decay=1/(1+ageHours/8);
-  return {ageHours,engagement,velocity:engagement/(Math.max(ageHours,.25)),decay};
-}
-async function applyRealtimeIntelligence(){
-  if(!user||!allPosts.length)return;
-  try{
-    const now=Date.now();
-    const eventsQ=await db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(300);
-    const activity={};
-    (eventsQ.data||[]).forEach(e=>{
-      const id=String(e.target_id||'');if(!id)return;
-      const type=String(e.target_type||'').toLowerCase();
-      const w=Number(e.weight??1);
-      if(['post','feed_post','caw'].includes(type))activity[id]=(activity[id]||0)+w;
-    });
-    const scored=allPosts.map(p=>{
-      const a=feedPostActivityScore(p,now);
-      const liveSignal=Number(activity[String(p.id)]||0);
-      const conversation=Number(p.comment_count||0)*2;
-      const authorId=String(p.user_id||'');
-      const authorRecent=allPosts.filter(x=>String(x.user_id||'')===authorId && (now-new Date(x.created_at).getTime())<86400000).length;
-      const velocityBoost=Math.min(8,a.velocity*.75);
-      const conversationBoost=Math.min(5,conversation*.35);
-      const authorBoost=Math.min(3,authorRecent*.25);
-      const liveBoost=Math.min(6,liveSignal*.6);
-      const realtimeScore=(a.decay*3)+velocityBoost+conversationBoost+authorBoost+liveBoost;
-      return {...p,__realtimeScore:realtimeScore};
-    }).sort((a,b)=>(b.__realtimeScore||0)-(a.__realtimeScore||0));
-    // Keep V19 relationship order as the primary ordering, but allow genuinely active posts to rise.
-    const rank=new Map(scored.map((p,i)=>[String(p.id),i]));
-    allPosts=[...allPosts].sort((a,b)=>{
-      const ra=rank.get(String(a.id))??999,rb=rank.get(String(b.id))??999;
-      const sa=(a.__feedScore||0)+(100-ra)*.08+(a.__realtimeScore||0)*1.5;
-      const sb=(b.__feedScore||0)+(100-rb)*.08+(b.__realtimeScore||0)*1.5;
-      return sb-sa;
-    });
-    const hot=allPosts.filter(p=>(p.__realtimeScore||0)>=4).length;
-    $('feed-note').textContent='V20 real-time intelligence active · '+hot+' live-moving posts · engagement velocity + freshness decay + conversation activity.';
-  }catch(e){
-    console.warn('[CrowSpace] realtime intelligence unavailable',e);
-  }
-}
-async function applyFeedRanking(){
-  if(!user||!allPosts.length)return;
-  try{
-    const [settings,events,prefs,follows,friends,profile,feedback,incoming]=await Promise.all([
-      db.from('crowspace_discovery_settings').select('personalization_enabled,adaptive_feed_enabled,recommendations_enabled,freshness_weight,familiarity_weight,exploration_weight,post_weight,positive_signal_multiplier,negative_signal_multiplier').eq('user_id',user.id).maybeSingle(),
-      db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(500),
-      db.from('crowspace_content_preferences').select('target_id,target_type,preference,strength').eq('user_id',user.id).limit(500),
-      db.from('crowspace_followers').select('following_id').eq('follower_id',user.id).limit(500),
-      db.from('crowspace_friendships').select('requester_id,addressee_id,status').or('requester_id.eq.'+user.id+',addressee_id.eq.'+user.id).limit(500),
-      db.from('crowspace_feed_profiles').select('weights,affinities,interest_graph').eq('user_id',user.id).maybeSingle(),
-      db.from('crowspace_recommendation_feedback').select('target_id,target_type,feedback_type,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(250),
-      db.from('crowspace_followers').select('follower_id').eq('following_id',user.id).limit(500)
-    ]);
-    const s=settings.data;if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false)return;
-    const ev=events.data||[],pref=prefs.data||[],following=new Set((follows.data||[]).map(x=>String(x.following_id)).filter(Boolean));
-    const followers=new Set((incoming.data||[]).map(x=>String(x.follower_id)).filter(Boolean)),connected=new Set(),friendsOfFriends=new Set();
-    (friends.data||[]).forEach(f=>{if(f.status!=='accepted')return;const other=String(f.requester_id)===String(user.id)?f.addressee_id:f.requester_id;if(other)connected.add(String(other))});
-    const reciprocal=new Set([...following].filter(id=>followers.has(id)));
-    if(following.size){
-      const fof=await db.from('crowspace_followers').select('follower_id,following_id').in('follower_id',[...following]).limit(1500);
-      (fof.data||[]).forEach(row=>{const id=String(row.following_id||'');if(id&&id!==String(user.id)&&!following.has(id)&&!connected.has(id))friendsOfFriends.add(id)});
-    }
-    const affinity={},weights=profile.data?.weights&&typeof profile.data.weights==='object'?profile.data.weights:{};
-    const base={like:1,comment:1.5,follow:2,profile_visit:1,repeat_engagement:2,caw_view:.7,caw_complete:1.5,ignore:-1};
-    ev.forEach(e=>{const type=String(e.target_type||'').toLowerCase();if(!e.target_id||!['profile','user','member'].includes(type))return;const w=Number(e.weight??1);affinity[String(e.target_id)]=(affinity[String(e.target_id)]||0)+Number(weights[e.event_type]??base[e.event_type]??0)*w});
-    const hiddenPosts=new Set(),hiddenAuthors=new Set();
-    pref.forEach(p=>{const id=String(p.target_id||'');if(!id||!['hidden','not_interested'].includes(p.preference))return;const t=String(p.target_type||'').toLowerCase();if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id);else hiddenPosts.add(id)});
-    feedback.data?.forEach(f=>{const id=String(f.target_id||'');if(!id||!['hidden','not_interested','less_like_this'].includes(f.feedback_type))return;const t=String(f.target_type||'').toLowerCase();if(['profile','user','member','author'].includes(t))hiddenAuthors.add(id);else hiddenPosts.add(id)});
-    const freshness=Number(s?.freshness_weight??1),familiarity=Number(s?.familiarity_weight??1),exploration=Number(s?.exploration_weight??1),postWeight=Number(s?.post_weight??1),positive=Number(s?.positive_signal_multiplier??1),negative=Number(s?.negative_signal_multiplier??1),now=Date.now();
-    const scored=allPosts.map(p=>{
-      const id=String(p.user_id||''),age=Math.max(0,(now-new Date(p.created_at).getTime())/36e5),fresh=1/(1+age/12),engagement=Math.log1p(Number(p.like_count||0)+Number(p.comment_count||0)*1.5),familiar=Number(affinity[id]||0),mutual=0;
-      const social=(following.has(id)?3:0)+(reciprocal.has(id)?2:0)+(connected.has(id)?2:0)+(friendsOfFriends.has(id)?1:0),discovery=(following.has(id)||connected.has(id))?0:friendsOfFriends.has(id)?1.25:1,blocked=(hiddenPosts.has(String(p.id))||hiddenAuthors.has(id))?-1000:0,signal=familiar>=0?familiar*positive:familiar*negative;
-      const relationship=following.has(id)?(reciprocal.has(id)?'Reciprocal':'Following'):connected.has(id)?'Friend':friendsOfFriends.has(id)?'Friend of friend':'Discover';
-      return {...p,__feedScore:(freshness*fresh)+(familiarity*signal)+(postWeight*engagement)+(exploration*discovery)+social+blocked,__feedSocial:relationship,__mutualCount:mutual};
-    }).sort((a,b)=>b.__feedScore-a.__feedScore);
-    const result=[],remaining=[...scored],counts={};
-    while(remaining.length&&result.length<scored.length){
-      const pos=result.length,cap=pos<10?2:pos<20?3:4;
-      let idx=remaining.findIndex(p=>(counts[String(p.user_id)]||0)<cap);
-      if(idx<0)idx=0;
-      if(pos>=4&&pos%5===4){const di=remaining.findIndex(p=>(counts[String(p.user_id)]||0)===0&&p.__feedSocial==='Discover');const fi=remaining.findIndex(p=>(counts[String(p.user_id)]||0)===0&&p.__feedSocial==='Friend of friend');if(di>=0)idx=di;else if(fi>=0)idx=fi}
-      const pick=remaining.splice(idx,1)[0],id=String(pick.user_id||'');counts[id]=(counts[id]||0)+1;result.push(pick);
-    }
-    allPosts=result;
-    $('feed-note').textContent='V19 relationship ranking active · '+result.filter(p=>p.__feedSocial==='Following'||p.__feedSocial==='Reciprocal').length+' following · '+result.filter(p=>p.__feedSocial==='Friend').length+' friends · '+result.filter(p=>p.__feedSocial==='Friend of friend').length+' mutual-network · '+result.filter(p=>p.__feedSocial==='Discover').length+' discovery · '+new Set(result.map(p=>String(p.user_id||'')).filter(Boolean)).size+' authors.';
-  }catch(e){console.warn('[CrowSpace] relationship ranking unavailable',e);$('feed-note').textContent='Relationship ranking unavailable · showing latest posts.'}
-}
-async function loadPersonalizedFeed(){
-  if(!db||!user){$('feed-personalization').textContent='Sign in to personalize your CrowSpace feed.';return}
-  try{
-    const [settings,events,prefs]=await Promise.all([
-      db.from('crowspace_discovery_settings').select('personalization_enabled,adaptive_feed_enabled,recommendations_enabled,freshness_weight,familiarity_weight,exploration_weight,caw_weight,post_weight').eq('user_id',user.id).maybeSingle(),
-      db.from('crowspace_feed_events').select('event_type,target_id,target_type,weight,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100),
-      db.from('crowspace_content_preferences').select('target_id,target_type,preference,strength').eq('user_id',user.id).limit(100)
-    ]);
-    const s=settings.data;
-    if(s?.personalization_enabled===false||s?.adaptive_feed_enabled===false){
-      $('feed-personalization').textContent='Personalized ranking is turned off in your discovery settings. Showing latest posts.';
-      return;
-    }
-    const positive=(events.data||[]).filter(e=>['like','comment','follow','profile_visit','repeat_engagement','caw_view','caw_complete'].includes(e.event_type)).length;
-    const negative=(events.data||[]).filter(e=>['ignore'].includes(e.event_type)).length;
-    const hidden=(prefs.data||[]).filter(p=>['hidden','not_interested','less'].includes(p.preference)).length;
-    $('feed-personalization').textContent='Adaptive home active · '+positive+' positive signals · '+negative+' negative signals · '+hidden+' content preferences. Freshness, familiarity and exploration are used when available.';
-  }catch(e){
-    $('feed-personalization').textContent='Adaptive home is using the standard latest-post feed.';
-  }
-}
-async function loadHomePanels(){
-  if(!db)return;
-  const profiles=await safeRows('crowspace_profiles','user_id,display_name,username,avatar_url,bio,created_at',12,'created_at');
-  profiles.forEach(p=>profilesCache[p.user_id]=p);
-  const others=profiles.filter(p=>p.user_id!==user?.id);
-  const nameOf=p=>p.display_name||p.username||'CrowSpace Member';
-  const avatarOf=p=>p.avatar_url?'<img class="person-avatar" src="'+esc(p.avatar_url)+'" alt="" loading="lazy">':'<div class="person-avatar">'+esc(initials(nameOf(p)))+'</div>';
-  $('suggestions').innerHTML=others.slice(0,5).map(p=>'<div class="person">'+avatarOf(p)+'<div class="person-main"><b>'+esc(nameOf(p))+' <span class="badge">MEMBER</span></b><small>'+esc(p.bio||'Connect on CrowSpace')+'</small></div><a class="follow-btn" href="profile.html?user='+encodeURIComponent(p.user_id)+'">VIEW</a></div>').join('')||'<div class="empty-mini">No new member suggestions yet.</div>';
-  $('active-members').innerHTML=others.slice(0,5).map((p,i)=>'<div class="person"><span class="rank-num">'+(i+1)+'</span>'+avatarOf(p)+'<div class="person-main"><b>'+esc(nameOf(p))+'</b><small><span class="online-dot"></span>Community member</small></div></div>').join('')||'<div class="empty-mini">No members to display.</div>';
-  const caws=await safeRows('crowspace_caws','id,user_id,body,created_at,like_count',8,'created_at');
-  $('trending-caws').innerHTML=caws.slice(0,5).map((p,i)=>'<div class="activity"><span class="rank-num">'+(i+1)+'</span><div class="person-main"><b>'+esc((profilesCache[p.user_id]&&nameOf(profilesCache[p.user_id]))||'CrowSpace Member')+'</b><small>'+esc(p.body||'A new Caw is trending.')+'</small></div></div>').join('')||'<div class="empty-mini">No Caws available yet.</div>';
-  let circles=await safeRows('crowspace_circles','id,name,description,created_at',5,'created_at');
-  $('recommended-circles').innerHTML=circles.map(c=>'<a class="circle" href="circles.html?id='+encodeURIComponent(c.id)+'"><div class="person-main"><b>'+esc(c.name||'CrowSpace Circle')+'</b><small>'+esc(c.description||'Community conversation')+'</small></div>›</a>').join('')||'<div class="empty-mini">No Circles are available yet. <a href="circles.html">Explore Circles →</a></div>';
-  const recent=allPosts.slice(0,5);
-  $('recent-activity').innerHTML=recent.map(p=>'<div class="activity"><span>◉</span><div class="person-main"><b>'+(profilesCache[p.user_id]?esc(nameOf(profilesCache[p.user_id])):'CrowSpace Member')+' posted</b><small>'+esc((p.body||'').slice(0,150))+' · '+esc(ago(p.created_at))+'</small></div></div>').join('')||'<div class="empty-mini">Your community activity will appear here.</div>';
-  const today=new Date();
-  $('today-title').textContent=user?'Your CrowSpace, '+(user.user_metadata?.display_name||user.user_metadata?.full_name||user.email?.split('@')[0]||'Member')+'.':'Your CrowSpace is open.';
-  $('today-copy').textContent=(caws.length||recent.length)?'Fresh activity is moving through the community. Check the feed, discover new Caws and connect with members.':'Start the conversation by creating your first post.';
-  $('personal-note').textContent=user?'Your home is personalized around your account and the community data available to CrowSpace.':'Sign in to unlock a more personalized CrowSpace home.';
-  $('notifications-preview').innerHTML='<div class="activity"><span>●</span><div class="person-main"><b>Community updates</b><small>'+recent.length+' recent posts are visible in your home feed.</small></div></div><div class="activity"><span>◇</span><div class="person-main"><b>Discovery</b><small>'+others.length+' other members are available to explore.</small></div></div>';
-  const stories=others.slice(0,6);
-  $('stories').innerHTML=stories.map(p=>'<a class="story" href="profile.html?user='+encodeURIComponent(p.user_id)+'">'+avatarOf(p)+'<b>'+esc(nameOf(p))+'</b><small>View profile</small></a>').join('')||'<div class="empty-mini">No community stories yet.</div>';
-}
-async function refresh(){
-  clearError();
-  await loadPosts();
-  await loadMyPosts();
-  await loadPersonalizedFeed();
-  await loadHomePanels();
-}
-async function boot(){
-  if(booted)return;
-  booted=true;
-  $('feed-status').textContent='CONNECTING';
-  $('feed-note').textContent='Connecting to CrowSpace…';
-  db=await getClient();
-  if(!db){$('db').textContent='OFFLINE';$('account').textContent='UNKNOWN';$('feed-status').textContent='OFFLINE';$('feed-note').textContent='CrowSpace could not connect. Please refresh and try again.';booted=false;return}
-  $('db').textContent='CONNECTED';
-  try{
-    const au=await db.auth.getUser();
-    user=au.data?.user||null;
-  }catch(e){user=null}
-  $('account').textContent=user?'SIGNED IN':'GUEST';
-  if(user){
-    setComposerMode();
-    const n=user.user_metadata?.display_name||user.user_metadata?.full_name||user.email?.split('@')[0]||'Crow';
-    $('welcome').textContent='Welcome back, '+n;
-    $('copy').textContent='Post something and start a conversation.';
-    $('composer-status').textContent='READY';
-    $('login-note').style.display='none';
-    $('composer-avatar').textContent=initials(n);
-  }else{
-    setComposerMode();
-    $('composer-status').textContent='SIGN IN';
-    $('post-btn').disabled=true;
-  }
-  const counts=await Promise.all([safeCount('crowspace_profiles'),safeCount('crowspace_posts'),safeCount('crowspace_caws')]);
-  ['members','posts','caws'].forEach((id,i)=>$(id).textContent=counts[i]==null?'—':counts[i].toLocaleString());
-  await loadPosts();
-  await loadMyPosts();
-  await loadHomePanels();
-  try{
-    let refreshTimer=null;
-    const scheduleLiveRefresh=()=>{
-      clearTimeout(refreshTimer);
-      refreshTimer=setTimeout(async()=>{
-        await loadPosts();
-        await loadHomePanels();
-      },650);
-    };
-    channel=db.channel('crowspace-home-feed')
-      .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},scheduleLiveRefresh)
-      .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_feed_events'},scheduleLiveRefresh);
-    await channel.subscribe();
-  }catch(e){console.warn('[CrowSpace] realtime feed unavailable',e)}
-}
-let postDraftTimer=null;
-function updatePostPreview(){
-  const title=$('post-title').value.trim(),body=$('post-body').value,box=$('post-preview'),has=Boolean(title||body.trim());
-  $('char-count').textContent=body.length+' / 5000';
-  $('preview-title').textContent=title;
-  $('preview-title').style.display=title?'block':'none';
-  $('preview-body').textContent=body.trim()||'Your post preview will appear here.';
-  box.classList.toggle('active',has);
-  $('post-draft-status').textContent=has?'DRAFT SAVED':'DRAFT READY';
-  if(postDraftTimer)clearTimeout(postDraftTimer);
-  postDraftTimer=setTimeout(()=>{
-    try{localStorage.setItem('crowspace-home-post-draft-v1',JSON.stringify({title,body,updated_at:Date.now()}))}catch(e){}
-  },250);
-}
-function clearPostDraft(){
-  try{localStorage.removeItem('crowspace-home-post-draft-v1')}catch(e){}
-  setPostingState('ready','DRAFT READY');
-}
-function setPostingState(state,message){
-  const el=$('post-draft-status'); if(!el)return;
-  el.textContent=message||state;
-  el.className='post-draft-status '+String(state||'').toLowerCase();
-}
-function setComposerMode(){
-  const ready=Boolean(user&&db);
-  $('post-btn').disabled=!ready;
-  $('post-title').disabled=!ready;
-  $('post-body').disabled=!ready;
-  $('composer-status').textContent=ready?'READY':'SIGN IN';
-}
-function resetComposer(){
-  $('post-title').value='';$('post-body').value='';
-  $('char-count').textContent='0 / 5000';
-  $('preview-title').textContent='';$('preview-title').style.display='none';
-  $('preview-body').textContent='Your post preview will appear here.';
-  $('post-preview').classList.remove('active');
-  clearPostDraft();
-}
-function restorePostDraft(){
-  try{
-    const raw=localStorage.getItem('crowspace-home-post-draft-v1');if(!raw)return;
-    const d=JSON.parse(raw);if(!d||Date.now()-Number(d.updated_at||0)>604800000)return clearPostDraft();
-    if(d.title||d.body){
-      $('post-title').value=String(d.title||'').slice(0,180);
-      $('post-body').value=String(d.body||'').slice(0,5000);
-      updatePostPreview();
-      setPostingState('restored','DRAFT RESTORED');
-    }
-  }catch(e){}
-}
-async function loadMyPosts(){const box=$('my-posts-list'),count=$('my-posts-count');if(!db||!user){box.innerHTML='<div class="empty-mini">Sign in to manage your posts.</div>';count.textContent='0 POSTS';return}try{const q=await db.from('crowspace_posts').select('id,title,body,created_at,like_count,comment_count').eq('user_id',user.id).order('created_at',{ascending:false}).limit(12);if(q.error)throw q.error;const rows=q.data||[];count.textContent=rows.length+' POST'+(rows.length===1?'':'S');box.innerHTML=rows.map(p=>'<div class="my-post-row"><div class="my-post-copy"><b>'+esc(p.title||'Untitled post')+'</b><small>'+esc(String(p.body||'').replace(/\s+/g,' ').trim().slice(0,110))+' · '+esc(ago(p.created_at))+'</small></div><div class="my-post-actions"><button type="button" data-post-action="edit" data-post-id="'+esc(p.id)+'">EDIT</button><button type="button" class="delete" data-post-action="delete" data-post-id="'+esc(p.id)+'">DELETE</button><button type="button" data-post-action="media" data-post-id="'+esc(p.id)+'">MEDIA</button></div></div>').join('')||'<div class="empty-mini">You have not posted anything yet.</div>'}catch(e){box.innerHTML='<div class="empty-mini">Your posts could not be loaded right now.</div>';count.textContent='—'}}
-function cancelPostEdit(){editingPostId=null;resetComposer();clearPostMedia();$('post-btn').textContent='POST TO LIVE FEED';$('composer-status').textContent=user?'READY':'SIGN IN';const b=$('editing-banner');if(b)b.remove()}
-async function startPostEdit(id){if(!user||!id)return;let row=allPosts.find(x=>String(x.id)===String(id));if(!row){const q=await db.from('crowspace_posts').select('id,title,body').eq('id',id).eq('user_id',user.id).maybeSingle();if(q.error||!q.data)return showError('That post is no longer available.');row=q.data}editingPostId=String(row.id);$('post-title').value=String(row.title||'').slice(0,180);$('post-body').value=String(row.body||'').slice(0,5000);clearPostDraft();updatePostPreview();$('composer-status').textContent='EDITING';$('post-btn').textContent='SAVE EDIT';let b=$('editing-banner');if(!b){b=document.createElement('div');b.id='editing-banner';b.className='editing-banner';$('composer').prepend(b)}b.innerHTML='<span>EDITING YOUR POST</span><button type="button">CANCEL</button>';b.querySelector('button').onclick=cancelPostEdit;$('composer').scrollIntoView({behavior:'smooth',block:'center'});$('post-body').focus()}
-async function cleanupPostMedia(urls){if(!db||!Array.isArray(urls)||!urls.length)return;const paths=urls.map(u=>{try{const x=new URL(u);const marker='/storage/v1/object/public/crowspace-media/';const i=x.pathname.indexOf(marker);return i>=0?decodeURIComponent(x.pathname.slice(i+marker.length)):null}catch(e){return null}}).filter(p=>p&&p.startsWith(String(user?.id||'')+'/'));if(paths.length){const r=await db.storage.from('crowspace-media').remove(paths);if(r.error)console.warn('[CrowSpace] media cleanup failed',r.error)}}
-function postMediaUrls(value){return String(value||'').split(/\
-|\\r?\
-/).map(x=>x.trim()).filter(Boolean).slice(0,6)}
-async function deletePost(id){if(!user||!id)return;const row=allPosts.find(x=>String(x.id)===String(id));if(!confirm('Delete '+(row?.title||'this post')+'? This cannot be undone.'))return;const q=await db.from('crowspace_posts').delete().eq('id',id).eq('user_id',user.id);if(q.error){showError(q.error.message||'Unable to delete that post.');return}await cleanupPostMedia(postMediaUrls(row?.media_url));allPosts=allPosts.filter(p=>String(p.id)!==String(id));if(editingPostId===String(id))cancelPostEdit();await renderFeed();await loadMyPosts();const n=Number($('posts').textContent);if(Number.isFinite(n)&&n>0)$('posts').textContent=(n-1).toLocaleString()}
-let selectedPostMedia=[];let mediaUploadStates=[];let mediaUploadCancelled=false;let mediaMeta=[];
-function clearPostMedia(){selectedPostMedia=[];mediaUploadStates=[];mediaMeta=[];mediaUploadCancelled=false;const f=$('post-media-file');if(f)f.value='';$('post-media-status').textContent='NO MEDIA';const box=$('post-media-preview');box.hidden=true;box.innerHTML=''}
-function mediaSize(n){const u=n<1024?Math.round(n)+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';return u}function mediaKind(f){return f.type.startsWith('video/')?'VIDEO':'IMAGE'}function escapeAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}function renderPostMediaPreview(){const box=$('post-media-preview');if(!selectedPostMedia.length){box.hidden=true;box.innerHTML='';return}box.hidden=false;box.innerHTML='<div class="media-grid">'+selectedPostMedia.map((file,i)=>{const url=URL.createObjectURL(file),s=mediaUploadStates[i]||'READY',m=mediaMeta[i]||{};return '<div class="media-tile media-state-'+s.toLowerCase()+'" draggable="true" data-media-index="'+i+'">'+(file.type.startsWith('image/')?'<img src="'+url+'" alt="'+escapeAttr(m.alt||('Selected media '+(i+1)))+'">':'<video src="'+url+'" controls muted playsinline></video>')+'<small class="media-meta"><b>'+mediaKind(file)+'</b><span>'+mediaSize(file.size)+'</span></small><small class="media-state">'+s+'</small><div class="media-fields"><input class="media-title" data-media-index="'+i+'" maxlength="160" placeholder="Media title" value="'+escapeAttr(m.title)+'"><input class="media-alt" data-media-index="'+i+'" maxlength="300" placeholder="Alt text for accessibility" value="'+escapeAttr(m.alt)+'"><textarea class="media-caption" data-media-index="'+i+'" maxlength="500" placeholder="Caption (optional)">'+escapeHtml(m.caption)+'</textarea></div><button type="button" class="media-remove" data-media-index="'+i+'">REMOVE</button><small class="media-order">#'+(i+1)+'</small></div>'}).join('')+'</div>';$('post-media-status').textContent=selectedPostMedia.length+' MEDIA SELECTED · ADD TITLES, ALT TEXT & CAPTIONS · DRAG TO REORDER'}
-function addPostMedia(files){const incoming=[...files];const allowed=/^image\/(png|jpe?g|gif|webp)|^video\/(mp4|webm|mov)$/i;for(const f of incoming){if(!allowed.test(f.type)){showError('Unsupported media: '+f.name);continue}if(f.size>25*1024*1024){showError(f.name+' is over the 25 MB limit.');continue}if(selectedPostMedia.length>=6){showError('You can attach up to 6 media files per post.');break}selectedPostMedia.push(f);mediaUploadStates.push('READY');mediaMeta.push({title:'',alt:'',caption:''})}renderPostMediaPreview();clearError()}
-async function uploadPostMedia(){if(!selectedPostMedia.length||!user||!db)return[];mediaUploadCancelled=false;mediaUploadStates=selectedPostMedia.map(()=> 'QUEUED');renderPostMediaPreview();const uploaded=[];for(let i=0;i<selectedPostMedia.length;i++){if(mediaUploadCancelled){mediaUploadStates=mediaUploadStates.map((s,j)=>j>=i&&s==='QUEUED'?'CANCELLED':s);renderPostMediaPreview();if(uploaded.length)await db.storage.from('crowspace-media').remove(uploaded.map(x=>x.path));throw new Error('Media upload cancelled.')}const file=selectedPostMedia[i];mediaUploadStates[i]='UPLOADING';renderPostMediaPreview();const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'-').slice(-120)||'media';const path=user.id+'/posts/'+Date.now()+'-'+i+'-'+safeName;$('post-media-status').textContent='UPLOADING '+(i+1)+'/'+selectedPostMedia.length+'…';const cancelBtn=$('post-media-cancel');if(cancelBtn)cancelBtn.hidden=false;const prog=$('post-media-progress');if(prog){prog.hidden=false;prog.title='Upload '+(i+1)+' of '+selectedPostMedia.length;prog.querySelector('i').style.width=Math.round(i/selectedPostMedia.length*100)+'%';}const up=await db.storage.from('crowspace-media').upload(path,file,{upsert:false,cacheControl:'3600'});if(up.error){mediaUploadStates[i]='ERROR';renderPostMediaPreview();if(uploaded.length)await db.storage.from('crowspace-media').remove(uploaded.map(x=>x.path));throw up.error}mediaUploadStates[i]='DONE';renderPostMediaPreview();const pub=db.storage.from('crowspace-media').getPublicUrl(path);uploaded.push({url:pub.data.publicUrl,path,title:(mediaMeta[i]||{}).title||'',alt:(mediaMeta[i]||{}).alt||'',caption:(mediaMeta[i]||{}).caption||''})}const cancelBtn=$('post-media-cancel');if(cancelBtn)cancelBtn.hidden=true;const prog=$('post-media-progress');if(prog){prog.querySelector('i').style.width='100%';setTimeout(()=>prog.hidden=true,400)}return uploaded}
-let mediaManagerPostId=null,mediaManagerRows=[];
-function mediaManagerStatus(t){const el=$('media-manager-status');if(el)el.textContent=t}
-function mediaManagerOpen(id){
- if(!user||!id)return;
- mediaManagerPostId=String(id);mediaManagerStatus('LOADING MEDIA…');
- const modal=$('media-manager-modal');if(modal){modal.hidden=false;modal.setAttribute('aria-hidden','false')}
- loadMediaManager(id);
-}
-async function loadMediaManager(id){
- const box=$('media-manager-list');if(!box)return;
- let q=await db.from('crowspace_post_media').select('id,post_id,media_url,storage_path,media_type,title,alt_text,caption,sort_order').eq('post_id',id).eq('user_id',user.id).order('sort_order',{ascending:true});
- if(q.error){box.innerHTML='<div class="empty-mini">Media management is unavailable right now.</div>';mediaManagerStatus('LOAD FAILED');return}
- mediaManagerRows=q.data||[];
- if(!mediaManagerRows.length){
-  const post=allPosts.find(x=>String(x.id)===String(id));const urls=postMediaUrls(post?.media_url);
-  mediaManagerRows=urls.map((url,i)=>({id:null,post_id:id,media_url:url,storage_path:null,media_type:/\\.(mp4|webm|mov)(?:[?#].*)?$/i.test(url)?'video':'image',title:'',alt_text:'',caption:'',sort_order:i}));
- }
- renderMediaManager();mediaManagerStatus(mediaManagerRows.length?'READY':'NO MEDIA')
-}
-function renderMediaManager(){
- const box=$('media-manager-list');if(!box)return;
- box.innerHTML=mediaManagerRows.length?mediaManagerRows.map((m,i)=>{const video=String(m.media_type||'').toLowerCase()==='video'||/\\.(mp4|webm|mov)(?:[?#].*)?$/i.test(m.media_url||'');return '<div class="media-manager-item" draggable="true" data-manager-index="'+i+'"><div class="media-manager-thumb">'+(video?'<video src="'+escapeAttr(m.media_url)+'" muted playsinline controls></video>':'<img src="'+escapeAttr(m.media_url)+'" alt="'+escapeAttr(m.alt_text||m.title||'Post media')+'">')+'</div><div class="media-manager-fields"><input data-mm-field="title" maxlength="160" value="'+escapeAttr(m.title||'')+'" placeholder="Media title"><input data-mm-field="alt_text" maxlength="300" value="'+escapeAttr(m.alt_text||'')+'" placeholder="Alt text"><textarea data-mm-field="caption" maxlength="500" placeholder="Caption">'+escapeHtml(m.caption||'')+'</textarea></div><div class="media-manager-order"><button type="button" data-mm-up="1" aria-label="Move media up">↑</button><button type="button" data-mm-down="1" aria-label="Move media down">↓</button></div></div>'}).join(''):'<div class="empty-mini">This post has no media attached.</div>';
-}
-function mediaManagerClose(){const m=$('media-manager-modal');if(m){m.hidden=true;m.setAttribute('aria-hidden','true')}mediaManagerPostId=null;mediaManagerRows=[]}
-async function saveMediaManager(){
- if(!user||!mediaManagerPostId)return;mediaManagerStatus('SAVING…');
- for(let i=0;i<mediaManagerRows.length;i++)mediaManagerRows[i].sort_order=i;
- const existing=mediaManagerRows.filter(x=>x.id);
- const old=await db.from('crowspace_post_media').select('id').eq('post_id',mediaManagerPostId).eq('user_id',user.id);
- if(old.error){mediaManagerStatus('SAVE FAILED');return}
- const kept=new Set(existing.map(x=>String(x.id)));
- const removed=(old.data||[]).filter(x=>!kept.has(String(x.id))).map(x=>x.id);
- if(removed.length){const d=await db.from('crowspace_post_media').delete().in('id',removed).eq('user_id',user.id);if(d.error){mediaManagerStatus('DELETE FAILED');return}}
- if(existing.length){const u=await db.from('crowspace_post_media').upsert(existing.map(x=>({id:x.id,post_id:mediaManagerPostId,user_id:user.id,media_url:x.media_url,storage_path:x.storage_path,media_type:x.media_type,title:x.title||'',alt_text:x.alt_text||'',caption:x.caption||'',sort_order:x.sort_order})),{onConflict:'id'});if(u.error){mediaManagerStatus('SAVE FAILED');return}}
- const urls=mediaManagerRows.map(x=>x.media_url).filter(Boolean);
- const pq=await db.from('crowspace_posts').update({media_url:urls.join('
-')}).eq('id',mediaManagerPostId).eq('user_id',user.id);
- if(pq.error){mediaManagerStatus('POST SYNC FAILED');return}
- const post=allPosts.find(x=>String(x.id)===mediaManagerPostId);if(post)post.media_url=urls.join('
-');
- mediaManagerStatus('SAVED ✓');await renderFeed();setTimeout(mediaManagerClose,500)
-}
-async function submit(){
-  clearError();
-  if(!user){location.href='login.html';return}
-  const body=$('post-body').value.trim(),title=$('post-title').value.trim();
-  if(!body){$('post-body').focus();showError('Write something before posting.');return}
-  if(body.length>5000){$('post-body').focus();showError('Your post is over the 5,000 character limit.');return}
-  const wasEditingBefore=Boolean(editingPostId);const btn=$('post-btn');btn.disabled=true;btn.textContent=editingPostId?'SAVING…':'POSTING…';setPostingState('syncing',editingPostId?'SAVING EDIT…':'SYNCING TO SUPABASE…');let payload={body};if(title)payload.title=title;
-  if(selectedPostMedia.length&&!editingPostId){
-    try{const media=await uploadPostMedia();if(media.length){payload.media_url=media.map(x=>x.url).join('
-');payload._media=media}}catch(e){console.error('[CrowSpace] media upload failed',e);showError(e.message||'Unable to upload media.');setPostingState('error','MEDIA UPLOAD FAILED');btn.disabled=false;btn.textContent='POST TO LIVE FEED';return}
-  }
-  const mediaRecords=payload._media||[];delete payload._media;let q;if(editingPostId){q=await db.from('crowspace_posts').update(payload).eq('id',editingPostId).eq('user_id',user.id).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}else{payload.user_id=user.id;q=await db.from('crowspace_posts').insert(payload).select('id,user_id,title,body,media_url,created_at,like_count,comment_count').single()}
-  if(q.error){
-    console.error('[CrowSpace] post insert failed',q.error);
-    if(payload.media_url&&!editingPostId)await cleanupPostMedia(postMediaUrls(payload.media_url));
-    const msg=String(q.error.message||'');
-    showError(/check constraint.*body/i.test(msg)?'Post rejected: write between 1 and 5,000 characters.':msg||'Unable to create the post.');
-    setPostingState('error','DRAFT KEPT');
-    btn.disabled=false;btn.textContent='POST TO LIVE FEED';return;
-  }
-  if(!wasEditingBefore){const mediaRecordsForInsert=mediaRecords.map((m,i)=>({post_id:q.data.id,user_id:user.id,media_url:m.url,storage_path:m.path,media_type:m.url.match(/\.(mp4|webm|mov)(\?|$)/i)?'video':'image',title:m.title||'',alt_text:m.alt||'',caption:m.caption||'',sort_order:i}));if(mediaRecordsForInsert.length){const mr=await db.from('crowspace_post_media').insert(mediaRecordsForInsert);if(mr.error)console.warn('[CrowSpace] media metadata save failed',mr.error)}}const wasEditingBefore=Boolean(editingPostId);editingPostId=null;resetComposer();clearPostMedia();setPostingState('live',wasEditing?'POST UPDATED ✓':'POST LIVE ✓');btn.textContent=wasEditing?'UPDATED ✓':'POSTED ✓';if(q.data)allPosts=wasEditing?allPosts.map(p=>String(p.id)===String(q.data.id)?q.data:p):[q.data,...allPosts.filter(p=>String(p.id)!==String(q.data.id))];await renderFeed();await loadMyPosts();$('feed-status').textContent='READY';
-  setTimeout(()=>{btn.disabled=false;btn.textContent='POST TO LIVE FEED';$('post-draft-status').textContent='DRAFT READY'},1200);
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  const ta=$('post-body');
-  const titleInput=$('post-title');ta.addEventListener('input',()=>{updatePostPreview();clearError()});titleInput.addEventListener('input',()=>{updatePostPreview();clearError()});
-  $('feed-search').addEventListener('input',e=>{feedQuery=e.target.value.trim();renderFeed()});
-  $('post-btn').addEventListener('click',submit);
-  $('post-media-cancel').addEventListener('click',()=>{mediaUploadCancelled=true;$('post-media-status').textContent='CANCELLING…';$('post-media-cancel').hidden=true});
-  $('post-media-btn').addEventListener('click',()=>{if(!user){location.href='login.html';return}$('post-media-file').click()});
-  $('post-media-file').addEventListener('change',e=>{addPostMedia(e.target.files||[]);e.target.value=''});
-  $('post-media-preview').addEventListener('input',e=>{const i=Number(e.target.dataset.mediaIndex);if(!mediaMeta[i])return;if(e.target.classList.contains('media-title'))mediaMeta[i].title=e.target.value;if(e.target.classList.contains('media-alt'))mediaMeta[i].alt=e.target.value;if(e.target.classList.contains('media-caption'))mediaMeta[i].caption=e.target.value});
-  $('post-media-preview').addEventListener('click',e=>{const b=e.target.closest('.media-remove');if(!b)return;const i=Number(b.dataset.mediaIndex);selectedPostMedia.splice(i,1);mediaUploadStates.splice(i,1);mediaMeta.splice(i,1);renderPostMediaPreview()});
-  let mediaDragIndex=null;
-  $('post-media-preview').addEventListener('dragstart',e=>{const tile=e.target.closest('.media-tile');if(!tile)return;mediaDragIndex=Number(tile.dataset.mediaIndex);tile.classList.add('dragging')});
-  $('post-media-preview').addEventListener('dragend',e=>{const tile=e.target.closest('.media-tile');if(tile)tile.classList.remove('dragging');mediaDragIndex=null});
-  $('post-media-preview').addEventListener('dragover',e=>e.preventDefault());
-  $('post-media-preview').addEventListener('drop',e=>{e.preventDefault();const tile=e.target.closest('.media-tile');if(!tile||mediaDragIndex===null)return;const to=Number(tile.dataset.mediaIndex);if(to!==mediaDragIndex){const [m]=selectedPostMedia.splice(mediaDragIndex,1);selectedPostMedia.splice(to,0,m);const [s]=mediaUploadStates.splice(mediaDragIndex,1);mediaUploadStates.splice(to,0,s);const [meta]=mediaMeta.splice(mediaDragIndex,1);mediaMeta.splice(to,0,meta);renderPostMediaPreview() }mediaDragIndex=null});
-  const composer=$('composer');composer.addEventListener('dragover',e=>{e.preventDefault();composer.classList.add('media-dragover')});composer.addEventListener('dragleave',e=>{if(!composer.contains(e.relatedTarget))composer.classList.remove('media-dragover')});composer.addEventListener('drop',e=>{e.preventDefault();composer.classList.remove('media-dragover');if(user)addPostMedia(e.dataTransfer.files||[])});
-
-  $('my-posts-list').addEventListener('click',e=>{const b=e.target.closest('[data-post-action]');if(!b)return;const id=b.getAttribute('data-post-id');if(b.getAttribute('data-post-action')==='edit')startPostEdit(id);if(b.getAttribute('data-post-action')==='delete')deletePost(id);if(b.getAttribute('data-post-action')==='media')mediaManagerOpen(id);});
-  $('media-manager-save').addEventListener('click',saveMediaManager);$('media-manager-cancel').addEventListener('click',mediaManagerClose);document.querySelectorAll('[data-media-manager-close]').forEach(x=>x.addEventListener('click',mediaManagerClose));$('media-manager-list').addEventListener('input',e=>{const row=e.target.closest('.media-manager-item');if(!row)return;const m=mediaManagerRows[Number(row.dataset.managerIndex)];if(!m)return;m[e.target.dataset.mmField]=e.target.value});$('media-manager-list').addEventListener('click',e=>{const row=e.target.closest('.media-manager-item');if(!row)return;const i=Number(row.dataset.managerIndex);if(e.target.closest('[data-mm-up]')&&i>0){[mediaManagerRows[i-1],mediaManagerRows[i]]=[mediaManagerRows[i],mediaManagerRows[i-1]];renderMediaManager()}if(e.target.closest('[data-mm-down]')&&i<mediaManagerRows.length-1){[mediaManagerRows[i+1],mediaManagerRows[i]]=[mediaManagerRows[i],mediaManagerRows[i+1]];renderMediaManager()}});$('refresh-feed').addEventListener('click',refresh);
-  $('filter-all').addEventListener('click',()=>{activeFilter='all';$('filter-all').classList.add('active');$('filter-mine').classList.remove('active');renderFeed()});
-  $('filter-mine').addEventListener('click',()=>{if(!user){location.href='login.html';return}activeFilter='mine';$('filter-mine').classList.add('active');$('filter-all').classList.remove('active');renderFeed()});
-  ta.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')submit()});const discoverBtn=document.querySelector('.nav-drop-btn');const discoverMenu=document.querySelector('.nav-drop');if(discoverBtn&&discoverMenu){discoverBtn.addEventListener('click',e=>{e.stopPropagation();const open=discoverMenu.classList.toggle('open');discoverBtn.setAttribute('aria-expanded',String(open))});document.addEventListener('click',()=>{discoverMenu.classList.remove('open');discoverBtn.setAttribute('aria-expanded','false')})}
-  restorePostDraft();updatePostPreview();setTimeout(boot,250);
-});
-window.addEventListener('crowspace:supabase-ready',boot);
+(()=>{let all=[],filter='all',channel=null,loading=false;
+const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const safe=u=>{try{const x=new URL(u,location.href);return ['http:','https:'].includes(x.protocol)?x.href:''}catch{return''}};
+const ago=d=>{const t=new Date(d).getTime();if(!Number.isFinite(t))return'';const m=Math.max(1,Math.floor((Date.now()-t)/60000));return m<60?m+'m ago':m<1440?Math.floor(m/60)+'h ago':Math.floor(m/1440)+'d ago'};
+function clock(){const d=new Date();$('clock').textContent=d.toLocaleTimeString([], {hour12:false});}setInterval(clock,1000);clock();
+function render(){const list=(filter==='all'?all:filter==='following'?all.filter(x=>x.followed):all.filter(x=>x.kind===filter));$('feedList').innerHTML=list.slice(0,15).map((x,i)=>{const av=safe(x.avatar),media=safe(x.media),href=safe(x.link);return '<article class="card '+(i===0?'featured':'')+'" style="animation-delay:'+Math.min(i,8)*.045+'s"><div class="media"'+(media?' style="background-image:url(\''+esc(media)+'\')"':'')+'></div><div class="content"><div class="tag">'+esc(x.tag)+(x.followed?' · FOLLOWING':'')+'</div><h3>'+ (href?'<a href="'+esc(href)+'" style="text-decoration:none">'+esc(x.title)+'</a>':esc(x.title)) +'</h3><div class="body">'+esc(x.body)+'</div><div class="meta"><span class="avatar"'+(av?' style="background-image:url(\''+esc(av)+'\');color:transparent"':'')+'>'+esc((x.author||'C').slice(0,1).toUpperCase())+'</span><span>'+esc(x.author||'CrowSpace')+'</span><span>•</span><span class="'+(x.live?'live':'')+'">'+esc(x.live?'LIVE NOW':ago(x.date))+'</span><span>•</span><span>'+esc(x.metric||'')+'</span><div class="actions"><button type="button">OPEN</button><button type="button">SHARE</button></div></div></div></article>'}).join('')||'<div class="empty">Nothing is moving in this channel yet.<br><br>Start the next moment in CrowSpace.</div>'; $('feedCopy').textContent=filter==='following'?'Activity from people and creators you follow.':'Live community activity from the CrowSpace universe.';}
+async function rows(db,table,order){try{let q=db.from(table).select('*').limit(35);if(order)q=q.order(order,{ascending:false,nullsFirst:false});const r=await q;return r.error?[]:(r.data||[])}catch(e){return[]}}
+async function profiles(db,ids){const u=[...new Set(ids.filter(Boolean))];if(!u.length)return new Map();try{const r=await db.from('crowspace_profiles').select('*').in('user_id',u);return new Map((r.data||[]).map(x=>[String(x.user_id),x]))}catch(e){return new Map()}}
+async function load(){if(loading)return;loading=true;try{await CrowSpaceAuth.ready;const db=CrowSpaceAuth.client,me=CrowSpaceAuth.user?.id||null;if(!db){throw Error('offline')}$('network').textContent='CONNECTED';$('memberStatus').textContent=me?'MEMBER':'GUEST';$('sync').textContent=me?'PERSONALIZED':'LIVE';$('feedCopy').textContent=me?'Your social universe is connected to people, creators, conversations, events and Caws.':'Live community activity from the CrowSpace universe.';
+let follows=new Set();if(me){try{const f=await db.from('crowspace_follows').select('*').eq('follower_id',me);(f.data||[]).forEach(x=>{const id=x.following_id||x.followed_user_id||x.following_user_id;if(id)follows.add(String(id))})}catch(e){}}
+const [posts,events,caws]=await Promise.all([rows(db,'crowspace_posts','created_at'),rows(db,'crowspace_events','starts_at'),rows(db,'crowspace_caws','created_at')]);const ids=[...posts.map(x=>x.user_id||x.author_id),...events.map(x=>x.created_by||x.user_id),...caws.map(x=>x.user_id||x.creator_id)];const pm=await profiles(db,ids);
+all=[...posts.map(x=>{const id=x.user_id||x.author_id,p=pm.get(String(id))||{};return{kind:'post',tag:'COMMUNITY CONVERSATION',title:x.title||'New conversation',body:x.body||'A new community moment.',author:p.display_name||p.username||'Creator',avatar:p.avatar_url,date:x.created_at,media:x.media_url||x.image_url||x.cover_url,followed:id&&follows.has(String(id)),metric:(x.like_count??0)+' likes · '+(x.comment_count??0)+' comments'}}),...events.map(x=>{const id=x.created_by||x.user_id,p=pm.get(String(id))||{};return{kind:'event',tag:x.is_live?'LIVE BROADCAST':String(x.event_type||'EVENT').toUpperCase(),title:x.title||'CrowSpace Event',body:x.description||'Something is happening in the universe.',author:p.display_name||p.username||'Host',avatar:p.avatar_url,date:x.starts_at,media:x.image_url||x.cover_url||x.thumbnail_url,live:!!x.is_live,link:x.link_url||x.youtube_url,metric:x.is_online?'ONLINE':'EVENT'}}),...caws.map(x=>{const id=x.user_id||x.creator_id,p=pm.get(String(id))||{};return{kind:'caw',tag:'CAW',title:x.title||'Community Caw',body:x.caption||x.description||'A moment from the community.',author:p.display_name||p.username||'Creator',avatar:p.avatar_url,date:x.created_at,media:x.thumbnail_url||x.cover_url,link:x.video_url,followed:id&&follows.has(String(id)),metric:(x.views??0)+' views'}})].filter(x=>x.date).sort((a,b)=>new Date(b.date)-new Date(a.date));$('members').textContent=all.length+' MOMENTS';render();
+if(channel)channel.unsubscribe();channel=db.channel('crowspace-home-live').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_events'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_caws'},()=>load()).subscribe(s=>$('sync').textContent=s==='SUBSCRIBED'?'LIVE':'SYNCING');
+}catch(e){$('network').textContent='OFFLINE';$('sync').textContent='RETRY';$('feedList').innerHTML='<div class="empty">CrowSpace could not synchronize this moment.<br><br>Refresh the page to reconnect.</div>'}finally{loading=false}}
+document.addEventListener('DOMContentLoaded',load);window.addEventListener('crowspace:supabase-ready',load);document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()}));window.addEventListener('beforeunload',()=>channel?.unsubscribe());
 })();
 </script>
-<section id="crow14" style="max-width:1200px;margin:20px auto;padding:24px;border:1px solid rgba(98,244,255,.18);border-radius:20px;background:rgba(255,255,255,.03)"><div style="color:#62f4ff;font-size:11px;letter-spacing:.2em;font-weight:800">CROWRULES // UNIVERSAL HOME INTELLIGENCE 14.0</div><h2 style="font:800 30px Orbitron;margin:10px 0">YOUR UNIVERSE</h2><div id="crow14state" style="color:#8995aa">SYNCING FEED, EVENTS, CAWS, COMMUNITIES & MEDIA…</div><div id="crow14grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:15px"></div></section><script>(async()=>{const s=document.getElementById('crow14state'),g=document.getElementById('crow14grid'),e=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));try{await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user;if(!u){s.textContent='Sign in to personalize your CrowSpace home.';return}await CrowSpaceAuth.ensureProfile(u);const db=CrowSpaceAuth.client;const q=async(table,select,order)=>{let x=db.from(table).select(select);if(order)x=x.order(order,{ascending:false});return x.limit(6)};const [p,ev,c,co,m]=await Promise.all([q('crowspace_posts','id,title,body,created_at','created_at'),q('crowspace_events','id,title,starts_at,is_live,is_online','starts_at'),q('crowspace_caws','id,title,description,created_at','created_at'),q('crowspace_groups','*'),q('crowspace_media','*','created_at')]);const card=(title,items,render)=>'<article style="padding:16px;border:1px solid #ffffff18;border-radius:15px"><h3 style="font:700 14px Orbitron;margin-top:0">'+title+'</h3>'+((items.data||[]).map(render).join('')||'<div style="color:#8995aa">Nothing here yet.</div>')+'</article>';g.innerHTML=card('FEED',p,x=>'<div style="padding:9px 0;border-top:1px solid #ffffff12"><b>'+e(x.title||'CrowSpace Post')+'</b><p style="color:#8995aa;margin:6px 0">'+e(x.body||'')+'</p></div>')+card('UP NEXT',ev,x=>'<div style="padding:9px 0;border-top:1px solid #ffffff12"><b>'+e(x.title)+'</b><div style="color:#8995aa">'+new Date(x.starts_at).toLocaleString()+' · '+(x.is_live?'LIVE':x.is_online?'ONLINE':'EVENT')+'</div></div>')+card('CAWS',c,x=>'<div style="padding:9px 0;border-top:1px solid #ffffff12"><b>'+e(x.title||'Caw')+'</b><div style="color:#8995aa">'+e(x.description||'')+'</div></div>')+card('COMMUNITIES',co,x=>'<div style="padding:9px 0;border-top:1px solid #ffffff12"><b>'+e(x.name||x.title||'Community')+'</b><div style="color:#8995aa">'+e(x.description||'')+'</div></div>')+card('MEDIA',m,x=>'<div style="padding:9px 0;border-top:1px solid #ffffff12"><b>'+e(x.title||'Media')+'</b><div style="color:#8995aa">'+e(x.media_type||x.type||'Media')+'</div></div>');s.textContent='Universal home intelligence connected.'}catch(x){s.textContent='Some home modules are unavailable: '+e(x.message)}})();</script><section id="crow15" style="max-width:1200px;margin:20px auto;padding:24px;border:1px solid rgba(155,108,255,.25);border-radius:20px;background:rgba(255,255,255,.025)"><div style="color:#9b6cff;font-size:11px;letter-spacing:.2em;font-weight:800">CROWRULES // RECOMMENDATION ENGINE 15.0 LEGACY COMPATIBILITY</div><h2 style="font:800 30px Orbitron;margin:10px 0">PERSONALIZED DISCOVERY</h2><div id="crow15state" style="color:#8995aa">Loading the current recommendation runtime…</div><div id="crow15grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px;margin-top:15px"></div></section><script src="js/crowspace-social-graph.js"></script><script>(async()=>{try{await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user;if(!u)return;const db=CrowSpaceAuth.client;const mount=()=>{const el=document.getElementById('crow15state');if(el)el.textContent='LIVE SOCIAL GRAPH · FOLLOWING · COMMUNITY · EVENTS · CAWS · MEDIA · NOTIFICATIONS';};const refresh=()=>{mount();document.dispatchEvent(new CustomEvent('crowspace:graph-update'));};const ch=window.CrowSpaceSocialGraph.init(db,u,refresh);window.addEventListener('beforeunload',()=>ch&&db.removeChannel(ch));}catch(e){console.warn('CrowSpace 16.0:',e)}})();</script><section id="crow212" style="margin:28px 0;padding:22px;border:1px solid #ffffff18;border-radius:18px;background:rgba(255,255,255,.025)">
-<div style="color:#9b6cff;font:800 11px Orbitron;letter-spacing:.2em">CROWRULES // GRAPH RECOMMENDATIONS 21.2</div>
-<h2 style="font:800 28px Orbitron;margin:9px 0">EXPLORE YOUR UNIVERSE.</h2>
-<p id="crow212state" style="color:#8995aa">Building recommendations from your CrowSpace graph…</p>
-<div id="crow212grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px"></div>
-</section>
-<script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-graph-learning-21-9.js"></script><script src="js/crowspace-recommendations-21-2.js"></script>
-<script>
-(async()=>{try{await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user,db=CrowSpaceAuth.client,s=document.getElementById('crow212state'),g=document.getElementById('crow212grid');if(!u){s.textContent='Sign in to unlock your personalized CrowRules discovery universe.';return}
-const st=await db.from('crowspace_discovery_settings').select('personalization_enabled,recommendations_enabled').eq('user_id',u.id).maybeSingle();if(st.data&&(st.data.personalization_enabled===false||st.data.recommendations_enabled===false)){s.textContent='Personalized discovery is disabled in Settings.';return}
-const surfaces=await CrowSpaceRecommendations21_2.surfaces(db,u), all=[...surfaces.for_you], keys=[...new Map(all.map(x=>[x.type+':'+x.id,x])).values()].slice(0,30);
-const ids=(t)=>keys.filter(x=>x.type===t).map(x=>x.id);const [profiles,projects,posts,caws,events,groups,circles,albums]=await Promise.all([
-db.from('crowspace_profiles').select('user_id,display_name,username,avatar_url,creator_category').in('user_id',ids('creator')),
-db.from('crowspace_project_history').select('id,project_name,role,project_url,user_id').in('id',ids('project')),
-db.from('crowspace_posts').select('id,title,body,user_id,created_at').in('id',ids('post')),
-db.from('crowspace_caws').select('id,title,caption,thumbnail_url,user_id,views').in('id',ids('caw')),
-db.from('crowspace_events').select('id,title,description,starts_at,is_online,is_live,created_by').in('id',ids('event')),
-db.from('crowspace_groups').select('id,name,description,image_url').in('id',ids('group')),
-db.from('crowspace_circles').select('id,name,description,image_url').in('id',ids('circle')),
-db.from('crowspace_albums').select('id,title,description,cover_url,user_id').in('id',ids('media_album'))
-]);
-const maps={property:new Map([['CrowSpace',{title:'CrowSpace',sub:'Social universe'}],['Dreamscapes',{title:'Dreamscapes',sub:'Stories & worlds'}],['Podcasting',{title:'Podcasting',sub:'Audio universe'}],['CrowRules TV',{title:'CrowRules TV',sub:'Television universe'}],['Sports',{title:'Sports',sub:'Sports universe'}],['Memorials',{title:'Memorials',sub:'Memorial universe'}],['Spectrum Awards',{title:'Spectrum Awards',sub:'Awards universe'}]]),creator:new Map((profiles.data||[]).map(x=>[String(x.user_id),{title:x.display_name||x.username||'Creator',sub:x.creator_category||'Creator'}])),project:new Map((projects.data||[]).map(x=>[String(x.id),{title:x.project_name,sub:x.role||'Project'}])),post:new Map((posts.data||[]).map(x=>[String(x.id),{title:x.title||'Community Post',sub:x.body||''}])),caw:new Map((caws.data||[]).map(x=>[String(x.id),{title:x.title||'Caw',sub:x.caption||((x.views||0)+' views')}])),event:new Map((events.data||[]).map(x=>[String(x.id),{title:x.title,sub:x.is_live?'LIVE · NOW':new Date(x.starts_at).toLocaleString()}])),group:new Map((groups.data||[]).map(x=>[String(x.id),{title:x.name,sub:x.description||'Group'}])),circle:new Map((circles.data||[]).map(x=>[String(x.id),{title:x.name,sub:x.description||'Circle'}])),media_album:new Map((albums.data||[]).map(x=>[String(x.id),{title:x.title||'Media Album',sub:x.description||'Media'}]))};
-const labels={for_you:'FOR YOU',creators:'CREATORS YOU MAY DISCOVER',projects:'PROJECTS YOU MAY LIKE',communities:'COMMUNITIES FOR YOU',caws:'CAWS FOR YOU',events:'EVENTS FOR YOU'};
-const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function card(title,arr){if(!arr.length)return '';return '<article style="padding:15px;border:1px solid #ffffff12;border-radius:15px"><h3 style="font:700 13px Orbitron;margin:0 0 10px">'+title+'</h3>'+arr.slice(0,6).map(x=>{const v=maps[x.type]?.get(String(x.id));return v?'<div style="padding:10px 0;border-top:1px solid #ffffff0d"><b>'+esc(v.title)+'</b><div style="color:#8995aa;font-size:12px;margin-top:4px">'+esc(v.sub)+'</div><div style="color:#62f4ff;font-size:10px;margin-top:6px">WHY: '+esc(x.reasons.join(' · '))+'</div></div>':''}).join('')+'</article>'}
-g.innerHTML=Object.keys(labels).map(k=>card(labels[k],surfaces[k]||[])).join('');
-const props=[['CrowSpace','/crowspace/'],['Dreamscapes','https://crowrulesentertainment-oss.github.io/dreamscapes/'],['Podcasting','/podcasting/'],['CrowRules TV','/crowrulestv/'],['Sports','/sports/'],['Memorials','/memorials/'],['Spectrum Awards','/spectrum/']];
-g.innerHTML+=card('EXPLORE BEYOND CROWSPACE',props.map(p=>({type:'property',id:p[0],reasons:['Part of the CrowRules universe']})).map(x=>({...x,title:x.id})));
-s.textContent='Personalized graph recommendations are active. Every recommendation includes a visible reason.';}catch(e){console.warn('CrowSpace 21.2',e);document.getElementById('crow212state').textContent='Personalized discovery is temporarily unavailable.'}})();
-</script><script src="js/crowspace-feedback-21-3.js"></script>
-<script>
-document.addEventListener("crowspace:recommendation-feedback",e=>{const d=e.detail||{};console.debug("CrowSpace 21.3 feedback",d);});
-</script><script src="js/crowspace-recommendation-ui-21-5.js"></script>
-<script>
-(async()=>{try{
-await CrowSpaceAuth.ready;const u=CrowSpaceAuth.user,db=CrowSpaceAuth.client,root=document.getElementById('crow212grid'),state=document.getElementById('crow212state');
-if(!u||!root)return;
-const rt=CrowSpaceRecommendationRuntime21_5,ui=CrowSpaceRecommendationUI21_5;
-const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const buttons=x=>'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">'+[['like','♥ Like'],['save','🔖 Save'],['more_like_this','✨ More Like This'],['not_interested','Not Interested'],['hide','Hide']].map(a=>'<button type="button" data-rank-action="'+a[0]+'" data-rank-type="'+x.type+'" data-rank-id="'+x.id+'" style="font-size:10px;padding:6px 8px;border:1px solid #ffffff18;border-radius:9px;background:#ffffff08;color:inherit;cursor:pointer">'+a[1]+'</button>').join('')+'</div>';
-async function render(detail={}){
-const surfaces=detail.surfaces||await rt.refresh(db,u)||{};const all=[...(surfaces.for_you||[])],uniq=[...new Map(all.map(x=>[x.type+':'+x.id,x])).values()].slice(0,12);
-if(!uniq.length){state.textContent='Your recommendation universe is learning from your activity.';return}
-root.innerHTML=uniq.map(x=>'<article data-rank-card style="padding:13px;border:1px solid #ffffff12;border-radius:13px"><b>'+esc(String(x.type).toUpperCase())+'</b><div style="color:#8995aa;font-size:11px;margin-top:5px">Score '+Math.round(x.score||0)+' · '+esc((x.reasons||[]).join(' · '))+'</div>'+buttons(x)+'</article>').join('');
-state.textContent='Live personalized discovery · sync v'+rt.state.version;
-}
-ui.register('home-recommendations',render);
-root.addEventListener('click',async e=>{const b=e.target.closest('[data-rank-action]');if(!b)return;b.disabled=true;const r=await rt.record(db,u,b.dataset.rankType,b.dataset.rankId,b.dataset.rankAction);if(r?.error||r?.feedback?.error||r?.event?.error){b.disabled=false;return}if(['hide','not_interested'].includes(b.dataset.rankAction))b.closest('[data-rank-card]')?.remove();else await render();});
-rt.start(db,u,{refresh:true});await render();
-}catch(e){console.warn('CrowSpace 21.5 Home UI',e)}})();
-</script>
-<script src="js/crowspace-recommendation-runtime-21-5.js"></script>
-<script src="js/crowspace-adaptive-21-5.js"></script><script>
-(async()=>{try{
- await CrowSpaceAuth.ready;
- const rt=window.CrowSpaceRecommendationRuntime21_5,ad=window.CrowSpaceAdaptive21_5;
- if(!rt||!ad)return;
- rt.subscribe(d=>{
-   if(d.action) ad.apply(d.action,d.type,d.id);
-   window.dispatchEvent(new CustomEvent("crowspace:recommendation-rerank",{detail:d}));
- });
-}catch(e){console.warn("CrowSpace 21.5 adaptive bridge",e)}})();
-</script><script src="js/crowspace-connected-discovery-21-6.js"></script><script>
-document.addEventListener("crowspace:recommendation-update",async e=>{
- const d=e.detail||{},rt=window.CrowSpaceRecommendationRuntime21_5,cd=window.CrowSpaceConnectedDiscovery21_6;
- if(!rt||!cd||!d.action||!d.id||d.type!=="creator"||d.action!=="follow")return;
- try{await rt.refresh(CrowSpaceAuth.client,CrowSpaceAuth.user);window.dispatchEvent(new CustomEvent("crowspace:connected-universe-update",{detail:{creatorId:d.id}}))}catch(err){console.warn("CrowSpace 21.6",err)}
-});
-</script><script src="js/crowspace-connected-ui-21-7.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpaceConnectedUI21_7&&CrowSpaceConnectedUI21_7.start());</script><script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-explainability-21-10.js"></script><script src="js/crowspace-recommendation-controls-21-11.js"></script>
-<script src="js/crowspace-preference-runtime-21-12.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpacePreferenceRuntime21_12?.wire());</script><!-- CROWSPACE HOME 24.5 — SUPABASE LIVING WORLD -->
-<section id="crowspace-home24" class="home24" aria-label="CrowSpace living feed">
-<style>
-.home24{max-width:1480px;margin:28px auto;padding:0;position:relative;overflow:hidden;border:1px solid rgba(98,244,255,.18);border-radius:28px;background:#03050a;box-shadow:0 35px 120px rgba(0,0,0,.55);font-family:Montserrat,Arial,sans-serif;isolation:isolate}
-.home24 *{box-sizing:border-box}.h24-bg{position:absolute;inset:0;z-index:-2;background:radial-gradient(circle at 12% 8%,rgba(125,82,255,.2),transparent 28%),radial-gradient(circle at 88% 30%,rgba(35,225,255,.14),transparent 30%),linear-gradient(180deg,#070a16,#03050a 70%);animation:h24float 18s ease-in-out infinite alternate}.h24-scan{position:absolute;inset:0;z-index:-1;opacity:.035;background:repeating-linear-gradient(0deg,transparent 0 4px,#fff 5px);pointer-events:none}@keyframes h24float{to{transform:scale(1.06) translate(-1%,1%)}}.h24-top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:48px 6% 20px}.h24-kicker{font:800 8px Orbitron,Arial;letter-spacing:.2em;color:#74849b}.h24-top h2{font:900 clamp(2.4rem,5vw,5rem)/.9 Orbitron,Arial;letter-spacing:-.07em;margin:10px 0}.h24-top h2 span{color:#62f4ff;text-shadow:0 0 34px rgba(98,244,255,.3)}.h24-top p{max-width:720px;color:#8d9caf;font-size:11px;line-height:1.7;margin:0}.h24-status{display:flex;align-items:center;gap:9px;white-space:nowrap}.h24-dot{width:8px;height:8px;border-radius:50%;background:#54f2b0;box-shadow:0 0 16px #54f2b0;animation:h24pulse 1.3s infinite}@keyframes h24pulse{50%{opacity:.25;transform:scale(.65)}}.h24-status b{font:800 7px Montserrat;letter-spacing:.14em;color:#54f2b0}.h24-status button{border:1px solid rgba(98,244,255,.2);background:rgba(255,255,255,.04);color:#62f4ff;border-radius:9px;padding:9px 12px;font:800 7px Montserrat;cursor:pointer}.h24-signal{display:flex;gap:22px;flex-wrap:wrap;padding:0 6% 18px;color:#5e7087;font:700 7px Montserrat;letter-spacing:.1em}.h24-signal b{color:#62f4ff}.h24-tabs{display:flex;gap:7px;overflow:auto;padding:0 6% 18px}.h24-tabs button{white-space:nowrap;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);color:#73839a;border-radius:999px;padding:9px 13px;font:800 7px Montserrat;cursor:pointer}.h24-tabs button.active{color:#62f4ff;border-color:rgba(98,244,255,.35);background:rgba(98,244,255,.09)}.h24-feed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:0 6% 42px}.h24-card{position:relative;min-height:315px;border:1px solid rgba(255,255,255,.09);border-radius:19px;overflow:hidden;background:#070b14;animation:h24in .55s ease both}@keyframes h24in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.h24-card:first-child{grid-column:1/-1;min-height:390px}.h24-media{position:absolute;inset:0;background:#101827 center/cover no-repeat}.h24-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,4,10,.05) 15%,rgba(2,4,10,.35) 40%,rgba(2,4,10,.97) 100%)}.h24-card-content{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:25px}.h24-type{font:800 7px Orbitron;letter-spacing:.16em;color:#62f4ff}.h24-title{font:800 clamp(1.1rem,2vw,1.7rem) Orbitron;margin:8px 0;color:#f6f9ff}.h24-body{font-size:10px;line-height:1.65;color:#a0adbd;max-width:800px}.h24-meta{display:flex;align-items:center;gap:9px;margin-top:13px;color:#73839a;font-size:8px}.h24-avatar{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#62f4ff,#8b5cff);background-position:center;background-size:cover;color:white;font:900 8px Orbitron;overflow:hidden}.h24-actions{margin-left:auto;display:flex;gap:6px}.h24-actions button{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#c6d0dd;border-radius:8px;padding:7px 9px;font:800 7px Montserrat;cursor:pointer}.h24-live{color:#54f2b0!important}.h24-empty,.h24-loading{grid-column:1/-1;text-align:center;padding:50px 25px;border:1px dashed rgba(255,255,255,.1);border-radius:16px;color:#718096;font-size:10px}.h24-reason{display:inline-block;margin-top:8px;color:#62f4ff;font-size:7px;letter-spacing:.06em}.h24-link{color:inherit;text-decoration:none}.h24-link:hover .h24-title{color:#62f4ff}@media(max-width:800px){.h24-top{flex-direction:column;align-items:flex-start}.h24-status{width:100%}.h24-feed{grid-template-columns:1fr;padding:0 4% 30px}.h24-card:first-child{grid-column:auto;min-height:330px}.h24-card{min-height:300px}.h24-tabs{padding-left:4%}.h24-signal{padding-left:4%;padding-right:4%}.h24-top{padding-left:4%;padding-right:4%}}
-</style>
-<div class="h24-bg"></div><div class="h24-scan"></div>
-<header class="h24-top"><div><div class="h24-kicker">CROWRULES // SUPABASE LIVING WORLD</div><h2>THE SPACE IS <span>ALIVE.</span></h2><p id="h24-copy">Your live CrowSpace universe is synchronizing.</p></div><div class="h24-status"><span class="h24-dot"></span><b id="h24-state">CONNECTING</b><button id="h24-refresh" type="button">SYNC</button></div></header>
-<div class="h24-signal"><span>DATABASE <b id="h24-db">CONNECTING</b></span><span>REALTIME <b id="h24-rt">WAITING</b></span><span>MEMBER <b id="h24-member">GUEST</b></span><span>VISIBLE <b id="h24-count">0</b></span></div>
-<nav class="h24-tabs" aria-label="CrowSpace feed channels"><button class="active" data-h24-filter="all">FOR YOU</button><button data-h24-filter="following">FOLLOWING</button><button data-h24-filter="post">CONVERSATIONS</button><button data-h24-filter="event">LIVE & EVENTS</button><button data-h24-filter="caw">CAWS</button></nav>
-<div id="h24-feed" class="h24-feed"><div class="h24-loading">Synchronizing CrowSpace…</div></div>
-<script>
-(()=>{const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));let items=[],filter='all',channel=null,loading=false;
-const ago=d=>{const t=new Date(d).getTime();if(!Number.isFinite(t))return'';const m=Math.max(1,Math.floor((Date.now()-t)/60000));return m<60?m+'m ago':m<1440?Math.floor(m/60)+'h ago':Math.floor(m/1440)+'d ago'};
-const safeUrl=u=>{try{const x=new URL(u,location.href);return ['http:','https:'].includes(x.protocol)?x.href:''}catch{return''}};
-const set=(id,v)=>{const x=$(id);if(x)x.textContent=v};
-function render(){let list=filter==='all'?items:filter==='following'?items.filter(x=>x.followed):items.filter(x=>x.kind===filter);set('h24-count',list.length);if(!list.length){$('h24-feed').innerHTML='<div class="h24-empty">Nothing is moving in this channel yet.<br><span class="h24-reason">Start the next moment in CrowSpace.</span></div>';return}
-$('h24-feed').innerHTML=list.slice(0,18).map((x,i)=>{const avatar=safeUrl(x.avatar),media=safeUrl(x.media),href=safeUrl(x.link);const art=media?' style="background-image:linear-gradient(180deg,rgba(2,4,10,.05),rgba(2,4,10,.8)),url(&quot;'+esc(media)+'&quot;)"':'';return '<article class="h24-card" style="animation-delay:'+Math.min(i,8)*.05+'s"><div class="h24-media"'+art+'></div><div class="h24-card-content"><div class="h24-type">'+esc(x.tag)+(x.followed?' · FOLLOWING':'')+'</div><h3 class="h24-title">'+(href?'<a class="h24-link" href="'+esc(href)+'">'+esc(x.title)+'</a>':esc(x.title))+'</h3><div class="h24-body">'+esc(x.body)+'</div><div class="h24-meta"><span class="h24-avatar"'+(avatar?' style="background-image:url(\''+esc(avatar)+'\');color:transparent"':'')+'>'+esc((x.author||'C').slice(0,1).toUpperCase())+'</span><span>'+esc(x.author||'CrowSpace')+'</span><span>•</span><span class="'+(x.live?'h24-live':'')+'">'+esc(x.live?'LIVE NOW':ago(x.date))+'</span><span>•</span><span>'+esc(x.metric||'')+'</span><div class="h24-actions"><button type="button">OPEN</button><button type="button">SHARE</button></div></div></div></article>'}).join('')}
-async function rows(db,table,order){try{let q=db.from(table).select('*').limit(30);if(order)q=q.order(order,{ascending:false,nullsFirst:false});const r=await q;return r.error?[]:(r.data||[])}catch(e){console.warn('CrowSpace '+table,e);return[]}}
-async function profiles(db,ids){const u=[...new Set(ids.filter(Boolean))];if(!u.length)return new Map();try{const r=await db.from('crowspace_profiles').select('*').in('user_id',u);return new Map((r.data||[]).map(x=>[String(x.user_id),x]))}catch(e){return new Map()}}
-async function load(){if(loading)return;loading=true;try{await CrowSpaceAuth.ready;const db=CrowSpaceAuth.client;if(!db){set('h24-db','OFFLINE');set('h24-state','OFFLINE');return}set('h24-db','CONNECTED');const me=CrowSpaceAuth.user?.id||null;set('h24-member',me?'CONNECTED':'GUEST');set('h24-state',me?'PERSONALIZED':'LIVE');
-let follows=new Set();if(me){try{const f=await db.from('crowspace_follows').select('*').eq('follower_id',me);(f.data||[]).forEach(x=>{const id=x.following_id||x.followed_user_id||x.following_user_id;if(id)follows.add(String(id))})}catch(e){}}
-const [p,e,c]=await Promise.all([rows(db,'crowspace_posts','created_at'),rows(db,'crowspace_events','starts_at'),rows(db,'crowspace_caws','created_at')]);const ids=[...p.map(x=>x.user_id||x.author_id),...e.map(x=>x.created_by||x.user_id),...c.map(x=>x.user_id||x.creator_id)];const pm=await profiles(db,ids);
-items=[...p.map(x=>{const id=x.user_id||x.author_id,pr=pm.get(String(id))||{};return{kind:'post',tag:'COMMUNITY CONVERSATION',title:x.title||'New conversation',body:x.body||'A new community moment.',userId:id,author:pr.display_name||pr.username||'Creator',avatar:pr.avatar_url,date:x.created_at,media:x.media_url||x.image_url||x.cover_url,followed:id&&follows.has(String(id)),metric:(x.like_count??0)+' likes · '+(x.comment_count??0)+' comments'}}),...e.map(x=>{const id=x.created_by||x.user_id,pr=pm.get(String(id))||{};return{kind:'event',tag:x.is_live?'LIVE BROADCAST':String(x.event_type||'EVENT').toUpperCase(),title:x.title||'CrowSpace Event',body:x.description||'Something is happening in the universe.',userId:id,author:pr.display_name||pr.username||'Host',avatar:pr.avatar_url,date:x.starts_at,media:x.image_url||x.cover_url||x.thumbnail_url,live:!!x.is_live,link:x.link_url||x.youtube_url,metric:x.is_online?'ONLINE':'EVENT'}}),...c.map(x=>{const id=x.user_id||x.creator_id,pr=pm.get(String(id))||{};return{kind:'caw',tag:'CAW',title:x.title||'Community Caw',body:x.caption||x.description||'A moment from the community.',userId:id,author:pr.display_name||pr.username||'Creator',avatar:pr.avatar_url,date:x.created_at,media:x.thumbnail_url||x.cover_url,link:x.video_url,followed:id&&follows.has(String(id)),metric:(x.views??0)+' views'}})].filter(x=>x.date).sort((a,b)=>new Date(b.date)-new Date(a.date));set('h24-copy',me?'Your CrowSpace world is connected to your follows, creators, conversations, events and Caws.':'Live community activity from the CrowSpace universe.');render();
-if(channel)channel.unsubscribe();channel=db.channel('crowspace-home-24-5').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_events'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_caws'},()=>load()).subscribe(s=>set('h24-rt',s==='SUBSCRIBED'?'LIVE':'WAITING'));
-}catch(e){console.warn('CrowSpace Home 24.5',e);set('h24-state','ERROR');$('h24-feed').innerHTML='<div class="h24-empty">CrowSpace is reachable, but this living feed could not synchronize.<br><span class="h24-reason">Use SYNC to try again.</span></div>'}finally{loading=false}}
-document.addEventListener('DOMContentLoaded',load);window.addEventListener('crowspace:supabase-ready',load);$('h24-refresh')?.addEventListener('click',load);document.querySelectorAll('[data-h24-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-h24-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.h24Filter;render()}));window.addEventListener('beforeunload',()=>{try{channel?.unsubscribe()}catch(e){}});})();
-</script></section>
-
-</body>
-</html>
+</body></html>
