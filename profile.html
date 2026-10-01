@@ -223,7 +223,44 @@ body:before{opacity:.3;background-size:36px 36px;mask-image:linear-gradient(to b
 @keyframes nodePulse{0%,100%{opacity:.65;box-shadow:0 0 8px var(--green)}50%{opacity:1;box-shadow:0 0 22px var(--green)}}
 @media(max-width:760px){.profile-commandbar:before{width:100%;margin-bottom:3px}.banner{height:250px}.identity h1{font-size:25px}.profile-edit-dialog{height:97vh;max-height:97vh}}
 @media(prefers-reduced-motion:reduce){.identity h1:after,.profile-statusline .status-dot{animation:none}.btn:before{display:none}}
-</style><style id="crow-profile-v104b">.profile-future-badge{display:inline-flex;align-items:center;gap:7px;margin:0 0 8px;padding:6px 10px;border:1px solid rgba(85,239,255,.18);border-radius:999px;background:rgba(5,10,20,.7);font:800 9px Orbitron;letter-spacing:.14em;color:var(--muted)}.profile-future-badge span{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}</style><script src="js/crowspace-youtube-events.js" defer></script></head>
+</style><style id="crow-profile-v104b">.profile-future-badge{display:inline-flex;align-items:center;gap:7px;margin:0 0 8px;padding:6px 10px;border:1px solid rgba(85,239,255,.18);border-radius:999px;background:rgba(5,10,20,.7);font:800 9px Orbitron;letter-spacing:.14em;color:var(--muted)}.profile-future-badge span{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}</style><script src="js/crowspace-youtube-events.js" defer></script><style id="crow-profile-future-v90">
+:root{--fx-cyan:#55efff;--fx-violet:#a879ff;--fx-pink:#ff5bd6}
+body{background:#02040a!important}
+body:before{opacity:.34!important;background-size:38px 38px!important;animation:fxGrid 18s linear infinite}
+body:after{animation:fxAura 9s ease-in-out infinite alternate}
+@keyframes fxGrid{to{background-position:38px 38px}}
+@keyframes fxAura{0%{transform:translate3d(-2%,0,0) scale(1)}100%{transform:translate3d(2%,2%,0) scale(1.06)}}
+#app{position:relative}
+#app:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.018) 0,rgba(255,255,255,.018) 1px,transparent 1px,transparent 4px);mix-blend-mode:screen;opacity:.32}
+.hero,.card,.creator-hub-card,.profile-pulse,.creator-timeline,.quick-card{isolation:isolate}
+.hero:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(85,239,255,.16);border-radius:inherit;box-shadow:inset 0 0 40px rgba(85,239,255,.025),0 0 0 1px rgba(168,121,255,.035);animation:fxPulse 4s ease-in-out infinite}
+@keyframes fxPulse{50%{box-shadow:inset 0 0 70px rgba(85,239,255,.07),0 0 28px rgba(168,121,255,.05)}}
+.banner{background-image:linear-gradient(120deg,rgba(3,7,18,.78),rgba(37,18,71,.62)),radial-gradient(circle at 20% 30%,rgba(85,239,255,.3),transparent 24%),radial-gradient(circle at 80% 70%,rgba(255,91,214,.22),transparent 28%)!important}
+.banner:before{background:linear-gradient(180deg,transparent 0%,rgba(3,5,11,.08) 45%,#03050b 100%),linear-gradient(90deg,transparent 49.8%,rgba(85,239,255,.1) 50%,transparent 50.2%)!important;background-size:auto,100% 100%!important}
+.avatar{position:relative;animation:fxAvatar 5s ease-in-out infinite}
+@keyframes fxAvatar{50%{box-shadow:0 0 0 4px rgba(85,239,255,.08),0 0 55px rgba(85,239,255,.34),0 0 85px rgba(168,121,255,.12)}}
+.identity h1{position:relative}
+.identity h1:after{content:"";display:block;width:55%;height:2px;margin-top:8px;background:linear-gradient(90deg,var(--fx-cyan),var(--fx-violet),transparent);box-shadow:0 0 12px var(--fx-cyan);animation:fxLine 3s ease-in-out infinite}
+@keyframes fxLine{50%{width:85%;opacity:.7}100%{width:55%}}
+.btn{position:relative;overflow:hidden}
+.btn:after{content:"";position:absolute;top:0;left:-120%;width:70%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.12),transparent);transform:skewX(-20deg);transition:left .45s}
+.btn:hover:after{left:140%}
+.profile-commandbar{border-color:rgba(85,239,255,.25)!important;background:linear-gradient(90deg,rgba(3,9,18,.94),rgba(11,7,25,.92),rgba(3,9,18,.94))!important}
+.profile-commandbar:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--fx-cyan);box-shadow:0 0 14px var(--fx-cyan);animation:fxBlink 1.4s infinite}
+@keyframes fxBlink{50%{opacity:.35;transform:scale(.7)}}
+.profile-statusline .status-dot{animation:fxBlink 1.2s infinite}
+.quick-card,.creator-hub-card,.profile-pulse,.creator-timeline,.card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.quick-card:hover,.creator-hub-card:hover,.profile-pulse:hover,.creator-timeline:hover,.card:hover{border-color:rgba(85,239,255,.35)!important;box-shadow:0 0 30px rgba(85,239,255,.07),0 20px 70px #0009}
+.profile-future-hud{position:relative;z-index:2;display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:0 0 12px;padding:9px 12px;border:1px solid rgba(85,239,255,.15);border-radius:12px;background:rgba(3,7,16,.72);backdrop-filter:blur(14px);font:700 9px Orbitron;letter-spacing:.12em;color:#7790aa;text-transform:uppercase}
+.profile-future-hud b{color:var(--fx-cyan);text-shadow:0 0 12px rgba(85,239,255,.45)}
+.profile-future-hud .hud-center{text-align:center;color:#dbeeff}
+.profile-future-hud .hud-right{text-align:right}
+.hud-meter{display:inline-block;width:90px;height:5px;margin-left:7px;border:1px solid #20304a;border-radius:999px;overflow:hidden;vertical-align:middle}
+.hud-meter i{display:block;width:72%;height:100%;background:linear-gradient(90deg,var(--fx-cyan),var(--fx-violet),var(--fx-pink));box-shadow:0 0 12px var(--fx-cyan);animation:fxMeter 3s ease-in-out infinite}
+@keyframes fxMeter{50%{width:94%}100%{width:72%}}
+@media(max-width:760px){.profile-future-hud{grid-template-columns:1fr 1fr}.profile-future-hud .hud-center{display:none}.profile-future-hud .hud-right{text-align:right}.hud-meter{width:55px}}
+@media(prefers-reduced-motion:reduce){body:before,body:after,.hero:after,.avatar,.identity h1:after,.profile-commandbar:before,.status-dot,.hud-meter i{animation:none!important}}
+</style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
 <script>
@@ -688,5 +725,23 @@ document.addEventListener("crowspace:recommendation-update",async e=>{
  try{await rt.refresh(CrowSpaceAuth.client,CrowSpaceAuth.user);window.dispatchEvent(new CustomEvent("crowspace:connected-universe-update",{detail:{creatorId:d.id}}))}catch(err){console.warn("CrowSpace 21.6",err)}
 });
 </script><script src="js/crowspace-connected-ui-21-7.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpaceConnectedUI21_7&&CrowSpaceConnectedUI21_7.start());</script><script src="js/crowspace-persistent-graph-21-8.js"></script><script src="js/crowspace-graph-learning-21-9.js"></script><script src="js/crowspace-explainability-21-10.js"></script><script src="js/crowspace-recommendation-controls-21-11.js"></script>
-<script src="js/crowspace-preference-runtime-21-12.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpacePreferenceRuntime21_12?.wire());</script></body>
+<script src="js/crowspace-preference-runtime-21-12.js"></script><script>document.addEventListener("DOMContentLoaded",()=>window.CrowSpacePreferenceRuntime21_12?.wire());</script><script id="crow-profile-future-v90">
+(()=>{function boot(){
+ const app=document.getElementById("app"); if(!app||document.querySelector(".profile-future-hud"))return;
+ const hud=document.createElement("div"); hud.className="profile-future-hud";
+ hud.innerHTML='<span>NODE <b>CRW-PRF</b><i class="hud-meter"><i></i></i></span><span class="hud-center">UNIVERSAL IDENTITY MATRIX</span><span class="hud-right">PROFILE SYSTEM <b>ONLINE</b></span>';
+ const bar=app.querySelector(".profile-commandbar"); if(bar)bar.insertAdjacentElement("beforebegin",hud); else app.prepend(hud);
+ let lastX=-1,lastY=-1;
+ document.addEventListener("pointermove",e=>{
+   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+   if(Math.abs(e.clientX-lastX)<22&&Math.abs(e.clientY-lastY)<22)return;
+   lastX=e.clientX;lastY=e.clientY;
+   const dot=document.createElement("span");dot.style.cssText='position:fixed;left:'+e.clientX+'px;top:'+e.clientY+'px;width:3px;height:3px;border-radius:50%;background:var(--fx-cyan);box-shadow:0 0 12px var(--fx-cyan);pointer-events:none;z-index:99999;transition:transform .65s ease,opacity .65s ease';
+   document.body.appendChild(dot);requestAnimationFrame(()=>{dot.style.transform="scale(5)";dot.style.opacity="0"});setTimeout(()=>dot.remove(),700);
+ });
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
+new MutationObserver(boot).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script></body>
 </html>
