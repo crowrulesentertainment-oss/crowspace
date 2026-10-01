@@ -151,13 +151,17 @@ async function load(){
   db=await waitForClient();
   const session=await db.auth.getSession();user=session.data?.session?.user||null;
   $('memberStatus').textContent=user?'MEMBER':'GUEST';$('networkStatus').textContent='CONNECTED';
-  const [p,e,c]=await Promise.all([
+  const [p,e,c]=await Promise.allSettled([
    db.from('crowspace_posts').select('*').order('created_at',{ascending:false}).limit(30),
    db.from('crowspace_events').select('*').order('starts_at',{ascending:false}).limit(20),
    db.from('crowspace_caws').select('*').order('created_at',{ascending:false}).limit(20)
   ]);
-  if(p.error)throw p.error;if(e.error)console.warn('events:',e.error);if(c.error)throw new Error('CAW SYNC FAILED: '+c.error.message);
-  const posts=p.data||[],events=e.data||[],caws=c.data||[];
+  const result=(r)=>r.status==='fulfilled'?r.value:{data:[],error:r.reason};
+  const pr=result(p),er=result(e),cr=result(c);
+  if(pr.error)console.error('[CrowSpace Posts]',pr.error);
+  if(er.error)console.error('[CrowSpace Events]',er.error);
+  if(cr.error)console.error('[CrowSpace Caws]',cr.error);
+  const posts=pr.data||[],events=er.data||[],caws=cr.data||[];
   const ids=[...posts.map(x=>x.user_id),...events.map(x=>x.created_by||x.user_id),...caws.map(x=>x.user_id||x.creator_id)].filter(Boolean);
   let pm=new Map();
   if(ids.length){const pr=await db.from('crowspace_profiles').select('user_id,username,display_name,avatar_url,is_verified,verification_label').in('user_id',[...new Set(ids.map(String))]);if(!pr.error)(pr.data||[]).forEach(x=>pm.set(String(x.user_id),x));}
@@ -168,9 +172,9 @@ async function load(){
   ].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(user){try{const f=await db.from('crowspace_follows').select('followed_user_id').eq('follower_id',user.id);const fs=new Set((f.data||[]).map(x=>String(x.followed_user_id)));rows.forEach(x=>x.followed=fs.has(String(x.authorId)))}catch(e){}}
   $('dataCounts').textContent=posts.length+' POSTS · '+events.length+' EVENTS · '+caws.length+' CAWS';
-  $('dataStatus').textContent='CONNECTED';$('dbStatus').textContent='CONNECTED';$('syncTime').textContent='SUPABASE · '+new Date().toLocaleTimeString([], {hour12:false});
+  $('dataStatus').textContent=(pr.error||er.error||cr.error)?'PARTIAL':'CONNECTED';$('dbStatus').textContent='CONNECTED · SDK';$('syncTime').textContent='SUPABASE · '+new Date().toLocaleTimeString([], {hour12:false});
   $('coreCount').textContent='LIVE';
-  rail('eventRail',rows.filter(x=>x.kind==='event'),'event');rail('cawRail',rows.filter(x=>x.kind==='caw'),'caw');$('cawStatus').textContent=caws.length?'CAWS LOADED FROM SUPABASE':'NO CAWS FOUND IN SUPABASE';render();
+  rail('eventRail',rows.filter(x=>x.kind==='event'),'event');rail('cawRail',rows.filter(x=>x.kind==='caw'),'caw');$('cawStatus').textContent=cr.error?'CAWS SYNC FAILED: '+(cr.error.message||cr.error):(caws.length?'CAWS LOADED FROM SUPABASE':'NO CAWS FOUND IN SUPABASE');render();
   if(!channel){channel=db.channel('crowspace-home-universe').on('postgres_changes',{event:'*',schema:'public',table:'crowspace_posts'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_events'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_caws'},()=>load()).on('postgres_changes',{event:'*',schema:'public',table:'crowspace_profiles'},()=>load()).subscribe(s=>{$('rtStatus').textContent=s==='SUBSCRIBED'?'CONNECTED':'CHECKING'})}
   $('feedDescription').textContent=user?'Your CrowSpace node is connected to the live universe.':'The public universe is connected. Sign in to unlock personalized signals.';
  }catch(e){console.error('[CrowSpace Home]',e);$('dbStatus').textContent='OFFLINE';$('networkStatus').textContent='CHECK';$('rtStatus').textContent='WAITING';$('dataStatus').textContent='OFFLINE';$('syncTime').textContent='CHECK FAILED · '+(e.message||'UNKNOWN ERROR');$('feed').innerHTML='<div class="empty">THE UNIVERSE CONNECTION COULD NOT BE VERIFIED.<br><br>'+esc(e.message||'Please check your connection and try again.')+'</div>';toast('SUPABASE CHECK FAILED')}finally{loading=false}
