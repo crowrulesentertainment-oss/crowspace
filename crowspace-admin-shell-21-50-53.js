@@ -7,6 +7,7 @@ const WORKER='worker-control-center.html';
 const HUB='admin-operations-hub-21-50-54.html';
 const NOC='notification-operations-center-21-50-55.html';
 const NOTIF_ANALYTICS='notification-analytics-21-50-56.html';
+const NOTIF_INTELLIGENCE='notification-intelligence-21-50-57.html';
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function inject(){
   if(document.getElementById('cs-admin-menu'))return;
@@ -16,7 +17,7 @@ function inject(){
   const btn=document.createElement('button');btn.type='button';btn.className='cs-nav-menu-btn';btn.setAttribute('aria-expanded','false');
   btn.innerHTML='<span>ADMIN</span><b>⌄</b>';
   const panel=document.createElement('div');panel.className='cs-nav-dropdown';panel.setAttribute('role','menu');
-  panel.innerHTML='<a href="'+HUB+'" role="menuitem" class="'+(location.pathname.endsWith(HUB)?'cs-active':'')+'">▣ Admin Operations Hub</a><a href="'+WORKER+'" role="menuitem" class="'+(location.pathname.endsWith(WORKER)?'cs-active':'')+'">⚙ Worker Control Center</a><a href="'+NOC+'" role="menuitem" class="'+(location.pathname.endsWith(NOC)?'cs-active':'')+'">✉ Notification Operations</a><a href="'+NOTIF_ANALYTICS+'" role="menuitem" class="'+(location.pathname.endsWith(NOTIF_ANALYTICS)?'cs-active':'')+'">◒ Notification Analytics</a>';
+  panel.innerHTML='<a href="'+HUB+'" role="menuitem" class="'+(location.pathname.endsWith(HUB)?'cs-active':'')+'">▣ Admin Operations Hub</a><a href="'+WORKER+'" role="menuitem" class="'+(location.pathname.endsWith(WORKER)?'cs-active':'')+'">⚙ Worker Control Center</a><a href="'+NOC+'" role="menuitem" class="'+(location.pathname.endsWith(NOC)?'cs-active':'')+'">✉ Notification Operations</a><a href="'+NOTIF_ANALYTICS+'" role="menuitem" class="'+(location.pathname.endsWith(NOTIF_ANALYTICS)?'cs-active':'')+'">◒ Notification Analytics</a><a href="'+NOTIF_INTELLIGENCE+'" role="menuitem" class="'+(location.pathname.endsWith(NOTIF_INTELLIGENCE)?'cs-active':'')+'">⚠ Notification Intelligence</a>';
   wrap.append(btn,panel);host.appendChild(wrap);
   btn.onclick=e=>{e.stopPropagation();const open=wrap.classList.toggle('is-open');btn.setAttribute('aria-expanded',String(open))};
   document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('is-open');btn.setAttribute('aria-expanded','false')}});
