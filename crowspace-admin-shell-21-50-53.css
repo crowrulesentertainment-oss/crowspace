@@ -1,0 +1,7 @@
+.cs-admin-menu-wrap .cs-nav-dropdown{min-width:245px}
+.cs-admin-menu-wrap .cs-nav-menu-btn{border-color:rgba(255,190,90,.28)}
+.cs-admin-menu-wrap .cs-nav-menu-btn span{color:#ffd18a}
+.cs-admin-ribbon{position:fixed;right:18px;bottom:18px;z-index:9999;display:flex;gap:10px;align-items:center;padding:9px 12px;border:1px solid rgba(255,190,90,.28);border-radius:999px;background:rgba(7,9,18,.9);backdrop-filter:blur(12px);box-shadow:0 12px 35px rgba(0,0,0,.35);font-family:Montserrat,system-ui,sans-serif}
+.cs-admin-ribbon span{font:800 9px Orbitron,sans-serif;letter-spacing:.18em;color:#ffd18a}
+.cs-admin-ribbon small{font-size:9px;color:#8e9bb0}
+@media(max-width:760px){.cs-admin-ribbon{right:10px;bottom:10px}.cs-admin-ribbon small{display:none}}
