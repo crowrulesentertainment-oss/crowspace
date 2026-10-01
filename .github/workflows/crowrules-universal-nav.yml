@@ -27,12 +27,19 @@ jobs:
         run: |
           set -euo pipefail
           SUPABASE_URL='https://cevylpnoexugwgygvtgu.supabase.co'
-          SUPABASE_KEY='sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-' 
           NAV_URL='https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4'
+
+          test -n "$SUPABASE_URL"
           test "${SUPABASE_URL#https://}" != "$SUPABASE_URL"
-          curl -fsS --max-time 15 -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY" "$SUPABASE_URL/rest/v1/" -o /dev/null
+
+          # /rest/v1/ is not a reliable health endpoint for Supabase and can
+          # return 401 even when the project is healthy. Validate the public
+          # Auth health endpoint instead; application pages use their own
+          # publishable/anon key when talking to PostgREST.
+          curl -fsS --max-time 15 "$SUPABASE_URL/auth/v1/health" -o /dev/null
           curl -fsS --max-time 15 "$NAV_URL" -o /dev/null
-          echo "Supabase endpoint and universal navigation asset are reachable."
+
+          echo "Supabase health endpoint and universal navigation asset are reachable."
 
       - name: Sync Universal CrowRules navigation
         shell: bash
@@ -52,7 +59,6 @@ jobs:
               text = path.read_text(encoding='utf-8')
               original = text
 
-              # Remove stale/duplicate CrowRules sitewide script tags.
               text = re.sub(
                   r'\s*<script\b[^>]*src=["\'][^"\']*crowrules-sitewide\.js[^"\']*["\'][^>]*>\s*</script>',
                   '',
@@ -60,7 +66,6 @@ jobs:
                   flags=re.I
               )
 
-              # Install exactly one canonical script before </head>.
               if re.search(r'</head>', text, flags=re.I):
                   text = re.sub(r'</head>', nav + '\n</head>', text, count=1, flags=re.I)
 
@@ -84,19 +89,31 @@ jobs:
           node --check crowspace-rebuild.js
           python3 <<'PY'
           from pathlib import Path
-          import re, sys
+          import sys
+
           failures = []
           canonical = 'https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=4'
+
           for path in Path('.').rglob('*.html'):
               if '.git' in path.parts:
                   continue
+
               text = path.read_text(encoding='utf-8')
-              refs = [line.strip() for line in text.splitlines() if "<script" in line.lower() and 'crowrules-sitewide.js' in line.lower()]
-              if refs != [canonical]:
-                  failures.append(f"{path}: expected exactly one canonical sitewide script, found {refs}")
+              refs = [
+                  line.strip()
+                  for line in text.splitlines()
+                  if '<script' in line.lower() and 'crowrules-sitewide.js' in line.lower()
+              ]
+
+              if refs != [f'<script src="{canonical}" defer></script>']:
+                  failures.append(
+                      f"{path}: expected exactly one canonical sitewide script, found {refs}"
+                  )
+
           if failures:
               print("\n".join(failures))
               sys.exit(1)
+
           print("HTML navigation and JavaScript validation passed.")
           PY
 
