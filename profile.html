@@ -283,6 +283,29 @@ body:after{animation:fxAura 9s ease-in-out infinite alternate}
 .profile-signal-pulse{position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(85,239,255,.12);animation:signalPulse 3.5s ease-in-out infinite}
 @keyframes signalPulse{50%{box-shadow:inset 0 0 55px rgba(85,239,255,.035),inset 0 0 0 1px rgba(85,239,255,.28)}}
 @media(prefers-reduced-motion:reduce){.profile-orb,.profile-holo-frame:before,.profile-holo-frame:after,.profile-presence i,.profile-signal-pulse{animation:none!important}.profile-enter-overlay{display:none!important}}
+</style><style id="crow-profile-holo-v92">
+.profile-holo-stage{position:relative;margin:18px 0;padding:18px;border:1px solid rgba(85,239,255,.18);border-radius:18px;background:radial-gradient(circle at 50% 35%,rgba(85,239,255,.08),transparent 35%),linear-gradient(145deg,rgba(6,12,25,.9),rgba(10,5,24,.82));overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease;box-shadow:0 20px 70px #0009,inset 0 0 45px rgba(85,239,255,.025)}
+.profile-holo-stage:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.8%,rgba(85,239,255,.08) 50%,transparent 50.2%),linear-gradient(transparent 49.8%,rgba(168,121,255,.06) 50%,transparent 50.2%);background-size:100% 100%;pointer-events:none}
+.holo-grid{position:absolute;inset:auto -20% -55%;height:75%;background:linear-gradient(rgba(85,239,255,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(168,121,255,.11) 1px,transparent 1px);background-size:28px 28px;transform:perspective(300px) rotateX(58deg);opacity:.35}
+.holo-content{position:relative;z-index:2;display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
+.holo-core{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle,rgba(85,239,255,.16),rgba(7,11,23,.95) 60%);border:1px solid rgba(85,239,255,.35);box-shadow:0 0 45px rgba(85,239,255,.14),inset 0 0 30px rgba(168,121,255,.12)}
+.holo-core:before,.holo-core:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(85,239,255,.35);animation:holoOrbit 6s linear infinite}
+.holo-core:before{inset:-12px;border-left-color:transparent;border-bottom-color:rgba(255,91,214,.45)}
+.holo-core:after{inset:-22px;border-right-color:transparent;border-top-color:rgba(168,121,255,.4);animation-duration:10s;animation-direction:reverse}
+@keyframes holoOrbit{to{transform:rotate(360deg)}}
+.holo-core .holo-number{font:900 30px Orbitron;color:var(--cyan);text-shadow:0 0 24px var(--cyan)}
+.holo-copy h3{margin:0;color:#e8fbff;font:800 14px Orbitron;letter-spacing:.1em}.holo-copy p{margin:8px 0;color:var(--muted);font-size:11px;line-height:1.55}.holo-readout{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}
+.holo-readout div{padding:9px;border:1px solid var(--line);border-radius:9px;background:#030811aa}.holo-readout b{display:block;color:var(--cyan);font:800 13px Orbitron}.holo-readout span{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.profile-energy{margin-top:12px;height:5px;border-radius:99px;background:#081020;border:1px solid var(--line);overflow:hidden}.profile-energy i{display:block;height:100%;width:68%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));box-shadow:0 0 14px var(--cyan);animation:energyFlow 3s ease-in-out infinite}
+@keyframes energyFlow{50%{width:92%}100%{width:68%}}
+.profile-achievement-constellation{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+.achievement-node{position:relative;padding:12px 8px;text-align:center;border:1px solid var(--line);border-radius:12px;background:#050a14;transition:.2s}
+.achievement-node:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 0 24px rgba(85,239,255,.1)}
+.achievement-node b{display:block;font-size:20px;filter:drop-shadow(0 0 8px rgba(85,239,255,.45))}.achievement-node span{display:block;margin-top:5px;font:700 8px Rajdhani;color:var(--muted);letter-spacing:.08em}
+.profile-creating{display:flex;align-items:center;gap:9px;margin-top:12px;padding:9px 11px;border:1px solid rgba(168,121,255,.2);border-radius:10px;background:rgba(168,121,255,.04);font-size:10px;color:#b9c9db}.profile-creating i{width:7px;height:7px;border-radius:50%;background:var(--violet);box-shadow:0 0 12px var(--violet);animation:creatingPulse 1.3s infinite}
+@keyframes creatingPulse{50%{opacity:.3;transform:scale(.6)}}
+@media(max-width:760px){.holo-content{grid-template-columns:1fr;text-align:center}.holo-core{margin:auto}.holo-readout{grid-template-columns:1fr 1fr}.profile-achievement-constellation{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.profile-holo-stage{transition:none}.holo-core:before,.holo-core:after,.profile-energy i,.profile-creating i{animation:none!important}}
 </style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
@@ -792,5 +815,23 @@ new MutationObserver(boot).observe(document.documentElement,{childList:true,subt
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
 })();
-</script></body>
+</script><script id="crow-profile-holo-v92">
+(()=>{function boot(){
+ const app=document.getElementById("app");if(!app||app.querySelector(".profile-holo-stage"))return;
+ const stage=document.createElement("section");stage.className="profile-holo-stage";stage.id="identityHologram";
+ const f=(v)=>{try{return Number(v||0)}catch{return 0}};
+ const followers=window.followers?.length||0,following=window.following?.length||0,posts=window.posts?.length||0;
+ const completeness=typeof window.profileCompleteness==="function"?Math.round(window.profileCompleteness(window.target||{})):0;
+ stage.innerHTML='<div class="holo-grid"></div><div class="holo-content"><div class="holo-core"><span class="holo-number">'+Math.min(99,Math.max(1,completeness))+'</span></div><div class="holo-copy"><h3>HOLOGRAPHIC IDENTITY MATRIX</h3><p>Live visualization of this CrowSpace identity, community connections and creator activity.</p><div class="holo-readout"><div><b>'+followers+'</b><span>Followers</span></div><div><b>'+following+'</b><span>Following</span></div><div><b>'+posts+'</b><span>Posts</span></div></div><div class="profile-energy"><i></i></div><div class="profile-creating"><i></i><span>IDENTITY SIGNAL ACTIVE · PROFILE DATA SYNCHRONIZED</span></div></div></div>';
+ const anchor=app.querySelector(".creator-hub")||app.querySelector(".profile-pulse")||app.querySelector(".hero");
+ if(anchor)anchor.insertAdjacentElement("afterend",stage);else app.appendChild(stage);
+ const reduced=matchMedia("(prefers-reduced-motion: reduce)");
+ if(!reduced.matches){stage.addEventListener("pointermove",e=>{const r=stage.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;stage.style.transform="perspective(900px) rotateX("+(-y*3)+"deg) rotateY("+(x*4)+"deg)"});stage.addEventListener("pointerleave",()=>stage.style.transform="");}
+ const ach=document.createElement("section");ach.className="profile-achievement-constellation";
+ ach.innerHTML='<div class="achievement-node"><b>◈</b><span>IDENTITY</span></div><div class="achievement-node"><b>✦</b><span>CREATOR</span></div><div class="achievement-node"><b>⌁</b><span>CONNECTED</span></div><div class="achievement-node"><b>⚡</b><span>ACTIVE</span></div>';
+ stage.insertAdjacentElement("afterend",ach);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
+new MutationObserver(boot).observe(document.documentElement,{childList:true,subtree:true});
+})();</script></body>
 </html>
