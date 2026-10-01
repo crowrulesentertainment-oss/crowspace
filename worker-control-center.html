@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowSpace — Worker Control Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="worker-control-center.css"></head>
+<body><div class="shell">
+<header><div><div class="eyebrow">CROWRULES // CROWSPACE</div><h1>WORKER CONTROL CENTER</h1><p>Governance notification delivery operations</p></div><button id="refresh" class="ghost">↻ Refresh</button></header>
+<section class="hero"><div><span id="healthDot" class="dot"></span><span id="health">Checking worker health…</span><small id="cron">Scheduler status</small></div><button id="run" class="primary">▶ RUN WORKER NOW</button></section>
+<section class="grid" id="queue"></section>
+<section class="panel"><div class="panelHead"><div><span class="eyebrow">LATEST EXECUTION</span><h2>Last Run</h2></div><span id="lastStatus" class="badge">—</span></div><div id="lastRun" class="metrics empty">No execution recorded yet.</div></section>
+<section class="panel"><div class="panelHead"><div><span class="eyebrow">OPERATIONS</span><h2>Execution History</h2></div><span id="updated">—</span></div><div class="tableWrap"><table><thead><tr><th>Trigger</th><th>Status</th><th>Started</th><th>Duration</th><th>Processed</th><th>Sent</th><th>Failed</th><th>Details</th></tr></thead><tbody id="history"></tbody></table></div></section>
+<div id="toast" class="toast"></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="worker-control-center.js"></script></body></html>
