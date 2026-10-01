@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050711">
+<title>CrowSpace — Notification Operations Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="crowspace-rebuild.css">
+<link rel="stylesheet" href="crowspace-universal.css">
+<link rel="stylesheet" href="crowspace-admin-shell-21-50-53.css">
+<link rel="stylesheet" href="notification-operations-center-21-50-55.css">
+<script src="crowspace-auth.js"></script>
+<script src="crowspace-universal.js" defer></script>
+<script src="crowspace-admin-shell-21-50-53.js" defer></script>
+</head>
+<body>
+<main class="noc">
+<header class="head">
+<div><div class="eyebrow">CROWRULES // CROWSPACE // ADMIN HQ</div><h1>NOTIFICATION OPERATIONS CENTER</h1><p>Search, inspect and safely requeue every governance notification delivery.</p></div>
+<div class="actions"><span id="access">VERIFYING ACCESS</span><a href="admin-operations-hub-21-50-54.html">← ADMIN HQ</a><button id="refresh">↻ REFRESH</button></div>
+</header>
+<section class="stats" id="stats"></section>
+<section class="toolbar">
+<div class="search"><span>⌕</span><input id="search" placeholder="Search title, type, recipient ID, provider ID, or error…"></div>
+<select id="status"><option value="all">All statuses</option><option value="queued">Queued</option><option value="sending">Sending</option><option value="sent">Sent</option><option value="deferred">Deferred</option><option value="failed">Failed</option></select>
+<select id="channel"><option value="all">All channels</option><option value="in_app">In-App</option><option value="email">Email</option><option value="push">Push</option><option value="sms">SMS</option></select>
+<button id="apply">APPLY FILTERS</button>
+</section>
+<section class="panel">
+<div class="panel-head"><div><span class="eyebrow">DELIVERY QUEUE</span><b id="resultCount">—</b></div><small id="updated">—</small></div>
+<div class="table-wrap"><table><thead><tr><th>Notification</th><th>Recipient</th><th>Channel</th><th>State</th><th>Attempts</th><th>Last Error</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="pager"><button id="prev">← PREVIOUS</button><span id="page">Page 1</span><button id="next">NEXT →</button></div>
+</section>
+<section class="panel history"><div class="panel-head"><div><span class="eyebrow">DELIVERY AUDIT TRAIL</span><b>Recent administrative actions</b></div></div><div id="auditList"></div></section>
+</main>
+<div id="drawer" class="drawer" aria-hidden="true"><div class="drawer-card"><button id="closeDrawer" class="close">×</button><div id="detail"></div></div></div>
+<div id="toast"></div>
+<script src="notification-operations-center-21-50-55.js"></script>
+</body></html>
