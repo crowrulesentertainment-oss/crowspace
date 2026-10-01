@@ -260,6 +260,29 @@ body:after{animation:fxAura 9s ease-in-out infinite alternate}
 @keyframes fxMeter{50%{width:94%}100%{width:72%}}
 @media(max-width:760px){.profile-future-hud{grid-template-columns:1fr 1fr}.profile-future-hud .hud-center{display:none}.profile-future-hud .hud-right{text-align:right}.hud-meter{width:55px}}
 @media(prefers-reduced-motion:reduce){body:before,body:after,.hero:after,.avatar,.identity h1:after,.profile-commandbar:before,.status-dot,.hud-meter i{animation:none!important}}
+</style><style id="crow-profile-living-v91">
+.profile-living-layer{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
+.profile-orb{position:absolute;width:18px;height:18px;border:1px solid rgba(85,239,255,.55);border-radius:50%;box-shadow:0 0 18px rgba(85,239,255,.3);animation:livingFloat 8s ease-in-out infinite}
+.profile-orb.o1{left:8%;top:28%}.profile-orb.o2{right:10%;top:18%;width:11px;height:11px;animation-delay:-2s}.profile-orb.o3{right:24%;bottom:16%;width:14px;height:14px;animation-delay:-5s}
+@keyframes livingFloat{0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.35}50%{transform:translate3d(18px,-28px,0) scale(1.45);opacity:.85}}
+.profile-holo-frame{position:relative}
+.profile-holo-frame:before{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px solid rgba(85,239,255,.18);border-top-color:var(--cyan);border-right-color:var(--violet);animation:holoSpin 7s linear infinite;pointer-events:none}
+.profile-holo-frame:after{content:"";position:absolute;inset:-15px;border-radius:50%;border:1px dashed rgba(255,91,214,.16);animation:holoSpinReverse 12s linear infinite;pointer-events:none}
+@keyframes holoSpin{to{transform:rotate(360deg)}}@keyframes holoSpinReverse{to{transform:rotate(-360deg)}}
+.profile-presence{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid rgba(102,255,178,.25);border-radius:999px;background:rgba(102,255,178,.045);color:var(--green);font:700 9px Orbitron;letter-spacing:.08em}
+.profile-presence i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:presencePulse 1.5s infinite}
+@keyframes presencePulse{50%{opacity:.3;transform:scale(.65)}}
+.profile-enter-overlay{position:fixed;inset:0;z-index:100000;background:#02040a;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:1;transition:opacity .65s ease}
+.profile-enter-overlay.done{opacity:0}
+.profile-enter-core{text-align:center;font-family:Orbitron;letter-spacing:.14em;color:var(--cyan);text-shadow:0 0 22px rgba(85,239,255,.6)}
+.profile-enter-core b{display:block;font-size:clamp(20px,5vw,38px);margin-bottom:12px}.profile-enter-core span{font-size:9px;color:#72869f}
+.profile-enter-line{width:min(320px,70vw);height:2px;margin:16px auto;background:#17243a;overflow:hidden}
+.profile-enter-line i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));box-shadow:0 0 16px var(--cyan);animation:enterLoad 1.1s ease forwards}
+@keyframes enterLoad{to{width:100%}}
+.profile-holo-tag{position:absolute;right:18px;top:18px;padding:7px 10px;border:1px solid rgba(85,239,255,.22);border-radius:8px;background:rgba(3,8,17,.72);backdrop-filter:blur(10px);color:var(--cyan);font:700 8px Orbitron;letter-spacing:.12em;z-index:3}
+.profile-signal-pulse{position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(85,239,255,.12);animation:signalPulse 3.5s ease-in-out infinite}
+@keyframes signalPulse{50%{box-shadow:inset 0 0 55px rgba(85,239,255,.035),inset 0 0 0 1px rgba(85,239,255,.28)}}
+@media(prefers-reduced-motion:reduce){.profile-orb,.profile-holo-frame:before,.profile-holo-frame:after,.profile-presence i,.profile-signal-pulse{animation:none!important}.profile-enter-overlay{display:none!important}}
 </style></head>
 <body data-page="profile">
 <main class="profile-wrap" id="profileWrap"><div id="app" class="state">Connecting to CrowSpace…</div></main>
@@ -742,6 +765,32 @@ document.addEventListener("crowspace:recommendation-update",async e=>{
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 new MutationObserver(boot).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script><script id="crow-profile-living-v91">
+(()=>{const init=()=>{
+ if(document.querySelector(".profile-living-layer"))return;
+ const layer=document.createElement("div");layer.className="profile-living-layer";
+ layer.innerHTML='<span class="profile-orb o1"></span><span class="profile-orb o2"></span><span class="profile-orb o3"></span>';
+ document.body.appendChild(layer);
+ const app=document.getElementById("app");if(app){
+   const hero=app.querySelector(".hero");
+   if(hero){
+     const tag=document.createElement("span");tag.className="profile-holo-tag";tag.textContent="IDENTITY NODE // LIVE";hero.appendChild(tag);
+     const pulse=document.createElement("span");pulse.className="profile-signal-pulse";hero.appendChild(pulse);
+     const av=hero.querySelector(".avatar");if(av&&!av.parentElement.classList.contains("profile-holo-frame")){const w=document.createElement("span");w.className="profile-holo-frame";av.parentNode.insertBefore(w,av);w.appendChild(av)}
+     const meta=hero.querySelector(".identity-meta")||hero.querySelector(".profile-header-meta");
+     if(meta&&!meta.querySelector(".profile-presence")){const p=document.createElement("span");p.className="profile-presence";p.innerHTML="<i></i> ONLINE NODE";meta.appendChild(p)}
+   }
+ }
+ if(!sessionStorage.getItem("crowspace-profile-enter-v91")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
+   sessionStorage.setItem("crowspace-profile-enter-v91","1");
+   const o=document.createElement("div");o.className="profile-enter-overlay";
+   o.innerHTML='<div class="profile-enter-core"><b>CROWSPACE</b><span>ESTABLISHING PERSONAL NODE</span><div class="profile-enter-line"><i></i></div><span>UNIVERSAL IDENTITY MATRIX // ONLINE</span></div>';
+   document.body.appendChild(o);setTimeout(()=>o.classList.add("done"),1200);setTimeout(()=>o.remove(),1900);
+ }
+};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+new MutationObserver(init).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script></body>
 </html>
