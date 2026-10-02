@@ -407,6 +407,7 @@ body:after{animation:fxAura 9s ease-in-out infinite alternate}
 (function(){
 "use strict";
 var db=null;
+var profileRealtimeChannel=null;
 var auth=window.CrowSpaceAuth;
 function waitForAuth(){
   return new Promise(function(resolve,reject){
@@ -424,6 +425,14 @@ var ago=function(v){var n=(Date.now()-new Date(v).getTime())/1000;if(n<60)return
 var toast=function(m){var x=document.createElement("div");x.className="toast";x.textContent=m;document.body.appendChild(x);setTimeout(function(){x.remove()},3200)};
 async function q(label,fn,optional){try{var r=await fn();if(r&&r.error){console.warn("[CrowSpace]",label,r.error);if(!optional)S.errors.push(label+": "+(r.error.message||"Supabase error"));return null}return r?r.data:null}catch(e){console.warn("[CrowSpace]",label,e);if(!optional)S.errors.push(label+": "+(e.message||"Supabase error"));return null}}
 async function currentUser(){var r=await db.auth.getUser();return r&&r.data?r.data.user:null}
+function subscribeUniversalProfileRealtime(){
+ var uid=S.profile&&S.profile.user_id;if(!db||!uid)return;
+ if(profileRealtimeChannel)try{db.removeChannel(profileRealtimeChannel)}catch(_){}
+ profileRealtimeChannel=db.channel("crowspace-universal-profile-"+uid)
+  .on("postgres_changes",{event:"*",schema:"public",table:"crowspace_profiles",filter:"user_id=eq."+uid},function(){loadData()})
+  .on("postgres_changes",{event:"*",schema:"public",table:"podcast_member_profiles",filter:"user_id=eq."+uid},function(){loadData()})
+  .subscribe();
+}
 async function getProfile(){var key=P.get("u")||P.get("user")||P.get("id"),q0=db.from("crowspace_profiles").select("*").limit(1);if(key){q0=/^[0-9a-f-]{36}$/i.test(key)?q0.eq("user_id",key):q0.eq("username",key)}else if(S.user)q0=q0.eq("user_id",S.user.id);else return null;return await q("Load profile",function(){return q0.maybeSingle()},false)}
 async function ensureProfile(){if(!S.user)return;var p=await q("Load own profile",function(){return db.from("crowspace_profiles").select("*").eq("user_id",S.user.id).maybeSingle()},true);if(p){S.profile=p;return}var m=await q("Load membership record",function(){return db.from("members").select("id,username,display_name,first_name,last_name,bio,avatar_url").eq("user_id",S.user.id).maybeSingle()},false);S.member=m;if(!m)return;var name=m.display_name||[m.first_name,m.last_name].filter(Boolean).join(" ")||S.user.user_metadata&&S.user.user_metadata.full_name||"Crow Member";var username=m.username||S.user.user_metadata&&S.user.user_metadata.user_name||S.user.email&&S.user.email.split("@")[0]||"crow";var created=await q("Create profile",function(){return db.from("crowspace_profiles").insert({user_id:S.user.id,username:username.toLowerCase().replace(/[^a-z0-9_.-]/g,"").slice(0,40),display_name:name.slice(0,80),bio:m.bio||"",avatar_url:m.avatar_url||null,social_links:{},profile_theme:"cinematic"}).select("*").single()},false);if(created)S.profile=created}
 async function loadData(){
@@ -531,6 +540,7 @@ window.addEventListener("crowspace-auth",function(e){
     await waitForAuth();
     S.user=auth&&auth.user?auth.user:await currentUser();
     await loadData();
+    subscribeUniversalProfileRealtime();
     var toggle=$("mobileToggle"),menu=$("mobileMenu");
     if(toggle&&menu)toggle.onclick=function(){menu.style.display=menu.style.display==="none"?"block":"none"};
     setInterval(function(){if(document.visibilityState==="visible")loadData()},30000);
