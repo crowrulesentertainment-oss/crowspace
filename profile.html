@@ -401,6 +401,7 @@ body:after{animation:fxAura 9s ease-in-out infinite alternate}
 @media(max-width:820px){.profile-grid{grid-template-columns:1fr}.caw-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}}@media(max-width:600px){.cr-nav{padding:9px 12px}.nav-links{display:none}.nav-right{font-size:7px}.hero-body{padding:0 16px 20px}.banner{height:230px}.avatar{width:115px;height:115px;margin-top:-58px}.identity{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.caw-grid,.people-grid{grid-template-columns:1fr}.social-row{grid-template-columns:1fr auto}.editor{height:96vh;border-radius:15px}.editor-body{padding:0 14px 100px}}
 </style>
 <script src="crowspace-auth.js"></script>
+<script src="universal-profile-sync.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
@@ -491,11 +492,16 @@ function addSocial(label,url){
  var row=document.createElement("div");row.className="social-row";row.innerHTML='<input data-label maxlength="30" placeholder="Platform" value="'+esc(label||"")+'"><input data-url type="url" placeholder="https://…" value="'+esc(url||"")+'"><button type="button" class="btn danger" data-remove>×</button>';row.querySelector("[data-remove]").onclick=function(){row.remove();if(!$("socialEditor").children.length)addSocial("","")};$("socialEditor").appendChild(row);
 }
 async function saveProfile(e){
- e.preventDefault();var f=e.currentTarget,btn=$("saveProfile");btn.disabled=true;$("saveStatus").textContent="Saving…";
+ e.preventDefault();var f=e.currentTarget,btn=$("saveProfile");btn.disabled=true;$("saveStatus").textContent="Saving universal profile…";$("saveDiagnostic").textContent="Syncing CrowSpace + Podcasting + member identity…";
  var social={};document.querySelectorAll("#socialEditor .social-row").forEach(function(r){var label=(r.querySelector("[data-label]").value||"").trim(),url=safeUrl((r.querySelector("[data-url]").value||"").trim());if(label&&url)social[label]=url});
  var patch={display_name:f.elements.display_name.value.trim().slice(0,80),username:f.elements.username.value.trim().toLowerCase().replace(/[^a-z0-9_.-]/g,"").slice(0,40),bio:f.elements.bio.value.trim().slice(0,1200),creator_category:f.elements.creator_category.value.trim().slice(0,80),portfolio_tagline:f.elements.portfolio_tagline.value.trim().slice(0,160),portfolio_bio:f.elements.portfolio_bio.value.trim().slice(0,1600),avatar_url:safeUrl(f.elements.avatar_url.value)||null,banner_url:safeUrl(f.elements.banner_url.value)||null,portfolio_url:safeUrl(f.elements.portfolio_url.value)||null,featured_caw_id:f.elements.featured_caw_id.value.trim()||null,profile_theme:f.elements.profile_theme.value,privacy_profile:f.elements.privacy_profile.value,privacy_posts:f.elements.privacy_posts.value,privacy_media:f.elements.privacy_media.value,privacy_activity:f.elements.privacy_activity.value,privacy_connections:f.elements.privacy_connections.value,allow_guestbook:f.elements.allow_guestbook.checked,social_links:social,updated_at:new Date().toISOString()};
- var saved=await q("Save profile",function(){return db.from("crowspace_profiles").update(patch).eq("user_id",S.user.id).select("*").single()},false);
- if(saved){S.profile=saved;closeEditor();render();toast("Profile updated.");$("saveStatus").textContent="Saved"}else{$("saveStatus").textContent="Save failed";$("saveDiagnostic").textContent=S.errors[S.errors.length-1]||"Supabase rejected the update."}
+ try{
+  var saved=await q("Save CrowSpace profile",function(){return db.from("crowspace_profiles").update(patch).eq("user_id",S.user.id).select("*").single()},false);
+  if(!saved)throw new Error(S.errors[S.errors.length-1]||"Supabase rejected the CrowSpace profile update.");
+  var synced=await window.CrowRulesUniversalProfile.save(db,S.user.id,{display_name:patch.display_name,username:patch.username,bio:patch.bio,tagline:patch.portfolio_tagline,avatar_url:patch.avatar_url,banner_url:patch.banner_url,portfolio_url:patch.portfolio_url,social_links:social});
+  S.profile=Object.assign({},saved,synced.crowspace||{},patch);
+  closeEditor();render();toast("Universal profile updated everywhere.");$("saveStatus").textContent="Saved everywhere";$("saveDiagnostic").textContent="CrowSpace, Podcasting and member identity are synchronized.";
+ }catch(err){$("saveStatus").textContent="Save failed";$("saveDiagnostic").textContent=err.message||"Supabase rejected the update."}
  btn.disabled=false;
 }
 async function act(name){
