@@ -331,7 +331,43 @@ body:after{animation:fxAura 9s ease-in-out infinite alternate}
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 </head>
 <body data-page="profile">
-<nav class="cr-nav"><a class="brand" href="index.html">CROWSPACE</a><div class="nav-links"><a href="index.html">Feed</a><a href="caw-feed.html">Caws</a><a href="members.html">Members</a><a href="profile.html">Profile</a></div><div class="nav-right"><span id="authState">CONNECTING</span><a id="authLink" href="login.html">Login</a></div></nav>
+<header class="global">
+  <a class="brand brandMark" href="home.html">CROW<span>SPACE</span></a>
+  <div class="navDivider"></div>
+  <nav class="globalnav">
+    <a class="navlink" href="home.html">HOME</a>
+    <a class="navlink" href="discover.html">DISCOVER</a>
+    <a class="navlink" href="caws.html">CAWS</a>
+    <a class="navlink" href="events.html">EVENTS</a>
+    <a class="navlink" href="messages.html">MESSAGES</a>
+    <a class="navlink" href="notifications.html">NOTIFICATIONS</a>
+  </nav>
+  <div class="navright">
+    <span class="statusdot"></span>
+    <span id="notificationBadge" style="display:none;color:var(--pink);font:900 7px Orbitron">0 NEW</span>
+    <span id="authState" style="font:700 7px Orbitron;color:#8190a5">GUEST</span>
+    <a class="iconbtn" id="authLink" href="login.html">LOGIN</a>
+    <a class="join" href="signup.html">JOIN</a>
+  </div>
+  <button class="iconbtn mobileNav" id="mobileToggle" type="button">MENU</button>
+</header>
+<div id="mobileMenu" style="display:none">
+  <div class="mobileMenuInner">
+    <nav style="display:grid;gap:4px">
+      <a class="navlink" href="home.html">HOME</a>
+      <a class="navlink" href="discover.html">DISCOVER</a>
+      <a class="navlink" href="caws.html">CAWS</a>
+      <a class="navlink" href="events.html">EVENTS</a>
+      <a class="navlink" href="messages.html">MESSAGES</a>
+      <a class="navlink" href="notifications.html">NOTIFICATIONS</a>
+      <a class="navlink active" href="profile.html">PROFILE</a>
+    </nav>
+    <div class="mobileAccount">
+      <a class="iconbtn" href="login.html">SIGN IN</a>
+      <a class="join" href="signup.html">JOIN CROWSPACE</a>
+    </div>
+  </div>
+</div>
 <main class="profile-wrap" id="profileWrap"><div class="state" id="app">INITIALIZING PERSONAL NODE…</div></main>
 
 <div class="modal" id="editorModal" aria-hidden="true"><div class="modal-backdrop" data-close></div><section class="editor">
@@ -364,13 +400,20 @@ body:after{animation:fxAura 9s ease-in-out infinite alternate}
 .modal{display:none;position:fixed;inset:0;z-index:5000;align-items:center;justify-content:center;padding:15px}.modal.open{display:flex}.modal-backdrop{position:absolute;inset:0;background:#010309cc;backdrop-filter:blur(14px)}.editor{position:relative;width:min(1050px,96vw);height:min(90vh,900px);display:flex;flex-direction:column;border:1px solid rgba(85,239,255,.3);border-radius:20px;background:#050a14;box-shadow:0 40px 120px #000}.editor-head{display:flex;justify-content:space-between;align-items:center;padding:17px 20px;border-bottom:1px solid var(--line)}.editor-head h2{margin:4px 0 0;font:800 20px Orbitron}.eyebrow{font:800 8px Orbitron;color:var(--cyan);letter-spacing:.15em}.editor-body{overflow:auto;padding:0 20px 100px}.editor-tabs{position:sticky;top:0;z-index:3;display:flex;gap:7px;padding:12px 0;background:#050a14f5;border-bottom:1px solid var(--line)}.tab{border:1px solid var(--line);background:#070d18;color:var(--muted);padding:8px 12px;border-radius:9px;cursor:pointer;font:700 10px Rajdhani}.tab.active{color:var(--cyan);border-color:var(--cyan)}.editor-panel{display:none;padding:15px 0}.editor-panel.active{display:block}.note{padding:12px;border:1px solid var(--line);border-radius:11px;color:var(--muted);font-size:11px;line-height:1.5;margin-bottom:13px}.note b{display:block;color:var(--text);font:800 10px Orbitron;margin-bottom:4px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid label{display:grid;gap:6px;color:var(--muted);font:800 9px Rajdhani;text-transform:uppercase;letter-spacing:.1em}.form-grid .wide{grid-column:1/-1}.form-grid input,.form-grid textarea,.form-grid select{width:100%;border:1px solid var(--line);border-radius:10px;background:#030811;color:var(--text);padding:11px;font:500 12px Rajdhani;outline:0}.form-grid textarea{min-height:110px;resize:vertical}.form-grid input:focus,.form-grid textarea:focus,.form-grid select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #55efff12}.check{display:flex!important;grid-template-columns:auto 1fr;align-items:center}.check input{width:auto}.social-editor{display:grid;gap:8px;margin-bottom:10px}.social-row{display:grid;grid-template-columns:120px 1fr auto;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px}.social-row input{min-width:0}.editor-footer{position:sticky;bottom:0;padding:12px 0;border-top:1px solid var(--line);background:#050a14f7;backdrop-filter:blur(14px);display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:4}.diagnostic{padding:12px;border-radius:10px;background:#030811;border:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.5}.toast{position:fixed;right:20px;bottom:20px;z-index:9999;padding:12px 15px;border:1px solid var(--cyan);border-radius:10px;background:#07101df5;color:var(--text);font-weight:700;font-size:11px;box-shadow:0 12px 45px #000}
 @media(max-width:820px){.profile-grid{grid-template-columns:1fr}.caw-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}}@media(max-width:600px){.cr-nav{padding:9px 12px}.nav-links{display:none}.nav-right{font-size:7px}.hero-body{padding:0 16px 20px}.banner{height:230px}.avatar{width:115px;height:115px;margin-top:-58px}.identity{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.caw-grid,.people-grid{grid-template-columns:1fr}.social-row{grid-template-columns:1fr auto}.editor{height:96vh;border-radius:15px}.editor-body{padding:0 14px 100px}}
 </style>
+<script src="crowspace-auth.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
 "use strict";
-var URL="https://cevylpnoexugwgygvtgu.supabase.co";
-var KEY="sb_publishable_G3vJoLdGpRP8cjjtl9SyWw_Qio5klrx";
-var db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+var db=null;
+var auth=window.CrowSpaceAuth;
+function waitForAuth(){
+  return new Promise(function(resolve,reject){
+    if(auth&&auth.ready){auth.ready.then(function(){db=auth.client||auth.supabase||window.db;if(!db)reject(new Error("CrowSpace Supabase client unavailable."));else resolve(db)}).catch(reject);return}
+    window.addEventListener("crowspace-auth-ready",function(e){db=e.detail&&e.detail.client||window.db;if(db)resolve(db);else reject(new Error("CrowSpace Supabase client unavailable."))},{once:true});
+    setTimeout(function(){if(!db)reject(new Error("CrowRules authentication timed out."))},12000);
+  });
+}
 var P=new URLSearchParams(location.search), S={user:null,profile:null,member:null,posts:[],caws:[],followers:[],following:[],friendship:null,isFollowing:false,guestbook:[],badges:[],people:new Map(),errors:[]};
 var $=function(id){return document.getElementById(id)};
 var esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
@@ -464,8 +507,28 @@ async function act(name){
 async function delPost(id){if(!S.user||!confirm("Delete this post?"))return;var r=await q("Delete post",function(){return db.from("crowspace_posts").delete().eq("id",id).eq("user_id",S.user.id)},false);if(r!==null){await loadData();toast("Post deleted.")}}
 document.addEventListener("click",function(e){var a=e.target.closest("[data-action]");if(a){e.preventDefault();act(a.dataset.action)}var d=e.target.closest("[data-delete-post]");if(d){e.preventDefault();delPost(d.dataset.deletePost)}if(e.target.closest("[data-close]"))closeEditor();var t=e.target.closest("[data-tab]");if(t){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active")});document.querySelectorAll(".editor-panel").forEach(function(x){x.classList.remove("active")});t.classList.add("active");document.querySelector('[data-panel="'+t.dataset.tab+'"]').classList.add("active")}});
 $("addSocial").onclick=function(){addSocial("","")};$("profileForm").addEventListener("submit",saveProfile);
-db.auth.onAuthStateChange(function(ev,s){S.user=s&&s.user||null;if(ev==="SIGNED_IN"||ev==="SIGNED_OUT"){S.profile=null;loadData()}});
-(async function(){try{S.user=await currentUser();await loadData();setInterval(function(){if(document.visibilityState==="visible")loadData()},30000)}catch(e){S.errors.push("Supabase bootstrap: "+(e.message||e));$("app").innerHTML='<div class="state profile-error"><h2>Supabase connection failed</h2><p>'+esc(e.message||e)+'</p><button class="btn primary" onclick="location.reload()">Retry</button></div>'}})();
+if(db&&db.auth)db.auth.onAuthStateChange(function(ev,s){
+  S.user=s&&s.user||null;
+  if(ev==="SIGNED_IN"||ev==="SIGNED_OUT"){S.profile=null;loadData()}
+});
+window.addEventListener("crowspace-auth",function(e){
+  S.user=e.detail&&e.detail.user||null;
+  S.profile=null;
+  loadData();
+});
+(async function(){
+  try{
+    await waitForAuth();
+    S.user=auth&&auth.user?auth.user:await currentUser();
+    await loadData();
+    var toggle=$("mobileToggle"),menu=$("mobileMenu");
+    if(toggle&&menu)toggle.onclick=function(){menu.style.display=menu.style.display==="none"?"block":"none"};
+    setInterval(function(){if(document.visibilityState==="visible")loadData()},30000);
+  }catch(e){
+    S.errors.push("Supabase bootstrap: "+(e.message||e));
+    $("app").innerHTML='<div class="state profile-error"><h2>Supabase connection failed</h2><p>'+esc(e.message||e)+'</p><button class="btn primary" onclick="location.reload()">Retry</button></div>';
+  }
+})();
 })();
 </script>
 </body></html>
