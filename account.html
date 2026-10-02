@@ -1,3 +1,140 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Account — CrowSpace // CrowSpace // CrowSpace</title><link rel="stylesheet" href="crowspace-rebuild.css"><link rel="stylesheet" href="crowspace-universal.css"><script src="crowspace-universal.js" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script><script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Account — CrowSpace</title>
+<link rel="stylesheet" href="crowspace-rebuild.css">
+<link rel="stylesheet" href="crowspace-universal.css">
+<script src="crowspace-universal.js" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script>
+<script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
-</head><body data-page="account"><div class="scanline" aria-hidden="true"></div><header class="nav"><div class="navin"></div></header><div class="community-links" aria-label="CrowSpace community shortcuts"><a href="home.html">Home</a><a href="explore.html">People</a><a href="caws.html">Caws</a><a href="circles.html">Circles</a><a href="messages.html">Messages</a><a href="notifications.html">Alerts</a><a href="profile.html">Profile</a></div><main class="shell"><div class="kicker">CROWRULES // ONE ACCOUNT // ONE UNIVERSE</div><div id="account" class="loading">Loading account…</div></main><script src="crowspace-auth.js"></script><script src="crowspace-rebuild.js"></script></body></html>
+</head>
+<body data-page="account">
+<div class="scanline" aria-hidden="true"></div>
+<header class="nav"><div class="navin"></div></header>
+<div class="community-links" aria-label="CrowSpace community shortcuts">
+<a href="home.html">Home</a><a href="explore.html">People</a><a href="caws.html">Caws</a><a href="circles.html">Circles</a><a href="messages.html">Messages</a><a href="notifications.html">Alerts</a><a href="profile.html">Profile</a>
+</div>
+
+<main class="shell">
+<div class="kicker">CROWRULES // ONE ACCOUNT // ONE UNIVERSE</div>
+<div id="account" class="loading">Loading account…</div>
+</main>
+
+<script src="crowspace-auth.js"></script>
+<script src="crowspace-rebuild.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  function esc(value){
+    return String(value == null ? "" : value).replace(/[&<>"]/g,function(ch){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch];
+    });
+  }
+
+  function stripFacebook(){
+    document.querySelectorAll(
+      '[data-provider="facebook"],[data-auth-provider="facebook"],[data-oauth-provider="facebook"],[data-provider*="facebook" i]'
+    ).forEach(function(el){ el.remove(); });
+
+    document.querySelectorAll("a,button").forEach(function(el){
+      var label=(el.textContent||"").trim().toLowerCase();
+      if(label === "facebook" || label.indexOf("continue with facebook") !== -1 || label.indexOf("sign in with facebook") !== -1 || label.indexOf("sign up with facebook") !== -1){
+        el.remove();
+      }
+    });
+  }
+
+  async function renderAccount(){
+    var root=document.getElementById("account");
+    if(!root) return;
+
+    stripFacebook();
+
+    var auth=window.CrowSpaceAuth;
+    if(!auth || !auth.ready){
+      root.innerHTML='<section class="card pad"><h2>Account</h2><p class="muted">Authentication is still initializing.</p></section>';
+      return;
+    }
+
+    try{
+      await auth.ready;
+    }catch(error){
+      root.innerHTML='<section class="card pad"><h2>Account connection unavailable</h2><p class="muted">'+esc(error && error.message || "Supabase authentication could not initialize.")+'</p><div class="actions"><a class="btn primary" href="account.html">Retry</a></div></section>';
+      return;
+    }
+
+    stripFacebook();
+
+    var user=auth.user;
+    if(!user){
+      root.innerHTML=
+        '<section class="hero">'+
+          '<div class="eyebrow">CROWRULES // ACCOUNT</div>'+
+          '<h1>YOUR CROWSPACE ACCOUNT.</h1>'+
+          '<p class="muted">One account connects you to the CrowRules universe.</p>'+
+          '<div class="actions">'+
+            '<a class="btn primary" href="login.html">Sign In</a>'+
+            '<a class="btn" href="signup.html">Create Account</a>'+
+          '</div>'+
+        '</section>'+
+        '<section class="card pad" style="margin-top:16px">'+
+          '<h2>Sign-in options</h2>'+
+          '<p class="muted">Continue with Google, Discord, or Twitch from the secure CrowSpace sign-in and sign-up pages.</p>'+
+          '<p class="muted">Facebook sign-up and login are not offered on CrowSpace.</p>'+
+        '</section>';
+      return;
+    }
+
+    var profile=null;
+    try{ profile=await auth.ensureProfile(user); }catch(e){ console.debug("[CrowSpace Account] profile bootstrap",e); }
+
+    var name=(profile && (profile.display_name || profile.username)) ||
+      user.user_metadata && (user.user_metadata.display_name || user.user_metadata.full_name || user.user_metadata.name) ||
+      user.email || "Crow Member";
+
+    var provider=(user.app_metadata && user.app_metadata.provider) || "account";
+    root.innerHTML=
+      '<section class="hero">'+
+        '<div class="eyebrow">CROWRULES // UNIVERSAL ACCOUNT</div>'+
+        '<h1>WELCOME, '+esc(name.toUpperCase())+'.</h1>'+
+        '<p class="muted">'+esc(user.email || "Signed in")+'</p>'+
+        '<div class="actions">'+
+          '<a class="btn primary" href="profile.html">Open Profile</a>'+
+          '<button class="btn" id="accountSignOut" type="button">Sign Out</button>'+
+        '</div>'+
+      '</section>'+
+      '<section class="grid" style="margin-top:16px">'+
+        '<article class="card pad"><div class="eyebrow">STATUS</div><h2>CONNECTED</h2><p class="muted">Your CrowSpace session is active.</p></article>'+
+        '<article class="card pad"><div class="eyebrow">SIGN-IN</div><h2>'+esc(provider.toUpperCase())+'</h2><p class="muted">Current authentication provider.</p></article>'+
+        '<article class="card pad"><div class="eyebrow">UNIVERSE</div><h2>ONE ACCOUNT</h2><p class="muted">Use your CrowRules account across connected CrowRules experiences.</p></article>'+
+      '</section>';
+
+    var signOut=document.getElementById("accountSignOut");
+    if(signOut){
+      signOut.onclick=async function(){
+        signOut.disabled=true;
+        try{ await auth.signOut(); location.href="login.html"; }
+        catch(e){ signOut.disabled=false; alert(e && e.message || "Could not sign out."); }
+      };
+    }
+
+    stripFacebook();
+  }
+
+  window.addEventListener("crowspace-auth-ready",function(){ renderAccount(); });
+  window.addEventListener("crowspace-auth",function(){ renderAccount(); });
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(renderAccount,0);
+    setTimeout(stripFacebook,250);
+    setTimeout(stripFacebook,1000);
+  });
+})();
+</script>
+</body>
+</html>
