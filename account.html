@@ -6,14 +6,14 @@
 <title>Account — CrowSpace</title>
 <link rel="stylesheet" href="crowspace-rebuild.css">
 <link rel="stylesheet" href="crowspace-universal.css">
-<script src="crowspace-universal.js?v=29" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-sitewide.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 </head>
 <body data-page="account">
 <div class="scanline" aria-hidden="true"></div>
-<header class="nav"><div class="navin"></div></header>
+<header class="global"><a class="brand brandMark" href="home.html">CROW<span>SPACE</span></a><div class="navDivider"></div><nav class="globalnav"><a class="navlink" href="home.html">HOME</a><a class="navlink" href="discover.html">DISCOVER</a><a class="navlink" href="caws.html">CAWS</a><a class="navlink" href="events.html">EVENTS</a><a class="navlink" href="messages.html">MESSAGES</a><a class="navlink" href="notifications.html">NOTIFICATIONS</a></nav><div class="navright"><span class="statusdot"></span><span id="notificationBadge" style="display:none;color:var(--pink);font:900 7px Orbitron">0 NEW</span><span id="memberState" style="font:700 7px Orbitron;color:#8190a5">GUEST</span><a class="iconbtn" href="profile.html">PROFILE</a><a class="join" href="signup.html">JOIN</a></div><button class="iconbtn mobileNav" id="mobileToggle" type="button">MENU</button></header>
+<div id="mobileMenu" style="display:none"><div class="mobileMenuInner"><nav style="display:grid;gap:4px"><a class="navlink" href="home.html">HOME</a><a class="navlink" href="discover.html">DISCOVER</a><a class="navlink" href="caws.html">CAWS</a><a class="navlink" href="events.html">EVENTS</a><a class="navlink" href="messages.html">MESSAGES</a><a class="navlink" href="notifications.html">NOTIFICATIONS</a><a class="navlink active" href="account.html">ACCOUNT</a><a class="navlink" href="profile.html">PROFILE</a></nav><div class="mobileAccount"><a class="iconbtn" href="login.html">SIGN IN</a><a class="join" href="signup.html">JOIN CROWSPACE</a></div></div></div>
 
 <main class="shell">
 <div class="kicker">CROWRULES // ONE ACCOUNT // ONE UNIVERSE</div>
@@ -21,7 +21,6 @@
 </main>
 
 <script src="crowspace-auth.js"></script>
-<script src="crowspace-rebuild.js"></script>
 
 <script>
 (function(){
@@ -68,6 +67,8 @@
     stripFacebook();
 
     var user=auth.user;
+    var memberState=document.getElementById("memberState");
+    if(memberState) memberState.textContent=user?"SIGNED IN":"GUEST";
     if(!user){
       root.innerHTML=
         '<section class="hero">'+
@@ -127,6 +128,8 @@
   window.addEventListener("crowspace-auth",function(){ renderAccount(); });
 
   document.addEventListener("DOMContentLoaded",function(){
+    var mobileToggle=document.getElementById("mobileToggle"), mobileMenu=document.getElementById("mobileMenu");
+    if(mobileToggle && mobileMenu) mobileToggle.onclick=function(){ mobileMenu.style.display=mobileMenu.style.display==="none"?"block":"none"; };
     setTimeout(renderAccount,0);
     setTimeout(stripFacebook,250);
     setTimeout(stripFacebook,1000);
