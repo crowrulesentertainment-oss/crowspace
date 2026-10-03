@@ -2,8 +2,11 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="CrowSpace event"><title>Event — CrowSpace</title>
 <link rel="stylesheet" href="crowspace-rebuild.css"><link rel="stylesheet" href="crowspace-universal.css">
-<script src="crowspace-auth.js">\n<script src="js/crowspace-notification-badges.js" defer></script></script><script src="crowspace-universal.js" defer></script><script src="crowspace-pages.js" defer></script>
-<script src="js/crowspace-youtube-events.js" defer></script>
+<script src="crowspace-auth.js?v=81"></script>
+<script src="js/crowspace-notification-badges.js?v=1" defer></script>
+<script src="crowspace-universal.js?v=1" defer></script>
+<script src="crowspace-pages.js?v=1" defer></script>
+<script src="js/crowspace-youtube-events.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-universal-member.js?v=1" defer></script>
 <script src="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/js/crowrules-notifications.js?v=3" defer></script>
 <style>.event-notification-indicator{display:inline-flex;align-items:center;gap:7px;margin:8px 0;padding:6px 10px;border:1px solid #ff658544;border-radius:999px;background:#ff65850d;color:#ff9bb0;font:800 8px Orbitron;letter-spacing:.08em}.event-notification-indicator .dot{width:7px;height:7px;border-radius:50%;background:#ff6585;box-shadow:0 0 10px #ff6585}</style><style>
@@ -18,8 +21,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
     setTimeout(finish,2500);
   });
   await waitForReady();
-  const db=window.CrowSpaceUniversal?.db||window.CrowSpaceAuth?.client;
+  const db=window.CrowSpaceUniversal?.db||window.CrowSpaceAuth?.client||window.CrowSpaceSupabase||window.supabaseClient||window.db;
   const me=window.CrowSpaceUniversal?.user||window.CrowSpaceAuth?.user||null;
+  const connection=document.createElement('div');
+  connection.style.cssText='position:fixed;right:16px;bottom:16px;z-index:9999;padding:8px 11px;border:1px solid #78efff33;border-radius:999px;background:#050811ee;color:#78efff;font:800 8px Orbitron;letter-spacing:.08em;box-shadow:0 8px 30px #0008';
+  connection.textContent=db?'SUPABASE CONNECTED':'CONNECTING TO SUPABASE…';
+  document.body.appendChild(connection);
+  const refreshConnection=()=>{connection.textContent=db?'SUPABASE LIVE':'SUPABASE OFFLINE';connection.style.color=db?'#78ffbf':'#ff829e';};
+  refreshConnection();
   const id=new URLSearchParams(location.search).get('id');
   const root=document.getElementById('event-detail');
   const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
@@ -27,10 +36,11 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const fmtShort=v=>{if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString([], {month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});};
   const initials=s=>String(s||'CR').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'CR';
   const avatar=(p,size='avatar')=>p?.avatar_url?'<img class="'+size+'" src="'+esc(p.avatar_url)+'" alt="'+esc(p.display_name||p.username||'CrowSpace Member')+'">':'<span class="'+size+' avatar-fallback">'+esc(initials(p?.display_name||p?.username))+'</span>';
-  if(!db||!id){root.innerHTML='<div class="cs-card"><h2>Event unavailable</h2><p class="cs-muted">A valid CrowSpace event ID is required.</p></div>';return}
+  if(!db||!id){connection.textContent='SUPABASE UNAVAILABLE';connection.style.color='#ff829e';root.innerHTML='<div class="cs-card"><h2>Event unavailable</h2><p class="cs-muted">A valid CrowSpace event ID is required, and the CrowSpace database could not be reached.</p></div>';return}
   try{
     const r=await db.from('crowspace_events').select('*').eq('id',id).maybeSingle();
     if(r.error)throw r.error;
+    refreshConnection();
     const e=r.data;
     if(!e){root.innerHTML='<div class="cs-card"><h2>Event not found</h2></div>';return}
     const owner=me&&String(e.created_by)===String(me.id);
@@ -70,6 +80,15 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const refreshRsvp=async()=>{const q=await db.from('crowspace_event_rsvps').select('status,user_id').eq('event_id',id);if(q.error){rsvpStatus.textContent=q.error.message;return}const mine=me?q.data.find(x=>String(x.user_id)===String(me.id)):null;rsvpButtons.forEach(b=>b.classList.toggle('active',mine?.status===b.dataset.rsvp));rsvpCount.textContent=q.data.filter(x=>x.status==='going').length+' going · '+q.data.filter(x=>x.status==='interested').length+' interested';};
     rsvpButtons.forEach(b=>b.onclick=async()=>{if(!me){location.href='login.html';return}const status=b.dataset.rsvp,existing=await db.from('crowspace_event_rsvps').select('id,status').eq('event_id',id).eq('user_id',me.id).maybeSingle();if(existing.error){rsvpStatus.textContent=existing.error.message;return}let q;if(existing.data)q=status===existing.data.status?await db.from('crowspace_event_rsvps').delete().eq('id',existing.data.id).eq('user_id',me.id):await db.from('crowspace_event_rsvps').update({status,updated_at:new Date().toISOString()}).eq('id',existing.data.id).eq('user_id',me.id);else q=await db.from('crowspace_event_rsvps').insert({event_id:id,user_id:me.id,status});if(q?.error)rsvpStatus.textContent=q.error.message;else{rsvpStatus.textContent='Your event response was updated.';await refreshRsvp()}});
     await refreshRsvp();
+
+    // Keep the event detail page synchronized with Supabase in real time.
+    try{
+      const channel=db.channel('crowspace-event-'+id+'-'+Date.now())
+        .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_events',filter:'id=eq.'+id},()=>location.reload())
+        .on('postgres_changes',{event:'*',schema:'public',table:'crowspace_event_rsvps',filter:'event_id=eq.'+id},()=>refreshRsvp());
+      channel.subscribe();
+      window.addEventListener('beforeunload',()=>{try{db.removeChannel(channel)}catch(_){}}); 
+    }catch(_){}
     if(!owner)return;
     const form=document.getElementById('edit-form'),openEditor=()=>{form.hidden=false;location.hash='edit'};document.getElementById('edit-event').onclick=openEditor;if(location.hash==='#edit')openEditor();document.getElementById('cancel-edit').onclick=()=>{form.hidden=true;history.replaceState(null,'',location.pathname+location.search)};
     form.onsubmit=async ev=>{ev.preventDefault();const fd=new FormData(form),url=String(fd.get('youtube_url')||'').trim(),vid=window.CrowSpaceYouTubeEvents?.videoId(url)||null;if(url&&!vid){document.getElementById('edit-status').textContent='Enter a valid YouTube URL.';return}const startValue=String(fd.get('starts_at')||''),endValue=String(fd.get('ends_at')||''),startDate=new Date(startValue),endDate=endValue?new Date(endValue):null;if(!startValue||Number.isNaN(startDate.getTime())){document.getElementById('edit-status').textContent='Choose a valid start date and time.';return}if(endDate&&Number.isNaN(endDate.getTime())){document.getElementById('edit-status').textContent='Choose a valid end date and time.';return}if(endDate&&endDate.getTime()<startDate.getTime()){document.getElementById('edit-status').textContent='End date/time cannot be before the start date/time.';return}const payload={title:String(fd.get('title')).trim(),event_type:fd.get('event_type'),description:String(fd.get('description')||'').trim()||null,starts_at:startDate.toISOString(),ends_at:endDate?endDate.toISOString():null,youtube_url:url||null,youtube_video_id:vid,is_live:fd.get('is_live')==='on',live_chat_enabled:fd.get('is_live')==='on'&&!!vid};const x=await db.from('crowspace_events').update(payload).eq('id',id).eq('created_by',me.id);if(x.error){document.getElementById('edit-status').textContent=x.error.message;return}location.reload()};
