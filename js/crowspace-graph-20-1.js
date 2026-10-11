@@ -1,2 +1,0 @@
-/* CrowSpace 20.1 — Automatic Graph Population */
-window.CrowSpaceGraph20_1={version:"20.1",async populate(db){const r=await db.rpc("crowspace_populate_content_graph");if(r.error)throw r.error;return r.data},async refresh(db,delay=1500){clearTimeout(this._timer);this._timer=setTimeout(()=>this.populate(db).catch(e=>console.warn("CrowSpace Graph 20.1",e)),delay)}};

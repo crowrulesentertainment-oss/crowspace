@@ -1,1 +1,0 @@
-window.CrowSpaceNotificationUI=window.CrowSpaceNotificationUI||{};window.CrowSpaceNotificationUI.priority=function(n){if(n.priority==='high'||Number(n.priority)>=2)return'high';if(n.priority==='low'||Number(n.priority)<=0)return'low';return'normal'};

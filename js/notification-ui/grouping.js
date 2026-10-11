@@ -1,1 +1,0 @@
-window.CrowSpaceNotificationUI=window.CrowSpaceNotificationUI||{};window.CrowSpaceNotificationUI.group=function(rows){const m=new Map();(rows||[]).forEach(n=>{const k=n.group_key||n.source||'other';if(!m.has(k))m.set(k,[]);m.get(k).push(n)});return [...m.entries()]};

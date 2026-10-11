@@ -1,3 +1,0 @@
-/* CrowSpace — Portfolio Causal Attribution v18 */
-.causal-attribution18{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(8,12,24,.55)}
-.causal-attribution18 span{font:700 8px Orbitron;color:var(--cyan);letter-spacing:1.4px}.causal-attribution18 h3{margin:6px 0;font:700 15px Orbitron}.causal-attribution18 small{display:block;color:var(--muted);font-size:9px;line-height:1.5}.causal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.causal-grid article{padding:9px;border:1px solid var(--line);border-radius:9px}.causal-grid b{display:block;font:700 10px Orbitron}.causal-grid small{margin-top:4px}@media(max-width:700px){.causal-grid{grid-template-columns:1fr}}

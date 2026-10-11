@@ -1,4 +1,0 @@
-/* CrowSpace — Strategy Evidence v17 */
-.strategy-evidence17{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(8,12,24,.55)}
-.strategy-evidence-head span{font:700 8px Orbitron;color:var(--cyan);letter-spacing:1.4px}.strategy-evidence-head h3{margin:6px 0;font:700 15px Orbitron}.strategy-evidence-head small{display:block;color:var(--muted);font-size:9px;line-height:1.5}
-.strategy-evidence-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.strategy-evidence-grid article{padding:10px;border:1px solid var(--line);border-radius:9px;display:grid;gap:4px}.strategy-evidence-grid b{font:700 9px Orbitron}.strategy-evidence-grid strong{font:700 10px Orbitron}.strategy-evidence-grid small{color:var(--muted);font-size:8px;line-height:1.4}.strategy-evidence-empty{color:var(--muted);font-size:9px}@media(max-width:700px){.strategy-evidence-grid{grid-template-columns:1fr}}
