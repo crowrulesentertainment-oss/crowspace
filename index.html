@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070914">
+  <meta name="description" content="CrowSpace by CrowRules Entertainment — a new universe for connection, creativity, and community. Coming soon.">
+  <title>CrowSpace | CrowRules Entertainment</title>
+  <style>
+    :root{color-scheme:dark;--bg:#070914;--panel:rgba(14,19,40,.76);--cyan:#55f5ff;--purple:#a875ff;--pink:#ff5fcf;--muted:#a9b4d1}
+    *{box-sizing:border-box}
+    html{min-height:100%;scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f4f7ff;background:radial-gradient(ellipse at 18% 15%,rgba(84,45,170,.24),transparent 38%),radial-gradient(ellipse at 85% 75%,rgba(0,190,220,.16),transparent 38%),var(--bg);overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(115,145,220,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(115,145,220,.055) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,black,transparent 90%);z-index:-1}
+    a{color:inherit}
+    .wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    header{height:86px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(151,170,230,.15)}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:850;letter-spacing:.11em}
+    .mark{width:38px;height:38px;border:1px solid var(--cyan);border-radius:11px;display:grid;place-items:center;color:var(--cyan);font-size:22px;text-shadow:0 0 15px rgba(85,245,255,.7);box-shadow:inset 0 0 18px rgba(85,245,255,.08),0 0 20px rgba(85,245,255,.12)}
+    .brand small{display:block;font-size:10px;letter-spacing:.18em;color:var(--muted);font-weight:650;margin-top:3px}
+    .status{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);border:1px solid rgba(85,245,255,.32);border-radius:999px;padding:10px 13px;background:rgba(85,245,255,.06)}
+    main{min-height:calc(100vh - 160px);display:grid;place-items:center;padding:70px 0 86px}
+    .hero{text-align:center;max-width:850px;margin:auto;position:relative}
+    .orb{width:118px;height:118px;margin:0 auto 30px;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle at 35% 30%,rgba(85,245,255,.2),rgba(168,117,255,.12) 48%,rgba(7,9,20,.4) 72%);border:1px solid rgba(85,245,255,.45);box-shadow:0 0 45px rgba(85,245,255,.12),inset 0 0 30px rgba(168,117,255,.13)}
+    .orb:before,.orb:after{content:"";position:absolute;inset:-10px;border:1px solid rgba(168,117,255,.32);border-radius:50%;transform:rotate(-28deg) scaleY(.45)}
+    .orb:after{inset:-20px;border-color:rgba(85,245,255,.22);transform:rotate(28deg) scaleY(.35)}
+    .orb span{font-size:47px;color:var(--cyan);text-shadow:0 0 22px rgba(85,245,255,.7)}
+    .eyebrow{font-size:12px;font-weight:750;letter-spacing:.27em;text-transform:uppercase;color:var(--purple);margin:0 0 18px}
+    h1{font-size:clamp(48px,9vw,100px);line-height:.95;letter-spacing:-.065em;margin:0;font-weight:900}
+    h1 .glow{background:linear-gradient(100deg,#fff 12%,var(--cyan) 47%,var(--purple) 80%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 25px rgba(85,245,255,.12))}
+    .tagline{font-size:clamp(16px,2.5vw,21px);color:#c4cce2;line-height:1.7;max-width:620px;margin:25px auto 0}
+    .divider{height:1px;width:100px;margin:30px auto;background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent)}
+    .announce{display:inline-flex;flex-direction:column;align-items:center;gap:9px;padding:20px 34px;margin-top:3px;border:1px solid rgba(85,245,255,.35);border-radius:16px;background:linear-gradient(135deg,rgba(85,245,255,.08),rgba(168,117,255,.09));box-shadow:0 15px 55px rgba(0,0,0,.2)}
+    .announce strong{font-size:clamp(18px,3vw,25px);letter-spacing:.13em;text-transform:uppercase}
+    .announce span{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan)}
+    .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:54px auto 0;max-width:760px;text-align:left}
+    .pillar{padding:20px;border:1px solid rgba(151,170,230,.16);border-radius:14px;background:var(--panel);backdrop-filter:blur(12px)}
+    .pillar .symbol{font-size:20px;color:var(--cyan);margin-bottom:12px}
+    .pillar h2{font-size:14px;margin:0 0 8px;letter-spacing:.04em}
+    .pillar p{font-size:12px;line-height:1.65;color:var(--muted);margin:0}
+    footer{border-top:1px solid rgba(151,170,230,.15);padding:22px 0;color:#8f9bb9;font-size:12px}
+    .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .foot b{color:#dbe4ff;letter-spacing:.08em}
+    .foot a{text-decoration:none;color:var(--cyan)}
+    .foot a:hover{text-decoration:underline}
+    @media(max-width:650px){.wrap{width:min(100% - 28px,1120px)}header{height:72px}.status{font-size:9px;padding:8px}.brand{font-size:12px;letter-spacing:.06em}.mark{width:33px;height:33px}.pillars{grid-template-columns:1fr;margin-top:38px}.pillar{display:grid;grid-template-columns:30px 1fr;column-gap:10px;padding:16px}.pillar .symbol{grid-row:span 2;margin:0}.pillar h2{align-self:end}.orb{width:96px;height:96px}.orb span{font-size:39px}.announce{padding:18px 20px}.foot{justify-content:center;text-align:center}}
+    @media(prefers-reduced-motion:no-preference){.orb{animation:pulse 5s ease-in-out infinite}@keyframes pulse{0%,100%{box-shadow:0 0 35px rgba(85,245,255,.10),inset 0 0 25px rgba(168,117,255,.12)}50%{box-shadow:0 0 55px rgba(85,245,255,.22),inset 0 0 35px rgba(168,117,255,.18)}}}
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <a class="brand" href="./" aria-label="CrowSpace home">
+      <span class="mark" aria-hidden="true">C</span>
+      <span>CROWRULES<small>ENTERTAINMENT</small></span>
+    </a>
+    <div class="status">A new universe is forming</div>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="orb" aria-hidden="true"><span>✦</span></div>
+      <p class="eyebrow">One company. One universe.</p>
+      <h1 id="page-title"><span class="glow">CROWWSPACE</span></h1>
+      <p class="tagline">A new place to connect, share your world, and find your people. CrowSpace is being built as part of the growing CrowRules Entertainment universe.</p>
+      <div class="divider" aria-hidden="true"></div>
+      <div class="announce" role="status">
+        <strong>Coming Soon</strong>
+        <span>Under Development</span>
+      </div>
+      <div class="pillars" aria-label="What CrowSpace is being built for">
+        <article class="pillar">
+          <div class="symbol" aria-hidden="true">⌘</div>
+          <h2>Connect</h2>
+          <p>Build your profile and discover a community where your voice belongs.</p>
+        </article>
+        <article class="pillar">
+          <div class="symbol" aria-hidden="true">◇</div>
+          <h2>Share</h2>
+          <p>Make room for your ideas, interests, creativity, and everyday moments.</p>
+        </article>
+        <article class="pillar">
+          <div class="symbol" aria-hidden="true">✧</div>
+          <h2>Belong</h2>
+          <p>Find new connections inside a shared universe shaped by its members.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap foot">
+      <span>© <span id="year">2026</span> <b>CrowRules Entertainment</b></span>
+      <span>One company. One universe.</span>
+      <a href="https://crowrulesentertainment-oss.github.io/crowrulesentertainment/">Explore CrowRules Entertainment ↗</a>
+    </div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
