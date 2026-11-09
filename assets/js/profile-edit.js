@@ -10,9 +10,9 @@ async function save(e){e.preventDefault();const form=e.currentTarget,status=docu
 const display_name=String(fd.get("display_name")||"").trim();if(!display_name){status.textContent="Please enter a display name.";return}
 const bio=String(fd.get("bio")||"").trim(),tagline=String(fd.get("tagline")||"").trim(),avatar_url=String(fd.get("avatar_url")||"").trim()||null,cover_url=String(fd.get("cover_url")||"").trim()||null,profile_theme=String(fd.get("profile_theme")||"cinematic");
 const podcast={user_id:user.id,display_name,username,bio,avatar_url,cover_url,tagline,location:String(fd.get("location")||"").trim()||null,website_url:String(fd.get("website_url")||"").trim()||null,mood:String(fd.get("mood")||"").trim()||null,interests:String(fd.get("interests")||"").trim()||null,favorite_music:String(fd.get("favorite_music")||"").trim()||null,favorite_movies:String(fd.get("favorite_movies")||"").trim()||null,favorite_games:String(fd.get("favorite_games")||"").trim()||null,profile_theme,is_public:fd.get("is_public")==="on"};
-const crow={user_id:user.id,display_name,username,bio,avatar_url,profile_theme,portfolio_tagline:tagline,portfolio_bio:bio};
+
 button.disabled=true;button.textContent="Saving both profiles…";status.textContent="Updating CrowSpace and Podcasting…";
-const [a,b]=await Promise.all([sb.from("podcast_member_profiles").upsert(podcast,{onConflict:"user_id"}),sb.from("crowspace_profiles").upsert(crow,{onConflict:"user_id"})]);
-if(a.error||b.error){status.textContent="Profile sync needs attention. "+(a.error?"Podcasting: "+a.error.message+" ":"")+(b.error?"CrowSpace: "+b.error.message:"");button.disabled=false;button.textContent="Try saving again";return}
-status.textContent="Saved! Your CrowSpace and Podcasting profiles are synchronized.";button.textContent="Saved successfully";setTimeout(()=>location.href="profile.html",900)}
+const result=await sb.from("podcast_member_profiles").upsert(podcast,{onConflict:"user_id"});
+if(result.error){status.textContent="Profile could not be saved: "+result.error.message;button.disabled=false;button.textContent="Try saving again";return}
+status.textContent="Saved! Supabase synchronized your CrowSpace profile automatically.";button.textContent="Saved successfully";setTimeout(()=>location.href="profile.html",900)}
 init().catch(e=>{app.innerHTML='<div class="wrap section"><div class="notice">Profile Studio could not start: '+esc(e.message||e)+'</div></div>'});
