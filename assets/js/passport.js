@@ -10,8 +10,6 @@ sb.from("podcast_member_profiles").select("user_id,display_name,username,avatar_
 sb.from("members").select("id,role,created_at").eq("user_id",uid).maybeSingle(),
 sb.from("crowrules_public_profiles").select("role").eq("user_id",uid).maybeSingle(),
 sb.from("podcast_creator_badges").select("badge_key,awarded_at,metadata").eq("user_id",uid).order("awarded_at",{ascending:false}),
-sb.from("podcast_creator_achievements").select("achievement_key,title,description,achieved_at,is_public,is_featured,showcase_order").order("showcase_order",{ascending:true}),
-sb.from("creators").select("id").eq("member_id", (await sb.from("members").select("id").eq("user_id",uid).maybeSingle()).data?.id||"00000000-0000-0000-0000-000000000000").maybeSingle(),
 sb.from("friendships").select("id",{count:"exact",head:true}).eq("status","accepted").or("requester_id.eq."+uid+",addressee_id.eq."+uid),
 sb.from("podcast_member_follows").select("id",{count:"exact",head:true}).eq("followed_user_id",uid)
 ]);
