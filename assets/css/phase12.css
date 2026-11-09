@@ -1,0 +1,36 @@
+/* CrowSpace Phase 12.1 — Creator Projects */
+.project-hero{padding:62px 0 52px;background:linear-gradient(110deg,#14161d,#090a0d 70%);border-bottom:1px solid var(--line)}
+.project-hero h1{font:800 clamp(38px,6vw,68px)/1.02 Manrope;letter-spacing:-.06em;margin:14px 0}
+.project-hero h1 em{font-style:normal;color:var(--gold)}
+.project-hero p{max-width:650px;color:#c1c3ca}
+.project-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px;align-items:start}
+.project-form,.project-detail,.project-side{padding:22px}
+.project-form h2,.project-detail h2{font:800 22px Manrope;margin:8px 0 18px}
+.project-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.project-field{display:grid;gap:6px;margin-bottom:13px;color:#c7c9d0;font-size:11px;font-weight:700}
+.project-field input,.project-field textarea,.project-field select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;background:#0d0f14;color:#fff;padding:11px 12px;outline:none}
+.project-field textarea{min-height:110px;resize:vertical}
+.project-field input:focus,.project-field textarea:focus,.project-field select:focus{border-color:var(--gold)}
+.project-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.project-card{padding:19px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,#191c24,#101217);min-width:0}
+.project-card-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.project-card h3{font:800 19px Manrope;margin:13px 0 7px}
+.project-card p{color:#b6b9c2;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.project-meta{display:flex;gap:8px;flex-wrap:wrap;color:#9da1ab;font-size:10px;margin:13px 0}
+.project-tag,.project-status{border:1px solid #ffffff24;border-radius:999px;padding:5px 9px;font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+.project-status{color:var(--gold)}
+.project-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.project-detail-head{padding:28px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#1a1d25,#101217)}
+.project-detail-head h1{font:800 clamp(30px,5vw,52px)/1.05 Manrope;letter-spacing:-.05em;margin:12px 0}
+.project-description{white-space:pre-wrap;overflow-wrap:anywhere;color:#d0d2d8;line-height:1.8}
+.project-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.project-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0}
+.project-stat{padding:14px;border:1px solid var(--line);border-radius:9px;background:#ffffff06}
+.project-stat strong{display:block;font:800 17px Manrope;color:var(--gold)}
+.project-stat small{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.project-filter{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.project-filter input,.project-filter select{background:#111319;color:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 14px}
+.project-status-message{min-height:18px;color:var(--gold);font-size:11px;margin-top:12px}
+.project-empty{grid-column:1/-1}
+@media(max-width:900px){.project-layout{grid-template-columns:1fr}.project-side{order:2}}
+@media(max-width:650px){.project-fields,.project-list{grid-template-columns:1fr}.project-hero{padding:42px 0}.project-form,.project-detail,.project-side{padding:16px}.project-stats{grid-template-columns:1fr 1fr}.project-filter>*{width:100%}}
