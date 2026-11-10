@@ -91,6 +91,6 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Members can choose Public or Private visibility from the Creator Passport editor. Public profiles are discoverable by signed-in CrowSpace members; private Creator Passport content is not listed or rendered to other members.
 - Public profile viewers can message the member from their Passport.
 - Corrected the skills and showcase SELECT policies to correlate against the outer row's owner ID. The earlier policy expression could unintentionally match every public profile.
-- Profile SELECT is restricted to the owner, public profiles, existing friendship participants, and trusted administrators. Anonymous access to the profiles table is revoked; authenticated access remains governed by RLS.
+- Profile SELECT is restricted to the owner, public profiles, and trusted administrators. Private profile records and their portfolio data are not visible to other members. Anonymous access to the profiles table is revoked; authenticated access remains governed by RLS.
 - Existing friendships, profile, skills, showcase, achievement and milestone tables are reused; no new tables or service-role browser credentials were introduced.
 - Browser-based multi-account privacy verification remains outstanding.
