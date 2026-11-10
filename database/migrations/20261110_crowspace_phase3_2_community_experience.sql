@@ -107,3 +107,23 @@ for each row execute function private.crowspace_emit_community_activity();
 drop trigger if exists crowspace_notify_community_member_join on public.crowspace_community_members;
 create trigger crowspace_notify_community_member_join after insert on public.crowspace_community_members
 for each row when(new.status='active') execute function private.crowspace_emit_community_activity();
+
+-- Pinning uses a narrowly scoped RPC so community managers cannot gain broad post-edit rights.
+drop policy if exists "Community managers pin discussions" on public.crowspace_community_posts;
+create or replace function public.crowspace_set_community_post_pin(p_post_id uuid,p_pinned boolean)
+returns void language plpgsql security definer set search_path=''
+as $$
+declare v_community_id uuid;
+begin
+ select p.community_id into v_community_id from public.crowspace_community_posts p where p.id=p_post_id;
+ if v_community_id is null then raise exception 'Discussion not found'; end if;
+ if private.crowspace_member_role(v_community_id,(select auth.uid())) not in ('owner','admin','moderator') then
+  raise exception 'Only community managers can pin discussions';
+ end if;
+ update public.crowspace_community_posts
+ set pinned_at=case when p_pinned then now() else null end,updated_at=now()
+ where id=p_post_id;
+end;
+$$;
+revoke all on function public.crowspace_set_community_post_pin(uuid,boolean) from public,anon;
+grant execute on function public.crowspace_set_community_post_pin(uuid,boolean) to authenticated;
