@@ -215,3 +215,19 @@ as $$ begin
  return new;
 end $$;
 revoke all on function private.crowspace_direct_message_notify() from public,anon,authenticated;
+
+-- Prevent self-promotion or moving group membership/message records via the legacy self-update policy.
+create or replace function private.crowspace_guard_group_member_update()
+returns trigger language plpgsql set search_path=''
+as $$ begin
+ if (new.group_id<>old.group_id or new.user_id<>old.user_id or new.joined_at<>old.joined_at) and current_user not in ('postgres','service_role') then raise exception 'Group membership identity is immutable'; end if;
+ if new.role<>old.role and current_user not in ('postgres','service_role') then raise exception 'Only group management controls can change member roles'; end if;
+ return new;
+end $$;
+revoke all on function private.crowspace_guard_group_member_update() from public,anon,authenticated;
+create trigger crowspace_guard_group_member_update before update on public.crowspace_group_members for each row execute function private.crowspace_guard_group_member_update();
+create or replace function private.crowspace_guard_group_message_identity()
+returns trigger language plpgsql set search_path=''
+as $$ begin if new.group_id<>old.group_id or new.sender_id<>old.sender_id or new.created_at<>old.created_at then raise exception 'Group message identity is immutable'; end if; return new; end $$;
+revoke all on function private.crowspace_guard_group_message_identity() from public,anon,authenticated;
+create trigger crowspace_guard_group_message_identity before update on public.crowspace_group_messages for each row execute function private.crowspace_guard_group_message_identity();
