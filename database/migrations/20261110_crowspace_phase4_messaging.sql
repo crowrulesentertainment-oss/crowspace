@@ -191,3 +191,15 @@ do $$ begin
  if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='crowspace_direct_attachments') then alter publication supabase_realtime add table public.crowspace_direct_attachments; end if;
  if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='crowspace_group_message_attachments') then alter publication supabase_realtime add table public.crowspace_group_message_attachments; end if;
 end $$;
+
+-- Conversation preference writes and inbox refresh behavior.
+grant update on public.crowspace_direct_members to authenticated;
+create or replace function private.crowspace_group_message_inbox_update()
+returns trigger language plpgsql security definer set search_path=''
+as $$ begin
+ update public.crowspace_group_conversations set updated_at=new.created_at where id=new.group_id;
+ update public.crowspace_group_members set archived_at=null where group_id=new.group_id;
+ return new;
+end $$;
+revoke all on function private.crowspace_group_message_inbox_update() from public,anon,authenticated;
+create trigger crowspace_group_message_inbox_update after insert on public.crowspace_group_messages for each row execute function private.crowspace_group_message_inbox_update();
