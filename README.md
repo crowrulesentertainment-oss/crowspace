@@ -21,5 +21,13 @@ In Supabase Dashboard → Authentication → URL Configuration, allow the deploy
 
 Serve locally over HTTP (for example, a static development server); ES modules do not run reliably from file://.
 
-## Scope
-Phase 1 provides the public shell, account authentication and CrowID/profile foundation. Posting, group administration, event management and realtime Messenger are later phases and are not represented as live features yet.
+## Phase 2 social network
+- Personalized feed reusing `crowspace_wall_posts`
+- Text and photo publishing with audience controls
+- Comments, reactions and member connections
+- Member discovery, follow/unfollow and connection requests
+- Activity notifications created by database triggers
+- Realtime notification and feed refresh
+- Reuses the existing private `crowspace-media` bucket for photos
+
+The Phase 2 migration is additive and preserves existing CrowSpace tables and policies. New public-schema tables receive explicit least-privilege Data API grants and RLS. The browser uses only the Supabase publishable key.
