@@ -62,7 +62,7 @@ alter table public.crowspace_community_invitations enable row level security;
 alter table public.crowspace_events enable row level security;
 alter table public.crowspace_event_invitations enable row level security;
 alter table public.crowspace_event_rsvps enable row level security;
-revoke all on public.crowspace_communities,public.crowspace_community_members,public.crowspace_community_posts,public.crowspace_community_comments,public.crowspace_community_invitations,public.crowspace_events,public.crowspace_event_invitations,public.crowspace_event_rsvps from anon;
+revoke all on public.crowspace_communities,public.crowspace_community_members,public.crowspace_community_posts,public.crowspace_community_comments,public.crowspace_community_invitations,public.crowspace_events,public.crowspace_event_invitations,public.crowspace_event_rsvps from anon,authenticated;
 grant select,insert,update,delete on public.crowspace_communities,public.crowspace_community_members,public.crowspace_community_posts,public.crowspace_community_comments,public.crowspace_community_invitations,public.crowspace_events,public.crowspace_event_invitations,public.crowspace_event_rsvps to authenticated;
 -- RLS policies are installed by the matching Supabase migration crowspace_phase3_communities_events and crowspace_phase3_community_invitations.
 -- Realtime publication includes all eight tables.
