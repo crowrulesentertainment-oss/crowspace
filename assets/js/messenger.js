@@ -160,7 +160,7 @@ async function subscribeConversation(){
  }).subscribe(async status=>{if(status==="SUBSCRIBED"){await channel.track({user_id:currentUser.id,name:currentProfile.display_name,online_at:new Date().toISOString()});}});
 }
 async function sendTyping(){
- if(!channel)return;
+ if(!channel||Date.now()-lastTypingAt<900)return;lastTypingAt=Date.now();
  channel.send({type:"broadcast",event:"typing",payload:{user_id:currentUser.id,name:currentProfile.display_name}});
 }
 async function sendMessage(e){
