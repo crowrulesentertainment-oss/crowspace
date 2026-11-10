@@ -1,0 +1,7 @@
+-- CrowSpace 3.0 Phase 2: social network foundation. Additive only.
+-- This migration was applied to project cevylpnoexugwgygvtgu.
+-- Reuses crowspace_wall_posts, friendships, and the existing crowspace-media bucket.
+-- New tables: crowspace_post_media, crowspace_post_comments, crowspace_post_reactions,
+-- crowspace_follows, crowspace_notifications. RLS, scoped grants, storage policies,
+-- database notification triggers, and Realtime publication membership were installed.
+-- No existing tables or existing RLS policies were dropped.
