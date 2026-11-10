@@ -52,7 +52,7 @@ async function boot(){
     <header class="top">
       <a class="brand" href="index.html"><b>C</b><span>CROW<span class="red">SPACE</span><small>YOUR PEOPLE. YOUR STORIES. YOUR SPACE.</small></span></a>
       <div class="search">⌕　Search CrowSpace</div>
-      <div class="top-actions"><a href="messenger.html">✉</a><a href="notifications.html">♢</a><button id="logout">↪</button><a class="avatar" href="profile.html">${esc(initial)}</a></div>
+      <div class="top-actions"><a href="messenger.html">✉</a><a id="notification-link" href="notifications.html" aria-label="Notifications">♢<span id="notification-badge" class="notification-badge" hidden></span></a><button id="logout">↪</button><a class="avatar" href="profile.html">${esc(initial)}</a></div>
     </header>
     <div class="layout">
       <aside class="sidebar">
@@ -75,6 +75,19 @@ async function boot(){
     </div>
     <nav class="mobile-nav">${nav.map(([key,icon,name])=>`<a class="${page===key?"active":""}" href="${href(key)}"><i>${icon}</i><small>${name}</small></a>`).join("")}</nav>`;
   document.querySelector("#logout").onclick=async()=>{await supabase.auth.signOut();location.href="index.html";};
+  const notificationBadge=document.querySelector("#notification-badge");
+  const refreshNotificationBadge=async()=>{
+    const {count,error}=await supabase.from("crowspace_notifications").select("id",{count:"exact",head:true}).is("read_at",null);
+    if(error||!notificationBadge)return;
+    notificationBadge.hidden=!count;
+    notificationBadge.textContent=count>99?"99+":String(count||"");
+  };
+  await refreshNotificationBadge();
+  const notificationChannel=supabase.channel("crowspace-global-notifications-"+user.id)
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"recipient_id=eq."+user.id},refreshNotificationBadge)
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"crowspace_notifications",filter:"recipient_id=eq."+user.id},refreshNotificationBadge)
+    .subscribe();
+  window.addEventListener("pagehide",()=>supabase.removeChannel(notificationChannel),{once:true});
   const container=document.querySelector("#content");
   const requestedUsername=new URLSearchParams(location.search).get("username")?.trim().toLowerCase();
 
