@@ -149,3 +149,7 @@ body{background:radial-gradient(ellipse at 50% -20%,#26202a 0%,#0a0b0f 48%,#0809
 
 /* CrowSpace 2.2 member profile connection controls */
 .profile-actions{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}.profile-stats{display:flex;gap:22px;padding:0 0 22px 140px;color:var(--muted);font-size:11px}.profile-stats b{color:#fff;font:800 15px Manrope;margin-right:4px}.profile-actions button:disabled{opacity:.6;cursor:wait}@media(max-width:700px){.profile-actions{margin-left:0}.profile-stats{padding-left:0;margin-top:12px}}
+
+/* CrowSpace 2.2 post ownership controls */
+.post-owner-actions{margin-left:auto;display:flex;align-items:center;gap:8px}.post-owner-actions .text-button{padding:4px 7px;color:var(--muted);font-size:10px}.post-owner-actions .text-button:hover{color:var(--gold)}
+@media(max-width:540px){.post-head{flex-wrap:wrap}.post-owner-actions{margin-left:54px}}
