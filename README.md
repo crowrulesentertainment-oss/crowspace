@@ -31,3 +31,16 @@ Serve locally over HTTP (for example, a static development server); ES modules d
 - Uses a dedicated private `crowspace-posts` bucket for photos
 
 The Phase 2 migration is additive and preserves existing CrowSpace tables and policies. New public-schema tables receive explicit least-privilege Data API grants and RLS. The browser uses only the Supabase publishable key.
+
+## Phase 3 communities and events
+- Community discovery and creation with public/private visibility and open/request join settings
+- Membership roles, owner management, join requests and membership status
+- Community discussion posts and comments
+- Event creation with community association, event format, local timezone, start/end time and location details
+- Member invitations, invitation responses and Going/Interested RSVPs
+- Upcoming event calendar/list with RSVP and invite controls
+- Dedicated additive tables: `crowspace_communities`, `crowspace_community_members`, `crowspace_community_posts`, `crowspace_community_comments`, `crowspace_community_invitations`, `crowspace_events`, `crowspace_event_invitations`, and `crowspace_event_rsvps`
+- Row Level Security enabled on all Phase 3 tables; anonymous access revoked and authenticated access explicitly granted
+- Existing legacy group-chat tables and CrowRules community/event tables are not repurposed or overwritten
+
+The Phase 3 schema was applied to the existing Supabase project. Community and event pages are connected through `assets/js/phase3.js`; no service-role key is used in the browser.
