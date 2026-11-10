@@ -94,7 +94,10 @@ async function renderPane(messages){
  const hist=$("#msg-history");hist.scrollTop=hist.scrollHeight;await hydrateAttachments(messages);
  $("#msg-search-toggle").onclick=()=>{$(".msg-searchbar").classList.toggle("hidden");$("#thread-search")?.focus();};
  $("#thread-search")?.addEventListener("input",e=>{const q=e.target.value.toLowerCase();hist.querySelectorAll(".msg-bubble").forEach(el=>el.classList.toggle("hidden",!el.textContent.toLowerCase().includes(q)));});
- $("#msg-send-form").onsubmit=sendMessage;\n $("#msg-pin").onclick=()=>setConversationPreference("pinned_at",current.pinned_at?null:new Date().toISOString());\n $("#msg-mute").onclick=()=>setConversationPreference("muted_until",current.muted_until&&new Date(current.muted_until)>new Date()?null:new Date(Date.now()+7*86400000).toISOString());\n $("#msg-archive").onclick=()=>setConversationPreference("archived_at",new Date().toISOString(),true);
+ $("#msg-send-form").onsubmit=sendMessage;
+ $("#msg-pin").onclick=()=>setConversationPreference("pinned_at",current.pinned_at?null:new Date().toISOString());
+ $("#msg-mute").onclick=()=>setConversationPreference("muted_until",current.muted_until&&new Date(current.muted_until)>new Date()?null:new Date(Date.now()+7*86400000).toISOString());
+ $("#msg-archive").onclick=()=>setConversationPreference("archived_at",new Date().toISOString(),true);
  $("#msg-input").addEventListener("input",sendTyping);
  $("#msg-file").onchange=uploadAttachment;
  $("#msg-record").onclick=toggleRecording;
