@@ -244,3 +244,54 @@ create policy "CrowSpace messenger upload own path" on storage.objects for inser
  and (((storage.foldername(name))[1]='dm' and (private.crowspace_is_direct_member(((storage.foldername(name))[2])::uuid) or exists(select 1 from public.podcast_direct_conversations c where c.id=((storage.foldername(name))[2])::uuid and (select auth.uid()) in (c.participant_low,c.participant_high)))
  or ((storage.foldername(name))[1]='group' and private.crowspace_is_group_member(((storage.foldername(name))[2])::uuid)))
 );
+
+-- Keep the exposed RPCs SECURITY INVOKER; privileged implementation stays in the unexposed private schema.
+create or replace function private.crowspace_start_direct_conversation_impl(p_other_user uuid)
+returns uuid language plpgsql security definer set search_path=''
+as $$
+declare v_me uuid:=(select auth.uid()); v_low uuid; v_high uuid; v_id uuid;
+begin
+ if v_me is null then raise exception 'Authentication required'; end if;
+ if p_other_user is null or p_other_user=v_me then raise exception 'Choose another member'; end if;
+ if not exists(select 1 from public.crowspace_profiles p where p.user_id=p_other_user) then raise exception 'Member not found'; end if;
+ if exists(select 1 from public.crowspace_direct_blocks b where (b.blocker_id=v_me and b.blocked_user_id=p_other_user) or (b.blocker_id=p_other_user and b.blocked_user_id=v_me)) then raise exception 'Messaging is unavailable for this member'; end if;
+ v_low:=least(v_me,p_other_user); v_high:=greatest(v_me,p_other_user);
+ insert into public.crowspace_direct_conversations(participant_low,participant_high,initiated_by) values(v_low,v_high,v_me)
+ on conflict(participant_low,participant_high) do update set updated_at=public.crowspace_direct_conversations.updated_at returning id into v_id;
+ insert into public.crowspace_direct_members(conversation_id,user_id) values(v_id,v_me),(v_id,p_other_user) on conflict do nothing;
+ return v_id;
+end $$;
+revoke all on function private.crowspace_start_direct_conversation_impl(uuid) from public,anon;
+grant execute on function private.crowspace_start_direct_conversation_impl(uuid) to authenticated;
+create or replace function public.crowspace_start_direct_conversation(p_other_user uuid)
+returns uuid language sql security invoker set search_path=''
+as $$ select private.crowspace_start_direct_conversation_impl(p_other_user); $$;
+revoke all on function public.crowspace_start_direct_conversation(uuid) from public,anon;
+grant execute on function public.crowspace_start_direct_conversation(uuid) to authenticated;
+
+create or replace function private.crowspace_group_manage_member_impl(p_group_id uuid,p_user_id uuid,p_action text)
+returns boolean language plpgsql security definer set search_path=''
+as $$
+declare v_actor uuid:=(select auth.uid()); v_creator uuid; v_target_role text;
+begin
+ if v_actor is null then raise exception 'Authentication required'; end if;
+ if p_action not in ('promote_admin','demote_member','remove') then raise exception 'Unsupported action'; end if;
+ select created_by into v_creator from public.crowspace_group_conversations where id=p_group_id;
+ if v_creator is null or not private.crowspace_is_group_admin(p_group_id) then raise exception 'Group administrator access required'; end if;
+ select role into v_target_role from public.crowspace_group_members where group_id=p_group_id and user_id=p_user_id;
+ if v_target_role is null then raise exception 'Group member not found'; end if;
+ if p_user_id=v_creator then raise exception 'The group owner cannot be changed or removed'; end if;
+ if p_action in ('promote_admin','demote_member') and v_actor<>v_creator then raise exception 'Only the group owner can change administrator roles'; end if;
+ if p_action='promote_admin' then update public.crowspace_group_members set role='admin' where group_id=p_group_id and user_id=p_user_id and role='member';
+ elsif p_action='demote_member' then update public.crowspace_group_members set role='member' where group_id=p_group_id and user_id=p_user_id and role='admin';
+ elsif p_action='remove' then if v_actor<>v_creator and v_target_role<>'member' then raise exception 'Admins may only remove regular members'; end if; delete from public.crowspace_group_members where group_id=p_group_id and user_id=p_user_id;
+ end if;
+ return true;
+end $$;
+revoke all on function private.crowspace_group_manage_member_impl(uuid,uuid,text) from public,anon;
+grant execute on function private.crowspace_group_manage_member_impl(uuid,uuid,text) to authenticated;
+create or replace function public.crowspace_group_manage_member(p_group_id uuid,p_user_id uuid,p_action text)
+returns boolean language sql security invoker set search_path=''
+as $$ select private.crowspace_group_manage_member_impl(p_group_id,p_user_id,p_action); $$;
+revoke all on function public.crowspace_group_manage_member(uuid,uuid,text) from public,anon;
+grant execute on function public.crowspace_group_manage_member(uuid,uuid,text) to authenticated;
