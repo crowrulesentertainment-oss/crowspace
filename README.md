@@ -105,3 +105,12 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Administrator moderation queue reviews opportunity reports. Admin authorization uses trusted Supabase `app_metadata.crowspace_admin=true`.
 - Additive migration: `database/migrations/20261110_crowspace_phase6_collaboration_network.sql`. New collaboration, opportunity, application, update and report tables have RLS enabled and explicit authenticated grants; anonymous access is revoked. Existing project tables and their established policies are reused.
 - Browser multi-account testing, opportunity application moderation, live Pages verification and full project invitation acceptance testing remain outstanding.
+
+
+## Phase 6.2 — Collaboration experience and workflow upgrade
+- Opportunity owners have an in-page application review panel with applicant introductions and reviewing/accepted/declined actions.
+- Members can track their own opportunity applications and withdraw applications that are still submitted or under review.
+- The invitation center separates incoming and sent invitations, shows pending counts, and supports accepting, declining, and cancelling pending invitations.
+- Project workspaces display a clearer team roster; owners can remove project members and invitees can decline outstanding project invitations.
+- Existing Phase 6.1 database transition guards and row-level security remain in place; no new tables or broad policy changes were required.
+- Browser-based multi-account end-to-end testing remains a separate verification step.
