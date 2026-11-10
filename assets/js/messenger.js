@@ -180,6 +180,7 @@ async function uploadAttachment(e){
  await sendMedia(file,kind);e.target.value="";
 }
 async function sendMedia(file,kind){
+ if(file.size>12*1024*1024){note("Files must be 12 MB or smaller.","error");return;}
  note("Uploading securely…");
  const path=(current.kind==="direct"?"dm/":"group/")+current.id+"/"+currentUser.id+"/"+crypto.randomUUID()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
  const {error:upErr}=await supabase.storage.from("crowspace-messenger").upload(path,file,{contentType:file.type,upsert:false});
@@ -208,7 +209,7 @@ async function toggleRecording(){
   const type=["audio/webm;codecs=opus","audio/ogg;codecs=opus","audio/mp4"].find(t=>MediaRecorder.isTypeSupported(t));
   recorder=new MediaRecorder(stream,type?{mimeType:type}:undefined);recordChunks=[];
   recorder.ondataavailable=e=>{if(e.data.size)recordChunks.push(e.data);};
-  recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(recordChunks,{type:recorder.mimeType||"audio/webm"});const ext=blob.type.includes("ogg")?"ogg":blob.type.includes("mp4")?"m4a":"webm";await sendMedia(new File([blob],"voice-note-"+Date.now()+"."+ext,{type:blob.type}),"audio");$("#record-state").textContent="";};
+  recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(recordChunks,{type:recorder.mimeType||"audio/webm"});const ext=blob.type.includes("ogg")?"ogg":blob.type.includes("mp4")?"m4a":"webm";await sendMedia(new File([blob],"voice-note-"+Date.now()+"."+ext,{type:(blob.type||"audio/webm").split(";")[0]}),"audio");$("#record-state").textContent="";};
   recorder.start();btn.textContent="■ Stop recording";$("#record-state").textContent="Recording…";
  }catch(err){note("Microphone access was not granted: "+err.message,"error");}
 }
