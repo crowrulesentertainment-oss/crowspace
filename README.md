@@ -114,3 +114,13 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Project workspaces display a clearer team roster; owners can remove project members and invitees can decline outstanding project invitations.
 - Existing Phase 6.1 database transition guards and row-level security remain in place; no new tables or broad policy changes were required.
 - Browser-based multi-account end-to-end testing remains a separate verification step.
+
+
+## Phase 6.3 — Collaboration notifications and communication
+- Reuses the existing `crowspace_notifications` table and recipient-scoped RLS; no duplicate notification store is created.
+- Database triggers create notifications for collaboration invitations and responses, new opportunity applications, application status decisions, project invitations and responses, and project progress updates.
+- Trigger function uses a fixed search path, is not executable by client roles, and runs only through its installed database triggers.
+- The existing notification inbox refreshes live, shows unread activity, and routes collaboration notices to the relevant Collaborate tab or project workspace.
+- The global notification icon displays a live unread count across authenticated CrowSpace pages.
+- Existing notifications remain private to their recipient; the notification table is added to the existing Realtime publication when that publication is present.
+- Multi-account browser verification is still required to confirm end-to-end delivery in deployed sessions.
