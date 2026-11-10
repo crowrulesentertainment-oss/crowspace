@@ -49,10 +49,10 @@ async function endCall(notify=true){
  document.querySelector("#callOverlay")?.remove();callConversation=null;
 }
 async function reportDirectConversation(conversation){
- const reason=prompt("Why are you reporting this conversation?");if(!reason?.trim())return;
+ const reason=prompt("Choose a reason: harassment, spam, hate, threats, sexual_content, other","other");if(!reason?.trim())return;const normalized=reason.trim().toLowerCase();if(!["harassment","spam","hate","threats","sexual_content","other"].includes(normalized)){showToast("Use one of the listed report reasons.");return}
  const other=conversation.participant_low===user.id?conversation.participant_high:conversation.participant_low;
  const{data:last}=await sb.from("podcast_direct_messages").select("id").eq("conversation_id",conversation.id).eq("sender_id",other).order("created_at",{ascending:false}).limit(1).maybeSingle();
- const{error}=await sb.from("podcast_direct_reports").insert({conversation_id:conversation.id,message_id:last?.id||null,reporter_id:user.id,reported_user_id:other,reason:reason.trim().slice(0,120),details:"Reported from CrowSpace Messenger."});
+ const{error}=await sb.from("podcast_direct_reports").insert({conversation_id:conversation.id,message_id:last?.id||null,reporter_id:user.id,reported_user_id:other,reason:normalized,details:"Reported from CrowSpace Messenger."});
  if(error){showToast("Report could not be submitted: "+error.message);return}showToast("Your report has been sent to CrowRules moderation.");
 }
 async function startTyping(kind,id,otherId=null){
