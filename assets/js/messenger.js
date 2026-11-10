@@ -112,7 +112,7 @@ function messageHTML(m){
  const mine=m.sender_id===currentUser.id, body=m.deleted_at?"This message was deleted":m.body;
  const peers=(current.members||[]).filter(x=>x.user_id!==currentUser.id);
  const seen=mine&&peers.length>0&&peers.every(x=>x.last_read_at&&new Date(x.last_read_at)>=new Date(m.created_at));
- return '<article class="msg-line '+(mine?'mine':'')+'"><div class="msg-bubble" data-message="'+m.id+'"><p>'+esc(body)+'</p><footer>'+stamp(m.created_at)+(m.edited_at?' · edited':'')+(mine?(seen?' · Seen':' · Sent'):'')+'</footer>'+(mine||current.kind!=="direct"?'':'<button class="msg-report-inline" data-report="'+m.id+'" title="Report message">⚑</button>')+'</div></article>';
+ return '<article class="msg-line '+(mine?'mine':'')+'"><div class="msg-bubble" data-message="'+m.id+'" data-created="'+esc(m.created_at)+'"><p>'+esc(body)+'</p><footer>'+stamp(m.created_at)+(m.edited_at?' · edited':'')+(mine?(seen?' · Seen':' · Sent'):'')+'</footer>'+(mine||current.kind!=="direct"?'':'<button class="msg-report-inline" data-report="'+m.id+'" title="Report message">⚑</button>')+'</div></article>';
 }
 
 async function hydrateAttachments(messages){
@@ -144,6 +144,14 @@ async function markRead(){
  await supabase.from(table).update({last_read_at:now}).eq(key,current.id).eq("user_id",currentUser.id);
  const n=allConversations.find(c=>c.id===current.id&&c.kind===current.kind);if(n)n.last_read_at=now;
 }
+function updateReadReceipts(){
+ const peers=(current.members||[]).filter(x=>x.user_id!==currentUser.id);
+ document.querySelectorAll(".msg-line.mine .msg-bubble").forEach(b=>{
+  const seen=peers.length>0&&peers.every(x=>x.last_read_at&&new Date(x.last_read_at)>=new Date(b.dataset.created));
+  const footer=b.querySelector("footer");if(!footer)return;
+  footer.textContent=footer.textContent.replace(/ · (Sent|Seen)$/,"")+(seen?" · Seen":" · Sent");
+ });
+}
 async function subscribeConversation(){
  const topic=(current.kind==="direct"?"crowspace-dm:":"crowspace-group:")+current.id;
  await supabase.realtime.setAuth();
@@ -152,7 +160,7 @@ async function subscribeConversation(){
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table,filter:fk+"=eq."+current.id},payload=>{
   if(payload.new.sender_id!==currentUser.id){const hist=$("#msg-history");if(hist){hist.insertAdjacentHTML("beforeend",messageHTML(payload.new));hist.scrollTop=hist.scrollHeight;markRead();}}
   loadConversations().catch(()=>{});
- }).on("postgres_changes",{event:"INSERT",schema:"public",table:current.kind==="direct"?"crowspace_direct_attachments":"crowspace_group_message_attachments",filter:(current.kind==="direct"?"conversation_id":"group_id")+"=eq."+current.id},payload=>{hydrateAttachments([{id:payload.new.message_id}]);}).on("broadcast",{event:"typing"},({payload})=>{
+ }).on("postgres_changes",{event:"INSERT",schema:"public",table:current.kind==="direct"?"crowspace_direct_attachments":"crowspace_group_message_attachments",filter:(current.kind==="direct"?"conversation_id":"group_id")+"=eq."+current.id},payload=>{hydrateAttachments([{id:payload.new.message_id}]);}).on("postgres_changes",{event:"UPDATE",schema:"public",table:current.kind==="direct"?"crowspace_direct_members":"crowspace_group_members",filter:(current.kind==="direct"?"conversation_id":"group_id")+"=eq."+current.id},payload=>{const member=current.members.find(m=>m.user_id===payload.new.user_id);if(member)member.last_read_at=payload.new.last_read_at;updateReadReceipts();}).on("broadcast",{event:"typing"},({payload})=>{
   if(payload.user_id!==currentUser.id){$("#msg-typing").textContent=(payload.name||"Someone")+" is typing…";clearTimeout(typingStop);typingStop=setTimeout(()=>$("#msg-typing").textContent="",2200);}
  }).on("presence",{event:"sync"},()=>{
   const state=channel.presenceState();onlineUsers=new Set(Object.values(state).flat().map(x=>x.user_id));
