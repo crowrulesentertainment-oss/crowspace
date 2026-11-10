@@ -23,11 +23,6 @@ with check (author_id=(select auth.uid())
   where m.community_id=crowspace_community_posts.community_id and m.user_id=(select auth.uid()) and m.status='active')
  and (is_announcement=false or private.crowspace_member_role(community_id,(select auth.uid())) in ('owner','admin','moderator')));
 
-create policy "Community managers pin discussions"
-on public.crowspace_community_posts for update to authenticated
-using(private.crowspace_member_role(community_id,(select auth.uid())) in ('owner','admin','moderator'))
-with check(private.crowspace_member_role(community_id,(select auth.uid())) in ('owner','admin','moderator'));
-
 create or replace function private.crowspace_guard_community_post_features()
 returns trigger language plpgsql security definer set search_path=''
 as $$
@@ -127,3 +122,9 @@ end;
 $$;
 revoke all on function public.crowspace_set_community_post_pin(uuid,boolean) from public,anon;
 grant execute on function public.crowspace_set_community_post_pin(uuid,boolean) to authenticated;
+
+drop trigger if exists crowspace_notify_community_member_join_update on public.crowspace_community_members;
+create trigger crowspace_notify_community_member_join_update
+after update of status on public.crowspace_community_members
+for each row when(new.status='active' and old.status is distinct from new.status)
+execute function private.crowspace_emit_community_activity();
