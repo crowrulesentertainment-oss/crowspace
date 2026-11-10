@@ -64,9 +64,9 @@ The Phase 3 schema was applied to the existing Supabase project. Community and e
 - Existing `crowspace_group_conversations`, `crowspace_group_members`, and `crowspace_group_messages` are reused; the legacy group-chat data model is not replaced.
 - Group creation, member invitations by username, roster viewing, owner-controlled admin promotion/demotion, and admin member removal are supported.
 - Real-time message updates, private-channel typing indicators, and online presence use membership-authorized Realtime channels.
-- Read positions, unread counts, pinning, muting, archiving, and conversation search are included.
+- Read positions and live read receipts, unread counts, pinning, muting, archiving, conversation-list search, and in-thread search are included (the inbox currently loads the latest 100 messages per thread).
 - Image, video, document, and audio attachments use the existing private `crowspace-messenger` Storage bucket; voice notes use browser microphone recording where supported.
-- Direct-message blocking and message/conversation reporting are supported. New message notifications route back to the correct conversation.
+- Direct-message blocking and message/conversation reporting are supported. Direct and group-message notifications respect mute settings and route back to the correct conversation.
 - Six new direct-message tables have RLS enabled, anonymous table access is revoked, and member-only policies guard reads and writes. The browser continues to use only the publishable Supabase key.
 - Migration source: `database/migrations/20261110_crowspace_phase4_messaging.sql`.
 - Remaining verification: authenticated two-account end-to-end testing, microphone/media testing across browsers, and live GitHub Pages verification. These have not been represented as completed.
