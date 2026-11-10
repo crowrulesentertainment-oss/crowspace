@@ -128,3 +128,71 @@ create trigger crowspace_notify_community_member_join_update
 after update of status on public.crowspace_community_members
 for each row when(new.status='active' and old.status is distinct from new.status)
 execute function private.crowspace_emit_community_activity();
+
+-- Final hardening: preserve discussion ownership/community and avoid notifying
+-- members about private events that are not intended for the whole community.
+create or replace function private.crowspace_guard_community_post_features()
+returns trigger language plpgsql security definer set search_path=''
+as $$
+declare v_role text;
+begin
+ v_role:=private.crowspace_member_role(new.community_id,(select auth.uid()));
+ if tg_op='INSERT' then
+  if (new.is_announcement or new.pinned_at is not null) and v_role not in ('owner','admin','moderator') then
+   raise exception 'Only community managers can publish announcements or pin discussions';
+  end if;
+ elsif tg_op='UPDATE' then
+  if new.community_id is distinct from old.community_id or new.author_id is distinct from old.author_id then
+   raise exception 'Discussion ownership and community cannot be changed';
+  end if;
+  if (new.is_announcement is distinct from old.is_announcement or new.pinned_at is distinct from old.pinned_at)
+   and v_role not in ('owner','admin','moderator') then
+   raise exception 'Only community managers can change announcement or pin status';
+  end if;
+ end if;
+ return new;
+end;
+$$;
+
+create or replace function private.crowspace_emit_community_activity()
+returns trigger language plpgsql security definer set search_path=''
+as $$
+declare v_community_id uuid; v_actor uuid; v_entity_id uuid; v_type text; v_message text; v_recipient uuid; v_post_author uuid;
+begin
+ if tg_table_name='crowspace_community_posts' then
+  if not new.is_announcement then return new; end if;
+  v_community_id:=new.community_id;v_actor:=new.author_id;v_entity_id:=new.id;
+  v_type:='community_announcement';v_message:='A community announcement was posted.';
+ elsif tg_table_name='crowspace_events' then
+  if new.community_id is null or new.visibility='private' then return new; end if;
+  v_community_id:=new.community_id;v_actor:=new.creator_id;v_entity_id:=new.id;
+  v_type:='community_event';v_message:='A new community event was created.';
+ elsif tg_table_name='crowspace_community_comments' then
+  select p.community_id,p.author_id into v_community_id,v_post_author from public.crowspace_community_posts p where p.id=new.post_id;
+  v_actor:=new.author_id;v_entity_id:=new.post_id;
+  if v_post_author is null or v_post_author=v_actor then return new; end if;
+  insert into public.crowspace_notifications(recipient_id,actor_id,notification_type,entity_type,entity_id,message)
+   values(v_post_author,v_actor,'community_comment','community_post',v_entity_id,'Someone commented on your community discussion.');
+  return new;
+ elsif tg_table_name='crowspace_community_members' then
+  if new.status<>'active' then return new; end if;
+  v_community_id:=new.community_id;v_actor:=new.user_id;v_entity_id:=new.community_id;
+  v_type:='community_member_join';v_message:='A new member joined your community.';
+  for v_recipient in select m.user_id from public.crowspace_community_members m
+   where m.community_id=v_community_id and m.status='active' and m.role in ('owner','admin','moderator') and m.user_id<>v_actor
+  loop
+   insert into public.crowspace_notifications(recipient_id,actor_id,notification_type,entity_type,entity_id,message)
+    values(v_recipient,v_actor,v_type,'community',v_entity_id,v_message);
+  end loop;
+  return new;
+ else return new;
+ end if;
+ for v_recipient in select m.user_id from public.crowspace_community_members m
+  where m.community_id=v_community_id and m.status='active' and m.user_id<>v_actor
+ loop
+  insert into public.crowspace_notifications(recipient_id,actor_id,notification_type,entity_type,entity_id,message)
+   values(v_recipient,v_actor,v_type,case when v_type='community_event' then 'event' else 'community_post' end,v_entity_id,v_message);
+ end loop;
+ return new;
+end;
+$$;
