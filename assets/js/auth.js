@@ -12,6 +12,8 @@ let mode = params.get("mode") === "signup" ? "signup" : "signin";
 let busy = false;
 let confirmationEmail = "";
 
+const HOME_URL = new URL("home.html", location.href).href;
+
 function authUrl(type) {
   const url = new URL("auth.html", location.href);
   if (type) url.searchParams.set("type", type);
@@ -33,6 +35,8 @@ function setMode(nextMode) {
   $("#auth-divider").classList.toggle("hidden", recovery || forgot);
   $("#name-wrap").classList.toggle("hidden", !signup);
   $("#name-wrap input").required = signup;
+  $("#signup-confirm-wrap").classList.toggle("hidden", !signup);
+  $("#signup-confirm-password").required = signup;
   $("#email-wrap").classList.toggle("hidden", recovery);
   $("#email").required = !recovery;
   $("#password-wrap").classList.toggle("hidden", forgot);
@@ -57,6 +61,8 @@ function setMode(nextMode) {
   $("#auth-subtitle").textContent = copy[1];
   submit.textContent = copy[2];
   $("#password").autocomplete = signup || recovery ? "new-password" : "current-password";
+  $("#signup-confirm-password").value = "";
+  $("#confirm-password").value = "";
   setMessage();
 }
 
@@ -70,6 +76,22 @@ function setBusy(value) {
   document.querySelectorAll("[data-provider], #resend-confirmation").forEach((button) => {
     button.disabled = value;
   });
+}
+
+function friendlyError(error) {
+  const raw = String(error?.message || "");
+  const lower = raw.toLowerCase();
+  if (lower.includes("invalid login credentials")) return "That email and password combination wasn't recognized. Check your details or reset your password.";
+  if (lower.includes("email not confirmed")) return "Please confirm your email address before signing in. You can resend the confirmation email below.";
+  if (lower.includes("user already registered")) return "An account already exists for this email. Sign in instead, or reset your password.";
+  if (lower.includes("password should be at least")) return "Choose a password with at least 8 characters.";
+  if (lower.includes("redirect") && (lower.includes("allow") || lower.includes("not"))) return "The sign-in redirect is not yet allowed in Supabase. Add the CrowSpace auth.html address to Authentication → URL Configuration → Redirect URLs.";
+  if (lower.includes("rate limit")) return "Too many requests were made. Please wait a minute and try again.";
+  return raw || "We couldn't complete that request. Please try again.";
+}
+
+function goHome() {
+  location.replace(HOME_URL);
 }
 
 tabs.forEach((tab) => tab.addEventListener("click", () => setMode(tab.dataset.mode)));
@@ -101,7 +123,7 @@ document.querySelectorAll("[data-provider]").forEach((button) => {
       });
       if (error) throw error;
     } catch (error) {
-      setMessage(error.message || "That sign-in option is unavailable right now.", "error");
+      setMessage(friendlyError(error), "error");
       setBusy(false);
     }
   });
@@ -115,25 +137,31 @@ form.addEventListener("submit", async (event) => {
   try {
     const email = $("#email").value.trim().toLowerCase();
     const password = $("#password").value;
+    if (mode !== "recovery" && !email) throw new Error("Enter your email address.");
     if (mode === "signup") {
-      const display_name = $("#display-name").value.trim();
-      if (!display_name) throw new Error("Please enter a display name.");
+      const displayName = $("#display-name").value.trim();
+      const confirmation = $("#signup-confirm-password").value;
+      if (displayName.length < 2) throw new Error("Please enter a display name with at least 2 characters.");
       if (password.length < 8) throw new Error("Your password must be at least 8 characters.");
+      if (password !== confirmation) throw new Error("Your passwords don't match. Please try again.");
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { display_name }, emailRedirectTo: authUrl("signup-confirmed") }
+        options: {
+          data: { display_name: displayName },
+          emailRedirectTo: authUrl("signup-confirmed")
+        }
       });
       if (error) throw error;
       if (data.session) {
-        location.replace("home.html");
+        setMessage("Your CrowSpace account is ready. Opening your space…", "success");
+        goHome();
         return;
       }
       confirmationEmail = email;
-      setMessage("Your account request is ready. Check your inbox for the confirmation link. If it doesn't arrive, you can resend it below.", "success");
+      setMessage("Almost there! Check your inbox and confirm your email address before signing in. If the email doesn't arrive, you can resend it below.", "success");
       $("#resend-wrap").classList.remove("hidden");
     } else if (mode === "forgot") {
-      if (!email) throw new Error("Enter the email address for your CrowSpace account.");
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: authUrl("recovery")
       });
@@ -146,17 +174,25 @@ form.addEventListener("submit", async (event) => {
       if (password !== confirm) throw new Error("Those passwords don't match. Please try again.");
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      setMessage("Your password has been updated. Taking you to CrowSpace…", "success");
-      setTimeout(() => location.replace("home.html"), 900);
-      return;
+      setMessage("Your password has been updated. You can now sign in with your new password.", "success");
+      history.replaceState({}, document.title, authUrl());
+      setMode("signin");
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      location.replace("home.html");
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (String(error.message || "").toLowerCase().includes("email not confirmed")) {
+          confirmationEmail = email;
+          $("#resend-wrap").classList.remove("hidden");
+        }
+        throw error;
+      }
+      if (!data.session) throw new Error("Sign-in completed but no active session was returned. Please try again.");
+      setMessage("You're signed in. Opening CrowSpace…", "success");
+      goHome();
       return;
     }
   } catch (error) {
-    setMessage(error.message || "Unable to continue. Please try again.", "error");
+    setMessage(friendlyError(error), "error");
   } finally {
     setBusy(false);
   }
@@ -175,7 +211,7 @@ $("#resend-confirmation").addEventListener("click", async () => {
     if (error) throw error;
     setMessage("If the address is eligible, a new confirmation email has been sent.", "success");
   } catch (error) {
-    setMessage(error.message || "We couldn't resend the email. Please try again.", "error");
+    setMessage(friendlyError(error), "error");
   } finally {
     setBusy(false);
   }
@@ -183,21 +219,41 @@ $("#resend-confirmation").addEventListener("click", async () => {
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === "PASSWORD_RECOVERY" || callbackType === "recovery") {
-    setMode("recovery");
+    if (mode !== "recovery") setMode("recovery");
     return;
   }
-  if (session && !["INITIAL_SESSION", "TOKEN_REFRESHED"].includes(event)) {
-    location.replace("home.html");
-  }
+  if (session && event === "SIGNED_IN" && mode !== "recovery") goHome();
 });
 
-const { data: { session } } = await supabase.auth.getSession();
-if (callbackType === "recovery") {
-  setMode("recovery");
-} else if (session) {
-  location.replace("home.html");
-} else {
-  setMode(mode);
+async function initializeAuthPage() {
   const callbackError = hashParams.get("error_description") || params.get("error_description");
-  if (callbackError) setMessage(callbackError.replace(/\+/g, " "), "error");
+  if (callbackError) {
+    setMessage(decodeURIComponent(callbackError.replace(/\+/g, " ")), "error");
+    return;
+  }
+
+  // supabase-js detects and exchanges OAuth/PKCE callback credentials before getSession resolves.
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+
+  if (callbackType === "recovery") {
+    setMode("recovery");
+    if (!data.session) setMessage("This password-reset link is invalid or expired. Request a new one to continue.", "error");
+    return;
+  }
+  if (data.session) {
+    goHome();
+    return;
+  }
+  setMode(mode);
+  if (callbackType === "signup-confirmed") {
+    setMessage("Your email confirmation was received. You can now sign in.", "success");
+  }
+}
+
+try {
+  await initializeAuthPage();
+} catch (error) {
+  setMode(mode);
+  setMessage(friendlyError(error), "error");
 }
