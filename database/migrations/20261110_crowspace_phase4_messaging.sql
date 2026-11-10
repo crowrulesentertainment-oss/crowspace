@@ -295,3 +295,17 @@ returns boolean language sql security invoker set search_path=''
 as $$ select private.crowspace_group_manage_member_impl(p_group_id,p_user_id,p_action); $$;
 revoke all on function public.crowspace_group_manage_member(uuid,uuid,text) from public,anon;
 grant execute on function public.crowspace_group_manage_member(uuid,uuid,text) to authenticated;
+
+-- Group messages also refresh inbox ordering and generate muted-aware notifications.
+create or replace function private.crowspace_group_message_inbox_update()
+returns trigger language plpgsql security definer set search_path=''
+as $$ begin
+ update public.crowspace_group_conversations set updated_at=new.created_at where id=new.group_id;
+ update public.crowspace_group_members set archived_at=null where group_id=new.group_id;
+ insert into public.crowspace_notifications(recipient_id,actor_id,notification_type,entity_type,entity_id,message)
+ select m.user_id,new.sender_id,'group_message','group_conversation',new.group_id,'sent a message in '||g.title
+ from public.crowspace_group_members m join public.crowspace_group_conversations g on g.id=m.group_id
+ where m.group_id=new.group_id and m.user_id<>new.sender_id and (m.muted_until is null or m.muted_until<=new.created_at);
+ return new;
+end $$;
+revoke all on function private.crowspace_group_message_inbox_update() from public,anon,authenticated;
