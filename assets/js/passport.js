@@ -5,7 +5,42 @@ const note = (el, text, kind="") => { el.textContent=text; el.className="passpor
 const date = (v) => new Date(v).toLocaleDateString([], {year:"numeric",month:"short",day:"numeric"});
 const safeUrl = (v) => /^https?:\/\//i.test(v || "") ? v : "";
 
-export async function initPassport({user, profile, container, viewOnly=false}) {\n  if(viewOnly){await renderPublicPassport({profile,container});return;}
+async function renderPublicPassport({profile,container}) {
+  container.innerHTML = `
+    <section class="passport-hero">
+      <div class="passport-cover">${safeUrl(profile.cover_url)?`<img class="passport-public-cover-image" src="${esc(profile.cover_url)}" alt="">`:""}</div>
+      <div class="passport-heading">
+        ${safeUrl(profile.avatar_url)?`<img class="passport-avatar" src="${esc(profile.avatar_url)}" alt="">`:`<div class="passport-avatar">${esc((profile.display_name||"C").slice(0,1).toUpperCase())}</div>`}
+        <div class="passport-identity"><div class="eyebrow">PUBLIC CREATOR PASSPORT</div><h2>${esc(profile.display_name)}</h2>
+          <p>@${esc(profile.username)} · ${esc(profile.crow_id||"CrowID")}</p>
+          <div class="passport-meta">${profile.location ? "⌖ "+esc(profile.location)+"　" : ""}${profile.creator_category ? "✦ "+esc(profile.creator_category) : "CrowSpace member"}</div>
+        </div>
+        <a class="btn red-btn" href="messenger.html?member=${encodeURIComponent(profile.username)}">Message member</a>
+      </div>
+      <p class="passport-bio">${esc(profile.portfolio_tagline || profile.bio || "A member of the CrowSpace community.")}</p>
+      ${profile.portfolio_bio ? `<p class="passport-bio passport-about-work">${esc(profile.portfolio_bio)}</p>` : ""}
+    </section>
+    <section class="passport-section"><div class="passport-section-head"><div><div class="eyebrow">CREATIVE IDENTITY</div><h2>Skills & interests</h2><p>What this member brings to the community.</p></div></div><div id="public-skill-list" class="passport-chips"></div></section>
+    <section class="passport-section"><div class="passport-section-head"><div><div class="eyebrow">SELECTED WORK</div><h2>Project showcase</h2><p>Projects, creative work and community contributions.</p></div></div><div id="public-showcase-list" class="passport-projects"></div></section>
+    <section class="passport-section"><div class="passport-section-head"><div><div class="eyebrow">EARNED RECOGNITION</div><h2>Achievements</h2></div><span class="passport-count" id="public-badge-count">0</span></div><div id="public-badge-list" class="passport-badges"></div></section>
+    <section class="passport-section"><div class="passport-section-head"><div><div class="eyebrow">THE JOURNEY</div><h2>Milestones</h2></div></div><div id="public-milestone-list" class="passport-timeline"></div></section>`;
+  const [skills,projects,badges,milestones]=await Promise.all([
+    supabase.from("crowspace_profile_skills").select("id,skill_name,category").eq("user_id",profile.user_id).order("sort_order"),
+    supabase.from("crowspace_profile_showcase").select("id,title,description,project_url,media_url,category,is_featured").eq("user_id",profile.user_id).order("is_featured",{ascending:false}).order("sort_order"),
+    supabase.from("crowspace_member_achievements").select("id,awarded_at,achievement:crowspace_achievements(name,description,icon,category)").eq("member_id",profile.user_id).order("awarded_at",{ascending:false}),
+    supabase.from("crowspace_member_milestones").select("id,title,description,achieved_at").eq("member_id",profile.user_id).order("achieved_at",{ascending:false})
+  ]);
+  for(const result of [skills,projects,badges,milestones]) if(result.error) throw result.error;
+  container.querySelector("#public-skill-list").innerHTML=skills.data?.length?skills.data.map(x=>`<span class="passport-chip">${esc(x.skill_name)} <small>${esc(x.category)}</small></span>`).join(""):'<p class="passport-empty">No skills or interests have been added yet.</p>';
+  container.querySelector("#public-showcase-list").innerHTML=projects.data?.length?projects.data.map(p=>`<article class="passport-project"><div class="passport-project-icon">◈</div><div><small>${esc(p.category)}${p.is_featured?" · FEATURED":""}</small><h3>${esc(p.title)}</h3><p>${esc(p.description)}</p>${safeUrl(p.project_url)?`<a href="${esc(p.project_url)}" target="_blank" rel="noopener noreferrer">View project ↗</a>`:""}${safeUrl(p.media_url)?` <a href="${esc(p.media_url)}" target="_blank" rel="noopener noreferrer">View media ↗</a>`:""}</div></article>`).join(""):'<p class="passport-empty">No showcase projects have been shared yet.</p>';
+  container.querySelector("#public-badge-count").textContent=String(badges.data?.length||0);
+  container.querySelector("#public-badge-list").innerHTML=badges.data?.length?badges.data.map(b=>{const a=b.achievement||{};return `<article class="passport-badge"><span>${esc(a.icon||"✦")}</span><div><h3>${esc(a.name||"Achievement")}</h3><p>${esc(a.description||"")}</p><small>Earned ${date(b.awarded_at)}</small></div></article>`;}).join(""):'<p class="passport-empty">No achievements to display yet.</p>';
+  container.querySelector("#public-milestone-list").innerHTML=milestones.data?.length?milestones.data.map(m=>`<article class="passport-milestone"><span class="passport-milestone-dot"></span><div><h3>${esc(m.title)}</h3><p>${esc(m.description)}</p><small>${date(m.achieved_at)}</small></div></article>`).join(""):'<p class="passport-empty">Milestones will appear here as this member participates.</p>';
+}
+
+
+export async function initPassport({user, profile, container, viewOnly=false}) {
+  if(viewOnly){await renderPublicPassport({profile,container});return;}
   const isAdmin = user.app_metadata?.crowspace_admin === true || user.app_metadata?.crowspace_admin === "true";
   container.innerHTML = `
     <section class="passport-hero">
