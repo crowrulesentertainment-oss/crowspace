@@ -4,7 +4,7 @@ const $ = (s, r=document) => r.querySelector(s);
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const stamp = v => v ? new Date(v).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "";
 const initials = v => esc((v || "C").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase());
-let current=null, channel=null, recorder=null, recordChunks=[], onlineUsers=new Set(), typingTimer=null, typingStop=null;
+let current=null, channel=null, recorder=null, recordChunks=[], onlineUsers=new Set(), typingTimer=null, typingStop=null, lastTypingAt=0;
 let allConversations=[], currentUser=null, currentProfile=null;
 
 function avatar(p, cls=""){return p?.avatar_url ? '<img class="msg-avatar '+cls+'" src="'+esc(p.avatar_url)+'" alt="">' : '<span class="msg-avatar '+cls+'">'+initials(p?.display_name)+'</span>';}
@@ -110,7 +110,9 @@ async function renderPane(messages){
 
 function messageHTML(m){
  const mine=m.sender_id===currentUser.id, body=m.deleted_at?"This message was deleted":m.body;
- return '<article class="msg-line '+(mine?'mine':'')+'"><div class="msg-bubble" data-message="'+m.id+'"><p>'+esc(body)+'</p><footer>'+stamp(m.created_at)+(m.edited_at?' · edited':'')+(mine?' · Sent':'')+'</footer>'+(mine?'':'<button class="msg-report-inline" data-report="'+m.id+'" title="Report message">⚑</button>')+'</div></article>';
+ const peers=(current.members||[]).filter(x=>x.user_id!==currentUser.id);
+ const seen=mine&&peers.length>0&&peers.every(x=>x.last_read_at&&new Date(x.last_read_at)>=new Date(m.created_at));
+ return '<article class="msg-line '+(mine?'mine':'')+'"><div class="msg-bubble" data-message="'+m.id+'"><p>'+esc(body)+'</p><footer>'+stamp(m.created_at)+(m.edited_at?' · edited':'')+(mine?(seen?' · Seen':' · Sent'):'')+'</footer>'+(mine||current.kind!=="direct"?'':'<button class="msg-report-inline" data-report="'+m.id+'" title="Report message">⚑</button>')+'</div></article>';
 }
 
 async function hydrateAttachments(messages){
@@ -162,7 +164,7 @@ async function sendTyping(){
  channel.send({type:"broadcast",event:"typing",payload:{user_id:currentUser.id,name:currentProfile.display_name}});
 }
 async function sendMessage(e){
- e.preventDefault();const input=$("#msg-input"),body=input.value.trim();if(!body)return;
+ e.preventDefault();const input=$("#msg-input"),body=input.value.trim();if(!body)return;if(current.kind==="group"&&body.length>3000){note("Group messages are limited to 3,000 characters.","error");return;}
  const table=current.kind==="direct"?"crowspace_direct_messages":"crowspace_group_messages";
  const row=current.kind==="direct"?{conversation_id:current.id,sender_id:currentUser.id,body,message_type:"text"}:{group_id:current.id,sender_id:currentUser.id,body};
  const btn=$("#msg-send-form button");btn.disabled=true;
