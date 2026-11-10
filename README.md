@@ -84,3 +84,13 @@ The Phase 3 schema was applied to the existing Supabase project. Community and e
 
 ### Phase 5 administrator setup
 To enable the achievement desk for a trusted administrator, open Supabase Dashboard → Authentication → Users → select the intended administrator → edit **app_metadata** and add `{"crowspace_admin": true}`. Save the change and have that user sign out and back in so the refreshed JWT includes the trusted claim. Do not put this flag in user-editable `user_metadata`; the database policies intentionally authorize only from `app_metadata`.
+
+## Phase 5.1 Public Creator Passport profiles
+- Explore now serves as a searchable public Creator Passport directory with creator-category filtering, profile cards, and direct profile links.
+- Public profile routes use `profile.html?username=<username>` and render a read-only portfolio view with skills, showcase projects, earned achievements and milestones.
+- Members can choose Public or Private visibility from the Creator Passport editor. Public profiles are discoverable by signed-in CrowSpace members; private Creator Passport content is not listed or rendered to other members.
+- Public profile viewers can message the member from their Passport.
+- Corrected the skills and showcase SELECT policies to correlate against the outer row's owner ID. The earlier policy expression could unintentionally match every public profile.
+- Profile SELECT is restricted to the owner, public profiles, existing friendship participants, and trusted administrators. Anonymous access to the profiles table is revoked; authenticated access remains governed by RLS.
+- Existing friendships, profile, skills, showcase, achievement and milestone tables are reused; no new tables or service-role browser credentials were introduced.
+- Browser-based multi-account privacy verification remains outstanding.
