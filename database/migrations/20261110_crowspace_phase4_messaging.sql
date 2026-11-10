@@ -231,3 +231,8 @@ returns trigger language plpgsql set search_path=''
 as $$ begin if new.group_id<>old.group_id or new.sender_id<>old.sender_id or new.created_at<>old.created_at then raise exception 'Group message identity is immutable'; end if; return new; end $$;
 revoke all on function private.crowspace_guard_group_message_identity() from public,anon,authenticated;
 create trigger crowspace_guard_group_message_identity before update on public.crowspace_group_messages for each row execute function private.crowspace_guard_group_message_identity();
+
+-- Private helpers are not callable through the exposed API schema; grant only the authenticated RLS use cases.
+revoke all on function private.crowspace_is_direct_member(uuid),private.crowspace_direct_can_send(uuid) from public,anon,authenticated;
+grant execute on function private.crowspace_is_direct_member(uuid),private.crowspace_direct_can_send(uuid) to authenticated;
+revoke all on function private.crowspace_guard_direct_member_update(),private.crowspace_guard_direct_message_identity() from public,anon,authenticated;
