@@ -1,4 +1,4 @@
-import{renderCommunities,renderEvents}from"./phase7.js?v=20261110-cs30";import{sb}from"./client.js";import{PODCASTING_BASE,PODCASTING_PROFILES}from"./config.js";
+import{renderCommunities,renderEvents}from"./phase7.js?v=20261110-cs30b";import{sb}from"./client.js";import{PODCASTING_BASE,PODCASTING_PROFILES}from"./config.js";
 const app=document.querySelector("#app"),page=document.body.dataset.page;
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const date=v=>v?new Date(v).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):"";
