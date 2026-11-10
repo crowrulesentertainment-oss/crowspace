@@ -3,13 +3,14 @@ import { initSocial } from "./social.js";
 import { initPhase3 } from "./phase3.js";
 import { initMessenger } from "./messenger.js";
 import { initPassport } from "./passport.js";
+import { initCollaboration } from "./collaboration.js";
 
 const page = document.body.dataset.page;
 const root = document.querySelector("#app");
 const nav = [
   ["home","⌂","Home"],["explore","⌕","Explore"],["groups","▦","Groups"],
   ["events","◷","Events"],["messenger","✉","Messenger"],["friends","♧","Connections"],
-  ["notifications","♢","Notifications"],["profile","◉","Profile"]
+  ["notifications","♢","Notifications"],["collaborate","✦","Collaborate"],["profile","◉","Profile"]
 ];
 const href = key => key === "home" ? "home.html" : key + ".html";
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
@@ -21,6 +22,7 @@ const copy = {
   groups:["Communities bring us together.","Find a group or start something new."],
   events:["Make moments happen.","Discover what's coming up and get together."],
   messenger:["Conversations that connect.","Your private space for messages."],
+  collaborate:["Create something together.","Find collaborators, opportunities and project teams."],
   profile:["Your Creator Passport.","Your identity, skills, projects and milestones."],
   settings:["Your account. Your choices.","Manage your CrowSpace identity."],
   friends:["Your connections.","People make the community."],
@@ -80,6 +82,8 @@ async function boot(){
     await initSocial({user,profile,page,container});
   }else if(["groups","events"].includes(page)){
     await initPhase3({user,profile,page,container});
+  }else if(page==="collaborate"){
+    await initCollaboration({user,profile,container});
   }else if(page==="messenger"){
     await initMessenger({user,profile,container});
   }else if(page==="profile"){
