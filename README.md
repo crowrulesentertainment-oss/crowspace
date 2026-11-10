@@ -38,10 +38,11 @@ The Phase 2 migration is additive and preserves existing CrowSpace tables and po
 - Community discussion posts and comments
 - Event creation with community association, event format, local timezone, start/end time and location details
 - Event invitations, invitation responses and Going/Interested RSVPs
-- Community invitation data model prepared for owner-to-member invites
-- Upcoming event calendar/list with RSVP and invite controls
+- Community invitations with inbox, accept/decline and membership activation
+- Community owner/admin/moderator roster controls, join-request moderation and member restrictions
+- Interactive monthly calendar with month navigation, event-day indicators, selected-day details, RSVP and creator invite controls
 - Dedicated additive tables: `crowspace_communities`, `crowspace_community_members`, `crowspace_community_posts`, `crowspace_community_comments`, `crowspace_community_invitations`, `crowspace_events`, `crowspace_event_invitations`, and `crowspace_event_rsvps`
 - Row Level Security enabled on all Phase 3 tables; anonymous access revoked and authenticated access explicitly granted
 - Existing legacy group-chat tables and CrowRules community/event tables are not repurposed or overwritten
 
-The Phase 3 schema was applied to the existing Supabase project. Community and event pages are connected through `assets/js/phase3.js`; no service-role key is used in the browser.
+The Phase 3 schema was applied to the existing Supabase project. Community and event pages are connected through `assets/js/phase3.js`; no service-role key is used in the browser.\n\n## Phase 3.1 community administration and calendar\n- Owner/admin/moderator community roster and moderation controls with role boundaries enforced by RLS\n- Member invitations with private-community invitation preview and accept/decline flow\n- Owner-only controls remain protected; moderators can restrict regular members but cannot promote roles\n- Interactive month grid with previous/next/today navigation, event indicators and selected-day event details\n- Additive Supabase policy hardening and private-schema membership-role helper; existing tables and unrelated CrowRules policies remain untouched\n- Browser-side JavaScript continues to use only the publishable key
