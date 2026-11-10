@@ -57,3 +57,16 @@ The Phase 3 schema was applied to the existing Supabase project. Community and e
 - Fixed the community discussion read and insert RLS predicates so membership is checked against the discussion's actual community.
 - Existing notifications table and community/event tables are reused; no service-role key or new public-facing table was introduced.
 - Authenticated two-account end-to-end testing and live GitHub Pages deployment verification remain outstanding.
+
+## Phase 4 messaging and real-time communication
+- Rebuilt the existing Messenger entry point into a unified inbox for private one-to-one conversations and existing group chats.
+- Direct messages use dedicated conversation/member/message tables with a unique participant pair, member-only reads, authenticated message writes, and database-created notifications.
+- Existing `crowspace_group_conversations`, `crowspace_group_members`, and `crowspace_group_messages` are reused; the legacy group-chat data model is not replaced.
+- Group creation, member invitations by username, roster viewing, owner-controlled admin promotion/demotion, and admin member removal are supported.
+- Real-time message updates, private-channel typing indicators, and online presence use membership-authorized Realtime channels.
+- Read positions, unread counts, pinning, muting, archiving, and conversation search are included.
+- Image, video, document, and audio attachments use the existing private `crowspace-messenger` Storage bucket; voice notes use browser microphone recording where supported.
+- Direct-message blocking and message/conversation reporting are supported. New message notifications route back to the correct conversation.
+- Six new direct-message tables have RLS enabled, anonymous table access is revoked, and member-only policies guard reads and writes. The browser continues to use only the publishable Supabase key.
+- Migration source: `database/migrations/20261110_crowspace_phase4_messaging.sql`.
+- Remaining verification: authenticated two-account end-to-end testing, microphone/media testing across browsers, and live GitHub Pages verification. These have not been represented as completed.
