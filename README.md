@@ -118,7 +118,7 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 
 ## Phase 6.3 — Collaboration notifications and communication
 - Reuses the existing `crowspace_notifications` table and recipient-scoped RLS; no duplicate notification store is created.
-- Database triggers create notifications for collaboration invitations and responses, new opportunity applications, application status decisions, project invitations and responses, and project progress updates.
+- Database triggers create notifications for collaboration invitations and responses, new opportunity applications, application status decisions, project invitations and responses, project progress updates, and project status changes.
 - Trigger function uses a fixed search path, is not executable by client roles, and runs only through its installed database triggers.
 - The existing notification inbox refreshes live, shows unread activity, and routes collaboration notices to the relevant Collaborate tab or project workspace.
 - The global notification icon displays a live unread count across authenticated CrowSpace pages.
