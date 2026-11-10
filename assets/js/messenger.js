@@ -30,7 +30,7 @@ async function loadConversations(){
    return {...c,kind:"direct",other:pm[c.participant_low===currentUser.id?c.participant_high:c.participant_low],last_message:last,last_read_at:m?.last_read_at,muted_until:m?.muted_until,pinned_at:m?.pinned_at};
   }));
  }
- const {data:gm,error:gmErr}=await supabase.from("crowspace_group_members").select("group_id,last_read_at,role").eq("user_id",currentUser.id);
+ const {data:gm,error:gmErr}=await supabase.from("crowspace_group_members").select("group_id,last_read_at,role,archived_at,muted_until,pinned_at").eq("user_id",currentUser.id).is("archived_at",null);
  if(gmErr)throw gmErr;
  let groups=[];
  if(gm?.length){
@@ -40,7 +40,7 @@ async function loadConversations(){
   groups=await Promise.all((gc||[]).map(async c=>{
    const m=gm.find(x=>x.group_id===c.id);
    const {data:last}=await supabase.from("crowspace_group_messages").select("id,body,sender_id,created_at").eq("group_id",c.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
-   return {...c,kind:"group",last_message:last,last_read_at:m?.last_read_at,role:m?.role};
+   return {...c,kind:"group",last_message:last,last_read_at:m?.last_read_at,role:m?.role,muted_until:m?.muted_until,pinned_at:m?.pinned_at};
   }));
  }
  allConversations=[...dms,...groups].sort((a,b)=>{
@@ -90,11 +90,11 @@ async function renderPane(messages){
  const otherId=current.kind==="direct"?current.members.find(m=>m.user_id!==currentUser.id)?.user_id:null;
  const blocked=otherId?await supabase.from("crowspace_direct_blocks").select("blocked_user_id").eq("blocker_id",currentUser.id).eq("blocked_user_id",otherId).maybeSingle():{data:null};
  const isBlocked=!!blocked.data;
- $("#message-pane").innerHTML='<header class="msg-chat-head">'+avatar(current.other||{display_name:current.title})+'<div><b>'+esc(title)+'</b><small>'+ (current.kind==="group"?current.members.length+" members · "+esc(current.role||"member"):onlineUsers.has(otherId)?"Online":"Direct conversation")+'</small></div><div class="msg-chat-actions"><button id="msg-search-toggle" title="Search messages">⌕</button>'+(current.kind==="direct"?'<button id="msg-block" title="Block member">'+(isBlocked?"Unblock":"Block")+'</button><button id="msg-report" title="Report conversation">⚑</button>':'<button id="msg-members" title="Manage group members">♧</button>')+'</div></header><div class="msg-searchbar hidden"><input id="thread-search" placeholder="Search this conversation…"></div><div class="msg-presence" id="msg-typing"></div><div class="msg-history" id="msg-history">'+messages.map(m=>messageHTML(m)).join("")+'</div><div class="msg-compose"><div class="msg-attach-row"><label class="msg-file-btn">＋ Attach<input id="msg-file" type="file" accept="image/*,video/mp4,video/webm,audio/*,application/pdf,text/plain" hidden></label><button id="msg-record" type="button">◉ Voice note</button><span id="record-state"></span></div><form id="msg-send-form"><textarea id="msg-input" rows="1" maxlength="5000" placeholder="Write a message…" '+(isBlocked?'disabled':'')+'></textarea><button class="btn red-btn" '+(isBlocked?'disabled':'')+'>Send ↑</button></form><div id="msg-status" class="msg-status"></div></div>';
+ $("#message-pane").innerHTML='<header class="msg-chat-head">'+avatar(current.other||{display_name:current.title})+'<div><b>'+esc(title)+'</b><small>'+ (current.kind==="group"?current.members.length+" members · "+esc(current.role||"member"):onlineUsers.has(otherId)?"Online":"Direct conversation")+'</small></div><div class="msg-chat-actions"><button id="msg-search-toggle" title="Search messages">⌕</button><button id="msg-pin" title="Pin conversation">◇</button><button id="msg-mute" title="Mute for one week">◌</button><button id="msg-archive" title="Archive conversation">▱</button>'+(current.kind==="direct"?'<button id="msg-block" title="Block member">'+(isBlocked?"Unblock":"Block")+'</button><button id="msg-report" title="Report conversation">⚑</button>':'<button id="msg-members" title="Manage group members">♧</button>')+'</div></header><div class="msg-searchbar hidden"><input id="thread-search" placeholder="Search this conversation…"></div><div class="msg-presence" id="msg-typing"></div><div class="msg-history" id="msg-history">'+messages.map(m=>messageHTML(m)).join("")+'</div><div class="msg-compose"><div class="msg-attach-row"><label class="msg-file-btn">＋ Attach<input id="msg-file" type="file" accept="image/*,video/mp4,video/webm,audio/*,application/pdf,text/plain" hidden></label><button id="msg-record" type="button">◉ Voice note</button><span id="record-state"></span></div><form id="msg-send-form"><textarea id="msg-input" rows="1" maxlength="5000" placeholder="Write a message…" '+(isBlocked?'disabled':'')+'></textarea><button class="btn red-btn" '+(isBlocked?'disabled':'')+'>Send ↑</button></form><div id="msg-status" class="msg-status"></div></div>';
  const hist=$("#msg-history");hist.scrollTop=hist.scrollHeight;await hydrateAttachments(messages);
  $("#msg-search-toggle").onclick=()=>{$(".msg-searchbar").classList.toggle("hidden");$("#thread-search")?.focus();};
  $("#thread-search")?.addEventListener("input",e=>{const q=e.target.value.toLowerCase();hist.querySelectorAll(".msg-bubble").forEach(el=>el.classList.toggle("hidden",!el.textContent.toLowerCase().includes(q)));});
- $("#msg-send-form").onsubmit=sendMessage;
+ $("#msg-send-form").onsubmit=sendMessage;\n $("#msg-pin").onclick=()=>setConversationPreference("pinned_at",current.pinned_at?null:new Date().toISOString());\n $("#msg-mute").onclick=()=>setConversationPreference("muted_until",current.muted_until&&new Date(current.muted_until)>new Date()?null:new Date(Date.now()+7*86400000).toISOString());\n $("#msg-archive").onclick=()=>setConversationPreference("archived_at",new Date().toISOString(),true);
  $("#msg-input").addEventListener("input",sendTyping);
  $("#msg-file").onchange=uploadAttachment;
  $("#msg-record").onclick=toggleRecording;
@@ -125,6 +125,14 @@ async function hydrateAttachments(messages){
  }
 }
 
+async function setConversationPreference(field,value,archive=false){
+ const direct=current.kind==="direct",table=direct?"crowspace_direct_members":"crowspace_group_members",key=direct?"conversation_id":"group_id";
+ const {error}=await supabase.from(table).update({[field]:value}).eq(key,current.id).eq("user_id",currentUser.id);
+ if(error){note(error.message,"error");return;}
+ current[field]=value;const item=allConversations.find(c=>c.id===current.id&&c.kind===current.kind);if(item)item[field]=value;
+ if(archive){current=null;$("#message-pane").innerHTML='<div class="msg-welcome"><div class="msg-welcome-icon">✉</div><h2>Conversation archived.</h2><p>You can start or open another conversation whenever you’re ready.</p></div>';}
+ await loadConversations();note(archive?"Conversation archived.":"Conversation settings updated.","success");
+}
 async function markRead(){
  const now=new Date().toISOString();
  const table=current.kind==="direct"?"crowspace_direct_members":"crowspace_group_members", key=current.kind==="direct"?"conversation_id":"group_id";
