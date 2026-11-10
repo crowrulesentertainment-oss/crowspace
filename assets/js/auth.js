@@ -228,7 +228,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 async function initializeAuthPage() {
   const callbackError = hashParams.get("error_description") || params.get("error_description");
   if (callbackError) {
-    setMessage(decodeURIComponent(callbackError.replace(/\+/g, " ")), "error");
+    setMessage(callbackError, "error");
     return;
   }
 
