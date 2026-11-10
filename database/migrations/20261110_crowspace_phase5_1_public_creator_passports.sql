@@ -2,17 +2,12 @@
 -- Existing profiles, friendships and Creator Passport tables are reused.
 drop policy if exists "CrowSpace profiles are publicly readable" on public.crowspace_profiles;
 drop policy if exists "Members can view public or connected profiles" on public.crowspace_profiles;
-create policy "Members can view public or connected profiles"
+drop policy if exists "Members can view public Creator Passports" on public.crowspace_profiles;
+create policy "Members can view public Creator Passports"
 on public.crowspace_profiles for select to authenticated
 using (
   user_id = (select auth.uid())
   or profile_visibility = 'public'
-  or exists (
-    select 1 from public.friendships f
-    where
-      (f.requester_id = (select auth.uid()) and f.addressee_id = crowspace_profiles.user_id)
-      or (f.addressee_id = (select auth.uid()) and f.requester_id = crowspace_profiles.user_id)
-  )
   or coalesce((auth.jwt()->'app_metadata'->>'crowspace_admin') = 'true', false)
 );
 
