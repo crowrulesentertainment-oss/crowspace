@@ -70,3 +70,14 @@ The Phase 3 schema was applied to the existing Supabase project. Community and e
 - Six new direct-message tables have RLS enabled, anonymous table access is revoked, and member-only policies guard reads and writes. The browser continues to use only the publishable Supabase key.
 - Migration source: `database/migrations/20261110_crowspace_phase4_messaging.sql`.
 - Remaining verification: authenticated two-account end-to-end testing, microphone/media testing across browsers, and live GitHub Pages verification. These have not been represented as completed.
+
+## Phase 5 Creator Passport, achievements and member recognition
+- The member profile now acts as a Creator Passport with creator category, portfolio tagline and biography, skills/interests, and a selected-project showcase.
+- Members can add and remove their own skills and showcase projects. Showcase links are restricted to HTTP/HTTPS URLs.
+- Achievement catalog, member awards and milestone history use dedicated additive tables with RLS enabled; anonymous access is revoked.
+- Public-profile visibility controls whether other authenticated members can view skills, showcase items, earned achievements and milestones; private profiles remain visible to their owner and authorized administrators.
+- CrowSpace automatically records first-account, first-post, first-community and first-event RSVP milestones. Matching first-post, community-builder and showed-up achievements are automatically awarded when the corresponding milestones are earned.
+- Milestones and achievement awards create member notifications using database triggers.
+- Administrator achievement tools support catalog creation, activation/deactivation, and member awards. Administrator access requires the trusted Supabase Auth app_metadata claim `crowspace_admin=true`; it is not based on user-editable profile metadata.
+- No service-role key is used in the browser. Existing profiles, posts, communities, events, notifications and messaging tables are reused without replacement.
+- Authenticated multi-account browser testing and GitHub Pages runtime verification remain outstanding.
