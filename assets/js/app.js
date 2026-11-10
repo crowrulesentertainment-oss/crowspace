@@ -74,6 +74,7 @@ async function boot(){
     <nav class="mobile-nav">${nav.map(([key,icon,name])=>`<a class="${page===key?"active":""}" href="${href(key)}"><i>${icon}</i><small>${name}</small></a>`).join("")}</nav>`;
   document.querySelector("#logout").onclick=async()=>{await supabase.auth.signOut();location.href="index.html";};
   const container=document.querySelector("#content");
+  const requestedUsername=new URLSearchParams(location.search).get("username")?.trim().toLowerCase();
 
   if(["home","explore","friends","notifications"].includes(page)){
     await initSocial({user,profile,page,container});
@@ -82,7 +83,12 @@ async function boot(){
   }else if(page==="messenger"){
     await initMessenger({user,profile,container});
   }else if(page==="profile"){
-    await initPassport({user,profile,container});
+    if(requestedUsername && requestedUsername!==String(profile.username).toLowerCase()){
+      const {data:publicProfile,error:publicProfileError}=await supabase.from("crowspace_profiles").select("*").eq("username",requestedUsername).eq("profile_visibility","public").maybeSingle();
+      if(publicProfileError)throw publicProfileError;
+      if(!publicProfile)container.innerHTML=empty("This Creator Passport isn’t available.","The member may have a private profile, or the username may not exist.","◉");
+      else await initPassport({user,profile:publicProfile,container,viewOnly:true});
+    }else await initPassport({user,profile,container});
   }else if(page==="settings"){
     container.innerHTML=`
       <section class="settings">
