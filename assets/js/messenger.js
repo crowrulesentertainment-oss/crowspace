@@ -221,12 +221,21 @@ async function createGroup(){
 }
 async function manageGroup(){
  if(!current||current.kind!=="group")return;
- const action=prompt("Group members: enter username to add, or type 'list' to view members.");if(!action)return;
+ const action=prompt("Group members: enter a username to add, 'list' to view members, or 'promote @name', 'demote @name', 'remove @name'.");if(!action)return;
  if(action.toLowerCase()==="list"){alert(current.members.map(m=>(m.profile?.display_name||m.user_id)+" — "+m.role).join("\n"));return;}
- const {data:p}=await supabase.from("crowspace_profiles").select("user_id,username,display_name").ilike("username",action.replace(/^@/,"")).maybeSingle();
- if(!p){note("Member not found.","error");return;}
- const {error}=await supabase.from("crowspace_group_members").insert({group_id:current.id,user_id:p.user_id,role:"member"});
- note(error?error.message:"Member added to group.",error?"error":"success");
+ const match=action.match(/^(promote|demote|remove)\s+@?(.+)$/i);
+ if(match){
+  const verb=match[1].toLowerCase(),name=match[2].trim();
+  const {data:p}=await supabase.from("crowspace_profiles").select("user_id").ilike("username",name).maybeSingle();
+  if(!p){note("Member not found.","error");return;}
+  const {error}=await supabase.rpc("crowspace_group_manage_member",{p_group_id:current.id,p_user_id:p.user_id,p_action:verb==="promote"?"promote_admin":verb==="demote"?"demote_member":"remove"});
+  note(error?error.message:"Group membership updated.",error?"error":"success");
+ }else{
+  const {data:p}=await supabase.from("crowspace_profiles").select("user_id").ilike("username",action.replace(/^@/,"")).maybeSingle();
+  if(!p){note("Member not found.","error");return;}
+  const {error}=await supabase.from("crowspace_group_members").insert({group_id:current.id,user_id:p.user_id,role:"member"});
+  note(error?error.message:"Member added to group.",error?"error":"success");
+ }
  await openConversation("group",current.id);
 }
 export async function initMessenger({user,profile,container}){
