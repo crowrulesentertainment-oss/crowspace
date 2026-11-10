@@ -1,1 +1,59 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Join CrowSpace</title><link rel="stylesheet" href="assets/css/style.css"></head><body class="auth-page"><a class="brand" href="index.html"><b>C</b><span>CROW<span class="red">SPACE</span><small>YOUR PEOPLE. YOUR STORIES. YOUR SPACE.</small></span></a><main class="auth-layout"><section class="auth-intro"><div class="eyebrow">YOUR UNIVERSE IS WAITING</div><h1>Make space<br>for <em>connection.</em></h1><p>One CrowID. A world of communities, conversations and possibilities.</p></section><section class="auth-card"><div class="tabs"><button class="active" data-mode="signin">Sign in</button><button data-mode="signup">Create account</button></div><h2 id="auth-title">Welcome back.</h2><p id="auth-subtitle">Sign in to continue to your CrowSpace.</p><form id="auth-form"><label id="name-wrap" class="hidden">Display name<input id="display-name" maxlength="80" autocomplete="name"></label><label>Email address<input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label><label>Password<input id="password" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></label><button id="auth-submit" class="btn red-btn full" type="submit">Sign in →</button></form><div id="auth-message" role="status"></div><small class="legal">Use CrowSpace respectfully and follow community guidelines.</small><a href="index.html" class="back">← Back to CrowSpace</a></section></main><script type="module" src="assets/js/auth.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#09090c">
+  <meta name="description" content="Sign in or create your CrowSpace account. One CrowID. Your people, stories and communities.">
+  <title>Sign in or join CrowSpace</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="auth-page">
+  <a class="brand" href="index.html" aria-label="CrowSpace home"><b>C</b><span>CROW<span class="red">SPACE</span><small>YOUR PEOPLE. YOUR STORIES. YOUR SPACE.</small></span></a>
+  <main class="auth-layout">
+    <section class="auth-intro">
+      <div class="eyebrow">YOUR UNIVERSE IS WAITING</div>
+      <h1>Make space<br>for <em>connection.</em></h1>
+      <p>One CrowID. A world of communities, conversations and possibilities.</p>
+      <div class="auth-points"><span>◉ One connected identity</span><span>✦ Communities and conversations</span><span>⌁ Your place in the CrowRules universe</span></div>
+    </section>
+    <section class="auth-card" aria-labelledby="auth-title">
+      <div class="tabs" id="auth-tabs" role="tablist" aria-label="Account access">
+        <button class="active" type="button" data-mode="signin" role="tab" aria-selected="true">Sign in</button>
+        <button type="button" data-mode="signup" role="tab" aria-selected="false">Create account</button>
+      </div>
+      <h2 id="auth-title">Welcome back.</h2>
+      <p id="auth-subtitle">Sign in to continue to your CrowSpace.</p>
+      <div id="social-auth" class="social-auth">
+        <button type="button" class="social-btn" data-provider="google"><span>G</span> Continue with Google</button>
+        <button type="button" class="social-btn" data-provider="discord"><span>◈</span> Continue with Discord</button>
+        <button type="button" class="social-btn" data-provider="twitch"><span>▣</span> Continue with Twitch</button>
+        <button type="button" class="social-btn" data-provider="spotify"><span>♫</span> Continue with Spotify</button>
+      </div>
+      <div class="auth-divider" id="auth-divider"><span>OR WITH EMAIL</span></div>
+      <form id="auth-form" novalidate>
+        <label id="name-wrap" class="hidden" for="display-name">Display name
+          <input id="display-name" maxlength="80" autocomplete="name" placeholder="How should people know you?">
+        </label>
+        <label id="email-wrap" for="email">Email address
+          <input id="email" type="email" required autocomplete="email" placeholder="you@example.com">
+        </label>
+        <label id="password-wrap" for="password">Password
+          <span class="password-field"><input id="password" type="password" required minlength="8" autocomplete="current-password" placeholder="At least 8 characters"><button type="button" class="password-toggle" data-toggle="password" aria-label="Show password">Show</button></span>
+        </label>
+        <label id="confirm-wrap" class="hidden" for="confirm-password">Confirm new password
+          <span class="password-field"><input id="confirm-password" type="password" minlength="8" autocomplete="new-password" placeholder="Enter your new password"><button type="button" class="password-toggle" data-toggle="confirm-password" aria-label="Show password">Show</button></span>
+        </label>
+        <div class="auth-inline-actions" id="forgot-wrap"><button type="button" id="forgot-link" class="text-action">Forgot password?</button></div>
+        <button id="auth-submit" class="btn red-btn full" type="submit">Sign in →</button>
+      </form>
+      <div id="auth-message" role="status" aria-live="polite"></div>
+      <div id="resend-wrap" class="hidden"><button type="button" id="resend-confirmation" class="text-action">Resend confirmation email</button></div>
+      <button type="button" id="back-to-signin" class="text-action hidden">← Back to sign in</button>
+      <small class="legal">By continuing, you agree to use CrowSpace respectfully and follow community guidelines.</small>
+      <a href="index.html" class="back">← Back to CrowSpace</a>
+    </section>
+  </main>
+  <script type="module" src="assets/js/auth.js"></script>
+</body>
+</html>
