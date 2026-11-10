@@ -10,7 +10,7 @@
 - Existing CrowSpace data, account links and RLS policies are preserved
 
 ## Pages
-Public landing, authentication, member home, profile, explore, groups, events, Messenger and settings.
+Public landing, authentication, member home, profile, explore, connections, notifications, groups, events, Messenger and settings.
 
 ## Supabase setup
 Uses the existing CrowRules Supabase project and its CrowSpace publishable key. A publishable key is safe for browser use only when RLS is correctly configured. Never commit a service-role or secret key.
