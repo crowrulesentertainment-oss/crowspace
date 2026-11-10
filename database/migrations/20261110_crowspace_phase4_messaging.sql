@@ -236,3 +236,11 @@ create trigger crowspace_guard_group_message_identity before update on public.cr
 revoke all on function private.crowspace_is_direct_member(uuid),private.crowspace_direct_can_send(uuid) from public,anon,authenticated;
 grant execute on function private.crowspace_is_direct_member(uuid),private.crowspace_direct_can_send(uuid) to authenticated;
 revoke all on function private.crowspace_guard_direct_member_update(),private.crowspace_guard_direct_message_identity() from public,anon,authenticated;
+
+-- Scope Messenger uploads to the uploader's own folder and an actual conversation membership.
+drop policy if exists "CrowSpace messenger upload own path" on storage.objects;
+create policy "CrowSpace messenger upload own path" on storage.objects for insert to authenticated with check (
+ bucket_id='crowspace-messenger' and (storage.foldername(name))[2] ~* '^[0-9a-f-]{36}$' and (storage.foldername(name))[3]=(select auth.uid())::text
+ and (((storage.foldername(name))[1]='dm' and (private.crowspace_is_direct_member(((storage.foldername(name))[2])::uuid) or exists(select 1 from public.podcast_direct_conversations c where c.id=((storage.foldername(name))[2])::uuid and (select auth.uid()) in (c.participant_low,c.participant_high)))
+ or ((storage.foldername(name))[1]='group' and private.crowspace_is_group_member(((storage.foldername(name))[2])::uuid)))
+);
