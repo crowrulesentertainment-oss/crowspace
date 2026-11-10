@@ -28,6 +28,6 @@ Serve locally over HTTP (for example, a static development server); ES modules d
 - Member discovery, follow/unfollow and connection requests
 - Activity notifications created by database triggers
 - Realtime notification and feed refresh
-- Reuses the existing private `crowspace-media` bucket for photos
+- Uses a dedicated private `crowspace-posts` bucket for photos
 
 The Phase 2 migration is additive and preserves existing CrowSpace tables and policies. New public-schema tables receive explicit least-privilege Data API grants and RLS. The browser uses only the Supabase publishable key.
