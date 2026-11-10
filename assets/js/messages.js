@@ -22,7 +22,7 @@ async function recordVoiceNote(){
 async function ensureCallChannel(id){
  if(callChannel&&callConversation===id)return;
  if(callChannel)await sb.removeChannel(callChannel);
- callConversation=id;callChannel=sb.channel("crowspace:dm:"+id,{config:{broadcast:{self:false}}});
+ callConversation=id;callChannel=sb.channel("crowspace:dm:"+id,{config:{private:true,broadcast:{self:false}}});
  callChannel.on("broadcast",{event:"signal"},async({payload})=>{if(!payload||payload.sender===user.id)return;try{if(payload.type==="offer"){if(callPc)return;if(!window.confirm("Incoming "+(payload.kind==="video"?"video":"audio")+" call. Answer?")){await callChannel.send({type:"broadcast",event:"signal",payload:{type:"hangup",sender:user.id}});return}callKind=payload.kind;await prepareCall(id,payload.kind);await callPc.setRemoteDescription(new RTCSessionDescription(payload.description));const answer=await callPc.createAnswer();await callPc.setLocalDescription(answer);await callChannel.send({type:"broadcast",event:"signal",payload:{type:"answer",sender:user.id,description:callPc.localDescription}});showCallUI(payload.kind)}else if(payload.type==="answer"&&callPc){await callPc.setRemoteDescription(new RTCSessionDescription(payload.description))}else if(payload.type==="ice"&&callPc&&payload.candidate){await callPc.addIceCandidate(new RTCIceCandidate(payload.candidate))}else if(payload.type==="hangup"){endCall(false)}}catch(e){showToast("Call connection error: "+e.message);endCall(false)}});
  await new Promise(resolve=>callChannel.subscribe(status=>{if(status==="SUBSCRIBED")resolve();if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")resolve()}));
 }
