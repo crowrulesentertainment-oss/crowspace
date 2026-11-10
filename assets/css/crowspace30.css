@@ -1,0 +1,38 @@
+/* CrowSpace 3.0 foundation — cinematic media network */
+:root{--cs30-red:#d62e3d;--cs30-gold:#dfbd76;--cs30-ink:#08090d;--cs30-panel:#14171f;--cs30-line:#30333d}
+body{background:radial-gradient(ellipse at 80% -15%,#4a1d261c,transparent 38%),var(--bg)}
+.topbar{box-shadow:0 12px 36px #0005}
+.brand-mark{background:linear-gradient(145deg,#f0d99b,#a87632);box-shadow:0 0 28px #d9b66b26}
+.navlinks a{transition:color .18s ease}
+.navlinks a:hover{color:var(--gold)}
+.cs30-hero{position:relative;isolation:isolate;overflow:hidden;min-height:350px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:#101219}
+.cs30-hero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#08090df5 0%,#08090dd9 48%,#08090d65 100%),linear-gradient(0deg,#090a0d 0%,transparent 45%),url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=2200&q=88") center/cover}
+.cs30-hero-inner{width:min(var(--max),calc(100% - 44px));margin:auto;padding:58px 0}
+.cs30-hero h1{font:800 clamp(38px,6vw,68px)/1.02 Manrope,sans-serif;letter-spacing:-.055em;max-width:780px;margin:16px 0}
+.cs30-hero h1 em{font-style:normal;color:var(--gold)}
+.cs30-hero p{max-width:650px;color:#c4c6ce;font-size:15px}
+.cs30-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:22px 0}
+.cs30-search{width:min(420px,100%);background:#0c0e13;border:1px solid var(--line);border-radius:999px;padding:12px 16px;color:#fff}
+.cs30-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cs30-filter{border:1px solid var(--line);background:#151820;color:#c6c8d0;border-radius:999px;padding:8px 13px;font-size:11px;cursor:pointer}
+.cs30-filter[aria-pressed=true]{background:#d9b66b1b;border-color:#d9b66b88;color:var(--gold)}
+.cs30-branch-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.cs30-branch-card{position:relative;min-height:260px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#14171f;display:flex;align-items:end;isolation:isolate;transition:transform .2s,border-color .2s}
+.cs30-branch-card:hover{transform:translateY(-4px);border-color:#d9b66b88}
+.cs30-branch-card:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,#07080cf5 0%,#090a0d9c 50%,#090a0d18 100%),var(--branch-art) center/cover}
+.cs30-branch-copy{padding:20px}
+.cs30-branch-type{font-size:9px;text-transform:uppercase;letter-spacing:.2em;color:var(--gold);font-weight:800}
+.cs30-branch-copy h2{font:800 21px Manrope;margin:8px 0}
+.cs30-branch-copy p{font-size:12px;color:#c4c6ce;margin:0 0 14px;max-width:360px}
+.cs30-branch-link{font-size:11px;color:#f0d99b;font-weight:800}
+.cs30-branch-detail{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:20px;align-items:start}
+.cs30-panel{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#191c24,#101218);padding:22px}
+.cs30-panel h2{font:800 22px Manrope;margin:8px 0 12px}
+.cs30-panel p,.cs30-panel li{color:#c4c6ce;font-size:13px}
+.cs30-feature-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.cs30-feature{padding:16px;border:1px solid #ffffff13;border-radius:10px;background:#ffffff06}
+.cs30-feature b{display:block;font:700 13px Manrope;margin-bottom:5px}
+.cs30-feature span{font-size:11px;color:var(--muted)}
+.cs30-empty{padding:32px;text-align:center;border:1px dashed #ffffff2b;border-radius:12px;color:var(--muted)}
+@media(max-width:900px){.cs30-branch-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cs30-branch-detail{grid-template-columns:1fr}}
+@media(max-width:600px){.cs30-branch-grid{grid-template-columns:1fr}.cs30-branch-card{min-height:230px}.cs30-hero-inner{width:calc(100% - 30px);padding:45px 0}.cs30-feature-list{grid-template-columns:1fr}.cs30-toolbar{align-items:stretch}.cs30-search{width:100%}}
