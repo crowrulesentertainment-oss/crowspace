@@ -282,8 +282,9 @@ export async function initMessenger({user,profile,container}){
  $("#msg-new").onclick=newMessage;$("#msg-group-new").onclick=createGroup;$("#msg-start-first").onclick=newMessage;
  $("#conversation-search").addEventListener("input",renderList);
  await loadConversations();
- const params=new URLSearchParams(location.search),peer=params.get("member"),conversationId=params.get("conversation");
+ const params=new URLSearchParams(location.search),peer=params.get("member"),conversationId=params.get("conversation"),groupId=params.get("group");
  if(conversationId){await loadConversations();if(allConversations.some(c=>c.id===conversationId&&c.kind==="direct"))await openConversation("direct",conversationId);}
+ if(groupId){await loadConversations();if(allConversations.some(c=>c.id===groupId&&c.kind==="group"))await openConversation("group",groupId);}
  if(peer){const {data:p}=await supabase.from("crowspace_profiles").select("user_id").ilike("username",peer.replace(/^@/,"")).maybeSingle();if(p){const {data:id,error}=await supabase.rpc("crowspace_start_direct_conversation",{p_other_user:p.user_id});if(!error){await loadConversations();await openConversation("direct",id);}}}
  const notice=supabase.channel("crowspace-messenger-notifications-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"recipient_id=eq."+user.id},()=>loadConversations().catch(()=>{})).subscribe();
  window.addEventListener("pagehide",()=>{supabase.removeChannel(notice);if(channel)supabase.removeChannel(channel);},{once:true});
