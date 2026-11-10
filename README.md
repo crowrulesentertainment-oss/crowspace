@@ -37,7 +37,8 @@ The Phase 2 migration is additive and preserves existing CrowSpace tables and po
 - Membership roles, owner management, join requests and membership status
 - Community discussion posts and comments
 - Event creation with community association, event format, local timezone, start/end time and location details
-- Member invitations, invitation responses and Going/Interested RSVPs
+- Event invitations, invitation responses and Going/Interested RSVPs
+- Community invitation data model prepared for owner-to-member invites
 - Upcoming event calendar/list with RSVP and invite controls
 - Dedicated additive tables: `crowspace_communities`, `crowspace_community_members`, `crowspace_community_posts`, `crowspace_community_comments`, `crowspace_community_invitations`, `crowspace_events`, `crowspace_event_invitations`, and `crowspace_event_rsvps`
 - Row Level Security enabled on all Phase 3 tables; anonymous access revoked and authenticated access explicitly granted
