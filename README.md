@@ -94,3 +94,14 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Profile SELECT is restricted to the owner, public profiles, and trusted administrators. Private profile records and their portfolio data are not visible to other members. Anonymous access to the profiles table is revoked; authenticated access remains governed by RLS.
 - Existing friendships, profile, skills, showcase, achievement and milestone tables are reused; no new tables or service-role browser credentials were introduced.
 - Browser-based multi-account privacy verification remains outstanding.
+
+
+## Phase 6 Creator Collaboration & Opportunity Network
+- Collaboration discovery searches public Creator Passports and member skills; creators can send and manage collaboration invitations.
+- Opportunity Board supports volunteer roles, creative project openings, collaboration requests and resource exchange, with remote/local/hybrid filters, applications and reports.
+- Project Workspaces reuse the existing CrowSpace project and membership tables; owners can invite contributors and teams can post progress updates.
+- Creator availability lets members signal whether they are open to collaboration, seeking a team, available for volunteer work, or unavailable.
+- Completed projects can be marked for public portfolio display using the existing public project visibility model.
+- Administrator moderation queue reviews opportunity reports. Admin authorization uses trusted Supabase `app_metadata.crowspace_admin=true`.
+- Additive migration: `database/migrations/20261110_crowspace_phase6_collaboration_network.sql`. New collaboration, opportunity, application, update and report tables have RLS enabled and explicit authenticated grants; anonymous access is revoked. Existing project tables and their established policies are reused.
+- Browser multi-account testing, opportunity application moderation, live Pages verification and full project invitation acceptance testing remain outstanding.
