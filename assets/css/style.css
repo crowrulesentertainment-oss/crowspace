@@ -170,3 +170,9 @@ body[data-page]{min-height:100vh}.top{height:68px;position:sticky;top:0;z-index:
 .collab-my-applications>h3{margin-bottom:12px}
 .collab-my-applications .collab-application{margin-bottom:8px}
 @media(max-width:600px){.collab-review{padding:14px}.collab-review-head{align-items:flex-start}.collab-invite-counts{width:100%}.collab-invite-counts span{flex:1}.collab-team-row{align-items:flex-start}.collab-team-row>div{align-items:flex-end;flex-direction:column;gap:6px}.collab-application-person{align-items:flex-start;flex-direction:column}}
+
+
+/* Phase 6.3 — live notification badge */
+.top-actions #notification-link{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:28px}
+.notification-badge{position:absolute;top:-7px;right:-9px;min-width:16px;height:16px;padding:0 4px;display:inline-flex;align-items:center;justify-content:center;border-radius:99px;background:var(--red,#b32632);border:1px solid #f4b8bc;color:#fff;font:700 9px/1 Arial,sans-serif;box-shadow:0 2px 8px #0008}
+.notification-badge[hidden]{display:none}
