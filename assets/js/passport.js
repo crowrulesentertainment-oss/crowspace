@@ -79,12 +79,11 @@ export async function initPassport({user, profile, container}) {
   container.querySelector("#showcase-list").onclick=async e=>{const b=e.target.closest("[data-project-remove]");if(!b)return;const{error}=await supabase.from("crowspace_profile_showcase").delete().eq("id",b.dataset.projectRemove).eq("user_id",user.id);if(error)return note(container.querySelector("#showcase-note"),error.message,"error");projects=projects.filter(p=>p.id!==b.dataset.projectRemove);renderProjects();};
 
   if(isAdmin){
-    const [membersRes,allAchievementsRes,allBadgesRes]=await Promise.all([
+    const [membersRes,allAchievementsRes]=await Promise.all([
       supabase.from("crowspace_profiles").select("user_id,username,display_name").order("display_name").limit(500),
-      supabase.from("crowspace_achievements").select("*").order("sort_order"),
-      supabase.from("crowspace_member_achievements").select("id,member_id,achievement_id,awarded_at,achievement:crowspace_achievements(name),member:crowspace_profiles!crowspace_member_achievements_member_id_fkey(display_name,username)").order("awarded_at",{ascending:false}).limit(100)
+      supabase.from("crowspace_achievements").select("*").order("sort_order")
     ]);
-    if(membersRes.error)throw membersRes.error;if(allAchievementsRes.error)throw allAchievementsRes.error;if(allBadgesRes.error)throw allBadgesRes.error;
+    if(membersRes.error)throw membersRes.error;if(allAchievementsRes.error)throw allAchievementsRes.error;
     const members=membersRes.data||[],allAchievements=allAchievementsRes.data||[];
     const memberSelect=container.querySelector("#award-member"),achievementSelect=container.querySelector("#award-achievement");
     memberSelect.innerHTML='<option value="">Choose a member…</option>'+members.map(m=>`<option value="${m.user_id}">${esc(m.display_name)} (@${esc(m.username)})</option>`).join("");
