@@ -22,7 +22,7 @@ In Supabase Dashboard → Authentication → URL Configuration, allow the deploy
 Serve locally over HTTP (for example, a static development server); ES modules do not run reliably from file://.
 
 ## Phase 2 social network
-- Personalized feed reusing `crowspace_wall_posts`
+- Personalized feed using a dedicated `crowspace_posts` table; legacy `crowspace_wall_posts` remains intact
 - Text and photo publishing with audience controls
 - Comments, reactions and member connections
 - Member discovery, follow/unfollow and connection requests
