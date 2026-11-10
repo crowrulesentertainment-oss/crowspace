@@ -203,3 +203,15 @@ as $$ begin
 end $$;
 revoke all on function private.crowspace_group_message_inbox_update() from public,anon,authenticated;
 create trigger crowspace_group_message_inbox_update after insert on public.crowspace_group_messages for each row execute function private.crowspace_group_message_inbox_update();
+
+create or replace function private.crowspace_direct_message_notify()
+returns trigger language plpgsql security definer set search_path=''
+as $$ begin
+ update public.crowspace_direct_conversations set last_message_at=new.created_at,updated_at=new.created_at where id=new.conversation_id;
+ update public.crowspace_direct_members set archived_at=null where conversation_id=new.conversation_id;
+ insert into public.crowspace_notifications(recipient_id,actor_id,notification_type,entity_type,entity_id,message)
+ select m.user_id,new.sender_id,'direct_message','direct_message',new.conversation_id,'sent you a message'
+ from public.crowspace_direct_members m where m.conversation_id=new.conversation_id and m.user_id<>new.sender_id and (m.muted_until is null or m.muted_until<=new.created_at);
+ return new;
+end $$;
+revoke all on function private.crowspace_direct_message_notify() from public,anon,authenticated;
