@@ -2,7 +2,7 @@ import{sb}from"./client.js";import{PODCASTING_BASE}from"./config.js";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const slug=new URLSearchParams(location.search).get("division");
 const root=document.querySelector("#cs30-root");
-const valid=["podcasting","tacoma-nights","back-deck-live","bonded-in-mystery","tacoma-community-hub","memorials","dreamscapes","studios","crowrules-plus","records","spectrum-awards","tacoma-community"];
+const valid=["community","podcasting","tacoma-nights","back-deck-live","bonded-in-mystery","tacoma-community-hub","memorials","dreamscapes","studios","crowrules-plus","records","spectrum-awards","tacoma-community"];
 if(document.body.dataset.page==="branch-detail"&&valid.includes(slug)){
  const section=document.createElement("section");section.className="wrap section";section.id="cs30-branch-feed";section.innerHTML='<div class="cs30-panel"><span class="kicker">THE DIVISION FEED</span><h2>Branch conversations</h2><div id="cs30-compose"></div></div><div id="cs30-post-list" class="cs30-post-list"><div class="cs30-empty">Loading branch conversations…</div></div>';root.append(section);
  const {data:auth}=await sb.auth.getUser(),user=auth?.user||null,compose=document.querySelector("#cs30-compose"),list=document.querySelector("#cs30-post-list");
