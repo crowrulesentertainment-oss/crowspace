@@ -91,7 +91,7 @@ async function renderPane(messages){
  const blocked=otherId?await supabase.from("crowspace_direct_blocks").select("blocked_user_id").eq("blocker_id",currentUser.id).eq("blocked_user_id",otherId).maybeSingle():{data:null};
  const isBlocked=!!blocked.data;
  $("#message-pane").innerHTML='<header class="msg-chat-head">'+avatar(current.other||{display_name:current.title})+'<div><b>'+esc(title)+'</b><small>'+ (current.kind==="group"?current.members.length+" members · "+esc(current.role||"member"):onlineUsers.has(otherId)?"Online":"Direct conversation")+'</small></div><div class="msg-chat-actions"><button id="msg-search-toggle" title="Search messages">⌕</button>'+(current.kind==="direct"?'<button id="msg-block" title="Block member">'+(isBlocked?"Unblock":"Block")+'</button><button id="msg-report" title="Report conversation">⚑</button>':'<button id="msg-members" title="Manage group members">♧</button>')+'</div></header><div class="msg-searchbar hidden"><input id="thread-search" placeholder="Search this conversation…"></div><div class="msg-presence" id="msg-typing"></div><div class="msg-history" id="msg-history">'+messages.map(m=>messageHTML(m)).join("")+'</div><div class="msg-compose"><div class="msg-attach-row"><label class="msg-file-btn">＋ Attach<input id="msg-file" type="file" accept="image/*,video/mp4,video/webm,audio/*,application/pdf,text/plain" hidden></label><button id="msg-record" type="button">◉ Voice note</button><span id="record-state"></span></div><form id="msg-send-form"><textarea id="msg-input" rows="1" maxlength="5000" placeholder="Write a message…" '+(isBlocked?'disabled':'')+'></textarea><button class="btn red-btn" '+(isBlocked?'disabled':'')+'>Send ↑</button></form><div id="msg-status" class="msg-status"></div></div>';
- const hist=$("#msg-history");hist.scrollTop=hist.scrollHeight;
+ const hist=$("#msg-history");hist.scrollTop=hist.scrollHeight;await hydrateAttachments(messages);
  $("#msg-search-toggle").onclick=()=>{$(".msg-searchbar").classList.toggle("hidden");$("#thread-search")?.focus();};
  $("#thread-search")?.addEventListener("input",e=>{const q=e.target.value.toLowerCase();hist.querySelectorAll(".msg-bubble").forEach(el=>el.classList.toggle("hidden",!el.textContent.toLowerCase().includes(q)));});
  $("#msg-send-form").onsubmit=sendMessage;
@@ -109,6 +109,22 @@ function messageHTML(m){
  const mine=m.sender_id===currentUser.id, body=m.deleted_at?"This message was deleted":m.body;
  return '<article class="msg-line '+(mine?'mine':'')+'"><div class="msg-bubble" data-message="'+m.id+'"><p>'+esc(body)+'</p><footer>'+stamp(m.created_at)+(m.edited_at?' · edited':'')+(mine?' · Sent':'')+'</footer>'+(mine?'':'<button class="msg-report-inline" data-report="'+m.id+'" title="Report message">⚑</button>')+'</div></article>';
 }
+
+async function hydrateAttachments(messages){
+ const ids=messages.map(m=>m.id).filter(Boolean);if(!ids.length)return;
+ const table=current.kind==="direct"?"crowspace_direct_attachments":"crowspace_group_message_attachments";
+ const {data}=await supabase.from(table).select("message_id,object_path,file_name,mime_type").in("message_id",ids);
+ for(const a of data||[]){
+  const {data:signed}=await supabase.storage.from("crowspace-messenger").createSignedUrl(a.object_path,3600);
+  if(!signed?.signedUrl)continue;
+  const bubble=document.querySelector('[data-message="'+a.message_id+'"]');if(!bubble)continue;
+  const p=bubble.querySelector("p");if(!p)continue;
+  const u=esc(signed.signedUrl),name=esc(a.file_name);
+  let html=a.mime_type.startsWith("image/")?'<img src="'+u+'" alt="'+name+'">':a.mime_type.startsWith("audio/")?'<audio controls src="'+u+'"></audio>':a.mime_type.startsWith("video/")?'<video controls src="'+u+'"></video>':'<a href="'+u+'" target="_blank" rel="noopener">↧ '+name+'</a>';
+  p.innerHTML=html;
+ }
+}
+
 async function markRead(){
  const now=new Date().toISOString();
  const table=current.kind==="direct"?"crowspace_direct_members":"crowspace_group_members", key=current.kind==="direct"?"conversation_id":"group_id";
@@ -123,7 +139,7 @@ async function subscribeConversation(){
  channel.on("postgres_changes",{event:"INSERT",schema:"public",table,filter:fk+"=eq."+current.id},payload=>{
   if(payload.new.sender_id!==currentUser.id){const hist=$("#msg-history");if(hist){hist.insertAdjacentHTML("beforeend",messageHTML(payload.new));hist.scrollTop=hist.scrollHeight;markRead();}}
   loadConversations().catch(()=>{});
- }).on("broadcast",{event:"typing"},({payload})=>{
+ }).on("postgres_changes",{event:"INSERT",schema:"public",table:current.kind==="direct"?"crowspace_direct_attachments":"crowspace_group_message_attachments",filter:(current.kind==="direct"?"conversation_id":"group_id")+"=eq."+current.id},payload=>{hydrateAttachments([{id:payload.new.message_id}]);}).on("broadcast",{event:"typing"},({payload})=>{
   if(payload.user_id!==currentUser.id){$("#msg-typing").textContent=(payload.name||"Someone")+" is typing…";clearTimeout(typingStop);typingStop=setTimeout(()=>$("#msg-typing").textContent="",2200);}
  }).on("presence",{event:"sync"},()=>{
   const state=channel.presenceState();onlineUsers=new Set(Object.values(state).flat().map(x=>x.user_id));
@@ -244,7 +260,8 @@ export async function initMessenger({user,profile,container}){
  $("#msg-new").onclick=newMessage;$("#msg-group-new").onclick=createGroup;$("#msg-start-first").onclick=newMessage;
  $("#conversation-search").addEventListener("input",renderList);
  await loadConversations();
- const params=new URLSearchParams(location.search),peer=params.get("member");
+ const params=new URLSearchParams(location.search),peer=params.get("member"),conversationId=params.get("conversation");
+ if(conversationId){await loadConversations();if(allConversations.some(c=>c.id===conversationId&&c.kind==="direct"))await openConversation("direct",conversationId);}
  if(peer){const {data:p}=await supabase.from("crowspace_profiles").select("user_id").ilike("username",peer.replace(/^@/,"")).maybeSingle();if(p){const {data:id,error}=await supabase.rpc("crowspace_start_direct_conversation",{p_other_user:p.user_id});if(!error){await loadConversations();await openConversation("direct",id);}}}
  const notice=supabase.channel("crowspace-messenger-notifications-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"crowspace_notifications",filter:"recipient_id=eq."+user.id},()=>loadConversations().catch(()=>{})).subscribe();
  window.addEventListener("pagehide",()=>{supabase.removeChannel(notice);if(channel)supabase.removeChannel(channel);},{once:true});
