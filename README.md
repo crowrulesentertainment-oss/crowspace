@@ -81,3 +81,6 @@ The Phase 3 schema was applied to the existing Supabase project. Community and e
 - Administrator achievement tools support catalog creation, activation/deactivation, and member awards. Administrator access requires the trusted Supabase Auth app_metadata claim `crowspace_admin=true`; it is not based on user-editable profile metadata.
 - No service-role key is used in the browser. Existing profiles, posts, communities, events, notifications and messaging tables are reused without replacement.
 - Authenticated multi-account browser testing and GitHub Pages runtime verification remain outstanding.
+
+### Phase 5 administrator setup
+To enable the achievement desk for a trusted administrator, open Supabase Dashboard → Authentication → Users → select the intended administrator → edit **app_metadata** and add `{"crowspace_admin": true}`. Save the change and have that user sign out and back in so the refreshed JWT includes the trusted claim. Do not put this flag in user-editable `user_metadata`; the database policies intentionally authorize only from `app_metadata`.
