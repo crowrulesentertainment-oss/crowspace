@@ -46,3 +46,14 @@ The Phase 2 migration is additive and preserves existing CrowSpace tables and po
 - Existing legacy group-chat tables and CrowRules community/event tables are not repurposed or overwritten
 
 The Phase 3 schema was applied to the existing Supabase project. Community and event pages are connected through `assets/js/phase3.js`; no service-role key is used in the browser.\n\n## Phase 3.1 community administration and calendar\n- Owner/admin/moderator community roster and moderation controls with role boundaries enforced by RLS\n- Member invitations with private-community invitation preview and accept/decline flow\n- Owner-only controls remain protected; moderators can restrict regular members but cannot promote roles\n- Interactive month grid with previous/next/today navigation, event indicators and selected-day event details\n- Additive Supabase policy hardening and private-schema membership-role helper; existing tables and unrelated CrowRules policies remain untouched\n- Browser-side JavaScript continues to use only the publishable key
+
+
+## Phase 3.2 community experience expansion
+- Community announcements are manager-only and trigger member notifications.
+- Community managers can pin and unpin discussions; pin and announcement permissions are enforced server-side.
+- Community detail pages show active member, discussion and upcoming event counts plus a recent activity timeline.
+- Community notifications are generated for announcements, new community events, comments on a member's discussion, and new member joins; notification clicks open the related community or event.
+- Event discovery includes upcoming events across accessible CrowSpace communities, keyword search, event-format filtering and date-range filtering.
+- Fixed the community discussion read and insert RLS predicates so membership is checked against the discussion's actual community.
+- Existing notifications table and community/event tables are reused; no service-role key or new public-facing table was introduced.
+- Authenticated two-account end-to-end testing and live GitHub Pages deployment verification remain outstanding.
