@@ -58,7 +58,7 @@ async function reportDirectConversation(conversation){
 async function startTyping(kind,id,otherId=null){
  if(typingChannel)await sb.removeChannel(typingChannel);
  typingChannel=sb.channel("crowspace-typing-"+kind+"-"+id,{config:{broadcast:{self:false}}});
- typingChannel.on("broadcast",{event:"typing"},({payload})=>{if(!payload||payload.user_id===user.id)return;const el=document.querySelector("#typingStatus");if(el){el.textContent=payload.typing?(kind==="direct"?"Typing…":"A member is typing…"):"";}if(typingStop)clearTimeout(typingStop);if(payload.typing)typingStop=setTimeout(()=>{const n=document.querySelector("#typingStatus");if(n)n.textContent="";},2200);}).subscribe();
+ await new Promise(resolve=>typingChannel.on("broadcast",{event:"typing"},({payload})=>{if(!payload||payload.user_id===user.id)return;const el=document.querySelector("#typingStatus");if(el){el.textContent=payload.typing?(kind==="direct"?"Typing…":"A member is typing…"):"";}if(typingStop)clearTimeout(typingStop);if(payload.typing)typingStop=setTimeout(()=>{const n=document.querySelector("#typingStatus");if(n)n.textContent="";},2200);}).subscribe(status=>{if(status==="SUBSCRIBED"||status==="CHANNEL_ERROR"||status==="TIMED_OUT")resolve()}));
  const input=document.querySelector('#messageForm textarea[name="body"]');
  if(input){input.addEventListener("input",()=>{const now=Date.now();if(now-typingLast>850){typingLast=now;typingChannel?.send({type:"broadcast",event:"typing",payload:{user_id:user.id,typing:true}});}});input.addEventListener("blur",()=>typingChannel?.send({type:"broadcast",event:"typing",payload:{user_id:user.id,typing:false}}));}
 }
