@@ -174,3 +174,14 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - New additive migration: `database/migrations/20261110_crowspace_phase6_8_custom_project_templates.sql`. The template table has RLS enabled, explicit authenticated grants, no anonymous access, owner-only create/update/delete, and authenticated read access limited to shared templates or the owner's own templates.
 - No service-role credentials, privileged functions or changes to existing project/milestone policies are introduced.
 - JavaScript syntax validation and database schema/RLS verification are required; authenticated multi-account sharing tests and live GitHub Pages verification remain outstanding until performed.
+
+
+## Phase 6.9 — Template Ratings, Reviews & Featured Templates
+- Shared templates display member star ratings, average score and review count.
+- Authenticated members can submit one review per shared template, update their own rating/review, and read community feedback. Template owners cannot review their own templates.
+- Template review text is limited to 2,000 characters; ratings are constrained to whole-number values from 1 to 5.
+- CrowSpace admins (trusted `app_metadata.crowspace_admin=true`) can feature or unfeature shared templates. Featured templates are visually marked and sorted to the top of the library.
+- New tables: `crowspace_project_template_reviews` and `crowspace_featured_project_templates`. Both use RLS and have no anonymous access. Review ownership is enforced by policies and an immutable owner/template trigger. Only trusted admins can curate featured entries.
+- New migration: `database/migrations/20261110_crowspace_phase6_9_template_reviews_featured.sql`.
+- Reviews are scoped to templates that are currently shared; private templates do not expose their reviews. Existing project templates, project milestones, and collaboration workflows remain unchanged.
+- JavaScript syntax and database policy verification should be run after deployment. Authenticated multi-account review flows and live GitHub Pages rendering remain outstanding until performed.
