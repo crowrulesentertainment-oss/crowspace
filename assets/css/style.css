@@ -286,3 +286,18 @@ body[data-page]{min-height:100vh}.top{height:68px;position:sticky;top:0;z-index:
 .custom-template-builder h4{margin:0 0 12px;font:600 16px var(--display)}
 .custom-template-builder>small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:-3px}
 @media(max-width:650px){.template-library-head{display:block}.template-library-head>button{margin-top:12px}.template-library-grid{grid-template-columns:1fr}.custom-template-library{padding:13px}}
+
+
+/* Phase 6.9 — template ratings, reviews and featured discovery */
+.template-library-card.is-featured{border-color:rgba(214,170,86,.55);background:linear-gradient(145deg,rgba(119,83,34,.16),rgba(255,255,255,.025))}
+.template-featured-label{display:inline-flex;margin-bottom:8px;padding:4px 7px;border-radius:4px;background:rgba(191,146,62,.16);color:#e8c77d;font-size:9px;font-weight:800;letter-spacing:.09em}
+.template-rating-line{display:flex;align-items:center;gap:8px;margin:9px 0;color:#e7c77e;font-size:11px}
+.template-rating-line strong{letter-spacing:.08em}
+.template-rating-line span{color:var(--muted);font-size:9px}
+.template-review-list{margin-top:12px;border-top:1px solid var(--border,rgba(255,255,255,.1));padding-top:9px}
+.template-review-list summary{cursor:pointer;color:var(--muted);font-size:10px}
+.template-review-item{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.template-review-item>div{display:flex;justify-content:space-between;gap:10px;font-size:10px}
+.template-review-item>div span{color:#e7c77e;white-space:nowrap;letter-spacing:.04em}
+.template-review-item p{margin:5px 0;color:var(--text,#eee);font-size:10px;line-height:1.5}
+.template-review-item small{color:var(--muted);font-size:9px}
