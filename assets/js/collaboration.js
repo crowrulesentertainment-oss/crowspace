@@ -113,7 +113,7 @@ async function openProject(id){
  
  if(isOwner){
   const filename=(suffix)=>String(p.title||"project").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,80)+"-"+suffix;
-  const csvCell=value=>{let text=String(value??"");if(/^[\\t\\r ]*[=+\\-@]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
+  const csvCell=value=>{let text=String(value??"");if(/^\\s*[=+@-]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
   const downloadFile=(content,type,name)=>{const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   const reportNote=msg=>{const el=root.querySelector("#project-export-note");if(el)el.textContent=msg;};
   const milestoneCsv=[["Title","Description","Status","Due date","Assigned to","Created by","Completed by","Completed at","Created at"],...ms.data.map(x=>[x.title,x.description,statusLabels[x.status]||x.status,x.due_date,names[x.assigned_to]||"",names[x.created_by]||"",names[x.completed_by]||"",x.completed_at,x.created_at])].map(row=>row.map(csvCell).join(",")).join("\r\n");
