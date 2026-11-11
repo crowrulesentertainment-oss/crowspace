@@ -205,3 +205,43 @@ body[data-page]{min-height:100vh}.top{height:68px;position:sticky;top:0;z-index:
 .command-activity p{font-size:10px;color:#c4bdc6;line-height:1.5;margin:5px 0}
 .command-activity small{font-size:9px;color:var(--muted)}
 @media(max-width:700px){.command-heading{align-items:flex-start;flex-direction:column}.command-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.command-grid{grid-template-columns:1fr}.command-panel{padding:14px}}
+
+
+/* Phase 6.5 — milestone tracking and project analytics */
+.milestone-progress{margin:14px 0 2px;padding:12px;background:#111116;border:1px solid var(--line);border-radius:9px}
+.milestone-progress-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:10px;color:var(--muted)}
+.milestone-progress-top b{color:var(--gold);font-size:13px}
+.milestone-progress-track{height:8px;overflow:hidden;background:#302b33;border-radius:99px}
+.milestone-progress-track i{display:block;height:100%;background:linear-gradient(90deg,#a52a35,#d4ad62);border-radius:99px;transition:width .2s ease}
+.milestone-progress>small{display:block;margin-top:7px;color:var(--muted);font-size:9px}
+.project-analytics{margin:20px 0 25px;padding:19px;background:linear-gradient(145deg,#1b181d,#111116);border:1px solid var(--line);border-radius:12px}
+.project-progress-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:15px}
+.project-progress-head strong{display:block;color:var(--gold);font:600 35px var(--display);margin:4px 0}
+.project-progress-head small{display:block;color:var(--muted);font-size:10px}
+.project-progress-ring{width:78px;height:78px;flex:0 0 78px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(#c49a52 var(--progress),#37313b 0);position:relative}
+.project-progress-ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:#17151b}
+.project-progress-ring span{position:relative;color:#f2e5c9;font:600 14px var(--display)}
+.project-analytics-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.project-analytics-stats span{padding:10px;background:#0d0d11;border:1px solid #302b33;border-radius:7px;color:var(--muted);font-size:9px}
+.project-analytics-stats b{display:block;color:#f0e8dd;font:600 18px var(--display);margin-bottom:3px}
+.milestone-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 0 12px}
+.milestone-section-head h3{margin:5px 0;font:600 18px var(--display)}
+.milestone-section-head>span{font-size:10px;color:var(--gold)}
+.milestone-create{margin:12px 0 16px}
+.milestone-list{display:grid;gap:9px}
+.milestone-row{padding:13px;background:#111116;border:1px solid #343039;border-radius:9px}
+.milestone-row-main{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.milestone-row h4{font-size:12px;margin:0 0 5px}
+.milestone-row p{font-size:10px;color:#c4bdc6;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 7px}
+.milestone-row small{font-size:9px;color:var(--muted)}
+.milestone-row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.milestone-row-actions select{max-width:190px;min-width:125px;padding:7px 9px;background:#19171e;border:1px solid #49414d;border-radius:6px;color:var(--text);font-size:10px}
+.contribution-list{display:grid;gap:7px;margin:12px 0 22px}
+.contribution-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:18px;padding:12px;background:#111116;border:1px solid #343039;border-radius:8px}
+.contribution-row>div b,.contribution-row>div small,.contribution-row>span b,.contribution-row>span small{display:block}
+.contribution-row>div b{font-size:11px}
+.contribution-row>div small,.contribution-row>span small{font-size:9px;color:var(--muted);margin-top:4px}
+.contribution-row>span{text-align:right;min-width:85px}
+.contribution-row>span b{font:600 17px var(--display);color:var(--gold)}
+.analytics-disclaimer{font-size:10px;color:var(--muted);line-height:1.6;margin:0 0 10px}
+@media(max-width:600px){.project-analytics-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.milestone-row-main{align-items:flex-start;flex-direction:column}.milestone-row-actions select{flex:1;min-width:0}.contribution-row{grid-template-columns:minmax(0,1fr) auto;gap:10px}.contribution-row>span:last-child{grid-column:2}.project-progress-ring{width:66px;height:66px;flex-basis:66px}}
