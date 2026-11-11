@@ -1,6 +1,5 @@
 import { supabase } from "./supabase.js";
 import { initSocial } from "./social.js";
-import { initPhase3 } from "./phase3.js";
 import { initMessenger } from "./messenger.js";
 import { initPassport } from "./passport.js";
 import { initCollaboration } from "./collaboration.js";
@@ -94,6 +93,7 @@ async function boot(){
   if(["home","explore","friends","notifications"].includes(page)){
     await initSocial({user,profile,page,container});
   }else if(["groups","events"].includes(page)){
+    const { initPhase3 } = await import("./phase3.js");
     await initPhase3({user,profile,page,container});
   }else if(page==="collaborate"){
     await initCollaboration({user,profile,container});
