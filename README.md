@@ -144,3 +144,11 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Additive database migrations: `database/migrations/20261110_crowspace_phase6_5_project_milestones_analytics.sql`, `database/migrations/20261110_crowspace_phase6_5_1_milestone_contribution_indexes.sql`, and `database/migrations/20261110_crowspace_phase6_5_2_milestone_attribution_guard.sql`. The new milestone table has RLS enabled, explicit authenticated grants, and policies scoped to the owning project and accepted members. A non-privileged trigger prevents changing a milestone’s project/creator and protects completion attribution. Anonymous access is revoked.
 - Existing project, membership, and progress-update tables remain in place; no service-role key or client-executable privileged function is introduced.
 - Browser-based multi-account testing and live GitHub Pages verification remain outstanding.
+
+
+## Phase 6.6 — Project Reports & Export Center
+- Project owners can generate a downloadable project progress report as a standalone HTML file, including project status, completion metrics, milestone summaries, team roster and activity history. The report includes a Print / Save as PDF action.
+- Owners can export milestone summaries and team activity as CSV files for spreadsheet use.
+- Team activity exports combine milestone completion events with progress updates and include the latest 100 project updates available to the workspace query.
+- Exports are generated in the browser from data the signed-in project owner is already authorized to view. No new database tables, privileged functions, storage buckets or service-role credentials are introduced.
+- Existing project and milestone RLS policies remain unchanged. Browser-based owner/member testing and live GitHub Pages verification remain outstanding.
