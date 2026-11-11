@@ -134,3 +134,13 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Reuses existing collaboration, opportunity, application, project, membership and progress-update tables. No duplicate dashboard data store or new client-executable privileged functions are introduced.
 - Additive database migration: `database/migrations/20261110_crowspace_phase6_4_project_command_center.sql`. The existing project RLS policies remain in force; the new nullable due-date column inherits those policies.
 - Browser-based two-account end-to-end testing and live GitHub Pages verification remain outstanding.
+
+
+## Phase 6.5 — Collaboration Milestones & Project Analytics
+- Project workspaces now include milestone creation, descriptions, due dates, assignment to an active project participant, and status tracking (not started, in progress, blocked, completed).
+- Milestone completion automatically updates the project completion percentage, with totals, blocked work, overdue milestones, and active contributor counts.
+- Team contribution summaries show milestone completions and progress updates attributed to each project participant. These are activity indicators, not ratings or judgments of individual performance.
+- Project cards show progress percentages for owners and accepted team members. Team progress and milestone records are not exposed to unrelated visitors of public portfolio projects.
+- Additive database migration: `database/migrations/20261110_crowspace_phase6_5_project_milestones_analytics.sql`. The new milestone table has RLS enabled, explicit authenticated grants, and policies scoped to the owning project and accepted members. Anonymous access is revoked.
+- Existing project, membership, and progress-update tables remain in place; no service-role key or client-executable privileged function is introduced.
+- Browser-based multi-account testing and live GitHub Pages verification remain outstanding.
