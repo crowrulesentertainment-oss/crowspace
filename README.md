@@ -163,3 +163,14 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - No new database tables, migrations, privileged functions, or service-role credentials were introduced. Existing RLS policies remain in place.
 - Template definitions are currently shipped with the application code; member-authored/shared template libraries are a possible later enhancement.
 - JavaScript syntax validation passed. Authenticated browser testing, including milestone seeding under a real owner account, and live GitHub Pages verification remain outstanding.
+
+
+## Phase 6.8 — Custom Template Builder & Shared Template Library
+- Members can create reusable project templates with a title, description, category, and up to 50 ordered starter milestones.
+- Each milestone supports a title, description and suggested day offset from project creation.
+- Templates can be private to their owner or shared with all authenticated CrowSpace members. The library shows both the member's own templates and shared templates.
+- Owners can switch a template between private and shared, delete their own templates, and launch a project from any template they can access.
+- Saved templates appear alongside built-in templates in the project creation selector. New projects copy the selected template's milestones into the existing project milestone workflow; editing or deleting a template does not alter existing projects.
+- New additive migration: `database/migrations/20261110_crowspace_phase6_8_custom_project_templates.sql`. The template table has RLS enabled, explicit authenticated grants, no anonymous access, owner-only create/update/delete, and authenticated read access limited to shared templates or the owner's own templates.
+- No service-role credentials, privileged functions or changes to existing project/milestone policies are introduced.
+- JavaScript syntax validation and database schema/RLS verification are required; authenticated multi-account sharing tests and live GitHub Pages verification remain outstanding until performed.
