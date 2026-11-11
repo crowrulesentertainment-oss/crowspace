@@ -141,6 +141,6 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Milestone completion automatically updates the project completion percentage, with totals, blocked work, overdue milestones, and active contributor counts.
 - Team contribution summaries show milestone completions and progress updates attributed to each project participant. These are activity indicators, not ratings or judgments of individual performance.
 - Project cards show progress percentages for owners and accepted team members. Team progress and milestone records are not exposed to unrelated visitors of public portfolio projects.
-- Additive database migration: `database/migrations/20261110_crowspace_phase6_5_project_milestones_analytics.sql`. The new milestone table has RLS enabled, explicit authenticated grants, and policies scoped to the owning project and accepted members. Anonymous access is revoked.
+- Additive database migrations: `database/migrations/20261110_crowspace_phase6_5_project_milestones_analytics.sql` and `database/migrations/20261110_crowspace_phase6_5_1_milestone_contribution_indexes.sql`. The new milestone table has RLS enabled, explicit authenticated grants, and policies scoped to the owning project and accepted members. Anonymous access is revoked.
 - Existing project, membership, and progress-update tables remain in place; no service-role key or client-executable privileged function is introduced.
 - Browser-based multi-account testing and live GitHub Pages verification remain outstanding.
