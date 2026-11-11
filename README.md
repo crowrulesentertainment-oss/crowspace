@@ -124,3 +124,13 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - The global notification icon displays a live unread count across authenticated CrowSpace pages.
 - Existing notifications remain private to their recipient; the notification table is added to the existing Realtime publication when that publication is present.
 - Multi-account browser verification is still required to confirm end-to-end delivery in deployed sessions.
+
+
+## Phase 6.4 — Collaboration Dashboard & Project Command Center
+- Adds a first-tab Command Center that consolidates project totals, active work, pending invitations, application review counts, and overdue items.
+- Shows project due dates and open opportunity application deadlines in one upcoming-deadlines list, with direct links to the relevant workspace or opportunity board.
+- Brings project workspaces, recent team progress updates, incoming/outgoing invitations, applications awaiting review, and the member's own pending applications into a single overview.
+- Project owners can set or update an optional due date from project creation and the project workspace.
+- Reuses existing collaboration, opportunity, application, project, membership and progress-update tables. No duplicate dashboard data store or new client-executable privileged functions are introduced.
+- Additive database migration: `database/migrations/20261110_crowspace_phase6_4_project_command_center.sql`. The existing project RLS policies remain in force; the new nullable due-date column inherits those policies.
+- Browser-based two-account end-to-end testing and live GitHub Pages verification remain outstanding.
