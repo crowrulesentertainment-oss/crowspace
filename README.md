@@ -152,3 +152,14 @@ To enable the achievement desk for a trusted administrator, open Supabase Dashbo
 - Team activity exports combine milestone completion events with progress updates and include the latest 100 project updates available to the workspace query.
 - Exports are generated in the browser from data the signed-in project owner is already authorized to view. No new database tables, privileged functions, storage buckets or service-role credentials are introduced.
 - Existing project and milestone RLS policies remain unchanged. Browser-based owner/member testing and live GitHub Pages verification remain outstanding.
+
+
+## Phase 6.7 — Project Templates & Workflow Automation
+- Project creation now offers reusable starter templates: Start from scratch, Podcast episode, Video production, Community event, Website or app build, and Marketing campaign.
+- Each template supplies a suggested project category, a short project description, and an ordered milestone/task sequence with suggested due dates relative to the creation date.
+- Members can preview the starter milestone sequence, change the project category, edit the project name and description, select a division, choose workspace visibility, and set a target due date before creating.
+- When a template is selected, CrowSpace creates the project and seeds its milestones in the existing crowspace_project_milestones table. The existing milestone editor, assignments, status workflow, analytics and reports continue to work with the generated milestones.
+- The Start from scratch option creates an empty workspace for fully custom planning.
+- No new database tables, migrations, privileged functions, or service-role credentials were introduced. Existing RLS policies remain in place.
+- Template definitions are currently shipped with the application code; member-authored/shared template libraries are a possible later enhancement.
+- JavaScript syntax validation passed. Authenticated browser testing, including milestone seeding under a real owner account, and live GitHub Pages verification remain outstanding.
