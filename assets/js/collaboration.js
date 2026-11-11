@@ -151,7 +151,7 @@ export async function initCollaboration({user,profile,container}){
     const base=new Date();base.setHours(12,0,0,0);
     const rows=template.milestones.map((item,index)=>{const due=new Date(base);due.setDate(due.getDate()+item[2]);return {project_id:create.data.id,title:item[0],description:item[1],status:"not_started",due_date:due.toISOString().slice(0,10),created_by:user.id,sort_order:(index+1)*10};});
     const seeded=await supabase.from("crowspace_project_milestones").insert(rows);
-    if(seeded.error){note("project-note","Your project was created, but its starter milestones could not be added: "+seeded.error.message+" You can add them manually in the workspace.",true);await openProject(create.data.id);return;}
+    if(seeded.error){alert("Your project was created, but its starter milestones could not be added: "+seeded.error.message+" You can add them manually in the workspace.");await openProject(create.data.id);return;}
    }
    await openProject(create.data.id);
   };
