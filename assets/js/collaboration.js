@@ -88,7 +88,74 @@ export async function initCollaboration({user,profile,container}){
  root.innerHTML='<div class="collab-section-head"><div><div class="eyebrow">PROJECT WORKSPACES</div><h2>Ideas become real together</h2></div><button id="new-project" class="btn red-btn">＋ Create project</button></div><div id="project-list" class="collab-grid"></div>';
  const list=root.querySelector("#project-list");
  list.innerHTML=visible.length?visible.map(x=>{const v=progress[x.id];return '<article class="collab-card"><div class="eyebrow">'+esc(x.status.replaceAll("_"," "))+' · '+esc(x.category||"project")+'</div><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"A CrowSpace collaborative project.")+'</p><small>'+esc(x.visibility)+' workspace</small>'+(v.available?'<div class="milestone-progress"><div class="milestone-progress-top"><span>Milestone progress</span><b>'+v.pct+'%</b></div><div class="milestone-progress-track"><i style="width:'+v.pct+'%"></i></div><small>'+v.done+' of '+v.total+' milestones completed</small></div>':'<small class="collab-state">Team progress is private</small>')+'<div class="collab-actions"><button class="btn red-btn" data-open-project="'+x.id+'">Open workspace</button>'+(x.owner_id===user.id?'<button class="subtle-btn" data-invite-project="'+x.id+'">Invite member</button>':(m.data.some(y=>y.project_id===x.id&&y.user_id===user.id&&y.status==="invited")?'<button class="btn red-btn" data-accept-project="'+x.id+'">Accept invitation</button>':""))+'</div></article>';}).join(""):'<div class="empty"><h2>Your project space is ready</h2><p>Create a project, invite collaborators and share progress updates.</p></div>';
- root.querySelector("#new-project").onclick=()=>{list.insertAdjacentHTML("afterbegin",'<form id="project-form" class="collab-form"><h3>Start a project</h3><label>Project name<input name="title" required maxlength="160"></label><label>What are you building?<textarea name="description" maxlength="5000"></textarea></label><div class="collab-form-grid"><label>Category<input name="category" value="creative"></label><label>Division<input name="division" value="CrowSpace"></label><label>Visibility<select name="visibility"><option value="private">Private team</option><option value="public">Public portfolio</option></select></label><label>Target due date<input type="date" name="due_date"></label></div><button class="btn red-btn">Create workspace</button><div id="project-note" class="collab-note"></div></form>');root.querySelector("#project-form").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),title=f.get("title").trim(),r=await supabase.from("crowspace_projects").insert({owner_id:user.id,title,slug:slug(title),description:f.get("description"),category:f.get("category"),division:f.get("division"),visibility:f.get("visibility"),due_date:f.get("due_date")||null,status:"planning"});if(r.error)note("project-note",r.error.message,true);else projects();};};
+ const projectTemplates={
+  blank:{name:"Start from scratch",category:"general",description:"A flexible workspace with no preset milestones.",milestones:[]},
+  podcast:{name:"Podcast episode",category:"podcasting",description:"Plan, record, edit and publish a podcast episode.",milestones:[
+   ["Define episode concept","Confirm the topic, audience and intended takeaway",0],
+   ["Prepare outline and research","Build the segment outline, questions and supporting research",2],
+   ["Confirm guests and contributors","Invite participants and confirm availability",3],
+   ["Record the episode","Capture host, guest and supporting audio",5],
+   ["Edit and review","Edit audio, mix levels and complete a quality review",7],
+   ["Create artwork and show notes","Prepare episode artwork, description and links",8],
+   ["Publish and promote","Publish the episode and share launch materials",10]
+  ]},
+  video:{name:"Video production",category:"video-production",description:"Move a video from concept through production and release.",milestones:[
+   ["Creative brief and concept","Define the audience, format, message and creative direction",0],
+   ["Script and storyboard","Prepare the script, shot list and visual plan",2],
+   ["Pre-production","Confirm locations, equipment, crew and schedule",4],
+   ["Production / filming","Capture primary footage and supporting material",6],
+   ["Edit first cut","Assemble footage, sound and graphics",8],
+   ["Review and final cut","Collect feedback, make revisions and approve final cut",10],
+   ["Publish and distribute","Export deliverables and publish across selected channels",12]
+  ]},
+  community:{name:"Community event",category:"community",description:"Organize a community gathering from planning to follow-up.",milestones:[
+   ["Set event purpose and audience","Define goals, audience, format and success measures",0],
+   ["Choose date and venue","Confirm event date, location and accessibility needs",2],
+   ["Build budget and resource plan","List costs, supplies, partners and volunteer needs",4],
+   ["Recruit volunteers and partners","Assign event roles and confirm partner participation",7],
+   ["Promote and register attendees","Publish event details and manage outreach",10],
+   ["Deliver the event","Coordinate setup, program and event-day operations",20],
+   ["Follow up and evaluate","Thank participants, gather feedback and document outcomes",22]
+  ]},
+  digital:{name:"Website or app build",category:"digital-product",description:"Plan and deliver a digital product in manageable stages.",milestones:[
+   ["Requirements and goals","Document users, key problems and project requirements",0],
+   ["Scope and user flows","Prioritize features and map the core experience",3],
+   ["Design and prototype","Create layouts, navigation and a reviewable prototype",6],
+   ["Build core functionality","Implement the essential product workflows",10],
+   ["Integrations and data","Connect required services and configure data access",14],
+   ["Testing and refinement","Test key flows, accessibility, responsive layouts and errors",18],
+   ["Launch and handoff","Deploy, document and plan ongoing maintenance",21]
+  ]},
+  campaign:{name:"Marketing campaign",category:"marketing",description:"Coordinate a campaign from strategy through performance review.",milestones:[
+   ["Campaign brief","Set audience, objectives, message and success measures",0],
+   ["Content and channel plan","Choose channels, formats, schedule and calls to action",2],
+   ["Create campaign assets","Prepare copy, graphics, video and landing page content",5],
+   ["Review and approvals","Check brand consistency, links and final materials",8],
+   ["Launch campaign","Publish campaign assets across selected channels",10],
+   ["Monitor and optimize","Review engagement and adjust campaign activity",14],
+   ["Campaign results report","Summarize outcomes, lessons and next steps",21]
+  ]}
+ };
+ const templateOptions=Object.entries(projectTemplates).map(([key,t])=>'<option value="'+key+'">'+esc(t.name)+'</option>').join("");
+ const categoryOptions=["general","podcasting","video-production","community","digital-product","marketing","education","business","creative","other"].map(x=>'<option value="'+x+'">'+esc(x.replaceAll("-"," ").replace(/\\b\\w/g,c=>c.toUpperCase()))+'</option>').join("");
+ root.querySelector("#new-project").onclick=()=>{
+  list.insertAdjacentHTML("afterbegin",'<form id="project-form" class="collab-form project-template-form"><h3>Start a project</h3><label>Project template<select name="template">'+templateOptions+'</select></label><div id="template-description" class="template-description"></div><div id="template-milestone-preview" class="template-milestone-preview"></div><label>Project name<input name="title" required maxlength="160" placeholder="Give your project a name"></label><label>What are you building?<textarea name="description" maxlength="5000" placeholder="Describe the goal and intended outcome"></textarea></label><div class="collab-form-grid"><label>Category<select name="category">'+categoryOptions+'</select></label><label>Division<input name="division" value="CrowSpace"></label><label>Visibility<select name="visibility"><option value="private">Private team</option><option value="public">Public portfolio</option></select></label><label>Target due date<input type="date" name="due_date"></label></div><button class="btn red-btn">Create project workspace</button><div id="project-note" class="collab-note"></div></form>');
+  const form=root.querySelector("#project-form"),templateSelect=form.elements.template,categorySelect=form.elements.category,preview=root.querySelector("#template-milestone-preview"),description=root.querySelector("#template-description");
+  const drawTemplate=()=>{const t=projectTemplates[templateSelect.value]||projectTemplates.blank;categorySelect.value=t.category;description.textContent=t.description;preview.innerHTML=t.milestones.length?'<strong>'+t.milestones.length+' starter milestones</strong><ol>'+t.milestones.map(x=>'<li>'+esc(x[0])+' <small>· Day '+x[2]+'</small></li>').join("")+'</ol>':'<strong>No preset milestones</strong><p>Build your own milestone list after creating the workspace.</p>';};
+  templateSelect.onchange=drawTemplate;drawTemplate();
+  form.onsubmit=async e=>{
+   e.preventDefault();const f=new FormData(form),title=String(f.get("title")||"").trim(),template=projectTemplates[String(f.get("template"))]||projectTemplates.blank;
+   const create=await supabase.from("crowspace_projects").insert({owner_id:user.id,title,slug:slug(title),description:String(f.get("description")||"").trim()||template.description,category:f.get("category"),division:f.get("division"),visibility:f.get("visibility"),due_date:f.get("due_date")||null,status:"planning"}).select("id").single();
+   if(create.error){note("project-note",create.error.message,true);return;}
+   if(template.milestones.length){
+    const base=new Date();base.setHours(12,0,0,0);
+    const rows=template.milestones.map((item,index)=>{const due=new Date(base);due.setDate(due.getDate()+item[2]);return {project_id:create.data.id,title:item[0],description:item[1],status:"not_started",due_date:due.toISOString().slice(0,10),created_by:user.id,sort_order:(index+1)*10};});
+    const seeded=await supabase.from("crowspace_project_milestones").insert(rows);
+    if(seeded.error){note("project-note","Your project was created, but its starter milestones could not be added: "+seeded.error.message+" You can add them manually in the workspace.",true);await openProject(create.data.id);return;}
+   }
+   await openProject(create.data.id);
+  };
+ };
  root.querySelectorAll("[data-accept-project]").forEach(b=>b.onclick=async()=>{const r=await supabase.from("crowspace_project_members").update({status:"accepted"}).eq("project_id",b.dataset.acceptProject).eq("user_id",user.id);if(r.error)alert(r.error.message);else projects();});
  root.querySelectorAll("[data-invite-project]").forEach(b=>b.onclick=async()=>{const username=prompt("Enter the CrowSpace username to invite:");if(!username)return;const {data:p}=await supabase.from("crowspace_profiles").select("user_id").eq("username",username.replace(/^@/,"").toLowerCase()).maybeSingle();if(!p){alert("Member not found.");return;}const r=await supabase.from("crowspace_project_members").insert({project_id:b.dataset.inviteProject,owner_id:user.id,user_id:p.user_id,role:"contributor",status:"invited"});if(r.error)alert(r.error.message);else alert("Project invitation sent.");});
  root.querySelectorAll("[data-open-project]").forEach(b=>b.onclick=()=>openProject(b.dataset.openProject));
