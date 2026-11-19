@@ -1,0 +1,81 @@
+# CrowSpace backend inventory
+
+Inspection target: Supabase project `cevylpnoexugwgygvtgu`, schema `public`, prefix `crowspace_`.
+
+Snapshot: 57 tables found; all 57 have RLS enabled. Policy counts are the number of `pg_policies` rows at inspection time. Estimated rows are approximate `pg_stat_user_tables.n_live_tup` values, not exact counts.
+
+| Table | Columns | Policies | Est. rows | Feature |
+|---|---|---:|---:|---|
+| `crowspace_account_links` | auth_user_id, member_id, linked_at | 1 | 10 | Auth/member identity bridge |
+| `crowspace_achievements` | id, slug, name, description, icon, category, criteria, is_active, sort_order, created_at | 2 | 5 | Achievement catalog |
+| `crowspace_album_photos` | id, album_id, user_id, media_url, caption, display_order, created_at | 7 | 0 | Album media |
+| `crowspace_albums` | id, user_id, creator_id, title, description, cover_url, album_type, visibility, is_published, created_at, updated_at | 7 | 0 | Photo albums |
+| `crowspace_collab_availability` | user_id, status, collaboration_types, preferred_modes, notes, updated_at | 4 | 0 | Creator availability |
+| `crowspace_collab_invitations` | id, sender_id, recipient_id, message, collaboration_type, status, created_at, responded_at | 3 | 0 | Collaboration invites |
+| `crowspace_communities` | id, owner_id, name, slug, description, category, privacy, join_policy, created_at, updated_at | 6 | 0 | Community directory |
+| `crowspace_community_comments` | id, post_id, author_id, body, created_at | 3 | 0 | Community comments |
+| `crowspace_community_invitations` | community_id, invitee_id, inviter_id, status, created_at, responded_at | 5 | 0 | Community invites |
+| `crowspace_community_members` | community_id, user_id, role, status, joined_at | 8 | 0 | Community membership/roles |
+| `crowspace_community_posts` | id, community_id, author_id, body, created_at, updated_at, is_announcement, pinned_at | 4 | 0 | Community feed |
+| `crowspace_direct_attachments` | id, message_id, conversation_id, uploaded_by, object_path, file_name, mime_type, size_bytes, created_at | 2 | 0 | DM attachments |
+| `crowspace_direct_blocks` | blocker_id, blocked_user_id, created_at | 3 | 0 | DM block controls |
+| `crowspace_direct_conversations` | id, participant_low, participant_high, initiated_by, created_at, updated_at, last_message_at | 1 | 0 | DM threads |
+| `crowspace_direct_members` | conversation_id, user_id, last_read_at, archived_at, muted_until, pinned_at, joined_at | 2 | 0 | Per-member DM state |
+| `crowspace_direct_messages` | id, conversation_id, sender_id, body, message_type, created_at, edited_at, deleted_at | 4 | 0 | DM messages |
+| `crowspace_direct_reports` | id, conversation_id, message_id, reporter_id, reported_user_id, reason, details, status, created_at | 1 | 0 | Message safety reports |
+| `crowspace_event_invitations` | event_id, invitee_id, inviter_id, status, created_at, responded_at | 4 | 0 | Event invitations |
+| `crowspace_event_rsvps` | event_id, user_id, response, updated_at | 4 | 0 | Event RSVPs |
+| `crowspace_events` | id, creator_id, community_id, title, description, starts_at, ends_at, timezone, location_name, location_details, event_type, visibility, created_at, updated_at | 5 | 0 | Event calendar |
+| `crowspace_featured_project_templates` | template_id, featured_by, created_at | 3 | 0 | Featured templates |
+| `crowspace_follows` | follower_id, following_id, created_at | 3 | 0 | Follow graph |
+| `crowspace_group_conversations` | id, title, created_by, created_at, updated_at | 3 | 0 | Group chat threads |
+| `crowspace_group_members` | group_id, user_id, role, joined_at, last_read_at, archived_at, muted_until, pinned_at | 4 | 0 | Group chat membership/state |
+| `crowspace_group_message_attachments` | id, message_id, group_id, uploaded_by, object_path, file_name, mime_type, size_bytes, created_at | 2 | 0 | Group attachments |
+| `crowspace_group_messages` | id, group_id, sender_id, body, created_at, edited_at | 4 | 0 | Group messages |
+| `crowspace_live_room_messages` | id, room_id, sender_id, body, created_at, edited_at | 4 | 0 | Live room chat |
+| `crowspace_live_room_participants` | id, room_id, user_id, role, joined_at, left_at | 4 | 0 | Live room roster |
+| `crowspace_live_room_reactions` | id, room_id, message_id, user_id, reaction, created_at | 3 | 0 | Live reactions |
+| `crowspace_live_room_reminders` | id, room_id, user_id, created_at | 3 | 0 | Live reminders |
+| `crowspace_live_rooms` | id, created_by, title, description, room_type, visibility, circle_id, event_id, group_id, scheduled_at, stream_url, status, started_at, ended_at, created_at, updated_at | 4 | 0 | Live rooms |
+| `crowspace_member_achievements` | id, member_id, achievement_id, awarded_by, award_note, awarded_at | 3 | 0 | Member awards |
+| `crowspace_member_milestones` | id, member_id, milestone_key, title, description, metadata, achieved_at | 1 | 3 | Member milestones |
+| `crowspace_notifications` | id, recipient_id, actor_id, notification_type, entity_type, entity_id, message, read_at, created_at | 2 | 3 | Notifications |
+| `crowspace_opportunities` | id, created_by, title, description, category, skills, opportunity_type, location, work_mode, status, application_deadline, created_at, updated_at | 4 | 0 | Opportunity board |
+| `crowspace_opportunity_applications` | id, opportunity_id, applicant_id, message, status, created_at, updated_at | 3 | 0 | Applications |
+| `crowspace_opportunity_reports` | id, opportunity_id, reporter_id, reason, status, reviewed_by, reviewed_at, created_at | 3 | 0 | Opportunity moderation |
+| `crowspace_photo_comments` | id, photo_id, user_id, parent_id, body, created_at | 3 | 0 | Photo comments |
+| `crowspace_photo_reactions` | id, photo_id, user_id, reaction, created_at | 4 | 0 | Photo reactions |
+| `crowspace_photo_shares` | id, photo_id, shared_by, shared_with_user_id, message, created_at | 3 | 0 | Photo sharing |
+| `crowspace_photo_tags` | id, photo_id, tagged_user_id, tagged_by, created_at | 3 | 0 | Photo tags |
+| `crowspace_post_comments` | id, post_id, author_id, parent_id, body, created_at, edited_at | 4 | 0 | Feed comments |
+| `crowspace_post_media` | id, post_id, uploaded_by, object_path, mime_type, alt_text, created_at | 3 | 0 | Feed media |
+| `crowspace_post_reactions` | post_id, user_id, reaction, created_at | 4 | 0 | Feed reactions |
+| `crowspace_posts` | id, author_id, body, visibility, post_kind, branch_key, created_at, updated_at | 5 | 0 | Branch-aware feed |
+| `crowspace_profile_showcase` | id, user_id, title, description, project_url, media_url, category, is_featured, sort_order, created_at, updated_at | 4 | 0 | Portfolio showcase |
+| `crowspace_profile_skills` | id, user_id, skill_name, category, sort_order, created_at | 4 | 0 | Profile skills |
+| `crowspace_profiles` | user_id, username, display_name, bio, avatar_url, social_links, creator_category, featured_caw_id, profile_theme, profile_sections, portfolio_tagline, portfolio_bio, portfolio_work_title, portfolio_collections_title, portfolio_sections_visible, portfolio_hero_media_mode, portfolio_hero_autoplay, portfolio_hero_loop, portfolio_hero_mobile_fallback, portfolio_hero_media_source, portfolio_hero_media_url, portfolio_hero_media_path, created_at, updated_at, crow_id, cover_url, location, profile_visibility, onboarding_complete | 4 | 11 | Canonical member profile |
+| `crowspace_project_members` | id, project_id, owner_id, user_id, role, status, created_at, updated_at | 4 | 0 | Project collaborators |
+| `crowspace_project_milestones` | id, project_id, title, description, status, due_date, assigned_to, created_by, completed_by, completed_at, sort_order, created_at, updated_at | 4 | 0 | Project milestones |
+| `crowspace_project_template_reviews` | id, template_id, reviewer_id, rating, review_text, created_at, updated_at | 4 | 0 | Template reviews |
+| `crowspace_project_templates` | id, owner_id, title, description, category, visibility, template_data, created_at, updated_at | 4 | 0 | Project templates |
+| `crowspace_project_updates` | id, project_id, author_id, body, created_at | 3 | 0 | Project updates |
+| `crowspace_projects` | id, owner_id, title, slug, description, category, division, status, visibility, created_at, updated_at, completed_at, started_at, opportunity_id, due_date | 5 | 0 | Project workspaces |
+| `crowspace_publication_assets` | id, publication_id, user_id, file_path, media_type, caption, sort_order, created_at | 3 | 0 | Publication media |
+| `crowspace_publications` | id, user_id, title, slug, publication_type, excerpt, body, cover_path, external_url, visibility, status, published_at, created_at, updated_at | 4 | 0 | Articles/publications |
+| `crowspace_wall_posts` | id, wall_owner_id, author_id, body, visibility, created_at, updated_at, post_kind, branch_key | 4 | 0 | Profile wall timeline |
+
+## Important interpretation notes
+- `crowspace_profiles` is the social profile source; `crowspace_account_links` bridges Auth UUID to the existing member record. Do not duplicate identity or create a second profile table.
+- `crowspace_posts` and `crowspace_wall_posts` include `branch_key`, so branch context already exists in the social model.
+- DM member rows include last-read, archive, mute and pin state. Direct-message schema also includes block and report records.
+- Communities have privacy and join-policy fields; the UI must not assume every community is public.
+- Zero estimated rows may reflect approximate stats, not a definitive absence of data.
+- Table policy counts are not a security review. Inspect full policy predicates, triggers, RPCs, storage rules, grants and Realtime authorization before activating each workflow.
+
+## Next backend verification gates
+1. Review exact policies for profile, feed, DM and group-chat reads/writes.
+2. Verify Auth redirects and account-link creation for existing members.
+3. Verify private Realtime channel authorization and message membership before subscribing.
+4. Verify private attachment buckets and signed URL paths.
+5. Test anonymous, owner, unrelated member, community member and moderator/admin contexts.
+6. Only propose additive schema work after proving a required feature has no existing table/RPC/trigger contract.
