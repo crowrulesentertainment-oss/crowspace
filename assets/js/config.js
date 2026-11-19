@@ -2,5 +2,6 @@
 window.CROWRULES_CONFIG = Object.freeze({
   supabaseUrl: "https://cevylpnoexugwgygvtgu.supabase.co",
   supabasePublishableKey: "sb_publishable_G3vJoLdGpRP8cjjtl9SyWw_Qio5klrx",
-  privateRealtimeVerified: false
+  // User confirmed Supabase Realtime > Allow public access to channels is disabled.
+  privateRealtimeVerified: true
 });
