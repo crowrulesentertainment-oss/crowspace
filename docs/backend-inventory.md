@@ -79,26 +79,3 @@ Snapshot: 57 tables found; all 57 have RLS enabled. Policy counts are the number
 4. Verify private attachment buckets and signed URL paths.
 5. Test anonymous, owner, unrelated member, community member and moderator/admin contexts.
 6. Only propose additive schema work after proving a required feature has no existing table/RPC/trigger contract.
-
-## Identity and profile verification snapshot (2026-11-18)
-
-- Project is active on PostgreSQL 17.11.
-- crowspace_profiles: 11 records; all currently have profile_visibility='public'; SELECT is limited to the owner, public Creator Passports and the app-metadata admin flag.
-- crowspace_account_links: 10 records; each link is unique by Auth user and member ID; members can SELECT only their own link.
-- Ten profiles have a corresponding members.user_id and matching account link. One profile has no matching members row. No member row or link was fabricated to repair this mismatch.
-- handle_crowrules_user_created creates a members row and a crowspace_profiles row for new Auth users, but the inspected trigger/function does not create crowspace_account_links. Do not assume the bridge auto-populates for every new user until that flow is fixed and tested.
-- The existing podcast_sync_from_crowspace_profile trigger synchronizes selected profile fields with podcast_member_profiles; preserve this cross-branch sync behavior.
-- Auth user creation has multiple existing triggers for Community Hub, CrowRules membership and Podcasting. Do not replace or rewrite them as part of CrowSpace frontend work.
-
-## Active frontend integration scope
-
-| Feature | Current verified state | Activation rule |
-|---|---|---|
-| Auth | Existing Auth project and social providers previously configured; browser-safe crowspace publishable key now wired | Test each provider and exact GitHub Pages redirect allow-list in browser |
-| Profile | Read-only own profile and public profile view connected to crowspace_profiles | Keep profile writes disabled until update policy and profile fields are reviewed end-to-end |
-| Discovery | Authenticated search of profile_visibility='public' profiles | Current SELECT policy is authenticated-only; anonymous visitor discovery is not assumed |
-| Feed | Existing posts/follows/comments/reactions tables and RLS found | Wire queries and test owner/follower/friend/public visibility cases before enabling mutations |
-| Messaging | DM/group RLS policies and tables exist | Must inspect realtime.messages policies, private-only channel setting, storage policies and message creation contracts first |
-| Communities/events | Existing RLS policies and triggers exist | Test membership role, invite, visibility and RSVP transitions before writes |
-
-This snapshot is an integration aid, not a permanent guarantee; re-inspect policies before production release.
