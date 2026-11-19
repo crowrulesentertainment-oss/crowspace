@@ -14,17 +14,27 @@ export async function initFeed(){
 function empty(root,title,body,cta,href){root.replaceChildren();const box=node("div","empty-state");box.append(node("div","empty-icon","✦"),node("h3","",title),node("p","",body));if(cta){const a=node("a","button button-primary",cta);a.href=href;box.append(a)}root.append(box)}
 async function loadFeed(){
  const root=document.querySelector("[data-feed-list]");const s=state.context.supabase;root.replaceChildren(node("div","muted","Loading posts…"));
+ const uid=state.context.user.id;
+ const [followsResult,branchesResult,interestsResult]=await Promise.all([
+  s.from("crowspace_follows").select("following_id").eq("follower_id",uid),
+  s.from("crowspace_branch_follows").select("branch_key").eq("user_id",uid),
+  s.from("crowspace_member_interests").select("interest_key").eq("user_id",uid)
+ ]);
+ const followedMembers=new Set((followsResult.data||[]).map(x=>x.following_id));
+ const followedBranches=new Set((branchesResult.data||[]).map(x=>x.branch_key));
+ const interests=(interestsResult.data||[]).map(x=>String(x.interest_key||"").toLowerCase()).filter(Boolean);
  let q=s.from("crowspace_posts").select("id,author_id,body,visibility,post_kind,branch_key,created_at,updated_at").order("created_at",{ascending:false}).limit(40);
  if(state.view==="following"){
-  const{data:follows,error}=await s.from("crowspace_follows").select("following_id").eq("follower_id",state.context.user.id);
-  if(error){empty(root,"Following feed unavailable",error.message);return}
-  const ids=[state.context.user.id,...(follows||[]).map(x=>x.following_id)];
-  q=q.in("author_id",ids);
+  if(followsResult.error){empty(root,"Following feed unavailable",followsResult.error.message);return}
+  q=q.in("author_id",[uid,...followedMembers]);
  }
  if(state.view==="branches"&&state.branch!=="all")q=q.eq("branch_key",state.branch);
  const{data:posts,error}=await q;
  if(error){empty(root,"Feed could not load",error.message);return}
- if(!posts?.length){empty(root,state.view==="following"?"Your Following feed is quiet":"No posts yet","Posts shared across the CrowRules universe will appear here. Follow members and explore branches to shape your feed.","Create a post","create-post.html");return}
+ if(!posts?.length){empty(root,state.view==="following"?"Your Following feed is quiet":"No posts yet","Posts shared across the CrowRules universe will appear here. Follow members, choose branches and add interests to shape your feed.","Create a post","create-post.html");return}
+ if(state.view==="for-you"){
+  posts.sort((a,b)=>postScore(b,followedMembers,followedBranches,interests)-postScore(a,followedMembers,followedBranches,interests)||new Date(b.created_at)-new Date(a.created_at));
+ }
  const ids=[...new Set(posts.map(p=>p.author_id))];const postIds=posts.map(p=>p.id);
  const [profilesResult,reactionsResult,commentsResult]=await Promise.all([
   s.from("crowspace_profiles").select("user_id,username,display_name,avatar_url").in("user_id",ids),
@@ -39,6 +49,14 @@ async function loadFeed(){
  const commentNames=new Map((commentProfiles.data||[]).map(p=>[p.user_id,p.display_name||p.username||"CrowSpace member"]));
  root.replaceChildren();
  posts.forEach(post=>root.append(renderPost(post,profiles.get(post.author_id),reactions.filter(r=>r.post_id===post.id),comments.filter(c=>c.post_id===post.id),commentNames)));
+}
+function postScore(post,followedMembers,followedBranches,interests){
+ let score=followedMembers.has(post.author_id)?5:0;
+ if(post.branch_key&&followedBranches.has(post.branch_key))score+=4;
+ const text=String(post.body||"").toLowerCase();
+ interests.forEach(interest=>{if(interest.length>1&&text.includes(interest))score+=2});
+ const ageHours=Math.max(0,(Date.now()-new Date(post.created_at).getTime())/3600000);
+ return score+Math.max(0,2-ageHours/48);
 }
 function renderPost(post,profile,reactions,comments,commentNames){
  const card=node("article","post-card");const header=node("div","post-header");const name=node("a","post-author",(profile?.display_name||profile?.username||"CrowSpace member"));name.href="profile.html?user="+encodeURIComponent(profile?.username||"");const handle=node("span","member-handle",profile?.username?"@"+profile.username:"Member");const meta=node("div","post-meta");meta.append(name,handle,node("span","post-date",new Date(post.created_at).toLocaleString()));header.append(meta);
