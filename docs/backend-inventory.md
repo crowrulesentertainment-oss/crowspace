@@ -79,3 +79,43 @@ Snapshot: 57 tables found; all 57 have RLS enabled. Policy counts are the number
 4. Verify private attachment buckets and signed URL paths.
 5. Test anonymous, owner, unrelated member, community member and moderator/admin contexts.
 6. Only propose additive schema work after proving a required feature has no existing table/RPC/trigger contract.
+
+## Feed, messaging and media verification snapshot (2026-11-18)
+
+### Feed
+- crowspace_posts, crowspace_post_comments, crowspace_post_reactions and crowspace_follows all have RLS enabled and authenticated Data API privileges.
+- Posts are limited to public, friends, followers and private visibility. Authors can create/update/delete only their own posts. The SELECT policy scopes public posts, friends through the existing friendships table, followers through crowspace_follows, and each member's own posts.
+- Reactions use the composite primary key (post_id, user_id) and allow only like, love, laugh, wow and support. Own-row INSERT/UPDATE/DELETE policies exist.
+- Comments are limited to 2,000 characters; post bodies to 5,000 characters. Comment and reaction visibility is joined to a visible parent post by RLS.
+- Follows are self-owned on INSERT/DELETE; authenticated SELECT is currently broad (USING true). Do not expose follower lists to anonymous users.
+
+### Direct and group messaging
+- DM creation is intended to use the existing RPC crowspace_start_direct_conversation(p_other_user). The underlying function checks authentication, prevents self-messaging, requires a CrowSpace profile for the other member, checks block records, normalizes the participant pair and creates the two membership rows.
+- Direct message INSERT checks sender identity and private.crowspace_direct_can_send; SELECT requires membership. Per-member read/archive/mute/pin state is stored in crowspace_direct_members.
+- Group messages require crowspace_group_members membership; group membership changes are protected by owner/admin/member policies and a trigger.
+- The private bucket crowspace-messenger exists. Its upload/read/delete policies use member/path checks, but some legacy OR policies still reference podcast_direct_conversations. Use the dedicated CrowSpace path and membership policies only after end-to-end Storage tests.
+
+### Realtime blocker — do not enable chat subscriptions yet
+- RLS is enabled on realtime.messages. CrowSpace-specific policies exist.
+- private.crowspace_realtime_can_access accepts topics matching crowspace-dm:<uuid> or crowspace-group:<uuid>, then checks membership using the existing CrowSpace membership functions.
+- A separate group broadcast policy uses the older colon topic form crowspace:group:<uuid> and checks crowspace_group_members.
+- The direct-message broadcast policies using crowspace:dm:<uuid> reference podcast_direct_conversations rather than crowspace_direct_conversations. This is a legacy cross-branch mismatch; do not use that topic format for CrowSpace DMs.
+- The Dashboard Realtime setting that disables public channel access was not accessible through the database inspection tools and remains unverified. Supabase's current guidance requires disabling Allow public access when private channels must be enforced. Keep private subscriptions disabled until that setting is confirmed and the hyphenated CrowSpace topics are exercised with two real member accounts.
+- Do not modify realtime schema objects. Supabase now locks that schema; RLS policies on realtime.messages remain the supported control surface.
+
+### Media access
+- crowspace-posts, crowspace-messenger, crowspace-albums and crowspace-creator-media are private buckets. The CrowSpace media rules are scoped by bucket, path and user/member access.
+- Public media URLs must not be generated for private bucket objects. Use signed URLs after checking the matching table-level policy and Storage object policy.
+
+## Community, events, notifications, albums and projects snapshot (2026-11-18)
+
+- Communities: authenticated SELECT exposes public communities, the member's own active memberships and owned communities. Public/open communities permit direct active membership INSERT; public/request communities permit pending membership INSERT; invite-only communities require an accepted invitation. Community posts are limited to active members; announcements require owner/admin/moderator role.
+- Events: SELECT is scoped to public events, community events for active members, creators and invited members. RSVP rows are member-owned; allowed responses are going, interested and not_going. The frontend now lists accessible events and updates only the signed-in member's RSVP.
+- Notifications: current policies permit recipients to SELECT and UPDATE their own notification rows. There is no client INSERT policy; the UI only lists and marks read.
+- Albums: owners can manage their albums; public published albums are visible to visitors; friends albums require accepted friendship; shared photos are visible to recipients. The crowspace-albums Storage bucket is private. The frontend requests short-lived signed URLs only for media paths the signed-in member is allowed to read.
+- Projects: project SELECT is available for public projects, owners and invited/accepted members. Project membership invites are owner-scoped. Project updates are deliberately not wired: current SELECT and INSERT policy predicates contain a self-comparison `m.project_id = m.project_id` instead of correlating the membership row to the update's project. This may grant a project member access to unrelated project updates. Review and correct that policy before exposing updates or milestones in the UI.
+- No database policy, table, trigger, Storage object, or Realtime setting was changed during this integration stage.
+
+
+## Personalized feed preference schema gap
+The inspected public schema has no CrowSpace-specific branch-follow or member-interest tables. The feed can already use member follows and community membership, but branch subscriptions and explicit interests need persistence. An additive migration now proposes `crowspace_branch_follows` and `crowspace_member_interests` with owner-only RLS. The migration is repository-only and is not applied to the live project.

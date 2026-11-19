@@ -1,0 +1,26 @@
+import {getUniverseContext} from "./universe-bridge.js";
+const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
+export async function initMessages(){
+ const root=document.querySelector("[data-conversation-list]");if(!root)return;const c=await getUniverseContext();if(!c.user){root.textContent="Sign in to view your private conversations.";return}
+ const s=c.supabase;const [dmMembers,groupMembers]=await Promise.all([s.from("crowspace_direct_members").select("conversation_id").eq("user_id",c.user.id).is("archived_at",null),s.from("crowspace_group_members").select("group_id,role").eq("user_id",c.user.id).is("archived_at",null)]);
+ if(dmMembers.error||groupMembers.error){root.textContent=(dmMembers.error||groupMembers.error).message;return}
+ const dmIds=[...new Set((dmMembers.data||[]).map(x=>x.conversation_id))];const groupIds=[...new Set((groupMembers.data||[]).map(x=>x.group_id))];
+ const [dms,groups]=await Promise.all([
+  dmIds.length?s.from("crowspace_direct_conversations").select("id,participant_low,participant_high,last_message_at").in("id",dmIds).order("last_message_at",{ascending:false}):{data:[],error:null},
+  groupIds.length?s.from("crowspace_group_conversations").select("id,title,created_by,updated_at").in("id",groupIds).order("updated_at",{ascending:false}):{data:[],error:null}
+ ]);
+ if(dms.error||groups.error){root.textContent=(dms.error||groups.error).message;return}
+ const otherIds=[...new Set((dms.data||[]).map(x=>x.participant_low===c.user.id?x.participant_high:x.participant_low))];
+ const prof=otherIds.length?await s.from("crowspace_profiles").select("user_id,username,display_name").in("user_id",otherIds):{data:[],error:null};
+ const names=new Map((prof.data||[]).map(x=>[x.user_id,x.display_name||x.username||"CrowSpace member"]));
+ root.replaceChildren();
+ const section=el("section","stack");section.append(el("h2","","Direct messages"));
+ (dms.data||[]).forEach(dm=>{const other=dm.participant_low===c.user.id?dm.participant_high:dm.participant_low;const a=el("a","conversation-link",names.get(other)||"Private conversation");a.href="conversation.html?type=dm&id="+encodeURIComponent(dm.id);section.append(a)});
+ if(!dms.data?.length)section.append(el("p","muted small","No direct conversations yet."));
+ const groupSection=el("section","stack");groupSection.append(el("h2","","Group chats"));
+ (groups.data||[]).forEach(g=>{const a=el("a","conversation-link",g.title||"CrowSpace group");a.href="conversation.html?type=group&id="+encodeURIComponent(g.id);groupSection.append(a)});
+ if(!groups.data?.length)groupSection.append(el("p","muted small","No group chats yet."));
+ root.append(section,groupSection);
+ const dmForm=document.querySelector("[data-start-dm]");if(dmForm)dmForm.addEventListener("submit",async event=>{event.preventDefault();const username=String(dmForm.elements.namedItem("username").value||"").trim();const status=document.querySelector("[data-message-status]");if(!username)return;if(status)status.textContent="Finding member…";const{data:profile,error}=await s.from("crowspace_profiles").select("user_id,username").eq("username",username).eq("profile_visibility","public").maybeSingle();if(error||!profile){if(status)status.textContent=error?.message||"No public member found with that username.";return}const{data:conversation,error:startError}=await s.rpc("crowspace_start_direct_conversation",{p_other_user:profile.user_id});if(startError){if(status)status.textContent="Could not start conversation: "+startError.message;return}location.href="conversation.html?type=dm&id="+encodeURIComponent(conversation)});
+ const groupForm=document.querySelector("[data-create-group]");if(groupForm)groupForm.addEventListener("submit",async event=>{event.preventDefault();const title=String(groupForm.elements.namedItem("title").value||"").trim();const usernames=String(groupForm.elements.namedItem("participants").value||"").split(",").map(x=>x.trim().replace(/^@/,"")).filter(Boolean);const status=document.querySelector("[data-message-status]");if(!title)return;if(status)status.textContent="Creating group…";const{data:group,error:createError}=await s.from("crowspace_group_conversations").insert({title,created_by:c.user.id}).select("id").single();if(createError){if(status)status.textContent="Could not create group: "+createError.message;return}const{error:ownerError}=await s.from("crowspace_group_members").insert({group_id:group.id,user_id:c.user.id,role:"owner"});if(ownerError){if(status)status.textContent="Group created but owner membership failed: "+ownerError.message;return}if(usernames.length){const{data:members,error:lookupError}=await s.from("crowspace_profiles").select("user_id,username").in("username",usernames).eq("profile_visibility","public");if(lookupError){if(status)status.textContent="Group created; member lookup failed: "+lookupError.message;return}const invitees=(members||[]).filter(m=>m.user_id!==c.user.id).map(m=>({group_id:group.id,user_id:m.user_id,role:"member"}));if(invitees.length){const{error:addError}=await s.from("crowspace_group_members").insert(invitees);if(addError){if(status)status.textContent="Group created; some members could not be added: "+addError.message;return}}}location.href="conversation.html?type=group&id="+encodeURIComponent(group.id)});
+}
