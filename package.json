@@ -1,0 +1,8 @@
+{
+  "name": "crowspace-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-links.mjs && node scripts/check-js.mjs"
+  }
+}
