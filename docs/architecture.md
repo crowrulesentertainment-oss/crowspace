@@ -40,3 +40,7 @@ Stable branch keys are listed in assets/js/branch-registry.js and align with the
 - Notification client operations are limited to SELECT and mark-read UPDATE on the recipient's own rows.
 - Album media uses the existing private crowspace-albums bucket and signed URLs after Storage authorization; never expose raw object paths as public URLs.
 - Project directory reads are available, but project updates are blocked pending review of the existing self-comparison RLS predicates.
+
+
+## Messaging rollout gate
+Direct and group message reads/writes are connected to existing participant-protected tables and the existing `crowspace_start_direct_conversation(p_other_user)` RPC. Realtime uses the private topic shapes `crowspace-dm:<uuid>` and `crowspace-group:<uuid>`, but subscriptions are disabled by default until the Dashboard's private-channel-only setting is verified. The code flag `privateRealtimeVerified` must remain false until then.

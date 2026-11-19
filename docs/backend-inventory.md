@@ -115,3 +115,7 @@ Snapshot: 57 tables found; all 57 have RLS enabled. Policy counts are the number
 - Albums: owners can manage their albums; public published albums are visible to visitors; friends albums require accepted friendship; shared photos are visible to recipients. The crowspace-albums Storage bucket is private. The frontend requests short-lived signed URLs only for media paths the signed-in member is allowed to read.
 - Projects: project SELECT is available for public projects, owners and invited/accepted members. Project membership invites are owner-scoped. Project updates are deliberately not wired: current SELECT and INSERT policy predicates contain a self-comparison `m.project_id = m.project_id` instead of correlating the membership row to the update's project. This may grant a project member access to unrelated project updates. Review and correct that policy before exposing updates or milestones in the UI.
 - No database policy, table, trigger, Storage object, or Realtime setting was changed during this integration stage.
+
+
+## Personalized feed preference schema gap
+The inspected public schema has no CrowSpace-specific branch-follow or member-interest tables. The feed can already use member follows and community membership, but branch subscriptions and explicit interests need persistence. An additive migration now proposes `crowspace_branch_follows` and `crowspace_member_interests` with owner-only RLS. The migration is repository-only and is not applied to the live project.

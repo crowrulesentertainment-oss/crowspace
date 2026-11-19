@@ -45,3 +45,10 @@ See [docs/backend-inventory.md](docs/backend-inventory.md) for the 57-table inve
 
 ## Security
 RLS remains authoritative. Private messages, private communities and private media must not be fetched or subscribed to until authorization is established. The frontend does not create a new identity model or duplicate existing branch profiles. No database changes are included in this commit.
+
+
+## Latest integration stage
+- Direct and group message pages use the existing conversation RPC, participant membership and RLS-protected message tables.
+- Private Realtime subscriptions are deliberately disabled by default in `CROWRULES_CONFIG.privateRealtimeVerified`. Do not switch this to true until the Supabase Realtime dashboard has `Allow public access` disabled and private topic authorization has been tested.
+- Branch follows and member interests are represented by an additive migration at `supabase/migrations/20261119000100_crowspace_feed_preferences.sql`. This migration has been committed to the repository but has **not** been applied to the live Supabase project.
+- The branch bridge SDK is ready for additive adoption. Existing branch repositories have not been modified by this PR; each branch still needs a separately reviewed integration.
