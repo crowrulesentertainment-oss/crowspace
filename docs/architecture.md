@@ -33,3 +33,10 @@ Stable branch keys are listed in assets/js/branch-registry.js and align with the
 - Discovery is authenticated-only because the current profile SELECT policy targets authenticated members.
 - Feed posts, follows, comments and reactions are wired against the existing RLS policies. No new database objects are needed for these first interactions.
 - Private messaging UI may use the existing DM RPC and participant-scoped table policies, but private Realtime subscriptions remain blocked until the dashboard's Allow public access setting is confirmed off. For CrowSpace DM Realtime use the topic shape crowspace-dm:<conversation-uuid>; do not use the legacy crowspace:dm:<uuid> policy that checks podcast_direct_conversations.
+
+## Additional feature boundaries
+- Community joining follows the existing join_policy values (open, request, invite_only); the UI never adds a user to a private/invite-only community.
+- Event RSVPs are scoped to the signed-in user and allowed response values.
+- Notification client operations are limited to SELECT and mark-read UPDATE on the recipient's own rows.
+- Album media uses the existing private crowspace-albums bucket and signed URLs after Storage authorization; never expose raw object paths as public URLs.
+- Project directory reads are available, but project updates are blocked pending review of the existing self-comparison RLS predicates.

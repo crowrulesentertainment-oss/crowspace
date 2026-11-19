@@ -106,3 +106,12 @@ Snapshot: 57 tables found; all 57 have RLS enabled. Policy counts are the number
 ### Media access
 - crowspace-posts, crowspace-messenger, crowspace-albums and crowspace-creator-media are private buckets. The CrowSpace media rules are scoped by bucket, path and user/member access.
 - Public media URLs must not be generated for private bucket objects. Use signed URLs after checking the matching table-level policy and Storage object policy.
+
+## Community, events, notifications, albums and projects snapshot (2026-11-18)
+
+- Communities: authenticated SELECT exposes public communities, the member's own active memberships and owned communities. Public/open communities permit direct active membership INSERT; public/request communities permit pending membership INSERT; invite-only communities require an accepted invitation. Community posts are limited to active members; announcements require owner/admin/moderator role.
+- Events: SELECT is scoped to public events, community events for active members, creators and invited members. RSVP rows are member-owned; allowed responses are going, interested and not_going. The frontend now lists accessible events and updates only the signed-in member's RSVP.
+- Notifications: current policies permit recipients to SELECT and UPDATE their own notification rows. There is no client INSERT policy; the UI only lists and marks read.
+- Albums: owners can manage their albums; public published albums are visible to visitors; friends albums require accepted friendship; shared photos are visible to recipients. The crowspace-albums Storage bucket is private. The frontend requests short-lived signed URLs only for media paths the signed-in member is allowed to read.
+- Projects: project SELECT is available for public projects, owners and invited/accepted members. Project membership invites are owner-scoped. Project updates are deliberately not wired: current SELECT and INSERT policy predicates contain a self-comparison `m.project_id = m.project_id` instead of correlating the membership row to the update's project. This may grant a project member access to unrelated project updates. Review and correct that policy before exposing updates or milestones in the UI.
+- No database policy, table, trigger, Storage object, or Realtime setting was changed during this integration stage.
