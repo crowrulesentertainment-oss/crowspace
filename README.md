@@ -3,7 +3,7 @@
 **One company. One universe.** A free social network connecting every CrowRules Entertainment branch.
 
 ## Rebuild status
-The GitHub repository was empty at the start of this rebuild. This commit establishes the static multi-page HTML/CSS/JavaScript frontend. The existing Supabase project remains the backend of record. No SQL, migrations, policies, storage buckets, Realtime settings, or data were changed.
+The static multi-page HTML/CSS/JavaScript frontend is being rebuilt in small, reviewable stages. The existing Supabase project remains the backend of record. The frontend now uses the project URL and its dedicated browser-safe `crowspace` publishable key. No service-role or secret key is present.
 
 ## Product decisions
 - One account has access to every branch.
@@ -18,7 +18,7 @@ See [docs/backend-inventory.md](docs/backend-inventory.md) for the 57-table inve
 
 | Feature | Existing backend tables | Frontend destination |
 |---|---|---|
-| Identity | `crowspace_account_links`, `crowspace_profiles` | Auth/profile context |
+| Identity | `crowspace_account_links`, `crowspace_profiles`, `members` | Auth/profile context |
 | Profiles & portfolios | `crowspace_profiles`, `crowspace_profile_skills`, `crowspace_profile_showcase` | `profile.html` |
 | Personalized feed | `crowspace_posts`, `crowspace_post_media`, `crowspace_post_comments`, `crowspace_post_reactions`, `crowspace_follows` | `feed.html` |
 | Profile walls | `crowspace_wall_posts` | Profile timeline |
@@ -27,21 +27,26 @@ See [docs/backend-inventory.md](docs/backend-inventory.md) for the 57-table inve
 | Group chats | group conversations/members/messages/attachments | `messages.html` |
 | Communities | communities, community members/posts/comments/invitations | `groups.html` |
 | Events | events, RSVPs, invitations | `events.html` |
-| Notifications | `crowspace_notifications` | Shared notification center (next integration) |
-| Photos | albums, album photos, photo comments/reactions/shares/tags | Gallery (next integration) |
-| Live rooms | live rooms, participants, messages, reactions, reminders | Live experiences (next integration) |
-| Collaboration | availability, invitations | Discover / collaboration (next integration) |
-| Opportunities | opportunities, applications, reports | Opportunities (next integration) |
-| Projects | projects, project members/updates/milestones | Creator workspaces (next integration) |
-| Templates | project templates, reviews, featured templates | Creator workspaces (next integration) |
-| Publications | publications, publication assets | Member publications (next integration) |
-| Recognition | achievements, member achievements, milestones | Profile badges (next integration) |
+| Notifications | `crowspace_notifications` | `notifications.html` |
+| Photos | albums, album photos, photo comments/reactions/shares/tags | `albums.html` |
+| Live rooms | live rooms, participants, messages, reactions, reminders | Live experiences |
+| Collaboration | availability, invitations | Discover / collaboration |
+| Opportunities | opportunities, applications, reports | `opportunities.html` |
+| Projects | projects, project members/updates/milestones | `projects.html` |
+| Templates | project templates, reviews, featured templates | Creator workspaces |
+| Publications | publications, publication assets | Member publications |
+| Recognition | achievements, member achievements, milestones | Profile badges |
 
 ## Frontend structure
-`index.html`, `feed.html`, `discover.html`, `branches.html`, `profile.html`, `messages.html`, `groups.html`, `events.html`, `settings.html`; shared CSS under `assets/css/`; ES modules under `assets/js/`; verified inventory and architecture under `docs/`.
+Multi-page HTML at repository root; shared CSS under `assets/css/`; ES modules under `assets/js/`; inventory and architecture under `docs/`.
 
-## Configuration
-`assets/js/config.js` is intentionally blank. Add only the Supabase project URL and browser-safe publishable key (or legacy anon key). Never place service_role or secret keys in browser code. The app stays in preview mode until configured.
+## Configuration and authentication
+`assets/js/config.js` contains only the Supabase project URL and a publishable key intended for browser clients. Never put a service_role or secret key in frontend code. Supabase Auth uses the browser PKCE flow and currently returns to `feed.html`; the production redirect URL must be allow-listed in Supabase Auth.
+
+The Auth and account-link audit found 11 CrowSpace profiles and 10 account links. Ten profiles have matching existing member rows and links; one existing profile has no matching `members` row. No records were changed to force a link. That orphan must be reconciled deliberately before any account-link repair.
 
 ## Security
-RLS remains authoritative. Private messages, private communities and private media must not be fetched or subscribed to until authorization is established. The frontend does not create a new identity model or duplicate existing branch profiles. No database changes are included in this commit.
+RLS remains authoritative. Profile discovery reads only profiles marked public and is available to authenticated members under the current profile SELECT policy. Writes, private messaging, private communities, private media and admin features remain gated until the exact policies, triggers, Realtime channel authorization and Storage access rules are verified.
+
+## Validation
+Run `npm run check` to validate local HTML references and JavaScript syntax. Browser OAuth, live data access and responsive interaction still require deployment and end-to-end testing.
