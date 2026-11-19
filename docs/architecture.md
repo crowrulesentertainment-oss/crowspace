@@ -26,3 +26,10 @@ Stable branch keys are listed in assets/js/branch-registry.js and align with the
 5. Wire private messaging only after reviewing participant policies and Realtime channel authorization.
 6. Wire communities, events, photos, projects and branch-specific bridges.
 7. Test anonymous, owner, unrelated member, community member and moderator/admin contexts before launch.
+
+## Verified integration boundaries
+- Auth uses the existing Supabase project and browser-safe publishable key. OAuth redirect URLs still need a live browser test against the GitHub Pages URL.
+- Profile reads and owner updates use crowspace_profiles; the existing podcast sync trigger is preserved.
+- Discovery is authenticated-only because the current profile SELECT policy targets authenticated members.
+- Feed posts, follows, comments and reactions are wired against the existing RLS policies. No new database objects are needed for these first interactions.
+- Private messaging UI may use the existing DM RPC and participant-scoped table policies, but private Realtime subscriptions remain blocked until the dashboard's Allow public access setting is confirmed off. For CrowSpace DM Realtime use the topic shape crowspace-dm:<conversation-uuid>; do not use the legacy crowspace:dm:<uuid> policy that checks podcast_direct_conversations.

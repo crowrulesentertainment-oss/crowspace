@@ -79,3 +79,30 @@ Snapshot: 57 tables found; all 57 have RLS enabled. Policy counts are the number
 4. Verify private attachment buckets and signed URL paths.
 5. Test anonymous, owner, unrelated member, community member and moderator/admin contexts.
 6. Only propose additive schema work after proving a required feature has no existing table/RPC/trigger contract.
+
+## Feed, messaging and media verification snapshot (2026-11-18)
+
+### Feed
+- crowspace_posts, crowspace_post_comments, crowspace_post_reactions and crowspace_follows all have RLS enabled and authenticated Data API privileges.
+- Posts are limited to public, friends, followers and private visibility. Authors can create/update/delete only their own posts. The SELECT policy scopes public posts, friends through the existing friendships table, followers through crowspace_follows, and each member's own posts.
+- Reactions use the composite primary key (post_id, user_id) and allow only like, love, laugh, wow and support. Own-row INSERT/UPDATE/DELETE policies exist.
+- Comments are limited to 2,000 characters; post bodies to 5,000 characters. Comment and reaction visibility is joined to a visible parent post by RLS.
+- Follows are self-owned on INSERT/DELETE; authenticated SELECT is currently broad (USING true). Do not expose follower lists to anonymous users.
+
+### Direct and group messaging
+- DM creation is intended to use the existing RPC crowspace_start_direct_conversation(p_other_user). The underlying function checks authentication, prevents self-messaging, requires a CrowSpace profile for the other member, checks block records, normalizes the participant pair and creates the two membership rows.
+- Direct message INSERT checks sender identity and private.crowspace_direct_can_send; SELECT requires membership. Per-member read/archive/mute/pin state is stored in crowspace_direct_members.
+- Group messages require crowspace_group_members membership; group membership changes are protected by owner/admin/member policies and a trigger.
+- The private bucket crowspace-messenger exists. Its upload/read/delete policies use member/path checks, but some legacy OR policies still reference podcast_direct_conversations. Use the dedicated CrowSpace path and membership policies only after end-to-end Storage tests.
+
+### Realtime blocker — do not enable chat subscriptions yet
+- RLS is enabled on realtime.messages. CrowSpace-specific policies exist.
+- private.crowspace_realtime_can_access accepts topics matching crowspace-dm:<uuid> or crowspace-group:<uuid>, then checks membership using the existing CrowSpace membership functions.
+- A separate group broadcast policy uses the older colon topic form crowspace:group:<uuid> and checks crowspace_group_members.
+- The direct-message broadcast policies using crowspace:dm:<uuid> reference podcast_direct_conversations rather than crowspace_direct_conversations. This is a legacy cross-branch mismatch; do not use that topic format for CrowSpace DMs.
+- The Dashboard Realtime setting that disables public channel access was not accessible through the database inspection tools and remains unverified. Supabase's current guidance requires disabling Allow public access when private channels must be enforced. Keep private subscriptions disabled until that setting is confirmed and the hyphenated CrowSpace topics are exercised with two real member accounts.
+- Do not modify realtime schema objects. Supabase now locks that schema; RLS policies on realtime.messages remain the supported control surface.
+
+### Media access
+- crowspace-posts, crowspace-messenger, crowspace-albums and crowspace-creator-media are private buckets. The CrowSpace media rules are scoped by bucket, path and user/member access.
+- Public media URLs must not be generated for private bucket objects. Use signed URLs after checking the matching table-level policy and Storage object policy.
